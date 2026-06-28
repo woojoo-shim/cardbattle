@@ -74,6 +74,8 @@ type Effect =
   | { kind: 'damage'; amount: number; target: 'chosen' | 'all' | 'random' }
   | { kind: 'heal';   amount: number };
 // S2+: applyStatus, steal, copy, negate, drawExtra, ...
+// 주: S1 카드 데이터(§10)는 target 'chosen'/'all'만 사용한다.
+// 'random'은 타입에 예약하되 S1 카드에선 미사용(검증·핸들러는 구현하여 안정성 확보).
 
 const effectHandlers: Record<Effect['kind'], EffectHandler> = { damage, heal };
 ```
@@ -153,7 +155,7 @@ type GameEvent =
 게임 시작 시: 좌석 순서로 `turnOrder` 구성, `currentTurnIndex=0`, 각 플레이어 손패 0장으로 시작(또는 시작 손패 N장 — §10 결정사항).
 
 각 턴 진행:
-1. **draw 페이즈:** 현재 플레이어가 가중 풀에서 시드 RNG로 카드 1장을 뽑아 손패에 추가 → `card_drawn` 이벤트. 손패 상한(기본 8) 초과 시에도 뽑되 상한은 너그럽게 둔다(Godfield는 다수 보유 허용).
+1. **draw 페이즈:** 현재 플레이어가 가중 풀에서 시드 RNG로 카드 1장을 뽑아 손패에 추가 → `card_drawn` 이벤트. 손패 상한 8은 **S1에서 강제하지 않는 소프트 목표**다(버리기 강제 없음, Godfield는 다수 보유 허용). 상한 강제/버리기 규칙은 S2 이후 결정.
 2. **action 페이즈:** 플레이어가 `play_card` 0..n회 후 `end_turn`. 각 `play_card`는 검증→리듀서 적용→이벤트 방출. (S1엔 자원/쿨타임 제약 없음.)
 3. **end 페이즈:** `turn_ended` 방출, 다음 생존 플레이어로 `currentTurnIndex` 이동, 새 `turnDeadline` 설정, `turn_started` 방출.
 
@@ -188,6 +190,7 @@ type GameEvent =
 - Colyseus `allowReconnection(client, 30)` (30초 유예).
 - 게임 중 끊김: 해당 플레이어 `connected=false`. 자기 턴이 되면 자동 `end_turn`(자동 패스).
 - 유예 내 재연결: `connected=true`, schema 재동기화로 상태 복원.
+- 유예 만료(미복귀): 플레이어를 **탈락시키지 않고** 좌석에 남겨 자기 턴마다 자동 패스하는 수동 상태로 둔다(`connected=false`, `alive=true`). 늦은 재연결도 허용. 이렇게 하면 게임 인원/턴 순서가 안정적으로 유지된다.
 - 남은 연결 플레이어가 1명뿐이면 그 플레이어 승리로 게임 종료.
 
 ## 9. 테스트 전략
