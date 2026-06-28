@@ -35,6 +35,8 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
   schema.turnDeadline = gs.turnDeadline;
   schema.winnerId = gs.winnerId ?? '';
   schema.turnOrder.splice(0, schema.turnOrder.length, ...gs.turnOrder);
+  // NOTE: does not remove schema players absent from gs.players. In S1 players are
+  // never deleted (disconnect sets connected=false), so stale entries cannot occur.
   for (const p of gs.players) {
     let ps = schema.players.get(p.id);
     if (!ps) { ps = new PlayerSchema(); ps.id = p.id; schema.players.set(p.id, ps); }
