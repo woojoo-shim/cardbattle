@@ -1,0 +1,13 @@
+{
+  "name": "cardbattle",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:server": "pnpm --filter @cardbattle/server dev",
+    "dev:client": "pnpm --filter @cardbattle/client dev",
+    "test": "pnpm --filter @cardbattle/shared test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
