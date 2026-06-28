@@ -106,8 +106,9 @@ export class BattleRoom extends Room<BattleState> {
     const p = this.gs.players.find((pp) => pp.id === client.sessionId);
     if (p) p.connected = false;
     this.publish();
+    if (consented) return; // intentional leave: stay a passive seat, never reconnect. See spec §8.
     try {
-      if (!consented) await this.allowReconnection(client, RECONNECT_SECONDS);
+      await this.allowReconnection(client, RECONNECT_SECONDS);
       if (p) { p.connected = true; this.publish(); }
     } catch {
       // grace expired: stay as passive seat (alive, auto-passed on their turn). See spec §8.
