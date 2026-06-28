@@ -112,7 +112,10 @@ export class BattleRoom extends Room<BattleState> {
       if (p) { p.connected = true; this.publish(); }
     } catch {
       // grace expired: stay as passive seat (alive, auto-passed on their turn). See spec §8.
+      // Guard against racing the turnTimer: only end the turn if it is still this player's,
+      // and clearTimer() first so a pending turnTimer callback cannot double-advance the turn.
       if (this.gs.phase === 'playing' && this.gs.turnOrder[this.gs.currentTurnIndex] === client.sessionId) {
+        this.clearTimer();
         const r = endTurn(this.gs, this.ctx()); this.gs = r.state; this.publish(r.events); this.armTimer();
       }
     }
