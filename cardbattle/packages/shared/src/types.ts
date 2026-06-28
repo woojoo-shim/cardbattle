@@ -1,7 +1,7 @@
 export type Phase = 'lobby' | 'playing' | 'ended';
 export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'poison' | 'holy' | 'none';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
-export type CardKind = 'weapon' | 'magic' | 'heal' | 'special' | 'equipment';
+export type CardKind = 'weapon' | 'magic' | 'equipment' | 'special';
 
 export type Effect =
   | { kind: 'damage'; amount: number; target: 'chosen' | 'all' | 'random' }
