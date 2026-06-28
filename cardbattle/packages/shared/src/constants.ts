@@ -1,0 +1,9 @@
+export const MIN_PLAYERS = 2;
+export const MAX_PLAYERS = 8;
+export const START_HP = 40;
+export const START_DEFENSE = 0;
+export const START_HAND = 3;
+export const DRAW_PER_TURN = 1;
+export const HAND_SOFT_CAP = 8; // not enforced in S1
+export const TURN_SECONDS = 30;
+export const RECONNECT_SECONDS = 30;
