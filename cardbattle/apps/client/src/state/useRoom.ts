@@ -41,7 +41,8 @@ export interface UseRoom {
 /** Build a plain UiState snapshot from the decoded Colyseus schema. */
 function snapshot(state: any): UiState {
   const players: UiPlayer[] = [];
-  state.players.forEach((p: any) => {
+  // state.players / turnOrder can be undefined for a tick after join, before the first sync.
+  state.players?.forEach((p: any) => {
     players.push({
       id: p.id,
       name: p.name,
@@ -60,7 +61,7 @@ function snapshot(state: any): UiState {
     currentTurnIndex: state.currentTurnIndex,
     turnDeadline: state.turnDeadline,
     winnerId: state.winnerId,
-    turnOrder: Array.from(state.turnOrder as Iterable<string>),
+    turnOrder: state.turnOrder ? Array.from(state.turnOrder as Iterable<string>) : [],
     players,
   };
 }
