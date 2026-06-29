@@ -17,6 +17,14 @@ export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
   return (
     <div style={wrap}>
       <h1 style={title}>CARD&nbsp;BATTLE</h1>
+      {ui.title && <p style={roomTitle}>{ui.title}</p>}
+      {ui.code && (
+        <div style={codeBadge}>
+          <span style={codeLabel}>방 코드</span>
+          <span style={codeValue}>{ui.code}</span>
+          <span style={codeShare}>친구에게 공유하세요</span>
+        </div>
+      )}
       <p style={subtitle}>
         {n}/{MAX_PLAYERS} 플레이어 · 최소 {MIN_PLAYERS}명 필요
       </p>
@@ -53,6 +61,18 @@ const title: React.CSSProperties = {
   WebkitTextFillColor: 'transparent', textShadow: '0 0 40px rgba(123,92,255,0.5)',
 };
 const subtitle: React.CSSProperties = { margin: 0, color: '#9a9ab0' };
+const roomTitle: React.CSSProperties = { margin: 0, fontSize: 18, fontWeight: 700, color: '#e8e8f0' };
+const codeBadge: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
+  background: 'rgba(123,92,255,0.12)', border: '1px solid rgba(123,92,255,0.4)',
+  boxShadow: '0 0 24px rgba(123,92,255,0.25)',
+};
+const codeLabel: React.CSSProperties = { fontSize: 13, color: '#9a9ab0' };
+const codeValue: React.CSSProperties = {
+  fontFamily: 'ui-monospace, monospace', fontSize: 26, fontWeight: 900, letterSpacing: 8,
+  color: '#3df2c0', textShadow: '0 0 16px rgba(61,242,192,0.5)',
+};
+const codeShare: React.CSSProperties = { fontSize: 12, color: '#6a6a80' };
 const list: React.CSSProperties = {
   listStyle: 'none', padding: 0, margin: '8px 0', width: 320, display: 'flex',
   flexDirection: 'column', gap: 8,

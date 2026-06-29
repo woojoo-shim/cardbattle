@@ -1,4 +1,4 @@
-import { Room, Client } from '@colyseus/core';
+import { Room, Client, updateLobby } from '@colyseus/core';
 import {
   initGame, startGame, reduce, endTurn,
   CARD_DEFS, requiresTarget,
@@ -8,6 +8,15 @@ import {
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
 
 interface JoinOptions { name?: string; }
+interface CreateOptions { name?: string; title?: string; }
+
+/** Short, friendly, unambiguous room code (no 0/O/1/I) friends can type to join. */
+function makeCode(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < 4; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return s;
+}
 
 export class BattleRoom extends Room<BattleState> {
   maxClients = MAX_PLAYERS;
@@ -22,9 +31,14 @@ export class BattleRoom extends Room<BattleState> {
     return { nextCardId: () => `card-${this.cardCounter++}`, now: Date.now() };
   }
 
-  onCreate(): void {
+  onCreate(options: CreateOptions = {}): void {
     this.setState(new BattleState());
     this.gs = initGame([]); // empty; players added on join (lobby)
+
+    // Custom-room identity: a typeable code for friends + a title shown in the browser.
+    this.state.code = makeCode();
+    this.state.title = (options.title ?? '').slice(0, 24) || `${options.name ?? '누군가'}의 방`;
+    this.refreshLobby();
 
     this.onMessage('setReady', (client, msg: { ready: boolean }) => {
       if (this.gs.phase !== 'lobby') return;
@@ -63,6 +77,16 @@ export class BattleRoom extends Room<BattleState> {
     this.publish();
   }
 
+  /** Publish this room's summary to the real-time lobby browser (title, code, headcount). */
+  private refreshLobby(): void {
+    this.setMetadata({
+      title: this.state.title,
+      code: this.state.code,
+      players: this.gs.players.length,
+      started: this.gs.phase !== 'lobby',
+    }).then(() => updateLobby(this)).catch(() => {});
+  }
+
   private allReady(): boolean {
     const n = this.gs.players.length;
     return n >= MIN_PLAYERS && this.gs.players.every((p) => this.ready.get(p.id));
@@ -75,6 +99,7 @@ export class BattleRoom extends Room<BattleState> {
     this.lock();
     const r = startGame(this.gs, this.ctx());
     this.gs = r.state;
+    this.refreshLobby(); // mark started:true so the browser drops this room from its list
     this.publish(r.events);
     this.afterCurrent();
   }
@@ -176,6 +201,7 @@ export class BattleRoom extends Room<BattleState> {
   private publish(events: GameEvent[] = []): void {
     syncToSchema(this.state, this.gs);
     this.pushHands();
+    if (this.gs.phase === 'lobby') this.refreshLobby(); // keep the browser headcount live; no churn mid-game
     if (events.length) this.broadcast('events', events);
   }
 

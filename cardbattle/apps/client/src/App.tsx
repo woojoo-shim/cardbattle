@@ -2,15 +2,23 @@ import { useState } from 'react';
 import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
+import { RoomBrowser } from './ui/RoomBrowser.js';
+import type { BattleConnection } from './net/client.js';
+
+type Connect = () => Promise<BattleConnection>;
 
 export function App() {
   const [name, setName] = useState<string | null>(null);
+  const [connect, setConnect] = useState<Connect | null>(null);
+
   if (name === null) return <NameGate onSubmit={setName} />;
-  return <Game name={name} />;
+  // useState setters treat function values as updaters, so wrap to store the connect fn itself.
+  if (connect === null) return <RoomBrowser name={name} onPick={(c) => setConnect(() => c)} />;
+  return <Game connect={connect} />;
 }
 
-function Game({ name }: { name: string }) {
-  const { conn, ui, hand, events, error, send, setReady, addBot } = useRoom(name);
+function Game({ connect }: { connect: Connect }) {
+  const { conn, ui, hand, events, error, send, setReady, addBot } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
   if (!ui) {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CardInstance, GameEvent, Action } from '@cardbattle/shared';
-import { joinBattle, type BattleConnection } from '../net/client.js';
+import type { BattleConnection } from '../net/client.js';
 
 export interface UiPlayer {
   id: string;
@@ -15,6 +15,8 @@ export interface UiPlayer {
 }
 
 export interface UiState {
+  code: string;
+  title: string;
   phase: string;
   currentTurnIndex: number;
   turnDeadline: number;
@@ -58,6 +60,8 @@ function snapshot(state: any): UiState {
   });
   players.sort((a, b) => a.seat - b.seat);
   return {
+    code: state.code ?? '',
+    title: state.title ?? '',
     phase: state.phase,
     currentTurnIndex: state.currentTurnIndex,
     turnDeadline: state.turnDeadline,
@@ -67,7 +71,9 @@ function snapshot(state: any): UiState {
   };
 }
 
-export function useRoom(name: string): UseRoom {
+/** `connect` establishes (or re-establishes) the battle connection — create / joinById /
+ * quickPlay are all supplied by the caller, so this hook is transport-agnostic. */
+export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const [conn, setConn] = useState<BattleConnection | null>(null);
   const [ui, setUi] = useState<UiState | null>(null);
   const [hand, setHand] = useState<CardInstance[]>([]);
@@ -79,7 +85,7 @@ export function useRoom(name: string): UseRoom {
     let disposed = false;
     let active: BattleConnection | null = null;
 
-    joinBattle(name)
+    connect()
       .then((c) => {
         if (disposed) { c.room.leave(); return; }
         active = c;
@@ -99,7 +105,7 @@ export function useRoom(name: string): UseRoom {
       connRef.current = null;
       active?.room.leave();
     };
-  }, [name]);
+  }, [connect]);
 
   const send = (action: Action) => connRef.current?.room.send('action', action);
   const setReady = (ready: boolean) => connRef.current?.room.send('setReady', { ready });

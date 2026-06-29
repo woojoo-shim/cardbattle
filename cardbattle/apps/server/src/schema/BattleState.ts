@@ -20,6 +20,8 @@ export class PlayerSchema extends Schema {
 }
 
 export class BattleState extends Schema {
+  @type('string') code = '';
+  @type('string') title = '';
   @type('string') phase = 'lobby';
   @type('number') currentTurnIndex = 0;
   @type('number') turnDeadline = 0;

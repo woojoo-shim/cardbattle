@@ -1,11 +1,14 @@
-import { Server } from '@colyseus/core';
+import { Server, LobbyRoom } from '@colyseus/core';
 import { WebSocketTransport } from '@colyseus/ws-transport';
 import { createServer } from 'http';
 import { BattleRoom } from './rooms/BattleRoom.js';
 
 const port = Number(process.env.PORT ?? 2567);
 const gameServer = new Server({ transport: new WebSocketTransport({ server: createServer() }) });
-gameServer.define('battle', BattleRoom);
+// enableRealtimeListing() pushes battle-room create/metadata/dispose into the LobbyRoom so the
+// client room browser updates live. The 'lobby' room is what the browser screen connects to.
+gameServer.define('battle', BattleRoom).enableRealtimeListing();
+gameServer.define('lobby', LobbyRoom);
 gameServer
   .listen(port)
   .then(() => console.log(`[cardbattle] server listening on :${port}`))
