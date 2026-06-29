@@ -1,0 +1,86 @@
+import { useState } from 'react';
+import type { CardInstance } from '@cardbattle/shared';
+import { CARD_DEFS } from '@cardbattle/shared';
+import { C, RARITY_BORDER, mono, sans } from './theme.js';
+
+interface Props {
+  hand: CardInstance[];
+  enabled: boolean;
+  pendingId: string | null;
+  onPlay: (card: CardInstance) => void;
+}
+
+/** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
+ * and the selected (pending-target) card lifts higher with a teal outline. */
+export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
+  const [hover, setHover] = useState<string | null>(null);
+  const n = hand.length;
+  const mid = (n - 1) / 2;
+
+  return (
+    <div style={fan}>
+      {hand.map((c, i) => {
+        const def = CARD_DEFS[c.defId];
+        if (!def) return null;
+        const isPending = c.id === pendingId;
+        const isHover = c.id === hover && enabled;
+        const rot = (i - mid) * 5;
+        const lift = Math.abs(i - mid) * 8;
+        const isHeal = def.effects.some((e) => e.kind === 'heal');
+        const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
+
+        let transform = `rotate(${rot}deg) translateY(${lift}px)`;
+        let z = 1;
+        if (isPending) { transform = 'translateY(-30px) scale(1.1)'; z = 6; }
+        else if (isHover) { transform = 'translateY(-22px) scale(1.08)'; z = 5; }
+
+        return (
+          <button
+            key={c.id}
+            disabled={!enabled}
+            onMouseEnter={() => setHover(c.id)}
+            onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
+            onClick={() => onPlay(c)}
+            style={{
+              ...card,
+              transform,
+              zIndex: z,
+              cursor: enabled ? 'pointer' : 'default',
+              opacity: enabled ? 1 : 0.5,
+              filter: enabled ? 'none' : 'grayscale(0.3)',
+              borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
+              boxShadow: isPending
+                ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(56,232,200,0.3)`
+                : isHover
+                ? '0 26px 44px rgba(0,0,0,0.6)'
+                : '0 14px 26px rgba(0,0,0,0.55)',
+            }}
+          >
+            <div style={{ fontSize: 34 }}>{def.icon}</div>
+            <div style={cname}>{def.name}</div>
+            <div style={{ ...pillVal, ...(isHeal ? healVal : dmgVal) }}>
+              {isHeal ? `+${value}` : value}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const fan: React.CSSProperties = {
+  display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%',
+  paddingBottom: 18, fontFamily: sans,
+};
+const card: React.CSSProperties = {
+  width: 92, height: 128, borderRadius: 12, margin: '0 -6px', position: 'relative',
+  background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${C.border}`,
+  color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
+  justifyContent: 'space-between', padding: '12px 8px',
+  transition: 'transform .18s ease, box-shadow .18s ease',
+  transformOrigin: 'bottom center',
+};
+const cname: React.CSSProperties = { fontSize: 13, fontWeight: 700 };
+const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 12, padding: '2px 9px', borderRadius: 999 };
+const dmgVal: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,59,107,0.16)', border: '1px solid #5a2436' };
+const healVal: React.CSSProperties = { color: '#bff6ec', background: 'rgba(56,232,200,0.16)', border: '1px solid #1f5a4c' };
