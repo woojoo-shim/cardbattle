@@ -10,14 +10,14 @@ export function App() {
 }
 
 function Game({ name }: { name: string }) {
-  const { conn, ui, hand, events, error, send, setReady } = useRoom(name);
+  const { conn, ui, hand, events, error, send, setReady, addBot } = useRoom(name);
   const myId = conn?.sessionId ?? '';
 
   if (!ui) {
     return <Centered>{error ? `연결 실패: ${error.message}` : '연결 중…'}</Centered>;
   }
   if (ui.phase === 'lobby') {
-    return <Lobby ui={ui} myId={myId} onReady={setReady} />;
+    return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} />;
   }
   return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} />;
 }

@@ -1,7 +1,8 @@
 import { Room, Client } from '@colyseus/core';
 import {
   initGame, startGame, reduce, endTurn,
-  type GameState, type Action, type GameEvent,
+  CARD_DEFS, requiresTarget,
+  type GameState, type Action, type GameEvent, type PlayerState,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
@@ -12,6 +13,8 @@ export class BattleRoom extends Room<BattleState> {
   maxClients = MAX_PLAYERS;
   private gs!: GameState;
   private ready = new Map<string, boolean>();
+  private bots = new Set<string>();
+  private botCounter = 0;
   private turnTimer?: ReturnType<typeof setTimeout>;
   private cardCounter = 0;
 
@@ -32,6 +35,21 @@ export class BattleRoom extends Room<BattleState> {
     this.onMessage('action', (client, msg: Action) => {
       this.handleAction(client, msg);
     });
+
+    this.onMessage('addBot', () => {
+      if (this.gs.phase !== 'lobby') return;
+      if (this.gs.players.length >= MAX_PLAYERS) return;
+      const id = `bot-${this.botCounter++}`;
+      this.gs.players.push({
+        id, name: `봇 ${this.botCounter}`,
+        connected: true, seat: this.gs.players.length,
+        hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
+      });
+      this.bots.add(id);
+      this.ready.set(id, true); // bots are always ready
+      this.publish();
+      if (this.allReady()) this.begin();
+    });
   }
 
   onJoin(client: Client, options: JoinOptions): void {
@@ -51,10 +69,73 @@ export class BattleRoom extends Room<BattleState> {
   }
 
   private begin(): void {
+    // Once the match starts the room leaves the lobby for good. Lock it so the matchmaker
+    // routes new joiners to a fresh lobby room instead of this (started/ended) one, which
+    // onJoin would reject — surfacing as "연결 실패" on the client. Reconnection bypasses lock.
+    this.lock();
     const r = startGame(this.gs, this.ctx());
     this.gs = r.state;
     this.publish(r.events);
-    this.armTimer();
+    this.afterCurrent();
+  }
+
+  /** After a turn (re)starts: end the game, auto-drive a bot, or arm the human deadline. */
+  private afterCurrent(): void {
+    this.clearTimer();
+    if (this.gs.phase !== 'playing') return;
+    const cur = this.gs.turnOrder[this.gs.currentTurnIndex];
+    if (this.bots.has(cur)) {
+      this.turnTimer = setTimeout(() => this.botTurn(), 900);
+    } else {
+      this.armTimer();
+    }
+  }
+
+  /** A bot plays one useful card (if any) then ends its turn. */
+  private botTurn(): void {
+    if (this.gs.phase !== 'playing') return;
+    const cur = this.gs.turnOrder[this.gs.currentTurnIndex];
+    if (!this.bots.has(cur)) return;
+    const bot = this.gs.players.find((p) => p.id === cur);
+    if (!bot) return;
+    const action = this.chooseBotAction(bot);
+    if (action) {
+      const r = reduce(this.gs, action, this.ctx());
+      this.gs = r.state; this.publish(r.events);
+      if (this.gs.phase === 'ended') { this.clearTimer(); return; }
+      this.turnTimer = setTimeout(() => this.botEndTurn(), 700);
+    } else {
+      this.botEndTurn();
+    }
+  }
+
+  private botEndTurn(): void {
+    if (this.gs.phase !== 'playing') return;
+    const r = endTurn(this.gs, this.ctx());
+    this.gs = r.state; this.publish(r.events);
+    this.afterCurrent();
+  }
+
+  /** Simple bot policy: heal if hurt, else bomb-all, else hit a random living opponent. */
+  private chooseBotAction(bot: PlayerState): Action | null {
+    const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
+    for (const card of bot.hand) {
+      const def = CARD_DEFS[card.defId];
+      if (!def) continue;
+      if (def.effects.some((e) => e.kind === 'heal')) {
+        if (bot.hp < bot.maxHp) return { type: 'play_card', cardInstanceId: card.id };
+        continue;
+      }
+      if (def.effects.some((e) => e.kind === 'damage' && e.target === 'all')) {
+        if (opponents.length > 0) return { type: 'play_card', cardInstanceId: card.id };
+        continue;
+      }
+      if (requiresTarget(def) && opponents.length > 0) {
+        const target = opponents[Math.floor(Math.random() * opponents.length)];
+        return { type: 'play_card', cardInstanceId: card.id, targetId: target.id };
+      }
+    }
+    return null;
   }
 
   private handleAction(client: Client, action: Action): void {
@@ -71,7 +152,7 @@ export class BattleRoom extends Room<BattleState> {
     this.gs = r.state;
     this.publish(r.events);
     if (this.gs.phase === 'ended') { this.clearTimer(); }
-    else if (r.events.some((e) => e.type === 'turn_started')) { this.armTimer(); }
+    else if (r.events.some((e) => e.type === 'turn_started')) { this.afterCurrent(); }
   }
 
   private armTimer(): void {
@@ -81,7 +162,7 @@ export class BattleRoom extends Room<BattleState> {
       const r = endTurn(this.gs, this.ctx());
       this.gs = r.state;
       this.publish(r.events);
-      if (this.gs.phase === 'ended') this.clearTimer(); else this.armTimer();
+      this.afterCurrent();
     }, ms);
   }
 
@@ -107,6 +188,16 @@ export class BattleRoom extends Room<BattleState> {
   }
 
   async onLeave(client: Client, consented: boolean): Promise<void> {
+    // In the lobby a leaver is removed outright (no in-game seat to preserve). This also
+    // cleans up the throwaway connection React StrictMode makes during dev double-mounts.
+    if (this.gs.phase === 'lobby') {
+      const idx = this.gs.players.findIndex((pp) => pp.id === client.sessionId);
+      if (idx >= 0) this.gs.players.splice(idx, 1);
+      this.gs.players.forEach((pp, i) => { pp.seat = i; }); // reindex so a new joiner's seat can't collide
+      this.ready.delete(client.sessionId);
+      this.publish();
+      return;
+    }
     const p = this.gs.players.find((pp) => pp.id === client.sessionId);
     if (p) p.connected = false;
     this.publish();
@@ -120,7 +211,7 @@ export class BattleRoom extends Room<BattleState> {
       // and clearTimer() first so a pending turnTimer callback cannot double-advance the turn.
       if (this.gs.phase === 'playing' && this.gs.turnOrder[this.gs.currentTurnIndex] === client.sessionId) {
         this.clearTimer();
-        const r = endTurn(this.gs, this.ctx()); this.gs = r.state; this.publish(r.events); this.armTimer();
+        const r = endTurn(this.gs, this.ctx()); this.gs = r.state; this.publish(r.events); this.afterCurrent();
       }
     }
   }

@@ -44,8 +44,11 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
     while (schema.turnOrder.length > 0) schema.turnOrder.pop();
     for (const id of gs.turnOrder) schema.turnOrder.push(id);
   }
-  // NOTE: does not remove schema players absent from gs.players. In S1 players are
-  // never deleted (disconnect sets connected=false), so stale entries cannot occur.
+  // Remove schema players no longer present in gs (e.g. a lobby leaver was spliced out).
+  const liveIds = new Set(gs.players.map((p) => p.id));
+  for (const key of Array.from(schema.players.keys())) {
+    if (!liveIds.has(key)) schema.players.delete(key);
+  }
   for (const p of gs.players) {
     let ps = schema.players.get(p.id);
     if (!ps) { ps = new PlayerSchema(); ps.id = p.id; schema.players.set(p.id, ps); }

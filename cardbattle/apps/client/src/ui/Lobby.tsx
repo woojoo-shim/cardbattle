@@ -6,9 +6,10 @@ interface Props {
   ui: UiState;
   myId: string;
   onReady: (ready: boolean) => void;
+  onAddBot: () => void;
 }
 
-export function Lobby({ ui, myId, onReady }: Props) {
+export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
   const [ready, setReady] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); onReady(next); };
   const n = ui.players.length;
@@ -29,10 +30,15 @@ export function Lobby({ ui, myId, onReady }: Props) {
           </li>
         ))}
       </ul>
-      <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
-        {ready ? '준비 완료 ✓' : '준비하기'}
-      </button>
-      <p style={hint}>모든 플레이어가 준비하면 게임이 시작됩니다.</p>
+      <div style={{ display: 'flex', gap: 12 }}>
+        <button onClick={onAddBot} disabled={n >= MAX_PLAYERS} style={botBtn}>
+          + 봇 추가
+        </button>
+        <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
+          {ready ? '준비 완료 ✓' : '준비하기'}
+        </button>
+      </div>
+      <p style={hint}>봇을 추가하면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!</p>
     </div>
   );
 }
@@ -62,4 +68,8 @@ const btn: React.CSSProperties = {
   boxShadow: '0 8px 24px rgba(123,92,255,0.4)',
 };
 const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#1fae8a,#3df2c0)', color: '#04231b' };
+const botBtn: React.CSSProperties = {
+  padding: '14px 26px', fontSize: 16, fontWeight: 700, color: '#cfcfe0', cursor: 'pointer',
+  border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+};
 const hint: React.CSSProperties = { margin: 0, color: '#6a6a80', fontSize: 13 };
