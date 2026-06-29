@@ -87,7 +87,11 @@ export class BattleRoom extends Room<BattleState> {
 
   private clearTimer(): void { if (this.turnTimer) clearTimeout(this.turnTimer); this.turnTimer = undefined; }
 
-  /** Push state to schema + per-client hand + broadcast events. */
+  /**
+   * Push state to schema + per-client hand + broadcast events.
+   * Ordering is a contract: 'hand' (pushHands) MUST be sent before 'events' so a client
+   * that awaits the start 'events' broadcast already has its dealt hand applied.
+   */
   private publish(events: GameEvent[] = []): void {
     syncToSchema(this.state, this.gs);
     this.pushHands();
