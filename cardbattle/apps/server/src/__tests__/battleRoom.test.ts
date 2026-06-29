@@ -4,13 +4,9 @@ import { WebSocketTransport } from '@colyseus/ws-transport';
 import { createServer } from 'http';
 import { BattleRoom } from '../rooms/BattleRoom.js';
 
-// @colyseus/testing's static import triggers @colyseus/tools side-effects
-// (three dynamic imports: bun-websockets, redis-driver, redis-presence) that
-// create temporarily-unhandled rejections.  vitest's unhandledRejection hook
-// catches these before .catch(() => {}) runs and tries to forward the non-
-// serialisable error object through the tinypool IPC channel, crashing with
-// Buffer.from(Object).  Deferring to a dynamic import inside beforeAll
-// lets the .catch() swallowing run first, so the rejection never leaks.
+// @colyseus/testing's static import triggers @colyseus/tools side-effects (dynamic
+// imports of optional drivers) that create temporarily-unhandled rejections. Deferring
+// to a dynamic import inside beforeAll lets the internal .catch() swallow them first.
 let colyseus: import('@colyseus/testing').ColyseusTestServer;
 
 describe('BattleRoom integration', () => {
@@ -33,26 +29,19 @@ describe('BattleRoom integration', () => {
     const c1 = await colyseus.connectTo(room, { name: 'A' });
     const c2 = await colyseus.connectTo(room, { name: 'B' });
 
-    // Wait for schema to be delivered to both clients.
-    await c1.waitForNextPatch();
+    // connectTo awaits onJoin completion, so the authoritative server state is populated.
+    expect(room.state.players.size).toBe(2);
+    expect(room.state.phase).toBe('lobby');
 
-    expect(c1.state.players.size).toBe(2);
-
-    // Register listeners BEFORE sending setReady so no race.
+    // Register the 'events' listener BEFORE readying so the start broadcast is captured.
     const eventsPromise = c1.waitForMessage('events');
-
     c1.send('setReady', { ready: true });
     c2.send('setReady', { ready: true });
 
-    // Wait for the state patch that sets phase='playing'.
-    await room.waitForNextPatch();
-
-    // Wait for the 'events' broadcast to reach c1.
-    const evts = await eventsPromise as any[];
-    const started = evts.some((e) => e.type === 'turn_started');
-
-    expect(c1.state.phase).toBe('playing');
-    expect(started).toBe(true);
+    // Resolve once the start broadcast (turn_started) reaches c1.
+    const evts = (await eventsPromise) as Array<{ type: string }>;
+    expect(evts.some((e) => e.type === 'turn_started')).toBe(true);
+    expect(room.state.phase).toBe('playing');
   });
 
   it('only the owner receives their hand contents', async () => {
@@ -60,23 +49,22 @@ describe('BattleRoom integration', () => {
     const c1 = await colyseus.connectTo(room, { name: 'A' });
     const c2 = await colyseus.connectTo(room, { name: 'B' });
 
-    // Register hand listener BEFORE sending setReady.
-    const handPromise = c1.waitForMessage('hand');
+    // 'hand' is sent on every publish (incl. empty lobby hands); keep the latest.
+    let c1Hand: unknown[] = [];
+    c1.onMessage('hand', (h) => { c1Hand = h as unknown[]; });
 
+    const eventsPromise = c1.waitForMessage('events');
     c1.send('setReady', { ready: true });
     c2.send('setReady', { ready: true });
 
-    // Wait for state to settle (phase becomes 'playing').
-    await room.waitForNextPatch();
-
-    // Await c1's private hand message.
-    const c1Hand = await handPromise as any[];
-
+    // The start publish sends 'hand' (dealt cards) BEFORE 'events', so once 'events'
+    // arrives the owner's filled hand has already been applied.
+    await eventsPromise;
     expect(c1Hand.length).toBeGreaterThan(0);
 
-    const c1AsSeenByC2 = c2.state.players.get(c1.sessionId);
-    expect(c1AsSeenByC2?.handCount).toBeGreaterThan(0);
-    // hand array in synced schema must be empty (hidden information).
-    expect(c1AsSeenByC2?.hand.length ?? 0).toBe(0);
+    // The synced schema (what every client sees) exposes handCount but never card contents.
+    const c1Schema = room.state.players.get(c1.sessionId);
+    expect(c1Schema?.handCount).toBeGreaterThan(0);
+    expect(c1Schema?.hand.length ?? 0).toBe(0);
   });
 });

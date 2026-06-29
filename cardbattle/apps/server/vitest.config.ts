@@ -5,7 +5,6 @@ export default defineConfig({
     passWithNoTests: true,
     testTimeout: 20000,
     hookTimeout: 30000,
-    setupFiles: ['./src/__tests__/setup.ts'],
     pool: 'threads',
     poolOptions: {
       threads: { singleThread: true },

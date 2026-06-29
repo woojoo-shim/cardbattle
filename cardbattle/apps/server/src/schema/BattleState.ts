@@ -34,7 +34,16 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
   schema.currentTurnIndex = gs.currentTurnIndex;
   schema.turnDeadline = gs.turnDeadline;
   schema.winnerId = gs.winnerId ?? '';
-  schema.turnOrder.splice(0, schema.turnOrder.length, ...gs.turnOrder);
+  // @colyseus/schema v3 ArraySchema.splice rejects insertCount > deleteCount, so a single
+  // splice cannot grow an empty array. Rebuild via pop/push, but only when the order changed
+  // (it is set once at game start in S1) to avoid emitting redundant deltas every publish.
+  const orderUnchanged =
+    schema.turnOrder.length === gs.turnOrder.length &&
+    gs.turnOrder.every((id, i) => schema.turnOrder[i] === id);
+  if (!orderUnchanged) {
+    while (schema.turnOrder.length > 0) schema.turnOrder.pop();
+    for (const id of gs.turnOrder) schema.turnOrder.push(id);
+  }
   // NOTE: does not remove schema players absent from gs.players. In S1 players are
   // never deleted (disconnect sets connected=false), so stale entries cannot occur.
   for (const p of gs.players) {
