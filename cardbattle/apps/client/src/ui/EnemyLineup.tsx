@@ -27,6 +27,7 @@ export function EnemyLineup({ ui, myId, selectable, onSelect }: Props) {
         return (
           <div
             key={p.id}
+            data-pid={p.id}
             onClick={() => canTarget && onSelect(p.id)}
             style={{
               ...enemy,

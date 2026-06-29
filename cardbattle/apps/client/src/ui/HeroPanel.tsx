@@ -18,7 +18,7 @@ export function HeroPanel({ ui, myId }: Props) {
 
   return (
     <div style={wrap}>
-      <div style={panel}>
+      <div style={panel} data-pid={me.id}>
         <div style={ava}>🛡️</div>
         <div style={info}>
           <div style={nameRow}>
