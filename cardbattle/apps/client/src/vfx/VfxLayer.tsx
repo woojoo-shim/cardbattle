@@ -36,14 +36,13 @@ function shake(id: string): void {
   setTimeout(() => { el.style.animation = ''; }, 300);
 }
 
-/** The acting portrait lifts + glows, selling that THIS character is playing a card. */
+/** The acting portrait glows in place, selling that THIS character is playing a card. */
 function castPulse(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
   const prevFilter = el.style.filter;
-  el.style.animation = 'cb-castlift .45s ease';
   el.style.filter = 'brightness(1.35) drop-shadow(0 0 16px rgba(255,255,255,0.55))';
-  setTimeout(() => { el.style.animation = ''; el.style.filter = prevFilter; }, 450);
+  setTimeout(() => { el.style.filter = prevFilter; }, 450);
 }
 
 /**
