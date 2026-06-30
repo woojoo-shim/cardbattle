@@ -29,6 +29,34 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         <span style={feltGlow} />
       </div>
 
+      {/* A card token rests on the table in front of each living seat: face-down by default,
+          flipped face-up while a persistent passive (e.g. shield) is active so it stays put. */}
+      {ring.map((p, i) => {
+        if (!p.alive) return null;
+        const k = ((i - myRing) % n + n) % n;
+        const theta = ((90 + k * (360 / n)) * Math.PI) / 180;
+        const sLeft = CX + RX * Math.cos(theta);
+        const sTop = CY + RY * Math.sin(theta);
+        const spotLeft = sLeft * 0.66 + CX * 0.34; // a third of the way in toward the table centre
+        const spotTop = sTop * 0.66 + CY * 0.34;
+        const hasShield = p.defense > 0;
+        return (
+          <div
+            key={`tc-${p.id}`}
+            style={{ ...tableCard, left: `${spotLeft}%`, top: `${spotTop}%`, ...(hasShield ? shieldCard : faceDownCard) }}
+          >
+            {hasShield ? (
+              <>
+                <span style={{ fontSize: 15, lineHeight: 1 }}>🛡</span>
+                <span style={tcNum}>{p.defense}</span>
+              </>
+            ) : (
+              <span style={{ fontSize: 13, color: 'rgba(56,232,200,0.5)' }}>◈</span>
+            )}
+          </div>
+        );
+      })}
+
       {ring.map((p, i) => {
         const isMe = p.id === myId;
         const k = ((i - myRing) % n + n) % n;            // 0 = me, then clockwise around the oval
@@ -108,6 +136,20 @@ const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   boxShadow: 'inset 0 0 40px rgba(56,232,200,0.08)',
 };
+const tableCard: React.CSSProperties = {
+  position: 'absolute', transform: 'translate(-50%,-50%)', width: 30, height: 40, borderRadius: 5,
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+  pointerEvents: 'none', zIndex: 3, transition: 'box-shadow .2s',
+};
+const faceDownCard: React.CSSProperties = {
+  background: 'linear-gradient(160deg,#1b2336,#101626)', border: `1px solid ${C.border}`,
+  boxShadow: '0 4px 12px rgba(0,0,0,0.55), inset 0 0 0 2px rgba(56,232,200,0.06)',
+};
+const shieldCard: React.CSSProperties = {
+  background: 'linear-gradient(160deg,#15233f,#0e1830)', border: '1px solid #7fb6ff',
+  boxShadow: '0 0 12px rgba(127,182,255,0.5), 0 4px 12px rgba(0,0,0,0.5)',
+};
+const tcNum: React.CSSProperties = { fontSize: 10, fontWeight: 800, color: '#bcd8ff', fontFamily: mono, lineHeight: 1 };
 const seat: React.CSSProperties = {
   position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
   pointerEvents: 'auto', transition: 'transform .25s',
