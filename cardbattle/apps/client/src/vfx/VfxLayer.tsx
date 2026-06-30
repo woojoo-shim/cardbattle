@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Element, GameEvent } from '@cardbattle/shared';
+import { CARD_DEFS } from '@cardbattle/shared';
 
 interface Props {
   events: GameEvent[];
@@ -8,7 +9,8 @@ interface Props {
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
-  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number };
+  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number }
+  | { id: number; kind: 'cast'; x: number; y: number; icon: string; name: string; color: string };
 
 /** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
 const ELEM: Record<Element, string> = {
@@ -34,6 +36,16 @@ function shake(id: string): void {
   setTimeout(() => { el.style.animation = ''; }, 300);
 }
 
+/** The acting portrait lifts + glows, selling that THIS character is playing a card. */
+function castPulse(id: string): void {
+  const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
+  if (!el) return;
+  const prevFilter = el.style.filter;
+  el.style.animation = 'cb-castlift .45s ease';
+  el.style.filter = 'brightness(1.35) drop-shadow(0 0 16px rgba(255,255,255,0.55))';
+  setTimeout(() => { el.style.animation = ''; el.style.filter = prevFilter; }, 450);
+}
+
 /**
  * S1 attack-animation layer. Maps the GameEvent stream to lightweight DOM effects:
  * a projectile orb flies attacker→target, lands with an impact ring + portrait shake,
@@ -55,7 +67,14 @@ export function VfxLayer({ events }: Props) {
     let damaged = false;
 
     for (const e of fresh) {
-      if (e.type === 'damage_dealt') {
+      if (e.type === 'card_played') {
+        const src = centerOf(e.playerId);
+        const def = CARD_DEFS[e.defId];
+        if (!src || !def) continue;
+        const color = ELEM[def.element] ?? ELEM.none;
+        add.push({ id: nextId.current++, kind: 'cast', x: src.x, y: src.y, icon: def.icon, name: def.name, color });
+        castPulse(e.playerId);
+      } else if (e.type === 'damage_dealt') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
         damaged = true;
@@ -103,6 +122,11 @@ export function VfxLayer({ events }: Props) {
             <span key={f.id} style={boltStyle(f)} />
           ) : f.kind === 'ring' ? (
             <span key={f.id} style={ringStyle(f)} />
+          ) : f.kind === 'cast' ? (
+            <span key={f.id} style={castStyle(f)}>
+              <span style={{ fontSize: 30, lineHeight: 1 }}>{f.icon}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{f.name}</span>
+            </span>
           ) : (
             <span key={f.id} style={numStyle(f)}>{f.text}</span>
           ),
@@ -133,6 +157,16 @@ function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
     position: 'fixed', left: f.x, top: f.y, width: 96, height: 96, borderRadius: '50%',
     border: `3px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`,
     animation: `cb-ring .5s ease-out ${f.delay}s backwards`,
+  };
+}
+function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, display: 'flex', flexDirection: 'column',
+    alignItems: 'center', gap: 4, padding: '9px 12px', borderRadius: 12,
+    background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${f.color}`,
+    boxShadow: `0 0 22px ${f.color}, 0 12px 30px rgba(0,0,0,0.6)`,
+    fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
+    animation: 'cb-cast .9s cubic-bezier(.2,.7,.3,1) forwards',
   };
 }
 function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
