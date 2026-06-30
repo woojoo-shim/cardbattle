@@ -1,13 +1,16 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
-/* A small jitter on the struck portrait. The seat is centred with translate(-50%,-50%),
-   so that offset is baked into every key to keep the shake a tiny vibration, not a jump. */
+/* A damped jitter on the struck portrait — amplitude decays each swing so it settles
+   naturally like a real recoil. The seat is centred with translate(-50%,-50%), so that
+   offset is baked into every key to keep the shake a tiny vibration in place, not a jump. */
 @keyframes cb-shake {
-  0%, 100% { transform: translate(-50%, -50%); }
-  20% { transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
-  40% { transform: translate(calc(-50% + 2px), calc(-50% - 1px)); }
-  60% { transform: translate(calc(-50% - 1.5px), calc(-50% + 1px)); }
-  80% { transform: translate(calc(-50% + 1.5px), calc(-50% - 1px)); }
+  0%   { transform: translate(-50%, -50%); }
+  14%  { transform: translate(calc(-50% - 3px),   calc(-50% + 1.6px)); }
+  28%  { transform: translate(calc(-50% + 2.6px), calc(-50% - 1.2px)); }
+  43%  { transform: translate(calc(-50% - 1.9px), calc(-50% + 1px)); }
+  58%  { transform: translate(calc(-50% + 1.3px), calc(-50% - 0.7px)); }
+  74%  { transform: translate(calc(-50% - 0.8px), calc(-50% + 0.4px)); }
+  100% { transform: translate(-50%, -50%); }
 }
 /* The table lamp powering on at game start: a few stutters, then settles to full glow. */
 @keyframes cb-lampon {
@@ -24,16 +27,18 @@
   100% { opacity: 1; }
 }
 
-/* Projectile orb travelling from attacker to target (--dx/--dy = pixel delta). */
+/* Projectile orb travelling from attacker to target (--dx/--dy = pixel delta).
+   Fades in quickly, swells a touch as it lands so the hit reads as an arrival. */
 @keyframes cb-bolt {
-  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-  15%  { opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0.9; }
+  0%   { transform: translate(-50%, -50%) scale(0.45); opacity: 0; }
+  18%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.08); opacity: 0.95; }
 }
-/* Impact shockwave at the point of hit. */
+/* Impact shockwave at the point of hit — blooms in, then expands and dissolves smoothly. */
 @keyframes cb-ring {
-  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) scale(0.25); opacity: 0; }
+  16%  { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.75); opacity: 0; }
 }
 /* A played card is dealt from the player onto the table in front of them, rests, then fades. */
 @keyframes cb-deal {
@@ -48,9 +53,18 @@
   0%   { transform: scale(0.8) translateY(10px); opacity: 0; }
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
-/* Floating damage / heal number rising off the target. */
+/* Floating damage / heal number rising off the target — pops up, settles to full size
+   and holds readable, then drifts up and fades out gently. */
 @keyframes cb-rise {
-  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
-  20%  { transform: translate(-50%, -90%) scale(1.25); opacity: 1; }
-  100% { transform: translate(-50%, -200%) scale(1); opacity: 0; }
+  0%   { transform: translate(-50%, -50%)  scale(0.7); opacity: 0; }
+  16%  { transform: translate(-50%, -84%)  scale(1.2); opacity: 1; }
+  34%  { transform: translate(-50%, -104%) scale(1);   opacity: 1; }
+  64%  { transform: translate(-50%, -140%) scale(1);   opacity: 1; }
+  100% { transform: translate(-50%, -196%) scale(0.94); opacity: 0; }
+}
+/* The acting portrait flares up then eases back as a card is played (smooth glow, no flicker). */
+@keyframes cb-cast {
+  0%   { filter: brightness(1); }
+  35%  { filter: brightness(1.4) drop-shadow(0 0 16px rgba(255, 255, 255, 0.55)); }
+  100% { filter: brightness(1); }
 }

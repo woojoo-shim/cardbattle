@@ -37,21 +37,20 @@ function tableCenter(): { x: number; y: number } | null {
   return { x: x / els.length, y: y / els.length };
 }
 
-/** Briefly jolt the struck portrait. The animation overrides transform then reverts. */
+/** Briefly jolt the struck portrait with a damped, eased recoil that settles in place. */
 function shake(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  el.style.animation = 'cb-shake .3s ease';
-  setTimeout(() => { el.style.animation = ''; }, 300);
+  el.style.animation = 'cb-shake .42s cubic-bezier(.33,.06,.28,.98)';
+  setTimeout(() => { el.style.animation = ''; }, 440);
 }
 
-/** The acting portrait glows in place, selling that THIS character is playing a card. */
+/** The acting portrait glows up then eases back as it plays a card (smooth ramp, no flicker). */
 function castPulse(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  const prevFilter = el.style.filter;
-  el.style.filter = 'brightness(1.35) drop-shadow(0 0 16px rgba(255,255,255,0.55))';
-  setTimeout(() => { el.style.filter = prevFilter; }, 450);
+  el.style.animation = 'cb-cast .5s ease-in-out';
+  setTimeout(() => { el.style.animation = ''; }, 520);
 }
 
 /**
@@ -113,14 +112,14 @@ export function VfxLayer({ events }: Props) {
     }
 
     if (damaged && flashRef.current) {
-      flashRef.current.style.boxShadow = 'inset 0 0 120px rgba(255,92,138,0.6)';
-      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'none'; }, 180);
+      flashRef.current.style.boxShadow = 'inset 0 0 120px rgba(255,92,138,0.55)';
+      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(255,92,138,0)'; }, 90);
     }
 
     if (add.length) {
       setFx((cur) => [...cur, ...add]);
       const ids = new Set(add.map((a) => a.id));
-      setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 1100);
+      setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 1300);
     }
   }, [events]);
 
@@ -148,7 +147,7 @@ export function VfxLayer({ events }: Props) {
 }
 
 const flash: React.CSSProperties = {
-  position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 50, transition: 'box-shadow .1s',
+  position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 50, transition: 'box-shadow .4s ease-out',
 };
 const stage: React.CSSProperties = {
   position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 60, overflow: 'hidden',
@@ -159,15 +158,16 @@ function boltStyle(f: Extract<Fx, { kind: 'bolt' }>): React.CSSProperties {
     position: 'fixed', left: f.x, top: f.y, width: 18, height: 18, borderRadius: '50%',
     background: `radial-gradient(circle, #fff, ${f.color} 55%, transparent 72%)`,
     boxShadow: `0 0 16px ${f.color}, 0 0 30px ${f.color}`,
-    animation: 'cb-bolt .26s cubic-bezier(.4,.05,.7,1) forwards',
+    animation: 'cb-bolt .3s cubic-bezier(.45,0,.55,1) forwards',
+    willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
   } as React.CSSProperties;
 }
 function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, width: 96, height: 96, borderRadius: '50%',
-    border: `3px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`,
-    animation: `cb-ring .5s ease-out ${f.delay}s backwards`,
+    border: `3px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`, willChange: 'transform, opacity',
+    animation: `cb-ring .62s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
@@ -186,6 +186,7 @@ function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
     position: 'fixed', left: f.x, top: f.y, color: f.color,
     fontFamily: '"Geist Mono", ui-monospace, monospace', fontWeight: 800, fontSize: 30,
     textShadow: `0 0 10px ${f.color}, 0 2px 4px rgba(0,0,0,0.7)`, whiteSpace: 'nowrap',
-    animation: `cb-rise .9s ease-out ${f.delay}s backwards`,
+    willChange: 'transform, opacity',
+    animation: `cb-rise 1.15s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
 }

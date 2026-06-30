@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
@@ -11,12 +11,25 @@ interface Props {
   onPlay: (card: CardInstance) => void;
 }
 
+// Touch devices (iPad/phone) have no hover, so a single tap on an instant card would fire it
+// before its description is ever seen. There, the first tap previews the card (lifts + shows the
+// tooltip) and a second tap commits. Mouse users keep the original hover-to-read, click-to-play.
+const IS_TOUCH =
+  typeof window !== 'undefined' && !!window.matchMedia &&
+  window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
 /** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
  * and the selected (pending-target) card lifts higher with a teal outline. */
 export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
   const [hover, setHover] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const n = hand.length;
   const mid = (n - 1) / 2;
+
+  // Drop a stale preview when the turn ends or the previewed card leaves the hand.
+  useEffect(() => {
+    if (preview && (!enabled || !hand.some((c) => c.id === preview))) setPreview(null);
+  }, [enabled, hand, preview]);
 
   return (
     <div style={fan}>
@@ -24,7 +37,8 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
         const def = CARD_DEFS[c.defId];
         if (!def) return null;
         const isPending = c.id === pendingId;
-        const isHover = c.id === hover && enabled;
+        const isPreview = c.id === preview && enabled;
+        const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
         const lift = Math.abs(i - mid) * 8;
         const hasDamage = def.effects.some((e) => e.kind === 'damage');
@@ -66,7 +80,13 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
             disabled={!enabled}
             onMouseEnter={() => setHover(c.id)}
             onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
-            onClick={() => onPlay(c)}
+            onClick={() => {
+              if (!enabled) return;
+              // On touch, the first tap only previews the card; the second tap commits.
+              if (IS_TOUCH && preview !== c.id) { setPreview(c.id); return; }
+              setPreview(null);
+              onPlay(c);
+            }}
             style={{
               ...card,
               transform,
@@ -86,6 +106,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
               <div style={tip}>
                 <div style={tipName}>{def.name}</div>
                 <div style={tipDesc}>{def.desc}</div>
+                {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
               </div>
             )}
             <CardArt id={def.id} size="clamp(48px, 5vw, 72px)" />
@@ -108,8 +129,8 @@ const card: React.CSSProperties = {
   background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${C.border}`,
   color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
   justifyContent: 'space-between', padding: 'clamp(12px, 1.2vw, 18px) clamp(8px, 0.8vw, 12px)',
-  transition: 'transform .18s ease, box-shadow .18s ease',
-  transformOrigin: 'bottom center',
+  transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease, border-color .24s ease',
+  transformOrigin: 'bottom center', willChange: 'transform',
 };
 const cname: React.CSSProperties = { fontSize: 'clamp(13px, 1.25vw, 17px)', fontWeight: 700 };
 const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
@@ -131,3 +152,7 @@ const tip: React.CSSProperties = {
 };
 const tipName: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.you, letterSpacing: 1, marginBottom: 4 };
 const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.45, color: C.text, whiteSpace: 'normal' };
+const tipHint: React.CSSProperties = {
+  marginTop: 6, paddingTop: 5, borderTop: `1px solid ${C.border}`,
+  fontSize: 11, fontWeight: 700, color: C.you, textAlign: 'center', letterSpacing: 0.3,
+};

@@ -201,12 +201,13 @@ const shieldChip: React.CSSProperties = {
 };
 const seat: React.CSSProperties = {
   position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-  pointerEvents: 'auto', transition: 'transform .25s',
+  pointerEvents: 'auto', transition: 'transform .3s cubic-bezier(.22,.61,.36,1)',
 };
 const portrait: React.CSSProperties = {
   borderRadius: 16, position: 'relative', overflow: 'hidden',
   background: `linear-gradient(160deg, ${C.panelHi}, ${C.panel})`, border: `1px solid ${C.border}`,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'box-shadow .2s',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  transition: 'box-shadow .3s cubic-bezier(.22,.61,.36,1), border-color .3s ease',
 };
 const badge: React.CSSProperties = {
   position: 'absolute', top: 5, minWidth: 24, height: 20, padding: '0 4px', borderRadius: 7, display: 'flex',
@@ -228,7 +229,7 @@ const spot: React.CSSProperties = {
 const hpBar: React.CSSProperties = {
   width: '86%', height: 8, borderRadius: 6, background: '#0c0f18', border: `1px solid ${C.border}`, overflow: 'hidden',
 };
-const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, transition: 'width .3s' };
+const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, transition: 'width .5s cubic-bezier(.22,.61,.36,1)' };
 const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, maxWidth: '100%' };
 const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
