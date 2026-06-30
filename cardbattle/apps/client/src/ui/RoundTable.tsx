@@ -1,0 +1,145 @@
+import type { UiState } from '../state/useRoom.js';
+import { C, mono, sans } from './theme.js';
+import { CreatureArt, HeroArt } from './art/CreatureArt.js';
+
+interface Props {
+  ui: UiState;
+  myId: string;
+  selectable: boolean;
+  onSelect: (id: string) => void;
+}
+
+// Ellipse the seats ride on, as % of the table area. cy sits a touch below centre so the
+// top arc clears the bar and the near (my) seat tucks just above the hand.
+const CX = 50, CY = 52, RX = 41, RY = 40;
+
+/** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
+ * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
+ * is acting. Each seat keeps its data-pid anchor for the VFX layer + needle. */
+export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
+  const activeId = ui.turnOrder[ui.currentTurnIndex];
+  const ring = [...ui.players].sort((a, b) => a.seat - b.seat);
+  const n = ring.length;
+  const myRing = Math.max(0, ring.findIndex((p) => p.id === myId));
+
+  return (
+    <div style={area}>
+      <div style={felt} aria-hidden>
+        <span style={feltRim} />
+        <span style={feltGlow} />
+      </div>
+
+      {ring.map((p, i) => {
+        const isMe = p.id === myId;
+        const k = ((i - myRing) % n + n) % n;            // 0 = me, then clockwise around the oval
+        const theta = ((90 + k * (360 / n)) * Math.PI) / 180; // 90° = bottom-front
+        const left = CX + RX * Math.cos(theta);
+        const top = CY + RY * Math.sin(theta);
+        const isActive = p.id === activeId;
+        const canTarget = selectable && p.alive && !isMe;
+        const accent = isMe ? C.you : C.enemy;
+        const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
+
+        return (
+          <div
+            key={p.id}
+            data-pid={p.id}
+            onClick={() => canTarget && onSelect(p.id)}
+            style={{
+              ...seat,
+              left: `${left}%`, top: `${top}%`,
+              width: isMe ? 132 : 112,
+              cursor: canTarget ? 'crosshair' : 'default',
+              filter: p.alive ? 'none' : 'grayscale(1)',
+              opacity: p.alive ? 1 : 0.45,
+              transform: `translate(-50%,-50%) scale(${isActive ? 1.08 : 1})`,
+              zIndex: isActive ? 8 : 4,
+            }}
+          >
+            <div
+              style={{
+                ...portrait,
+                width: isMe ? 92 : 80, height: isMe ? 92 : 80,
+                borderColor: isActive || canTarget || isMe ? accent : C.border,
+                boxShadow: isActive
+                  ? `0 0 0 2px ${accent}, 0 14px 38px ${isMe ? 'rgba(56,232,200,0.4)' : 'rgba(255,59,107,0.4)'}`
+                  : isMe
+                  ? `0 0 0 1px ${C.you}, 0 0 22px rgba(56,232,200,0.3)`
+                  : canTarget
+                  ? `0 0 0 1px ${C.enemy}, 0 0 24px rgba(255,59,107,0.45)`
+                  : '0 10px 24px rgba(0,0,0,0.5)',
+              }}
+            >
+              {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}>🛡{p.defense}</span>}
+              {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}>⚠</span>}
+              {isMe ? <HeroArt size={56} /> : <CreatureArt seat={p.seat} size={56} />}
+              {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
+              {!p.alive && <span style={skull}>☠</span>}
+              {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(56,232,200,0.4)' : 'rgba(255,59,107,0.35)'}, transparent 70%)` }} />}
+            </div>
+
+            <div style={hpBar}>
+              <i style={{ ...hpFill, width: `${hpPct}%`, background: isMe ? `linear-gradient(90deg,#5af0d3,${C.you})` : `linear-gradient(90deg,#ff6b8f,${C.enemy})` }} />
+            </div>
+            <div style={info}>
+              <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
+                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}
+              </span>
+              <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
+const felt: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
+  width: '62%', height: '70%', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 38%, #15324a 0%, #102438 45%, #0a1626 100%)',
+  border: '2px solid #1d3a52', boxShadow: 'inset 0 0 60px rgba(0,0,0,0.6), 0 30px 70px rgba(0,0,0,0.55)',
+};
+const feltRim: React.CSSProperties = {
+  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(56,232,200,0.18)',
+};
+const feltGlow: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: '50%',
+  boxShadow: 'inset 0 0 40px rgba(56,232,200,0.08)',
+};
+const seat: React.CSSProperties = {
+  position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+  pointerEvents: 'auto', transition: 'transform .25s',
+};
+const portrait: React.CSSProperties = {
+  borderRadius: 16, position: 'relative', overflow: 'hidden',
+  background: `linear-gradient(160deg, ${C.panelHi}, ${C.panel})`, border: `1px solid ${C.border}`,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'box-shadow .2s',
+};
+const badge: React.CSSProperties = {
+  position: 'absolute', top: 5, minWidth: 24, height: 20, padding: '0 4px', borderRadius: 7, display: 'flex',
+  alignItems: 'center', justifyContent: 'center', fontSize: 10, fontFamily: mono, fontWeight: 700,
+  border: `1px solid ${C.border}`, background: 'rgba(10,12,20,0.85)', zIndex: 2,
+};
+const badgeDef: React.CSSProperties = { left: 5, color: '#7fb6ff' };
+const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
+const crosshair: React.CSSProperties = {
+  position: 'absolute', inset: 0, border: '1px dashed', borderRadius: 16, animation: 'cb-spin 6s linear infinite',
+};
+const skull: React.CSSProperties = {
+  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,
+};
+const spot: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: -22, transform: 'translateX(-50%)',
+  width: 120, height: 42, borderRadius: '50%',
+};
+const hpBar: React.CSSProperties = {
+  width: '86%', height: 8, borderRadius: 6, background: '#0c0f18', border: `1px solid ${C.border}`, overflow: 'hidden',
+};
+const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, transition: 'width .3s' };
+const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, maxWidth: '100%' };
+const nm: React.CSSProperties = {
+  fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+};
+const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };

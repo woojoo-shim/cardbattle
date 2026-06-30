@@ -3,8 +3,7 @@ import type { CardInstance, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, requiresTarget } from '@cardbattle/shared';
 import type { UiState, RoomError } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
-import { EnemyLineup } from './EnemyLineup.js';
-import { HeroPanel } from './HeroPanel.js';
+import { RoundTable } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
 import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
@@ -66,16 +65,15 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
       <VfxLayer events={events} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
-      <div style={lineupRow}><EnemyLineup ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} /></div>
-      <div style={fieldRow}>
+      <div style={tableRow}>
         <div style={fieldGrid} />
+        <RoundTable ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} />
         {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
-        <span style={fieldHint}>◈ BATTLEFIELD ◈</span>
+        <span style={fieldHint}>◈ ABYSSAL TABLE ◈</span>
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}>🎯 대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
         {error && <div style={errToast}>{error.message}</div>}
       </div>
-      <div style={heroRow}><HeroPanel ui={ui} myId={myId} /></div>
       <div style={handRow}>
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} onPlay={playCard} />
         {isMyTurn && (
@@ -90,14 +88,13 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
 
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
-  display: 'grid', gridTemplateRows: '64px 34% 1fr 116px clamp(196px, 19vh, 256px)',
+  display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
   background:
     'radial-gradient(120% 90% at 50% 8%, #141826 0%, #0e1018 38%, #07080d 100%), #07080d',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
-const lineupRow: React.CSSProperties = { minHeight: 0 };
-const fieldRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const tableRow: React.CSSProperties = { position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const fieldGrid: React.CSSProperties = {
   position: 'absolute', inset: 0,
   backgroundImage:
@@ -110,7 +107,6 @@ const fieldHint: React.CSSProperties = {
   position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
   fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 3,
 };
-const heroRow: React.CSSProperties = { display: 'flex', alignItems: 'center' };
 const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
