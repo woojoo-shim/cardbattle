@@ -1,7 +1,12 @@
 import { Client, Room } from 'colyseus.js';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
 
-const endpoint = `ws://${location.hostname}:2567`;
+// Dev: the Vite page (:5173) and the Colyseus server (:2567) run on separate ports.
+// Prod: the server serves the built client, so the websocket lives on the page's own
+// origin — use wss when the page is https so secure pages don't get mixed-content errors.
+const endpoint = import.meta.env.DEV
+  ? `ws://${location.hostname}:2567`
+  : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
 
 export interface BattleConnection {
   room: Room;
