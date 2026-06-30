@@ -1,11 +1,27 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
+/* A small jitter on the struck portrait. The seat is centred with translate(-50%,-50%),
+   so that offset is baked into every key to keep the shake a tiny vibration, not a jump. */
 @keyframes cb-shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(5px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(3px); }
+  0%, 100% { transform: translate(-50%, -50%); }
+  20% { transform: translate(calc(-50% - 2px), calc(-50% + 1px)); }
+  40% { transform: translate(calc(-50% + 2px), calc(-50% - 1px)); }
+  60% { transform: translate(calc(-50% - 1.5px), calc(-50% + 1px)); }
+  80% { transform: translate(calc(-50% + 1.5px), calc(-50% - 1px)); }
+}
+/* The table lamp powering on at game start: a few stutters, then settles to full glow. */
+@keyframes cb-lampon {
+  0%   { opacity: 0; }
+  8%   { opacity: 0.55; }
+  11%  { opacity: 0.04; }
+  16%  { opacity: 0.7; }
+  19%  { opacity: 0.12; }
+  27%  { opacity: 0.85; }
+  31%  { opacity: 0.25; }
+  44%  { opacity: 1; }
+  48%  { opacity: 0.5; }
+  56%  { opacity: 1; }
+  100% { opacity: 1; }
 }
 
 /* Projectile orb travelling from attacker to target (--dx/--dy = pixel delta). */

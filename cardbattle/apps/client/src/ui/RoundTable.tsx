@@ -29,6 +29,16 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         <span style={feltGlow} />
       </div>
 
+      {/* Pendant lamp hung over the table centre. The fixture (cord + shade) is always on;
+          the emitted light (cone + floor pool + bulb) flickers up once when the match begins. */}
+      <div style={lampWrap} aria-hidden>
+        <span style={lampCord} />
+        <span style={lampShade} />
+        <span style={lampBulb} />
+        <span style={lampCone} />
+        <span style={lampPool} />
+      </div>
+
       {/* In front of each living seat: a small fan of face-down cards, one per card the player
           is holding. A persistent passive (e.g. shield) shows as a chip above so it stays put. */}
       {ring.map((p, i) => {
@@ -137,6 +147,41 @@ const feltRim: React.CSSProperties = {
 const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   boxShadow: 'inset 0 0 40px rgba(56,232,200,0.08)',
+};
+// Pendant lamp over the table centre. The fixture (cord + shade) is always lit; the emitted
+// light (bulb, cone, floor pool) plays the cb-lampon flicker once when RoundTable mounts (= game start).
+const lampWrap: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
+};
+const lampCord: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)',
+  width: 2, height: '14%', background: 'linear-gradient(#0a121e,#26405a)',
+};
+const lampShade: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '13%', transform: 'translateX(-50%)',
+  width: 64, height: 30, borderRadius: '50% 50% 46% 46% / 80% 80% 20% 20%',
+  background: 'linear-gradient(160deg,#2c4760,#16263a)', border: '1px solid #355472',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.5)',
+};
+const lampBulb: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '20%', transform: 'translateX(-50%)',
+  width: 16, height: 16, borderRadius: '50%',
+  background: 'radial-gradient(circle, #d8fff6 0%, #6ff0db 55%, rgba(56,232,200,0.2) 100%)',
+  boxShadow: '0 0 22px 6px rgba(120,240,220,0.6)',
+  animation: 'cb-lampon 2.4s ease-out both',
+};
+const lampCone: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '21%', transform: 'translateX(-50%)',
+  width: 240, height: '46%',
+  background: 'linear-gradient(180deg, rgba(120,240,220,0.22), rgba(120,240,220,0))',
+  clipPath: 'polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%)',
+  filter: 'blur(2px)', animation: 'cb-lampon 2.4s ease-out both',
+};
+const lampPool: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
+  width: '52%', height: '54%', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 42%, rgba(120,240,220,0.16), transparent 68%)',
+  animation: 'cb-lampon 2.4s ease-out both',
 };
 const tableFan: React.CSSProperties = {
   position: 'absolute', transform: 'translate(-50%,-50%)', width: 0, height: 0,
