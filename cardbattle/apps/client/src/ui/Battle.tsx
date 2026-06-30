@@ -69,7 +69,7 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
       <div style={lineupRow}><EnemyLineup ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} /></div>
       <div style={fieldRow}>
         <div style={fieldGrid} />
-        {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} />}
+        {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
         <span style={fieldHint}>◈ BATTLEFIELD ◈</span>
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}>🎯 대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}

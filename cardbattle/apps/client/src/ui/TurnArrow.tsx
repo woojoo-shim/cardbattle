@@ -4,12 +4,13 @@ import { C } from './theme.js';
 interface Props {
   activeId: string;
   isMyTurn: boolean;
+  turnDir: number; // +1 = forward play order, -1 = reversed (flipped by '역류')
 }
 
-/** Central compass needle that swivels to point at whose turn it is. It reads the
- * active player's portrait anchor (data-pid) and rotates a pointer toward it; the
- * angle accumulates so the needle always takes the short path (never unwinds 360°). */
-export function TurnArrow({ activeId, isMyTurn }: Props) {
+/** Central compass needle that points at whose turn it is. Rather than taking the short
+ * path, it always sweeps in the round's play direction (turnDir) — so across a full lap it
+ * spins all the way around the table, and visibly reverses when '역류' flips the direction. */
+export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const angleRef = useRef(0);
   const [angle, setAngle] = useState(0);
@@ -28,8 +29,10 @@ export function TurnArrow({ activeId, isMyTurn }: Props) {
       const tx = tr.left + tr.width / 2;
       const ty = tr.top + tr.height / 2;
       const want = (Math.atan2(ty - cy, tx - cx) * 180) / Math.PI;
-      let delta = ((want - angleRef.current) % 360 + 360) % 360;
-      if (delta > 180) delta -= 360; // short way around
+      // Screen y grows downward, so a positive angle step rotates clockwise. Drive the sweep in
+      // the play direction: forward → keep adding (CW), reversed → keep subtracting (CCW).
+      const raw = ((want - angleRef.current) % 360 + 360) % 360; // 0..360 the clockwise way
+      const delta = turnDir < 0 ? (raw === 0 ? 0 : raw - 360) : raw;
       angleRef.current += delta;
       setAngle(angleRef.current);
     };
@@ -38,7 +41,7 @@ export function TurnArrow({ activeId, isMyTurn }: Props) {
     const t = setTimeout(aim, 320); // let portrait spotlight/translate animations settle
     window.addEventListener('resize', aim);
     return () => { cancelAnimationFrame(raf); clearTimeout(t); window.removeEventListener('resize', aim); };
-  }, [activeId]);
+  }, [activeId, turnDir]);
 
   return (
     <div ref={ref} style={wrap} aria-hidden>
@@ -69,7 +72,7 @@ const ring: React.CSSProperties = {
 };
 const needle: React.CSSProperties = {
   position: 'absolute', left: 0, top: 0, width: 0, height: 0, transformOrigin: '0 0',
-  transition: 'transform .6s cubic-bezier(.34,1.28,.5,1)',
+  transition: 'transform .8s cubic-bezier(.45,.05,.25,1)',
 };
 const hub: React.CSSProperties = {
   position: 'absolute', left: -8, top: -8, width: 16, height: 16, borderRadius: '50%',
