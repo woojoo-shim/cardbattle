@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
+import { CardArt } from './art/CardArt.js';
 
 interface Props {
   hand: CardInstance[];
@@ -56,7 +57,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
                 : '0 14px 26px rgba(0,0,0,0.55)',
             }}
           >
-            <div style={{ fontSize: 34 }}>{def.icon}</div>
+            <CardArt id={def.id} size={46} />
             <div style={cname}>{def.name}</div>
             <div style={{ ...pillVal, ...(isHeal ? healVal : dmgVal) }}>
               {isHeal ? `+${value}` : value}

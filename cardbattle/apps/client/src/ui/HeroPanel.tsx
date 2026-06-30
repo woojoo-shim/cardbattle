@@ -1,5 +1,6 @@
 import type { UiState } from '../state/useRoom.js';
 import { C, mono, sans } from './theme.js';
+import { HeroArt } from './art/CreatureArt.js';
 
 interface Props {
   ui: UiState;
@@ -19,7 +20,7 @@ export function HeroPanel({ ui, myId }: Props) {
   return (
     <div style={wrap}>
       <div style={panel} data-pid={me.id}>
-        <div style={ava}>🛡️</div>
+        <div style={ava}><HeroArt size={46} /></div>
         <div style={info}>
           <div style={nameRow}>
             <b style={{ fontSize: 18 }}>{me.name}</b>

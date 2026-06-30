@@ -1,5 +1,6 @@
 import type { UiState } from '../state/useRoom.js';
 import { C, mono, sans } from './theme.js';
+import { CreatureArt } from './art/CreatureArt.js';
 
 interface Props {
   ui: UiState;
@@ -7,8 +8,6 @@ interface Props {
   selectable: boolean;
   onSelect: (id: string) => void;
 }
-
-const FACES = ['🧙', '👺', '🤖', '🐲', '👹', '🧛', '🦇', '👻'];
 
 /** Opponents arrayed as a horizontal portrait line — they look down on you.
  * Active turn = forward + spotlight; targetable = crosshair; dead = desaturated + ☠. */
@@ -22,7 +21,6 @@ export function EnemyLineup({ ui, myId, selectable, onSelect }: Props) {
       {enemies.map((p) => {
         const isActive = p.id === activeId;
         const canTarget = selectable && p.alive;
-        const face = FACES[p.seat % FACES.length];
         const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
         return (
           <div
@@ -51,7 +49,7 @@ export function EnemyLineup({ ui, myId, selectable, onSelect }: Props) {
             >
               {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}>🛡{p.defense}</span>}
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}>⚠</span>}
-              <span style={{ fontSize: 40, filter: 'saturate(0.85)' }}>{face}</span>
+              <CreatureArt seat={p.seat} size={64} />
               {canTarget && <span style={crosshair} />}
               {!p.alive && <span style={skull}>☠</span>}
               {isActive && p.alive && <span style={spot} />}
