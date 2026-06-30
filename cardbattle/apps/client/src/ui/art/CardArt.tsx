@@ -243,6 +243,150 @@ function Shatter() {
   );
 }
 
+function Bind() {
+  return (
+    <>
+      <Glow color="#7fd6ff" o={0.4} />
+      {/* frozen shackle ring with a hanging chain — locks a turn in ice */}
+      <circle cx="32" cy="22" r="11" fill="none" stroke="#bfeaff" strokeWidth="4" />
+      <circle cx="32" cy="22" r="11" fill="none" stroke="#3fb6ff" strokeWidth="1.4" />
+      {/* keyhole on the cuff */}
+      <circle cx="32" cy="20" r="2.6" fill="#0d1c2c" />
+      <rect x="31" y="21" width="2" height="5" fill="#0d1c2c" />
+      {/* chain links dangling below */}
+      {[34, 44, 54].map((cy, i) => (
+        <ellipse key={i} cx={i % 2 ? 28 : 32} cy={cy} rx="4.6" ry="6" fill="none" stroke="#9bd8f5" strokeWidth="3" />
+      ))}
+      {/* frost shards */}
+      <path d="M14 14 L18 18 L13 19 Z" fill="#d6f4ff" opacity="0.85" />
+      <path d="M50 16 L54 20 L48 21 Z" fill="#d6f4ff" opacity="0.7" />
+    </>
+  );
+}
+
+function Dice() {
+  return (
+    <>
+      <Glow color="#ffd84a" o={0.5} />
+      {/* a single die tilted, glowing gold — fate of the gamble */}
+      <g transform="rotate(-12 32 34)">
+        <rect x="18" y="20" width="28" height="28" rx="5" fill="#1c2233" stroke="#ffd86a" strokeWidth="2" />
+        <rect x="18" y="20" width="28" height="28" rx="5" fill="url(#dice-sheen)" opacity="0.4" />
+        {/* pips: five */}
+        <circle cx="25" cy="27" r="2.4" fill="#fff1a8" />
+        <circle cx="39" cy="27" r="2.4" fill="#fff1a8" />
+        <circle cx="32" cy="34" r="2.4" fill="#fff1a8" />
+        <circle cx="25" cy="41" r="2.4" fill="#fff1a8" />
+        <circle cx="39" cy="41" r="2.4" fill="#fff1a8" />
+      </g>
+      <defs>
+        <linearGradient id="dice-sheen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* sparks of chance */}
+      <circle cx="50" cy="14" r="2" fill="#fff1a8" opacity="0.85" />
+      <circle cx="14" cy="50" r="1.6" fill="#fff1a8" opacity="0.7" />
+    </>
+  );
+}
+
+function Sacrifice() {
+  return (
+    <>
+      <Glow color="#ff7a3c" o={0.5} />
+      {/* altar slab */}
+      <rect x="16" y="44" width="32" height="8" rx="2" fill="#2a1f1a" stroke="#7a4a2a" strokeWidth="1.4" />
+      <rect x="20" y="52" width="24" height="5" rx="1.5" fill="#1a1310" stroke="#5c3a1f" strokeWidth="1" />
+      {/* rising flame of offering */}
+      <path d="M32 8 Q42 22 36 34 Q44 30 40 42 Q38 48 32 48 Q26 48 24 42 Q20 30 28 34 Q22 22 32 8 Z"
+        fill="#ff8a3c" stroke="#ffd07a" strokeWidth="1.2" />
+      <path d="M32 18 Q37 28 33 38 Q31 44 32 46 Q26 44 28 36 Q26 28 32 18 Z" fill="#ffe08a" opacity="0.9" />
+      {/* embers */}
+      <circle cx="42" cy="20" r="1.8" fill="#ffd07a" opacity="0.85" />
+      <circle cx="22" cy="26" r="1.4" fill="#ffb45a" opacity="0.75" />
+    </>
+  );
+}
+
+function TwinStrike() {
+  return (
+    <>
+      <Glow color="#ff5c8a" o={0.36} />
+      {/* two crossed blades */}
+      <g transform="rotate(20 32 32)">
+        <path d="M32 8 L35 16 L34 40 L32 45 L30 40 L29 16 Z" fill={STEEL} stroke="#eef2ff" strokeWidth="1" />
+        <rect x="23" y="43" width="18" height="4" rx="2" fill="#b98a3c" stroke="#e7c272" strokeWidth="0.8" />
+        <rect x="30" y="47" width="4" height="8" fill={WOOD} stroke={WOOD_D} strokeWidth="0.7" />
+      </g>
+      <g transform="rotate(-20 32 32)">
+        <path d="M32 8 L35 16 L34 40 L32 45 L30 40 L29 16 Z" fill={STEEL} stroke="#eef2ff" strokeWidth="1" />
+        <path d="M32 8 L32 45 L30 40 L29 16 Z" fill={STEEL_D} opacity="0.6" />
+        <rect x="23" y="43" width="18" height="4" rx="2" fill="#b98a3c" stroke="#e7c272" strokeWidth="0.8" />
+        <rect x="30" y="47" width="4" height="8" fill={WOOD} stroke={WOOD_D} strokeWidth="0.7" />
+      </g>
+      {/* clash spark at the cross point */}
+      <path d="M32 26 L34 30 L38 31 L34 33 L33 37 L31 33 L27 31 L31 30 Z" fill="#ffd0db" opacity="0.9" />
+    </>
+  );
+}
+
+function FirstAid() {
+  return (
+    <>
+      <Glow color="#38e8c8" o={0.45} />
+      {/* aid kit body */}
+      <rect x="12" y="22" width="40" height="30" rx="5" fill="#13312c" stroke="#38e8c8" strokeWidth="2" />
+      <rect x="12" y="22" width="40" height="10" rx="5" fill="#0e2a28" opacity="0.6" />
+      {/* handle */}
+      <path d="M26 22 L26 18 Q26 16 28 16 L36 16 Q38 16 38 18 L38 22" fill="none" stroke="#38e8c8" strokeWidth="2" />
+      {/* green cross */}
+      <path d="M29 34 L35 34 L35 40 L41 40 L41 46 L35 46 L35 52 L29 52 L29 46 L23 46 L23 40 L29 40 Z"
+        fill="#7af0d3" stroke="#d6fff7" strokeWidth="1.2" />
+    </>
+  );
+}
+
+function Snipe() {
+  return (
+    <>
+      <Glow color="#ff5c8a" o={0.42} />
+      {/* scope ring */}
+      <circle cx="32" cy="32" r="20" fill="#0d1622" stroke="#ff7aa0" strokeWidth="2.5" />
+      <circle cx="32" cy="32" r="20" fill="none" stroke="#5a2436" strokeWidth="1" />
+      {/* crosshair */}
+      <line x1="32" y1="10" x2="32" y2="24" stroke="#ffd0db" strokeWidth="2" />
+      <line x1="32" y1="40" x2="32" y2="54" stroke="#ffd0db" strokeWidth="2" />
+      <line x1="10" y1="32" x2="24" y2="32" stroke="#ffd0db" strokeWidth="2" />
+      <line x1="40" y1="32" x2="54" y2="32" stroke="#ffd0db" strokeWidth="2" />
+      {/* locked-on dot */}
+      <circle cx="32" cy="32" r="4" fill="#ff3b6b" />
+      <circle cx="32" cy="32" r="1.6" fill="#fff" opacity="0.9" />
+    </>
+  );
+}
+
+function Judgment() {
+  return (
+    <>
+      <Glow color="#f4c44a" o={0.5} />
+      {/* central column */}
+      <rect x="30" y="12" width="4" height="40" rx="1.5" fill="#e7c272" stroke="#fff3c8" strokeWidth="0.8" />
+      <circle cx="32" cy="11" r="3" fill="#ffe9a8" stroke="#fff3c8" strokeWidth="1" />
+      {/* beam */}
+      <rect x="12" y="16" width="40" height="3" rx="1.5" fill="#e7c272" />
+      {/* hanging chains + pans (scales of judgment) */}
+      <line x1="16" y1="18" x2="16" y2="30" stroke="#cdbb88" strokeWidth="1" />
+      <line x1="48" y1="18" x2="48" y2="30" stroke="#cdbb88" strokeWidth="1" />
+      <path d="M8 30 Q16 42 24 30 Z" fill="#2a2418" stroke="#ffd86a" strokeWidth="1.4" />
+      <path d="M40 30 Q48 42 56 30 Z" fill="#2a2418" stroke="#ffd86a" strokeWidth="1.4" />
+      {/* base */}
+      <path d="M24 52 L40 52 L44 57 L20 57 Z" fill="#1c1810" stroke="#c08f54" strokeWidth="1" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -256,6 +400,13 @@ const ART: Record<string, () => JSX.Element> = {
   bolt: Bolt,
   peek: Peek,
   shatter: Shatter,
+  bind: Bind,
+  gambit: Dice,
+  sacrifice: Sacrifice,
+  twinstrike: TwinStrike,
+  firstaid: FirstAid,
+  snipe: Snipe,
+  judgment: Judgment,
 };
 
 export function CardArt({ id, size = 44 }: Props) {
