@@ -29,8 +29,8 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         <span style={feltGlow} />
       </div>
 
-      {/* A card token rests on the table in front of each living seat: face-down by default,
-          flipped face-up while a persistent passive (e.g. shield) is active so it stays put. */}
+      {/* In front of each living seat: a small fan of face-down cards, one per card the player
+          is holding. A persistent passive (e.g. shield) shows as a chip above so it stays put. */}
       {ring.map((p, i) => {
         if (!p.alive) return null;
         const k = ((i - myRing) % n + n) % n;
@@ -39,20 +39,22 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         const sTop = CY + RY * Math.sin(theta);
         const spotLeft = sLeft * 0.66 + CX * 0.34; // a third of the way in toward the table centre
         const spotTop = sTop * 0.66 + CY * 0.34;
-        const hasShield = p.defense > 0;
+        const cards = Math.max(0, p.handCount);
+        const spread = cards > 1 ? Math.min(11, 64 / (cards - 1)) : 0;
         return (
-          <div
-            key={`tc-${p.id}`}
-            style={{ ...tableCard, left: `${spotLeft}%`, top: `${spotTop}%`, ...(hasShield ? shieldCard : faceDownCard) }}
-          >
-            {hasShield ? (
-              <>
-                <span style={{ fontSize: 15, lineHeight: 1 }}>🛡</span>
-                <span style={tcNum}>{p.defense}</span>
-              </>
-            ) : (
-              <span style={{ fontSize: 13, color: 'rgba(56,232,200,0.5)' }}>◈</span>
-            )}
+          <div key={`tc-${p.id}`} style={{ ...tableFan, left: `${spotLeft}%`, top: `${spotTop}%` }}>
+            {Array.from({ length: cards }).map((_, ci) => {
+              const off = ci - (cards - 1) / 2;
+              return (
+                <span
+                  key={ci}
+                  style={{ ...miniBack, left: off * spread, transform: `translate(-50%,-50%) rotate(${off * 4}deg)`, zIndex: ci }}
+                >
+                  <span style={{ fontSize: 8, color: 'rgba(56,232,200,0.45)' }}>◈</span>
+                </span>
+              );
+            })}
+            {p.defense > 0 && <span style={shieldChip}>🛡{p.defense}</span>}
           </div>
         );
       })}
@@ -136,20 +138,22 @@ const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   boxShadow: 'inset 0 0 40px rgba(56,232,200,0.08)',
 };
-const tableCard: React.CSSProperties = {
-  position: 'absolute', transform: 'translate(-50%,-50%)', width: 30, height: 40, borderRadius: 5,
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
-  pointerEvents: 'none', zIndex: 3, transition: 'box-shadow .2s',
+const tableFan: React.CSSProperties = {
+  position: 'absolute', transform: 'translate(-50%,-50%)', width: 0, height: 0,
+  pointerEvents: 'none', zIndex: 3,
 };
-const faceDownCard: React.CSSProperties = {
+const miniBack: React.CSSProperties = {
+  position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
+  transformOrigin: 'center bottom', display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: 'linear-gradient(160deg,#1b2336,#101626)', border: `1px solid ${C.border}`,
-  boxShadow: '0 4px 12px rgba(0,0,0,0.55), inset 0 0 0 2px rgba(56,232,200,0.06)',
+  boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(56,232,200,0.06)',
 };
-const shieldCard: React.CSSProperties = {
-  background: 'linear-gradient(160deg,#15233f,#0e1830)', border: '1px solid #7fb6ff',
-  boxShadow: '0 0 12px rgba(127,182,255,0.5), 0 4px 12px rgba(0,0,0,0.5)',
+const shieldChip: React.CSSProperties = {
+  position: 'absolute', top: -32, left: 0, transform: 'translateX(-50%)',
+  padding: '1px 6px', borderRadius: 6, fontSize: 10, fontWeight: 800, fontFamily: mono,
+  color: '#bcd8ff', background: 'linear-gradient(160deg,#15233f,#0e1830)', border: '1px solid #7fb6ff',
+  boxShadow: '0 0 10px rgba(127,182,255,0.5)', whiteSpace: 'nowrap', zIndex: 20,
 };
-const tcNum: React.CSSProperties = { fontSize: 10, fontWeight: 800, color: '#bcd8ff', fontFamily: mono, lineHeight: 1 };
 const seat: React.CSSProperties = {
   position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
   pointerEvents: 'auto', transition: 'transform .25s',
