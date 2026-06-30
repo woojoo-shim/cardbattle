@@ -113,7 +113,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
-                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}
+                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? ' · 💤' : ''}
               </span>
               <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
             </div>

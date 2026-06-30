@@ -12,6 +12,7 @@ export interface UiPlayer {
   defense: number;
   alive: boolean;
   handCount: number;
+  skipTurns: number;
 }
 
 export interface UiState {
@@ -58,6 +59,7 @@ function snapshot(state: any): UiState {
       defense: p.defense,
       alive: p.alive,
       handCount: p.handCount,
+      skipTurns: p.skipTurns ?? 0,
     });
   });
   players.sort((a, b) => a.seat - b.seat);

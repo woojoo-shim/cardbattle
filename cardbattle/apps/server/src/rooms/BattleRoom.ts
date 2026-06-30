@@ -58,6 +58,7 @@ export class BattleRoom extends Room<BattleState> {
         id, name: `봇 ${this.botCounter}`,
         connected: true, seat: this.gs.players.length,
         hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
+        skipTurns: 0, gamble: false, empower: 1,
       });
       this.bots.add(id);
       this.ready.set(id, true); // bots are always ready
@@ -72,6 +73,7 @@ export class BattleRoom extends Room<BattleState> {
       id: client.sessionId, name: (options.name ?? 'Player').slice(0, 16),
       connected: true, seat: this.gs.players.length,
       hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
+      skipTurns: 0, gamble: false, empower: 1,
     });
     this.ready.set(client.sessionId, false);
     this.publish();

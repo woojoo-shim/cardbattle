@@ -34,7 +34,17 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
       effect.target === 'all'   ? livingOthers(ctx.state, ctx.source.id)
     : effect.target === 'random'? ctx.randomOrder.slice(0, 1)
     : (() => { const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive); return t ? [t] : []; })();
-    for (const t of targets) damageOne(t, effect.amount, ctx.element, ctx.source.id, ctx.emit);
+    // '희생' empowers every attack this turn; '도박', if armed, then either doubles or whiffs it.
+    let amount = Math.round(effect.amount * (ctx.source.empower || 1));
+    if (ctx.source.gamble) {
+      ctx.source.gamble = false; // consumed by this attack
+      const flip = weightedPick(ctx.state.rngSeed, [0, 1], () => 1);
+      ctx.state.rngSeed = flip.seed;
+      const doubled = flip.item === 1;
+      amount = doubled ? amount * 2 : 0;
+      ctx.emit({ type: 'gamble_resolved', playerId: ctx.source.id, doubled });
+    }
+    for (const t of targets) damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
   },
   heal: (effect: Extract<Effect, { kind: 'heal' }>, ctx) => {
     ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + effect.amount);
@@ -64,5 +74,19 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     const idx = t.hand.findIndex((c) => c.id === pick.item.id);
     if (idx >= 0) t.hand.splice(idx, 1);
     ctx.emit({ type: 'card_discarded', targetId: t.id, cardInstanceId: pick.item.id, defId: pick.item.defId });
+  },
+  skip: (_effect: Extract<Effect, { kind: 'skip' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId);
+    if (!t || !t.alive) return;
+    t.skipTurns += 1;
+  },
+  gamble: (_effect: Extract<Effect, { kind: 'gamble' }>, ctx) => {
+    ctx.source.gamble = true; // armed; resolved by the next attack played this turn
+  },
+  empower: (effect: Extract<Effect, { kind: 'empower' }>, ctx) => {
+    ctx.source.empower = effect.amount; // multiplies attacks for the rest of this turn
+  },
+  selfskip: (_effect: Extract<Effect, { kind: 'selfskip' }>, ctx) => {
+    ctx.source.skipTurns += 1; // forfeit my own next turn
   },
 };

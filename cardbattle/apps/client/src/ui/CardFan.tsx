@@ -32,6 +32,10 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
         const isReverse = def.effects.some((e) => e.kind === 'reverse');
         const isPeek = def.effects.some((e) => e.kind === 'peek');
         const isDiscard = def.effects.some((e) => e.kind === 'discard');
+        const isSkip = def.effects.some((e) => e.kind === 'skip');
+        const isGamble = def.effects.some((e) => e.kind === 'gamble');
+        const isSacrifice = def.effects.some((e) => e.kind === 'selfskip');
+        const dmgValue = def.effects.reduce((m, e) => (e.kind === 'damage' ? Math.max(m, e.amount) : m), 0);
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
         const pill = isReverse
           ? { style: revVal, label: '↔' }
@@ -39,8 +43,14 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
           ? { style: peekVal, label: '👁' }
           : isDiscard
           ? { style: shatterVal, label: '✖' }
+          : isSkip
+          ? { style: skipVal, label: '⛓' }
+          : isGamble
+          ? { style: gambleVal, label: '🎲' }
+          : isSacrifice
+          ? { style: sacrificeVal, label: '🔥' }
           : hasDamage
-          ? { style: dmgVal, label: `${value}` }
+          ? { style: dmgVal, label: `${dmgValue}` }
           : hasShield
           ? { style: shieldVal, label: `+${value}` }
           : { style: healVal, label: `+${value}` };
@@ -72,6 +82,12 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
                 : '0 14px 26px rgba(0,0,0,0.55)',
             }}
           >
+            {(isHover || isPending) && (
+              <div style={tip}>
+                <div style={tipName}>{def.name}</div>
+                <div style={tipDesc}>{def.desc}</div>
+              </div>
+            )}
             <CardArt id={def.id} size="clamp(48px, 5vw, 72px)" />
             <div style={cname}>{def.name}</div>
             <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
@@ -103,3 +119,15 @@ const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127
 const revVal: React.CSSProperties = { color: '#d9c4ff', background: 'rgba(139,108,255,0.16)', border: '1px solid #4a3a78' };
 const peekVal: React.CSSProperties = { color: '#cdeaff', background: 'rgba(139,227,255,0.16)', border: '1px solid #2a5a78' };
 const shatterVal: React.CSSProperties = { color: '#d6f5b8', background: 'rgba(155,232,90,0.16)', border: '1px solid #3e6a2a' };
+const skipVal: React.CSSProperties = { color: '#bfe6ff', background: 'rgba(95,208,255,0.16)', border: '1px solid #2a5a78' };
+const gambleVal: React.CSSProperties = { color: '#ffe39a', background: 'rgba(255,216,74,0.16)', border: '1px solid #6a5a22' };
+const sacrificeVal: React.CSSProperties = { color: '#ffc6a0', background: 'rgba(255,122,60,0.16)', border: '1px solid #6a3a22' };
+const tip: React.CSSProperties = {
+  position: 'absolute', bottom: '102%', left: '50%', transform: 'translateX(-50%)',
+  width: 'clamp(150px, 15vw, 200px)', padding: '9px 11px', borderRadius: 10, zIndex: 20,
+  background: 'linear-gradient(180deg, rgba(24,28,40,0.98), rgba(14,16,24,0.98))',
+  border: `1px solid ${C.border}`, boxShadow: '0 16px 36px rgba(0,0,0,0.6)',
+  pointerEvents: 'none', textAlign: 'left',
+};
+const tipName: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.you, letterSpacing: 1, marginBottom: 4 };
+const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.45, color: C.text, whiteSpace: 'normal' };

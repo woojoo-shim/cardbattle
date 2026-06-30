@@ -3,7 +3,7 @@ import { reduce } from '../engine/reducer.js';
 import type { GameState, PlayerState, ReduceCtx } from '../types.js';
 
 function player(id: string, seat: number, over: Partial<PlayerState> = {}): PlayerState {
-  return { id, name: id, connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], buffs: [], alive: true, ...over };
+  return { id, name: id, connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], buffs: [], alive: true, skipTurns: 0, gamble: false, empower: 1, ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
   return { phase: 'playing', players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
@@ -103,5 +103,37 @@ describe('reduce: play_card', () => {
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
     expect(state.players[1].hand).toHaveLength(0);
     expect(events).toContainEqual(expect.objectContaining({ type: 'card_discarded', targetId: 'b', defId: 'sword' }));
+  });
+
+  it('bind makes a chosen target skip their next turn', () => {
+    const s = game();
+    s.players[0].hand = [{ id: 'c1', defId: 'bind' }];
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[1].skipTurns).toBe(1);
+  });
+
+  it('sacrifice heals, empowers this turn, and forfeits the next turn', () => {
+    const s = game();
+    s.players[0].hp = 25;
+    s.players[0].hand = [{ id: 'c1', defId: 'sacrifice' }, { id: 'c2', defId: 'sword' }];
+    const r1 = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(r1.state.players[0].hp).toBe(35);       // +10 heal
+    expect(r1.state.players[0].empower).toBe(1.5);
+    expect(r1.state.players[0].skipTurns).toBe(1);
+    // the empowered sword now deals round(10 * 1.5) = 15
+    const r2 = reduce(r1.state, { type: 'play_card', cardInstanceId: 'c2', targetId: 'b' }, ctx);
+    expect(r2.state.players[1].hp).toBe(25);       // 40 - 15
+  });
+
+  it('gamble makes the next attack either double or whiff (and emits a resolution)', () => {
+    const s = game({ rngSeed: 7 });
+    s.players[0].hand = [{ id: 'c1', defId: 'gambit' }, { id: 'c2', defId: 'sword' }];
+    const r1 = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(r1.state.players[0].gamble).toBe(true);
+    const r2 = reduce(r1.state, { type: 'play_card', cardInstanceId: 'c2', targetId: 'b' }, ctx);
+    expect(r2.state.players[0].gamble).toBe(false); // consumed
+    const resolved = r2.events.find((e) => e.type === 'gamble_resolved');
+    expect(resolved).toBeTruthy();
+    expect([40, 20]).toContain(r2.state.players[1].hp); // whiff -> 40, double 20dmg -> 20
   });
 });

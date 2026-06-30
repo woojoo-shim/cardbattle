@@ -67,4 +67,24 @@ describe('loop', () => {
     const r = endTurn(started.state, ctx());
     expect(r.state.turnOrder[r.state.currentTurnIndex]).toBe('c');
   });
+
+  it('a player carrying skipTurns is passed over and the skip is consumed', () => {
+    counter = 0;
+    const started = startGame(initGame([{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }, { id: 'c', name: 'C' }]), ctx());
+    started.state.players[1].skipTurns = 1; // b is bound ('결박')
+    const r = endTurn(started.state, ctx()); // a -> (skip b) -> c
+    expect(r.state.turnOrder[r.state.currentTurnIndex]).toBe('c');
+    expect(r.state.players[1].skipTurns).toBe(0); // consumed
+    expect(r.events.some((e) => e.type === 'turn_skipped' && e.playerId === 'b')).toBe(true);
+  });
+
+  it('endTurn clears the ending player per-turn buffs (empower/gamble)', () => {
+    counter = 0;
+    const started = startGame(initGame([{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }]), ctx());
+    started.state.players[0].empower = 1.5;
+    started.state.players[0].gamble = true;
+    const r = endTurn(started.state, ctx());
+    expect(r.state.players[0].empower).toBe(1);
+    expect(r.state.players[0].gamble).toBe(false);
+  });
 });

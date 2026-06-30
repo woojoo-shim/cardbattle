@@ -9,7 +9,11 @@ export type Effect =
   | { kind: 'shield'; amount: number }
   | { kind: 'reverse' }
   | { kind: 'peek' }       // privately reveal one of a chosen player's hand cards to the caster
-  | { kind: 'discard' };   // destroy one random card from a chosen player's hand
+  | { kind: 'discard' }    // destroy one random card from a chosen player's hand
+  | { kind: 'skip' }       // make a chosen player skip their next turn
+  | { kind: 'gamble' }     // the caster's next attack this turn is doubled or nullified (50/50)
+  | { kind: 'empower'; amount: number } // multiply the caster's damage this turn (e.g. 1.5x)
+  | { kind: 'selfskip' };  // the caster forfeits their own next turn
 
 export interface CardDef {
   id: string;
@@ -42,6 +46,9 @@ export interface PlayerState {
   statuses: unknown[];       // S1: always []
   buffs: unknown[];          // S1: always []
   alive: boolean;
+  skipTurns: number;         // pending turns to skip (from '결박' / '희생'); decremented on arrival
+  gamble: boolean;           // a '도박' is armed: the next attack this turn is doubled or whiffs
+  empower: number;           // damage multiplier for this turn (1 = none, 1.5 = '희생')
 }
 
 export interface GameState {
@@ -74,6 +81,8 @@ export type GameEvent =
   | { type: 'round_advanced'; round: number }
   | { type: 'card_revealed'; viewerId: string; targetId: string; cardInstanceId: string; defId: string } // PRIVATE: server sends only to viewerId
   | { type: 'card_discarded'; targetId: string; cardInstanceId: string; defId: string }
+  | { type: 'turn_skipped'; playerId: string }
+  | { type: 'gamble_resolved'; playerId: string; doubled: boolean }
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 
