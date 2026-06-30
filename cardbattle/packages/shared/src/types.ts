@@ -7,7 +7,9 @@ export type Effect =
   | { kind: 'damage'; amount: number; target: 'chosen' | 'all' | 'random' }
   | { kind: 'heal'; amount: number }
   | { kind: 'shield'; amount: number }
-  | { kind: 'reverse' };
+  | { kind: 'reverse' }
+  | { kind: 'peek' }       // privately reveal one of a chosen player's hand cards to the caster
+  | { kind: 'discard' };   // destroy one random card from a chosen player's hand
 
 export interface CardDef {
   id: string;
@@ -70,6 +72,8 @@ export type GameEvent =
   | { type: 'shielded'; targetId: string; amount: number; defenseAfter: number }
   | { type: 'direction_reversed'; direction: 1 | -1 }
   | { type: 'round_advanced'; round: number }
+  | { type: 'card_revealed'; viewerId: string; targetId: string; cardInstanceId: string; defId: string } // PRIVATE: server sends only to viewerId
+  | { type: 'card_discarded'; targetId: string; cardInstanceId: string; defId: string }
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

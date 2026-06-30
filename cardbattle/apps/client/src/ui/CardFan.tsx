@@ -30,9 +30,15 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
         const hasDamage = def.effects.some((e) => e.kind === 'damage');
         const hasShield = def.effects.some((e) => e.kind === 'shield');
         const isReverse = def.effects.some((e) => e.kind === 'reverse');
+        const isPeek = def.effects.some((e) => e.kind === 'peek');
+        const isDiscard = def.effects.some((e) => e.kind === 'discard');
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
         const pill = isReverse
           ? { style: revVal, label: '↔' }
+          : isPeek
+          ? { style: peekVal, label: '👁' }
+          : isDiscard
+          ? { style: shatterVal, label: '✖' }
           : hasDamage
           ? { style: dmgVal, label: `${value}` }
           : hasShield
@@ -66,7 +72,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
                 : '0 14px 26px rgba(0,0,0,0.55)',
             }}
           >
-            <CardArt id={def.id} size={46} />
+            <CardArt id={def.id} size="clamp(48px, 5vw, 72px)" />
             <div style={cname}>{def.name}</div>
             <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
           </button>
@@ -81,16 +87,19 @@ const fan: React.CSSProperties = {
   paddingBottom: 18, fontFamily: sans,
 };
 const card: React.CSSProperties = {
-  width: 92, height: 128, borderRadius: 12, margin: '0 -6px', position: 'relative',
+  width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
+  borderRadius: 12, margin: '0 -6px', position: 'relative',
   background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${C.border}`,
   color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'space-between', padding: '12px 8px',
+  justifyContent: 'space-between', padding: 'clamp(12px, 1.2vw, 18px) clamp(8px, 0.8vw, 12px)',
   transition: 'transform .18s ease, box-shadow .18s ease',
   transformOrigin: 'bottom center',
 };
-const cname: React.CSSProperties = { fontSize: 13, fontWeight: 700 };
-const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 12, padding: '2px 9px', borderRadius: 999 };
+const cname: React.CSSProperties = { fontSize: 'clamp(13px, 1.25vw, 17px)', fontWeight: 700 };
+const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
 const dmgVal: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,59,107,0.16)', border: '1px solid #5a2436' };
 const healVal: React.CSSProperties = { color: '#bff6ec', background: 'rgba(56,232,200,0.16)', border: '1px solid #1f5a4c' };
 const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127,182,255,0.16)', border: '1px solid #2a4870' };
 const revVal: React.CSSProperties = { color: '#d9c4ff', background: 'rgba(139,108,255,0.16)', border: '1px solid #4a3a78' };
+const peekVal: React.CSSProperties = { color: '#cdeaff', background: 'rgba(139,227,255,0.16)', border: '1px solid #2a5a78' };
+const shatterVal: React.CSSProperties = { color: '#d6f5b8', background: 'rgba(155,232,90,0.16)', border: '1px solid #3e6a2a' };

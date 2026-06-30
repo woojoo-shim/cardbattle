@@ -3,7 +3,7 @@
 
 interface Props {
   id: string;
-  size?: number;
+  size?: number | string; // number → px; string → any CSS length (e.g. a clamp() for responsive cards)
 }
 
 const STEEL = '#cfd6e6';
@@ -197,6 +197,52 @@ function Bolt() {
   );
 }
 
+function Peek() {
+  return (
+    <>
+      <Glow color="#8be3ff" o={0.42} />
+      {/* crystal-ball eye that scries a hidden card */}
+      <circle cx="32" cy="34" r="18" fill="#0d1c2c" stroke="#8be3ff" strokeWidth="2" />
+      <circle cx="32" cy="34" r="18" fill="url(#peek-orb)" opacity="0.5" />
+      <defs>
+        <radialGradient id="peek-orb" cx="0.38" cy="0.34" r="0.7">
+          <stop offset="0" stopColor="#d6f4ff" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#1a3a55" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {/* eye */}
+      <path d="M20 34 Q32 24 44 34 Q32 44 20 34 Z" fill="#06121c" stroke="#bfeaff" strokeWidth="1.2" />
+      <circle cx="32" cy="34" r="5" fill="#3fb6ff" />
+      <circle cx="32" cy="34" r="2.2" fill="#04121e" />
+      <circle cx="30" cy="32" r="1.2" fill="#eaffff" />
+      {/* stand */}
+      <path d="M22 52 L42 52 L38 56 L26 56 Z" fill="#1c3550" stroke="#5a86ab" strokeWidth="1" />
+    </>
+  );
+}
+
+function Shatter() {
+  return (
+    <>
+      <Glow color="#9be85a" o={0.4} />
+      {/* a card breaking apart */}
+      <g transform="rotate(-8 32 32)">
+        <path d="M18 14 L34 14 L31 50 L15 50 Z" fill="#16202c" stroke="#5a7a3c" strokeWidth="1.5" />
+        <path d="M18 14 L34 14 L31 50 L15 50 Z" fill="#0e1620" opacity="0.4" />
+      </g>
+      <g transform="rotate(14 38 34)">
+        <path d="M34 18 L50 16 L49 50 L33 52 Z" fill="#1a2530" stroke="#5a7a3c" strokeWidth="1.5" />
+      </g>
+      {/* crack */}
+      <path d="M33 12 L29 26 L37 30 L31 44 L35 54" fill="none" stroke="#bdf08a" strokeWidth="2" strokeLinejoin="round" />
+      {/* shards */}
+      <path d="M22 8 L26 12 L21 14 Z" fill="#bdf08a" opacity="0.85" />
+      <path d="M48 10 L52 14 L46 15 Z" fill="#bdf08a" opacity="0.7" />
+      <path d="M44 54 L48 57 L42 58 Z" fill="#bdf08a" opacity="0.7" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -208,13 +254,16 @@ const ART: Record<string, () => JSX.Element> = {
   shield: Shield,
   drain: Drain,
   bolt: Bolt,
+  peek: Peek,
+  shatter: Shatter,
 };
 
 export function CardArt({ id, size = 44 }: Props) {
   const Art = ART[id];
   if (!Art) return null;
+  const dim = typeof size === 'number' ? `${size}px` : size;
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
+    <svg viewBox="0 0 64 64" aria-hidden style={{ display: 'block', width: dim, height: dim }}>
       <Art />
     </svg>
   );

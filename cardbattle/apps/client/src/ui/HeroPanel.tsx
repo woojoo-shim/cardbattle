@@ -48,7 +48,7 @@ export function HeroPanel({ ui, myId }: Props) {
   );
 }
 
-const wrap: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans };
+const wrap: React.CSSProperties = { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans };
 const panel: React.CSSProperties = {
   width: 'min(760px, 92%)', height: 88, borderRadius: 16, display: 'flex', alignItems: 'center',
   gap: 18, padding: '0 22px', position: 'relative',

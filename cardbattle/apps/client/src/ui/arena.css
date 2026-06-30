@@ -19,6 +19,11 @@
   0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
   100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
+/* Peek reveal toast popping into view. */
+@keyframes revealPop {
+  0%   { transform: scale(0.8) translateY(10px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
 /* Floating damage / heal number rising off the target. */
 @keyframes cb-rise {
   0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }

@@ -214,7 +214,20 @@ export class BattleRoom extends Room<BattleState> {
     syncToSchema(this.state, this.gs);
     this.pushHands();
     if (this.gs.phase === 'lobby') this.refreshLobby(); // keep the browser headcount live; no churn mid-game
-    if (events.length) this.broadcast('events', events);
+    if (events.length) this.sendEvents(events);
+  }
+
+  /**
+   * Broadcast the event stream, but keep private reveals (card_revealed) hidden from
+   * everyone except their viewer — otherwise '간파' would leak the peeked card to the table.
+   * Each client receives the public events plus only the reveals addressed to them, in order.
+   */
+  private sendEvents(events: GameEvent[]): void {
+    if (!events.some((e) => e.type === 'card_revealed')) { this.broadcast('events', events); return; }
+    for (const client of this.clients) {
+      const visible = events.filter((e) => e.type !== 'card_revealed' || e.viewerId === client.sessionId);
+      if (visible.length) client.send('events', visible);
+    }
   }
 
   /** Send each connected client only their own hand contents (hidden information). */

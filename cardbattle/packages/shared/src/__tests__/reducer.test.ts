@@ -76,4 +76,32 @@ describe('reduce: play_card', () => {
     const { events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
     expect(events).toHaveLength(0);
   });
+
+  it('shield is consumed by incoming damage (not a passive)', () => {
+    const s = game();
+    s.players[1].defense = 8;
+    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // 10 dmg
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[1].defense).toBe(0); // shield fully spent
+    expect(state.players[1].hp).toBe(38);     // only 2 dmg got through (10 - 8 absorbed)
+  });
+
+  it('peek privately reveals one of a target\'s cards to the caster', () => {
+    const s = game();
+    s.players[0].hand = [{ id: 'c1', defId: 'peek' }];
+    s.players[1].hand = [{ id: 't1', defId: 'sword' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    const reveal = events.find((e) => e.type === 'card_revealed');
+    expect(reveal).toMatchObject({ type: 'card_revealed', viewerId: 'a', targetId: 'b', defId: 'sword' });
+    expect(state.players[1].hand).toHaveLength(1); // peek does not remove the card
+  });
+
+  it('discard destroys one of a target\'s cards', () => {
+    const s = game();
+    s.players[0].hand = [{ id: 'c1', defId: 'shatter' }];
+    s.players[1].hand = [{ id: 't1', defId: 'sword' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[1].hand).toHaveLength(0);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'card_discarded', targetId: 'b', defId: 'sword' }));
+  });
 });

@@ -8,6 +8,7 @@ import { HeroPanel } from './HeroPanel.js';
 import { CardFan } from './CardFan.js';
 import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
+import { RevealOverlay } from './RevealOverlay.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { C, mono, sans } from './theme.js';
 import './arena.css';
@@ -63,6 +64,7 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
   return (
     <div style={screen}>
       <VfxLayer events={events} />
+      <RevealOverlay events={events} myId={myId} ui={ui} />
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={lineupRow}><EnemyLineup ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} /></div>
       <div style={fieldRow}>
@@ -88,7 +90,7 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
 
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
-  display: 'grid', gridTemplateRows: '64px 34% 1fr 116px 188px',
+  display: 'grid', gridTemplateRows: '64px 34% 1fr 116px clamp(196px, 19vh, 256px)',
   background:
     'radial-gradient(120% 90% at 50% 8%, #141826 0%, #0e1018 38%, #07080d 100%), #07080d',
   color: C.text,
