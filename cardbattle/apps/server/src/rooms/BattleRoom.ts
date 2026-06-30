@@ -141,24 +141,36 @@ export class BattleRoom extends Room<BattleState> {
     this.afterCurrent();
   }
 
-  /** Simple bot policy: heal if hurt, else bomb-all, else hit a random living opponent. */
+  /** Simple bot policy: heal when badly hurt, else play the first useful attack/utility card. */
   private chooseBotAction(bot: PlayerState): Action | null {
     const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
+    const has = (card: { defId: string }, kind: string, target?: string) =>
+      CARD_DEFS[card.defId]?.effects.some((e) => e.kind === kind && (target === undefined || (e as any).target === target)) ?? false;
+
+    // 1. Badly hurt: prefer a pure self-heal (potion/대회복), not a targeted lifesteal.
+    if (bot.hp < bot.maxHp * 0.5) {
+      const healCard = bot.hand.find((c) => has(c, 'heal') && !requiresTarget(CARD_DEFS[c.defId]!));
+      if (healCard) return { type: 'play_card', cardInstanceId: healCard.id };
+    }
+
+    // 2. Otherwise act on the first playable card in hand order.
     for (const card of bot.hand) {
       const def = CARD_DEFS[card.defId];
       if (!def) continue;
-      if (def.effects.some((e) => e.kind === 'heal')) {
-        if (bot.hp < bot.maxHp) return { type: 'play_card', cardInstanceId: card.id };
+      if (requiresTarget(def)) {
+        if (opponents.length > 0) {
+          const target = opponents[Math.floor(Math.random() * opponents.length)];
+          return { type: 'play_card', cardInstanceId: card.id, targetId: target.id };
+        }
         continue;
       }
-      if (def.effects.some((e) => e.kind === 'damage' && e.target === 'all')) {
+      if (has(card, 'damage', 'all') || has(card, 'damage', 'random')) {
         if (opponents.length > 0) return { type: 'play_card', cardInstanceId: card.id };
         continue;
       }
-      if (requiresTarget(def) && opponents.length > 0) {
-        const target = opponents[Math.floor(Math.random() * opponents.length)];
-        return { type: 'play_card', cardInstanceId: card.id, targetId: target.id };
-      }
+      if (has(card, 'heal') && bot.hp < bot.maxHp) return { type: 'play_card', cardInstanceId: card.id };
+      if (has(card, 'shield') && bot.defense < 8) return { type: 'play_card', cardInstanceId: card.id };
+      // '역류'(reverse) has no direct value to the bot's heuristic — it simply ends its turn.
     }
     return null;
   }

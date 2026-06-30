@@ -6,7 +6,7 @@ function player(id: string, seat: number, over: Partial<PlayerState> = {}): Play
   return { id, name: id, connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], buffs: [], alive: true, ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
-  return { phase: 'playing', players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
+  return { phase: 'playing', players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
 }
 const ctx: ReduceCtx = { nextCardId: () => 'c-x', now: 1000 };
 

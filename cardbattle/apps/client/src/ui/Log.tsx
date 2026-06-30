@@ -8,7 +8,7 @@ interface Props {
   ui: UiState;
 }
 
-type Line = { text: string; tone: 'turn' | 'card' | 'dmg' | 'heal' | 'out' | 'win' };
+type Line = { text: string; tone: 'turn' | 'card' | 'dmg' | 'heal' | 'shield' | 'reverse' | 'round' | 'out' | 'win' };
 
 function nameOf(ui: UiState, id: string): string {
   return ui.players.find((p) => p.id === id)?.name ?? id.slice(0, 4);
@@ -20,6 +20,9 @@ function line(ui: UiState, e: GameEvent): Line | null {
     case 'card_played': return { text: `🃏 ${nameOf(ui, e.playerId)} → ${CARD_DEFS[e.defId]?.name ?? e.defId}`, tone: 'card' };
     case 'damage_dealt': return { text: `💥 ${nameOf(ui, e.targetId)} ${e.amount} 피해 (HP ${e.targetHpAfter})`, tone: 'dmg' };
     case 'healed': return { text: `💚 ${nameOf(ui, e.targetId)} ${e.amount} 회복 (HP ${e.targetHpAfter})`, tone: 'heal' };
+    case 'shielded': return { text: `🛡 ${nameOf(ui, e.targetId)} 방어 +${e.amount} (총 ${e.defenseAfter})`, tone: 'shield' };
+    case 'direction_reversed': return { text: `🔄 진행 방향 반전! (${e.direction === -1 ? '역방향' : '정방향'})`, tone: 'reverse' };
+    case 'round_advanced': return { text: `↻ ROUND ${e.round} — 손패 보충`, tone: 'round' };
     case 'player_eliminated': return { text: `☠ ${nameOf(ui, e.playerId)} 탈락`, tone: 'out' };
     case 'game_over': return { text: `🏆 ${nameOf(ui, e.winnerId)} 승리!`, tone: 'win' };
     default: return null;
@@ -27,7 +30,8 @@ function line(ui: UiState, e: GameEvent): Line | null {
 }
 
 const TONE: Record<Line['tone'], string> = {
-  turn: C.dim, card: C.text, dmg: '#ff8aa6', heal: '#7fe9d6', out: C.faint, win: C.rare,
+  turn: C.dim, card: C.text, dmg: '#ff8aa6', heal: '#7fe9d6',
+  shield: '#7fb6ff', reverse: '#c9a0ff', round: C.rare, out: C.faint, win: C.rare,
 };
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */

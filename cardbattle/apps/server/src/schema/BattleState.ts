@@ -24,6 +24,8 @@ export class BattleState extends Schema {
   @type('string') title = '';
   @type('string') phase = 'lobby';
   @type('number') currentTurnIndex = 0;
+  @type('number') turnDir = 1;
+  @type('number') roundCount = 1;
   @type('number') turnDeadline = 0;
   @type('string') winnerId = '';
   @type(['string']) turnOrder = new ArraySchema<string>();
@@ -34,6 +36,8 @@ export class BattleState extends Schema {
 export function syncToSchema(schema: BattleState, gs: GameState): void {
   schema.phase = gs.phase;
   schema.currentTurnIndex = gs.currentTurnIndex;
+  schema.turnDir = gs.turnDir;
+  schema.roundCount = gs.roundCount;
   schema.turnDeadline = gs.turnDeadline;
   schema.winnerId = gs.winnerId ?? '';
   // @colyseus/schema v3 ArraySchema.splice rejects insertCount > deleteCount, so a single

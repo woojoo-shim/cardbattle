@@ -7,6 +7,11 @@ export const CARD_DEFS: Record<string, CardDef> = {
   bomb:     { id: 'bomb',     name: '폭탄',   rarity: 'epic',   cost: 0, element: 'fire',     kind: 'magic',  effects: [{ kind: 'damage', amount: 12, target: 'all' }],    cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '💣', desc: '나를 제외한 모두에게 12 피해', drawWeight: 8 },
   potion:   { id: 'potion',   name: '회복약', rarity: 'common', cost: 0, element: 'holy',     kind: 'heal',   effects: [{ kind: 'heal',   amount: 12 }],                cooldown: 0, vfxKey: 'heal',    sfxKey: 'heal',    icon: '🧪', desc: '나를 12 회복', drawWeight: 18 },
   greatheal:{ id: 'greatheal',name: '대회복', rarity: 'rare',   cost: 0, element: 'holy',     kind: 'heal',   effects: [{ kind: 'heal',   amount: 20 }],                cooldown: 0, vfxKey: 'heal',    sfxKey: 'heal',    icon: '✨', desc: '나를 20 회복', drawWeight: 6 },
+  // Special cards — change the flow of play, not just HP.
+  reverse:  { id: 'reverse',  name: '역류',   rarity: 'rare',   cost: 0, element: 'lightning',kind: 'special',effects: [{ kind: 'reverse' }],                          cooldown: 0, vfxKey: 'reverse', sfxKey: 'reverse', icon: '🔄', desc: '진행 방향을 반대로 뒤집는다', drawWeight: 8 },
+  shield:   { id: 'shield',   name: '방패',   rarity: 'common', cost: 0, element: 'holy',     kind: 'equipment',effects:[{ kind: 'shield', amount: 8 }],                 cooldown: 0, vfxKey: 'shield',  sfxKey: 'shield',  icon: '🛡️', desc: '방어 +8 (받는 피해 감소)', drawWeight: 12 },
+  drain:    { id: 'drain',    name: '흡혈검', rarity: 'rare',   cost: 0, element: 'poison',   kind: 'magic',  effects: [{ kind: 'damage', amount: 8, target: 'chosen' }, { kind: 'heal', amount: 8 }], cooldown: 0, vfxKey: 'drain', sfxKey: 'drain', icon: '🩸', desc: '대상에게 8 피해, 나를 8 회복', drawWeight: 8 },
+  bolt:     { id: 'bolt',     name: '벼락',   rarity: 'epic',   cost: 0, element: 'lightning',kind: 'magic',  effects: [{ kind: 'damage', amount: 16, target: 'random' }], cooldown: 0, vfxKey: 'bolt',  sfxKey: 'bolt',  icon: '⚡', desc: '무작위 적에게 16 피해', drawWeight: 6 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);

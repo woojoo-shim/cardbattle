@@ -36,4 +36,12 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + effect.amount);
     ctx.emit({ type: 'healed', targetId: ctx.source.id, amount: effect.amount, targetHpAfter: ctx.source.hp });
   },
+  shield: (effect: Extract<Effect, { kind: 'shield' }>, ctx) => {
+    ctx.source.defense += effect.amount;
+    ctx.emit({ type: 'shielded', targetId: ctx.source.id, amount: effect.amount, defenseAfter: ctx.source.defense });
+  },
+  reverse: (_effect: Extract<Effect, { kind: 'reverse' }>, ctx) => {
+    ctx.state.turnDir = ctx.state.turnDir === 1 ? -1 : 1;
+    ctx.emit({ type: 'direction_reversed', direction: ctx.state.turnDir });
+  },
 };

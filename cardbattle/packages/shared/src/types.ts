@@ -5,7 +5,9 @@ export type CardKind = 'weapon' | 'magic' | 'heal' | 'special' | 'equipment';
 
 export type Effect =
   | { kind: 'damage'; amount: number; target: 'chosen' | 'all' | 'random' }
-  | { kind: 'heal'; amount: number };
+  | { kind: 'heal'; amount: number }
+  | { kind: 'shield'; amount: number }
+  | { kind: 'reverse' };
 
 export interface CardDef {
   id: string;
@@ -45,6 +47,8 @@ export interface GameState {
   players: PlayerState[];
   turnOrder: string[];
   currentTurnIndex: number;
+  turnDir: 1 | -1;     // +1 = forward through turnOrder, -1 = reversed (flipped by '역류')
+  roundCount: number;  // increments each time the turn token completes a full lap
   turnDeadline: number;
   rngSeed: number;
   log: GameEvent[];
@@ -63,6 +67,9 @@ export type GameEvent =
   | { type: 'card_played'; playerId: string; defId: string; targetId?: string }
   | { type: 'damage_dealt'; sourceId: string; targetId: string; amount: number; element: Element; targetHpAfter: number }
   | { type: 'healed'; targetId: string; amount: number; targetHpAfter: number }
+  | { type: 'shielded'; targetId: string; amount: number; defenseAfter: number }
+  | { type: 'direction_reversed'; direction: 1 | -1 }
+  | { type: 'round_advanced'; round: number }
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

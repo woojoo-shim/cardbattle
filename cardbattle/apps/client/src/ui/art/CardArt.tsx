@@ -132,6 +132,71 @@ function GreatHeal() {
   );
 }
 
+function Reverse() {
+  return (
+    <>
+      <Glow color="#8b6cff" o={0.42} />
+      {/* two curved arrows forming a rotation ring */}
+      <path d="M16 32 A16 16 0 0 1 44 21" fill="none" stroke="#c9a0ff" strokeWidth="4" strokeLinecap="round" />
+      <path d="M48 32 A16 16 0 0 1 20 43" fill="none" stroke="#c9a0ff" strokeWidth="4" strokeLinecap="round" />
+      {/* arrowheads */}
+      <path d="M44 21 L38 18 L45 14 Z" fill="#e2d0ff" stroke="#fff" strokeWidth="0.6" />
+      <path d="M20 43 L26 46 L19 50 Z" fill="#e2d0ff" stroke="#fff" strokeWidth="0.6" />
+      {/* core spark */}
+      <circle cx="32" cy="32" r="4" fill="#efe6ff" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+    </>
+  );
+}
+
+function Shield() {
+  return (
+    <>
+      <Glow color="#7fb6ff" o={0.42} />
+      {/* shield body */}
+      <path d="M32 8 L52 16 L52 34 Q52 50 32 58 Q12 50 12 34 L12 16 Z"
+        fill="#16243a" stroke="#7fb6ff" strokeWidth="2" />
+      <path d="M32 8 L52 16 L52 34 Q52 50 32 58 Z" fill="#0e1726" opacity="0.5" />
+      {/* center boss */}
+      <circle cx="32" cy="30" r="8" fill="#2a4870" stroke="#cfe2ff" strokeWidth="1.4" />
+      {/* sheen */}
+      <path d="M22 16 L32 12 L32 50 Q22 44 22 34 Z" fill="#9ec6ff" opacity="0.18" />
+    </>
+  );
+}
+
+function Drain() {
+  return (
+    <>
+      <Glow color="#9be85a" o={0.4} />
+      {/* dripping blade */}
+      <path d="M32 6 L36 16 L35 38 L32 44 L29 38 L28 16 Z" fill={STEEL} stroke="#eef2ff" strokeWidth="1" />
+      <path d="M32 6 L32 44 L29 38 L28 16 Z" fill={STEEL_D} opacity="0.6" />
+      <path d="M32 7 L32 43" stroke="#b6f08a" strokeWidth="1" opacity="0.8" />
+      {/* guard + grip */}
+      <rect x="22" y="42" width="20" height="4" rx="2" fill="#6a8a3c" stroke="#bfe772" strokeWidth="1" />
+      <rect x="30" y="46" width="4" height="9" fill={WOOD} stroke={WOOD_D} strokeWidth="0.8" />
+      {/* blood drops */}
+      <path d="M30 50 Q28 55 30 57 Q32 55 30 50 Z" fill="#c0264a" />
+      <circle cx="37" cy="52" r="2.2" fill="#c0264a" />
+    </>
+  );
+}
+
+function Bolt() {
+  return (
+    <>
+      <Glow color="#ffd84a" o={0.5} />
+      {/* lightning bolt */}
+      <path d="M36 6 L20 34 L30 34 L26 58 L46 26 L34 26 Z"
+        fill="#ffe46a" stroke="#fff6c4" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M36 6 L20 34 L30 34 Z" fill="#fff2a0" opacity="0.6" />
+      {/* sparks */}
+      <circle cx="44" cy="14" r="2" fill="#fff1a8" opacity="0.85" />
+      <circle cx="18" cy="48" r="1.6" fill="#fff1a8" opacity="0.75" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -139,6 +204,10 @@ const ART: Record<string, () => JSX.Element> = {
   bomb: Bomb,
   potion: Potion,
   greatheal: GreatHeal,
+  reverse: Reverse,
+  shield: Shield,
+  drain: Drain,
+  bolt: Bolt,
 };
 
 export function CardArt({ id, size = 44 }: Props) {

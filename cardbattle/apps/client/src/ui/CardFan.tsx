@@ -27,8 +27,17 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
         const isHover = c.id === hover && enabled;
         const rot = (i - mid) * 5;
         const lift = Math.abs(i - mid) * 8;
-        const isHeal = def.effects.some((e) => e.kind === 'heal');
+        const hasDamage = def.effects.some((e) => e.kind === 'damage');
+        const hasShield = def.effects.some((e) => e.kind === 'shield');
+        const isReverse = def.effects.some((e) => e.kind === 'reverse');
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
+        const pill = isReverse
+          ? { style: revVal, label: '↔' }
+          : hasDamage
+          ? { style: dmgVal, label: `${value}` }
+          : hasShield
+          ? { style: shieldVal, label: `+${value}` }
+          : { style: healVal, label: `+${value}` };
 
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
@@ -59,9 +68,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
           >
             <CardArt id={def.id} size={46} />
             <div style={cname}>{def.name}</div>
-            <div style={{ ...pillVal, ...(isHeal ? healVal : dmgVal) }}>
-              {isHeal ? `+${value}` : value}
-            </div>
+            <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
           </button>
         );
       })}
@@ -85,3 +92,5 @@ const cname: React.CSSProperties = { fontSize: 13, fontWeight: 700 };
 const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 12, padding: '2px 9px', borderRadius: 999 };
 const dmgVal: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,59,107,0.16)', border: '1px solid #5a2436' };
 const healVal: React.CSSProperties = { color: '#bff6ec', background: 'rgba(56,232,200,0.16)', border: '1px solid #1f5a4c' };
+const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127,182,255,0.16)', border: '1px solid #2a4870' };
+const revVal: React.CSSProperties = { color: '#d9c4ff', background: 'rgba(139,108,255,0.16)', border: '1px solid #4a3a78' };

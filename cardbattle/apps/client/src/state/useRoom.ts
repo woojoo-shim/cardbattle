@@ -19,6 +19,8 @@ export interface UiState {
   title: string;
   phase: string;
   currentTurnIndex: number;
+  turnDir: number;
+  roundCount: number;
   turnDeadline: number;
   winnerId: string;
   turnOrder: string[];
@@ -64,6 +66,8 @@ function snapshot(state: any): UiState {
     title: state.title ?? '',
     phase: state.phase,
     currentTurnIndex: state.currentTurnIndex,
+    turnDir: state.turnDir ?? 1,
+    roundCount: state.roundCount ?? 1,
     turnDeadline: state.turnDeadline,
     winnerId: state.winnerId,
     turnOrder: state.turnOrder ? Array.from(state.turnOrder as Iterable<string>) : [],

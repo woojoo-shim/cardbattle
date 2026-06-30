@@ -1,5 +1,5 @@
 import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
-import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, TURN_SECONDS } from '../constants.js';
+import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, TURN_SECONDS } from '../constants.js';
 import { ALL_DEFS } from '../cards/defs.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
@@ -10,7 +10,7 @@ export function initGame(seats: { id: string; name: string }[]): GameState {
     hp: START_HP, maxHp: START_HP, defense: START_DEFENSE,
     hand: [], equipment: [], statuses: [], buffs: [], alive: true,
   }));
-  return { phase: 'lobby', players, turnOrder: [], currentTurnIndex: 0, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
+  return { phase: 'lobby', players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
 }
 
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
@@ -46,6 +46,14 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
   emit({ type: 'turn_started', playerId: cur.id, deadline: state.turnDeadline });
 }
 
+/** Top every living player's hand back up to HAND_TARGET (cards are added, never removed). */
+function refillHands(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
+  for (const p of state.players) {
+    if (!p.alive) continue;
+    while (p.hand.length < HAND_TARGET) drawCard(state, p, ctx, emit);
+  }
+}
+
 export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
   if (input.phase !== 'playing') return { state: input, events: [] };
   const state = structuredClone(input);
@@ -54,14 +62,29 @@ export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
   const endingId = state.turnOrder[state.currentTurnIndex];
   emit({ type: 'turn_ended', playerId: endingId });
 
-  // advance to next living player
+  // advance to the next living player in the current direction; crossing the wrap
+  // point (seam) means the token completed a full lap -> a new round begins.
   const n = state.turnOrder.length;
+  const dir = state.turnDir;
+  const oldIdx = state.currentTurnIndex;
+  let lapped = false;
   for (let step = 1; step <= n; step++) {
-    const idx = (state.currentTurnIndex + step) % n;
+    const idx = (((oldIdx + dir * step) % n) + n) % n;
     const cand = state.players.find((p) => p.id === state.turnOrder[idx]);
-    if (cand && cand.alive) { state.currentTurnIndex = idx; break; }
+    if (cand && cand.alive) {
+      lapped = dir === 1 ? idx <= oldIdx : idx >= oldIdx;
+      state.currentTurnIndex = idx;
+      break;
+    }
   }
   checkWin(state, emit);
-  if (state.phase === 'playing') beginTurn(state, ctx, emit);
+  if (state.phase === 'playing') {
+    if (lapped) {
+      state.roundCount += 1;
+      emit({ type: 'round_advanced', round: state.roundCount });
+      refillHands(state, ctx, emit);
+    }
+    beginTurn(state, ctx, emit);
+  }
   return { state, events };
 }

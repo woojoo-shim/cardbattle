@@ -16,6 +16,7 @@ const ELEM: Record<Element, string> = {
   lightning: '#ffd84a', poison: '#9be85a', holy: '#ffe9a8', none: '#ff5c8a',
 };
 const HEAL = '#38e8c8';
+const SHIELD = '#7fb6ff';
 
 /** Viewport-centre of a player's portrait/panel, located via its data-pid anchor. */
 function centerOf(id: string): { x: number; y: number } | null {
@@ -73,6 +74,11 @@ export function VfxLayer({ events }: Props) {
         if (!tgt) continue;
         add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color: HEAL, delay: 0 });
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0 });
+      } else if (e.type === 'shielded') {
+        const tgt = centerOf(e.targetId);
+        if (!tgt) continue;
+        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color: SHIELD, delay: 0 });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `🛡+${e.amount}`, color: SHIELD, delay: 0 });
       }
     }
 
