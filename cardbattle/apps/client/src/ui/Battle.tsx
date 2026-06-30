@@ -6,6 +6,7 @@ import { TopBar } from './TopBar.js';
 import { EnemyLineup } from './EnemyLineup.js';
 import { HeroPanel } from './HeroPanel.js';
 import { CardFan } from './CardFan.js';
+import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { C, mono, sans } from './theme.js';
@@ -66,6 +67,7 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
       <div style={lineupRow}><EnemyLineup ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} /></div>
       <div style={fieldRow}>
         <div style={fieldGrid} />
+        {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} />}
         <span style={fieldHint}>◈ BATTLEFIELD ◈</span>
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}>🎯 대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
@@ -102,7 +104,10 @@ const fieldGrid: React.CSSProperties = {
   WebkitMaskImage: 'radial-gradient(60% 70% at 50% 50%, #000, transparent)',
   maskImage: 'radial-gradient(60% 70% at 50% 50%, #000, transparent)',
 };
-const fieldHint: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 3 };
+const fieldHint: React.CSSProperties = {
+  position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
+  fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 3,
+};
 const heroRow: React.CSSProperties = { display: 'flex', alignItems: 'center' };
 const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
