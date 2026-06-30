@@ -19,12 +19,13 @@
   0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
   100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
-/* A played card pops out of the acting character and lifts off, then fades. */
-@keyframes cb-cast {
-  0%   { transform: translate(-50%, -50%) scale(0.4) rotate(-9deg); opacity: 0; }
-  22%  { opacity: 1; }
-  55%  { transform: translate(-50%, -135%) scale(1.12) rotate(5deg); opacity: 1; }
-  100% { transform: translate(-50%, -190%) scale(0.96) rotate(0deg); opacity: 0; }
+/* A played card is dealt from the player onto the table in front of them, rests, then fades. */
+@keyframes cb-deal {
+  0%   { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.45) rotate(-12deg); opacity: 0; }
+  18%  { opacity: 1; }
+  50%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  82%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.96) rotate(0deg); opacity: 0; }
 }
 /* Peek reveal toast popping into view. */
 @keyframes revealPop {

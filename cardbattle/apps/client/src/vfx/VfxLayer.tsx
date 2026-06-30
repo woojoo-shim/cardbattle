@@ -10,7 +10,7 @@ type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number }
-  | { id: number; kind: 'cast'; x: number; y: number; icon: string; name: string; color: string };
+  | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; icon: string; name: string; color: string };
 
 /** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
 const ELEM: Record<Element, string> = {
@@ -26,6 +26,15 @@ function centerOf(id: string): { x: number; y: number } | null {
   if (!el) return null;
   const r = el.getBoundingClientRect();
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+/** Centre of the round table ≈ centroid of every seat anchored around it. */
+function tableCenter(): { x: number; y: number } | null {
+  const els = document.querySelectorAll<HTMLElement>('[data-pid]');
+  if (els.length === 0) return null;
+  let x = 0, y = 0;
+  els.forEach((el) => { const r = el.getBoundingClientRect(); x += r.left + r.width / 2; y += r.top + r.height / 2; });
+  return { x: x / els.length, y: y / els.length };
 }
 
 /** Briefly jolt the struck portrait. The animation overrides transform then reverts. */
@@ -71,7 +80,10 @@ export function VfxLayer({ events }: Props) {
         const def = CARD_DEFS[e.defId];
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
-        add.push({ id: nextId.current++, kind: 'cast', x: src.x, y: src.y, icon: def.icon, name: def.name, color });
+        // Lay the card on the table just in front of the player (a third of the way to centre).
+        const c = tableCenter();
+        const spot = c ? { x: src.x + (c.x - src.x) * 0.34, y: src.y + (c.y - src.y) * 0.34 } : src;
+        add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, icon: def.icon, name: def.name, color });
         castPulse(e.playerId);
       } else if (e.type === 'damage_dealt') {
         const tgt = centerOf(e.targetId);
@@ -123,8 +135,8 @@ export function VfxLayer({ events }: Props) {
             <span key={f.id} style={ringStyle(f)} />
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
-              <span style={{ fontSize: 30, lineHeight: 1 }}>{f.icon}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{f.name}</span>
+              <span style={{ fontSize: 20, lineHeight: 1 }}>{f.icon}</span>
+              <span style={{ fontSize: 8, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', letterSpacing: 0.2 }}>{f.name}</span>
             </span>
           ) : (
             <span key={f.id} style={numStyle(f)}>{f.text}</span>
@@ -161,12 +173,13 @@ function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, display: 'flex', flexDirection: 'column',
-    alignItems: 'center', gap: 4, padding: '9px 12px', borderRadius: 12,
+    alignItems: 'center', gap: 2, padding: '6px 7px', borderRadius: 8, width: 48,
     background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${f.color}`,
-    boxShadow: `0 0 22px ${f.color}, 0 12px 30px rgba(0,0,0,0.6)`,
+    boxShadow: `0 0 14px ${f.color}, 0 8px 18px rgba(0,0,0,0.6)`,
     fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
-    animation: 'cb-cast .9s cubic-bezier(.2,.7,.3,1) forwards',
-  };
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+    animation: 'cb-deal 1.1s cubic-bezier(.2,.7,.3,1) forwards',
+  } as React.CSSProperties;
 }
 function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
   return {
