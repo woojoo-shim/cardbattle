@@ -13,7 +13,9 @@ interface Props {
 
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
-  | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
+  | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number; size?: number; thick?: number; dur?: number }
+  | { id: number; kind: 'bloom'; x: number; y: number; color: string; delay: number }
+  | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
@@ -71,6 +73,28 @@ function castPulse(id: string): void {
  * and a floating ±number rises off the target. Heals pulse teal. The screen edge still
  * flashes crimson on damage. In S4 this is superseded by a pooled PixiJS particle canvas.
  */
+/** A layered impact at (cx,cy): a soft additive bloom + a double shockwave ring. Shared by
+ *  every hit (damage/heal/shield) so contact always lands with real light, not a bare outline. */
+function impact(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
+  return [
+    { id: spawn(), kind: 'bloom', x: cx, y: cy, color, delay },
+    { id: spawn(), kind: 'ring', x: cx, y: cy, color, delay, size: 84, thick: 3, dur: 0.84 },
+    { id: spawn(), kind: 'ring', x: cx, y: cy, color, delay: delay + 0.04, size: 150, thick: 1.5, dur: 1.0 },
+  ];
+}
+
+/** A radial spray of bright sparks flung off a strike point — grit that sells the blow's weight. */
+function sparkParticles(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
+  const out: Fx[] = [];
+  const count = 7;
+  for (let i = 0; i < count; i++) {
+    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+    const dist = 30 + Math.random() * 32;
+    out.push({ id: spawn(), kind: 'spark', x: cx, y: cy, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay });
+  }
+  return out;
+}
+
 /** Spawn a ring of cosmetic burst particles at a seat when its owner plays a card. */
 function burstParticles(spawn: () => number, cx: number, cy: number, effect: string, color: string): Fx[] {
   const out: Fx[] = [];
@@ -136,8 +160,10 @@ export function VfxLayer({ events, players }: Props) {
         if (!tgt) continue;
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
-        // The projectile was already launched by the preceding card_played; the impact lands as it arrives.
-        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY });
+        // The projectile was already launched by the preceding card_played; the impact lands as it arrives:
+        // a bloom + double shockwave, a spray of sparks, then the damage number rising off the target.
+        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, color, IMPACT_DELAY));
+        add.push(...sparkParticles(() => nextId.current++, tgt.x, tgt.y, color, IMPACT_DELAY));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay: IMPACT_DELAY });
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
@@ -151,12 +177,12 @@ export function VfxLayer({ events, players }: Props) {
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color: HEAL, delay: 0 });
+        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, HEAL, 0));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0 });
       } else if (e.type === 'shielded') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color: SHIELD, delay: 0 });
+        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, SHIELD, 0));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
       }
     }
@@ -188,6 +214,10 @@ export function VfxLayer({ events, players }: Props) {
             </span>
           ) : f.kind === 'ring' ? (
             <span key={f.id} style={ringStyle(f)} />
+          ) : f.kind === 'bloom' ? (
+            <span key={f.id} style={bloomStyle(f)} />
+          ) : f.kind === 'spark' ? (
+            <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -239,11 +269,31 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
   } as React.CSSProperties;
 }
 function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
+  const size = f.size ?? 96;
   return {
-    position: 'fixed', left: f.x, top: f.y, width: 96, height: 96, borderRadius: '50%',
-    border: `3px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`, willChange: 'transform, opacity',
-    animation: `cb-ring .84s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
+    position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
+    border: `${f.thick ?? 3}px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`, willChange: 'transform, opacity',
+    animation: `cb-ring ${f.dur ?? 0.84}s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
+}
+/** Additive light flash at the hit point — screen-blended so it reads as real light on the dark table. */
+function bloomStyle(f: Extract<Fx, { kind: 'bloom' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 120, height: 120, borderRadius: '50%',
+    background: `radial-gradient(circle, #fff 0%, ${f.color} 30%, transparent 68%)`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity',
+    animation: `cb-bloom .6s ease-out ${f.delay}s backwards`,
+  };
+}
+/** A single bright spark shard flung off the strike. */
+function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 5, height: 5, borderRadius: '50%',
+    background: `radial-gradient(circle, #fff, ${f.color} 60%, transparent)`,
+    boxShadow: `0 0 8px ${f.color}`, willChange: 'transform, opacity',
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+    animation: `cb-spark .5s cubic-bezier(.12,.7,.3,1) ${f.delay}s backwards`,
+  } as React.CSSProperties;
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
