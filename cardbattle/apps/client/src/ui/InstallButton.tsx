@@ -14,6 +14,20 @@ interface BIPEvent extends Event {
 const getStashed = () =>
   (window as unknown as { __installPrompt?: BIPEvent }).__installPrompt ?? null;
 
+// Fire the native install prompt. Must be called synchronously from a real user
+// gesture (a click/keypress handler) or the browser ignores it. Returns the
+// user's choice, or 'unavailable' when no prompt has been captured yet.
+export async function promptInstall(): Promise<'accepted' | 'dismissed' | 'unavailable'> {
+  const w = window as unknown as { __installPrompt?: BIPEvent };
+  const evt = w.__installPrompt;
+  if (!evt) return 'unavailable';
+  await evt.prompt();
+  const { outcome } = await evt.userChoice;
+  w.__installPrompt = undefined;
+  window.dispatchEvent(new Event('pwa-installable')); // let the button refresh
+  return outcome;
+}
+
 const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
   // @ts-expect-error iOS-only flag
@@ -47,14 +61,11 @@ export function InstallButton() {
 
   if (installed) return null;
 
-  const onClick = async () => {
-    const evt = deferred ?? getStashed();
-    if (evt) {
-      await evt.prompt();
-      const { outcome } = await evt.userChoice;
-      (window as unknown as { __installPrompt?: BIPEvent }).__installPrompt = undefined;
+  const onClick = () => {
+    if (deferred ?? getStashed()) {
+      const p = promptInstall(); // sync call keeps the user gesture valid
       setDeferred(null);
-      if (outcome !== 'accepted') setHint(manualHint());
+      p.then((outcome) => { if (outcome === 'dismissed') setHint(manualHint()); });
       return;
     }
     setHint((h) => (h ? null : manualHint())); // no prompt: toggle manual how-to

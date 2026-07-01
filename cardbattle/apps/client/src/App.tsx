@@ -3,7 +3,7 @@ import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
-import { InstallButton } from './ui/InstallButton.js';
+import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
@@ -48,7 +48,16 @@ const HERO_CARDS = [
 function NameGate({ onSubmit }: { onSubmit: (name: string, avatar: string) => void }) {
   const [value, setValue] = useState('');
   const [avatar, setAvatar] = useState(AVATAR_CHOICES[0].id);
-  const go = () => { const n = value.trim() || 'Player'; onSubmit(n.slice(0, 16), avatar); };
+  const go = () => {
+    const n = value.trim() || 'Player';
+    // On the first entry, ride this click to auto-open the install prompt so an app
+    // icon lands on the desktop with a single confirm. Only ask once per browser;
+    // if no prompt is available yet, the manual 앱 설치 button remains.
+    if (!localStorage.getItem('cb_install_asked')) {
+      promptInstall().then((r) => { if (r !== 'unavailable') localStorage.setItem('cb_install_asked', '1'); });
+    }
+    onSubmit(n.slice(0, 16), avatar);
+  };
   return (
     <div style={gateWrap}>
       <InstallButton />
