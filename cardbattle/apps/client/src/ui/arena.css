@@ -55,18 +55,13 @@
   72%  { transform: translate(calc(-50% + var(--dx) * 0.86), calc(-50% + var(--dy) * 0.86)) scale(1.2); opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.85); opacity: 0; }
 }
-/* Impact shockwave at the point of hit — blooms in, then expands and dissolves smoothly. */
-@keyframes cb-ring {
-  0%   { transform: translate(-50%, -50%) scale(0.25); opacity: 0; }
-  16%  { opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(1.75); opacity: 0; }
-}
-/* Additive light bloom at the point of contact — a soft flash of colour that swells then fades.
+/* Additive light flash at the point of contact — a quick punch of colour that barely grows,
+   so it reads as a burst of light on the face rather than an expanding shockwave circle.
    Rendered with mix-blend-mode: screen so it reads as real light against the dark table. */
 @keyframes cb-bloom {
-  0%   { transform: translate(-50%, -50%) scale(0.35); opacity: 0; }
-  24%  { opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+  18%  { opacity: 0.95; }
+  100% { transform: translate(-50%, -50%) scale(1.12); opacity: 0; }
 }
 /* Impact spark — a bright shard flung outward from the hit, decelerating hard and fading.
    Several fire at once in a radial spray to give the strike weight and grit. */

@@ -13,7 +13,6 @@ interface Props {
 
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
-  | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number; size?: number; thick?: number; dur?: number }
   | { id: number; kind: 'bloom'; x: number; y: number; color: string; delay: number }
   | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
@@ -76,14 +75,10 @@ function castPulse(id: string): void {
  * and a floating ±number rises off the target. Heals pulse teal. The screen edge still
  * flashes crimson on damage. In S4 this is superseded by a pooled PixiJS particle canvas.
  */
-/** A layered impact at (cx,cy): a soft additive bloom + a double shockwave ring. Shared by
- *  every hit (damage/heal/shield) so contact always lands with real light, not a bare outline. */
+/** A single additive light flash at (cx,cy) on the struck face — no expanding ring, just a
+ *  burst of colour that lands with the hit. Shared by damage/heal/shield (tinted per effect). */
 function impact(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
-  return [
-    { id: spawn(), kind: 'bloom', x: cx, y: cy, color, delay },
-    { id: spawn(), kind: 'ring', x: cx, y: cy, color, delay, size: 84, thick: 3, dur: 0.84 },
-    { id: spawn(), kind: 'ring', x: cx, y: cy, color, delay: delay + 0.04, size: 150, thick: 1.5, dur: 1.0 },
-  ];
+  return [{ id: spawn(), kind: 'bloom', x: cx, y: cy, color, delay }];
 }
 
 /** A radial spray of bright sparks flung off a strike point — grit that sells the blow's weight. */
@@ -215,8 +210,6 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={hurlStyle(f)}>
               {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
             </span>
-          ) : f.kind === 'ring' ? (
-            <span key={f.id} style={ringStyle(f)} />
           ) : f.kind === 'bloom' ? (
             <span key={f.id} style={bloomStyle(f)} />
           ) : f.kind === 'spark' ? (
@@ -270,14 +263,6 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
     animation: 'cb-burst .72s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
-}
-function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
-  const size = f.size ?? 96;
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
-    border: `${f.thick ?? 3}px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`, willChange: 'transform, opacity',
-    animation: `cb-ring ${f.dur ?? 0.84}s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
-  };
 }
 /** Additive light flash at the hit point — screen-blended so it reads as real light on the dark table. */
 function bloomStyle(f: Extract<Fx, { kind: 'bloom' }>): React.CSSProperties {
