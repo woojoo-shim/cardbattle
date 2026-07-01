@@ -33,9 +33,12 @@ const ELEM: Record<Element, string> = {
 const HEAL = '#38e8c8';
 const SHIELD = '#7fb6ff';
 
-/** Viewport-centre of a player's portrait/panel, located via its data-pid anchor. */
+/** Viewport-centre of a player's portrait (the face), so hits land on the person and not the
+ *  nameplate below. Prefers the dedicated portrait anchor; falls back to the whole seat card. */
 function centerOf(id: string): { x: number; y: number } | null {
-  const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
+  const sel = `${CSS.escape(id)}`;
+  const el = document.querySelector<HTMLElement>(`[data-portrait="${sel}"]`)
+    ?? document.querySelector<HTMLElement>(`[data-pid="${sel}"]`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };

@@ -103,6 +103,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             }}
           >
             <div
+              data-portrait={p.id}
               style={{
                 ...portrait,
                 width: isMe ? 92 : 80, height: isMe ? 92 : 80,
