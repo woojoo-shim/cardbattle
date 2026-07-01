@@ -17,10 +17,11 @@ export function App() {
   if (name === null) return <NameGate onSubmit={setName} />;
   // useState setters treat function values as updaters, so wrap to store the connect fn itself.
   if (connect === null) return <RoomBrowser name={name} onPick={(c) => setConnect(() => c)} />;
-  return <Game connect={connect} />;
+  // Dropping `connect` unmounts Game → useRoom's cleanup leaves the room → back to the browser.
+  return <Game connect={connect} onExit={() => setConnect(null)} />;
 }
 
-function Game({ connect }: { connect: Connect }) {
+function Game({ connect, onExit }: { connect: Connect; onExit: () => void }) {
   const { conn, ui, hand, events, error, send, setReady, addBot } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
@@ -30,7 +31,7 @@ function Game({ connect }: { connect: Connect }) {
   if (ui.phase === 'lobby') {
     return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} />;
   }
-  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} />;
+  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} />;
 }
 
 /** A fanned hand of real game cards, dealt across the void behind the title. */

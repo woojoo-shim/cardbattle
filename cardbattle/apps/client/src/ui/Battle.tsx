@@ -19,9 +19,10 @@ interface Props {
   events: GameEvent[];
   error: RoomError | null;
   send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'end_turn' }) => void;
+  onExit: () => void;
 }
 
-export function Battle({ ui, myId, hand, events, error, send }: Props) {
+export function Battle({ ui, myId, hand, events, error, send, onExit }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
@@ -56,6 +57,9 @@ export function Battle({ ui, myId, hand, events, error, send }: Props) {
           {iWon ? '승리!' : `${winner?.name ?? '???'} 승리`}
         </h1>
         <p style={endSub}>{iWon ? '최후의 생존자가 되었습니다.' : '다음 기회에…'}</p>
+        <button className="cb-enter" style={returnBtn} onClick={onExit}>
+          로비로 돌아가기&nbsp;<span style={{ fontWeight: 900 }}>→</span>
+        </button>
       </div>
     );
   }
@@ -131,3 +135,9 @@ const endWrap: React.CSSProperties = {
 };
 const endTitle: React.CSSProperties = { margin: 0, fontSize: 64, fontWeight: 900, letterSpacing: 4, textShadow: '0 0 50px currentColor' };
 const endSub: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 18 };
+const returnBtn: React.CSSProperties = {
+  marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 800, letterSpacing: 0.5,
+  color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
+  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
+  boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
+};
