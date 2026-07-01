@@ -42,7 +42,7 @@ const TONE: Record<Line['tone'], string> = {
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */
 export function Log({ events, ui }: Props) {
-  const lines = events.map((e) => line(ui, e)).filter((l): l is Line => l !== null).slice(-8);
+  const lines = events.map((e) => line(ui, e)).filter((l): l is Line => l !== null).slice(-6);
   if (lines.length === 0) return null;
   return (
     <div style={box}>
@@ -56,10 +56,14 @@ export function Log({ events, ui }: Props) {
   );
 }
 
+// Anchored bottom-left, clear of the seat ring's top arc. pointer-events:none so it NEVER
+// intercepts taps meant for a seat behind it (iPad landscape packs seats tighter). Slightly
+// translucent + width clamps to stay unobtrusive on narrower iPad aspect ratios.
 const box: React.CSSProperties = {
-  position: 'absolute', right: 24, top: 16, width: 230, zIndex: 15,
-  background: 'linear-gradient(180deg, rgba(22,26,38,0.96), rgba(14,16,24,0.96))',
-  border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 14px',
+  position: 'absolute', left: 16, bottom: 12, width: 'clamp(180px, 22vw, 230px)', zIndex: 3,
+  pointerEvents: 'none',
+  background: 'linear-gradient(180deg, rgba(22,26,38,0.82), rgba(14,16,24,0.82))',
+  border: `1px solid ${C.border}`, borderRadius: 12, padding: '10px 12px',
   boxShadow: '0 18px 40px rgba(0,0,0,0.5)', fontFamily: sans,
 };
 const head: React.CSSProperties = {
