@@ -3,6 +3,7 @@ import { createRoom, joinRoomById, quickPlay, listLobby, type BattleConnection, 
 import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
+import { BrandMark } from './BrandMark.js';
 import { Icon, MODE_ICON } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 
@@ -67,7 +68,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
         <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;상점</button>
         {onLogout && <button style={logout} onClick={onLogout}>로그아웃</button>}
       </div>
-      <h1 style={brand}>CARD&nbsp;BATTLE</h1>
+      <BrandMark size={72} />
       <p style={who}>{name} 님 · 방을 만들거나 친구 방에 입장하세요</p>
 
       <div style={cols}>
@@ -169,12 +170,7 @@ const wrap: React.CSSProperties = {
   justifyContent: 'center', gap: 10, fontFamily: sans, color: C.text,
   background: 'radial-gradient(120% 90% at 50% 8%, #141826 0%, #0e1018 40%, #07080d 100%), #07080d',
 };
-const brand: React.CSSProperties = {
-  margin: 0, fontSize: 44, fontWeight: 900, letterSpacing: 4,
-  background: 'linear-gradient(90deg,#7b5cff,#3df2c0)', WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-};
-const who: React.CSSProperties = { margin: '0 0 14px', color: C.dim, fontSize: 14 };
+const who: React.CSSProperties = { margin: '10px 0 14px', color: C.dim, fontSize: 14 };
 const cols: React.CSSProperties = { display: 'flex', gap: 20, width: 'min(820px, 94vw)', alignItems: 'stretch' };
 const panel: React.CSSProperties = {
   flex: 1, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRadius: 16,

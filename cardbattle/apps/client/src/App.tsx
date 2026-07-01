@@ -6,6 +6,7 @@ import { RoomBrowser } from './ui/RoomBrowser.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
+import { BrandMark } from './ui/BrandMark.js';
 import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
@@ -97,7 +98,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
 
       <div style={gateContent} className="cb-gate-in">
         <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
-        <h1 style={brand}>CARD&nbsp;BATTLE</h1>
+        <BrandMark size={104} />
         <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
 
         <div style={heroFan} className="cb-hero-float" aria-hidden>
@@ -207,14 +208,6 @@ const gateContent: React.CSSProperties = {
 const kicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 6, color: C.faint, textTransform: 'uppercase',
   marginBottom: 12,
-};
-// Brushed-metal title — near-white with a top-lit sheen, engraved by a soft drop shadow.
-const brand: React.CSSProperties = {
-  margin: 0, fontSize: 'clamp(44px, 9.5vw, 70px)', fontWeight: 900, letterSpacing: 3, lineHeight: 1,
-  fontFamily: sans,
-  background: 'linear-gradient(180deg, #ffffff 0%, #d3d8ea 46%, #8890a8 100%)',
-  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
 };
 const ruleWrap: React.CSSProperties = {
   marginTop: 14, width: 'min(340px, 74vw)', height: 2, borderRadius: 2, overflow: 'hidden',
