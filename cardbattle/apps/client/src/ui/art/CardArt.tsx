@@ -609,6 +609,133 @@ function Charge() {
   );
 }
 
+function FateSwap() {
+  return (
+    <>
+      <Glow color="#b388ff" o={0.42} />
+      {/* two hearts trading places along curved swap arrows */}
+      <path d="M18 16 C15 16 13 18.4 13 21 C13 25 17 28 22 32 C27 28 31 25 31 21 C31 18.4 29 16 26 16 C24 16 22.6 17.2 22 18.4 C21.4 17.2 20 16 18 16 Z" fill="#ff5c8a" stroke="#ffd0db" strokeWidth="1" />
+      <path d="M42 34 C39 34 37 36.4 37 39 C37 43 41 46 46 50 C51 46 55 43 55 39 C55 36.4 53 34 50 34 C48 34 46.6 35.2 46 36.4 C45.4 35.2 44 34 42 34 Z" fill="#7fb6ff" stroke="#cfe2ff" strokeWidth="1" />
+      {/* swap arrows */}
+      <path d="M12 40 Q22 52 34 46" fill="none" stroke="#c9a0ff" strokeWidth="3" strokeLinecap="round" />
+      <path d="M34 46 L28 45 L31 51 Z" fill="#e2d0ff" />
+      <path d="M52 24 Q42 12 30 18" fill="none" stroke="#c9a0ff" strokeWidth="3" strokeLinecap="round" />
+      <path d="M30 18 L36 19 L33 13 Z" fill="#e2d0ff" />
+    </>
+  );
+}
+
+function MindSiphon() {
+  return (
+    <>
+      <Glow color="#6fb6ff" o={0.45} />
+      {/* a head profile with a spiral mind, mana motes streaming out */}
+      <path d="M34 54 Q18 54 16 38 Q14 22 30 18 Q46 14 48 30 Q49 40 42 42 L42 50 Q42 54 38 54 Z"
+        fill="#16243a" stroke="#7fb6ff" strokeWidth="2" strokeLinejoin="round" />
+      {/* mind swirl */}
+      <path d="M30 34 m0 -6 a6 6 0 1 1 -5 3 a3.5 3.5 0 1 0 3 2" fill="none" stroke="#bfe0ff" strokeWidth="2" strokeLinecap="round" />
+      {/* siphoned mana crystals drifting away */}
+      <path d="M52 14 l3 5 l-3 5 l-3 -5 Z" fill="#5aa0ff" stroke="#d6ecff" strokeWidth="0.9" />
+      <path d="M56 28 l2.2 3.6 l-2.2 3.6 l-2.2 -3.6 Z" fill="#5aa0ff" stroke="#d6ecff" strokeWidth="0.8" opacity="0.8" />
+      <circle cx="49" cy="24" r="1.6" fill="#d6ecff" opacity="0.85" />
+    </>
+  );
+}
+
+function BloodWave() {
+  return (
+    <>
+      <Glow color="#c0264a" o={0.45} />
+      {/* a cresting wave of blood */}
+      <path d="M6 40 Q14 26 24 34 Q30 39 36 32 Q44 22 52 34 Q58 42 58 48 L58 56 L6 56 Z"
+        fill="#7a1330" stroke="#ff6a88" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M6 44 Q16 34 24 40 Q32 46 40 40 Q48 34 58 44 L58 56 L6 56 Z" fill="#c0264a" opacity="0.8" />
+      {/* curl highlight */}
+      <path d="M44 26 Q52 30 52 38 Q49 33 44 34 Q47 30 44 26 Z" fill="#ff8aa0" opacity="0.85" />
+      {/* flung droplets */}
+      <path d="M20 20 Q18 24 20 26 Q22 24 20 20 Z" fill="#ff6a88" />
+      <circle cx="34" cy="18" r="2.4" fill="#ff6a88" />
+      <circle cx="48" cy="16" r="1.8" fill="#ff6a88" opacity="0.85" />
+    </>
+  );
+}
+
+function LastStand() {
+  return (
+    <>
+      <Glow color="#ff5c8a" o={0.42} />
+      {/* a cracked shield with a defiant clenched fist bursting through */}
+      <path d="M32 6 L50 12 L50 30 Q50 44 32 52 Q14 44 14 30 L14 12 Z"
+        fill="#1a2230" stroke="#ff7aa0" strokeWidth="2" strokeLinejoin="round" />
+      {/* crack */}
+      <path d="M32 6 L28 20 L36 26 L30 38 L34 52" fill="none" stroke="#ff3b6b" strokeWidth="2" strokeLinejoin="round" opacity="0.8" />
+      {/* fist */}
+      <path d="M24 40 Q24 32 30 32 L40 32 Q46 32 46 38 L46 46 Q46 52 38 52 L30 52 Q24 52 24 46 Z"
+        fill="#3a2530" stroke="#ffd0db" strokeWidth="1.6" />
+      {[30, 35, 40].map((x, i) => (
+        <rect key={i} x={x - 1.6} y="29" width="3.2" height="7" rx="1.5" fill="#4a2f38" stroke="#ffd0db" strokeWidth="1" />
+      ))}
+      {/* defiant spark */}
+      <path d="M35 12 L37 17 L42 18 L37 19 L35 24 L33 19 L28 18 L33 17 Z" fill="#ffd0db" opacity="0.9" />
+    </>
+  );
+}
+
+function Gale() {
+  return (
+    <>
+      <Glow color="#7fd6ff" o={0.4} />
+      {/* three swirling wind gusts */}
+      <path d="M10 20 h22 a5 5 0 1 0 -5 -5" fill="none" stroke="#d6f4ff" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M8 32 h34 a6 6 0 1 1 -6 6" fill="none" stroke="#7fd6ff" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M12 44 h20 a4.5 4.5 0 1 0 -4.5 4.5" fill="none" stroke="#bfeaff" strokeWidth="3" strokeLinecap="round" opacity="0.85" />
+      {/* frost flecks carried on the wind */}
+      <path d="M48 12 l3 3 l-3 3 l-3 -3 Z" fill="#eaffff" opacity="0.85" />
+      <circle cx="50" cy="50" r="1.8" fill="#eaffff" opacity="0.7" />
+    </>
+  );
+}
+
+function Tempest() {
+  return (
+    <>
+      <Glow color="#ffd84a" o={0.5} />
+      {/* storm cloud */}
+      <path d="M18 30 A9 9 0 0 1 34 24 A8 8 0 0 1 48 28 A7 7 0 0 1 47 42 L20 42 A8 8 0 0 1 18 30 Z"
+        fill="#2a2f42" stroke="#8b93ad" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M18 30 A9 9 0 0 1 34 24 A8 8 0 0 1 48 28 A7 7 0 0 1 47 42 Z" fill="#1a1e2c" opacity="0.5" />
+      {/* forking lightning */}
+      <path d="M32 40 L24 52 L31 52 L26 62 L40 48 L33 48 L38 40 Z" fill="#ffe46a" stroke="#fff6c4" strokeWidth="1.4" strokeLinejoin="round" />
+      {/* driving rain */}
+      <line x1="20" y1="46" x2="17" y2="54" stroke="#7fb6ff" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+      <line x1="46" y1="46" x2="43" y2="54" stroke="#7fb6ff" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+    </>
+  );
+}
+
+function Backstab() {
+  return (
+    <>
+      <Glow color="#9be85a" o={0.4} />
+      {/* a stolen card pulled away, a dagger striking from behind it */}
+      <g transform="rotate(-12 26 32)">
+        <rect x="14" y="14" width="22" height="30" rx="3" fill="#16202c" stroke="#7ad04a" strokeWidth="1.6" />
+        <rect x="14" y="14" width="22" height="30" rx="3" fill="#0e1620" opacity="0.4" />
+        <path d="M25 20 L28 26 L34 27 L29 31 L30 37 L25 34 L20 37 L21 31 L16 27 L22 26 Z" fill="#bdf08a" opacity="0.8" />
+      </g>
+      {/* dagger thrust */}
+      <g transform="rotate(38 44 32)">
+        <path d="M44 8 L47 16 L46 34 L44 40 L42 34 L41 16 Z" fill="#cfd6e6" stroke="#eef2ff" strokeWidth="1" />
+        <path d="M44 8 L44 40 L42 34 L41 16 Z" fill="#7b8398" opacity="0.6" />
+        <rect x="37" y="39" width="14" height="3.5" rx="1.7" fill="#6a8a3c" stroke="#bfe772" strokeWidth="0.9" />
+        <rect x="42.5" y="42" width="3" height="8" fill={WOOD} stroke={WOOD_D} strokeWidth="0.7" />
+      </g>
+      {/* motion streak */}
+      <path d="M40 12 L50 8" stroke="#bdf08a" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -639,6 +766,13 @@ const ART: Record<string, () => JSX.Element> = {
   holynova: HolyNova,
   execute: Execute,
   charge: Charge,
+  fateswap: FateSwap,
+  mindsiphon: MindSiphon,
+  bloodwave: BloodWave,
+  laststand: LastStand,
+  gale: Gale,
+  tempest: Tempest,
+  backstab: Backstab,
 };
 
 export function CardArt({ id, size = 44 }: Props) {

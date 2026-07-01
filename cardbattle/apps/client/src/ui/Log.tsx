@@ -32,6 +32,8 @@ function line(ui: UiState, e: GameEvent): Line | null {
     case 'round_advanced': return { icon: 'arrowCW', text: `ROUND ${e.round} — 손패 보충`, tone: 'round' };
     case 'player_eliminated': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} 탈락`, tone: 'out' };
     case 'game_over': return { icon: 'trophy', text: `${nameOf(ui, e.winnerId)} 승리!`, tone: 'win' };
+    case 'hp_swapped': return { icon: 'arrowSwap', text: `${nameOf(ui, e.aId)} ↔ ${nameOf(ui, e.bId)} 체력 교환`, tone: 'reverse' };
+    case 'mana_burned': return { icon: 'crystal', text: `${nameOf(ui, e.targetId)} 마나 -${e.amount} (남은 ${e.manaAfter})`, tone: 'reveal' };
     default: return null;
   }
 }

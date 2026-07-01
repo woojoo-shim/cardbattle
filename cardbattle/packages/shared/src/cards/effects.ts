@@ -126,4 +126,49 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
       ctx.emit({ type: 'player_eliminated', playerId: t.id });
     }
   },
+  // '운명교환' — trade my current HP with the chosen player's. Each side is clamped to its own
+  // maxHp so a low-HP caster can offload their frailty onto a healthy foe (and vice versa).
+  swap: (_effect: Extract<Effect, { kind: 'swap' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive);
+    if (!t) return;
+    const mine = ctx.source.hp;
+    ctx.source.hp = Math.min(ctx.source.maxHp, t.hp);
+    t.hp = Math.min(t.maxHp, mine);
+    ctx.emit({ type: 'hp_swapped', aId: ctx.source.id, bId: t.id, aHp: ctx.source.hp, bHp: t.hp });
+  },
+  // '정신흡수' — siphon a chosen player's banked mana. Pairs with a `mana` effect on the same
+  // card to hand the drained resource to the caster.
+  manaburn: (effect: Extract<Effect, { kind: 'manaburn' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive);
+    if (!t) return;
+    const burned = Math.min(t.mana, effect.amount);
+    t.mana -= burned;
+    ctx.emit({ type: 'mana_burned', targetId: t.id, amount: burned, manaAfter: t.mana });
+  },
+  // '흡혈파동' — an AoE vampire strike: hit every other living player, then heal the caster by the
+  // total HP actually removed (shield-absorbed damage doesn't feed the leech). Still an attack, so
+  // it honours this turn's empower and any armed gamble (resolved once for the whole wave).
+  leech: (effect: Extract<Effect, { kind: 'leech' }>, ctx) => {
+    const targets = livingOthers(ctx.state, ctx.source.id);
+    const amount = resolveAttackAmount(ctx, effect.amount);
+    let healed = 0;
+    for (const t of targets) {
+      const before = t.hp;
+      damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
+      healed += before - t.hp;
+    }
+    if (healed > 0) {
+      ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + healed);
+      ctx.emit({ type: 'healed', targetId: ctx.source.id, amount: healed, targetHpAfter: ctx.source.hp });
+    }
+  },
+  // '최후의 발악' — the closer to death the caster is, the harder it hits: base + the caster's
+  // missing HP. A desperate comeback swing against a chosen foe (obeys empower/gamble).
+  desperation: (effect: Extract<Effect, { kind: 'desperation' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive);
+    if (!t) return;
+    const missing = ctx.source.maxHp - ctx.source.hp;
+    const amount = resolveAttackAmount(ctx, effect.amount + missing);
+    damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
+  },
 };

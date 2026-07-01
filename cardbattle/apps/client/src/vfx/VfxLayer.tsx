@@ -114,7 +114,9 @@ export function VfxLayer({ events, players }: Props) {
         const def = CARD_DEFS[e.defId];
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
-        const isAttack = def.effects.some((ef) => ef.kind === 'damage');
+        const isAttack = def.effects.some(
+          (ef) => ef.kind === 'damage' || ef.kind === 'pierce' || ef.kind === 'leech' || ef.kind === 'desperation',
+        );
         if (isAttack) {
           // A sleek light-streak lances from the caster toward its target (a chosen foe, or the
           // table centre for area/random hits) — an element-tinted comet, not a thrown blade.

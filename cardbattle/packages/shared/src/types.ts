@@ -18,7 +18,11 @@ export type Effect =
   | { kind: 'selfskip' }   // the caster forfeits their own next turn
   | { kind: 'steal' }      // take one random card from a chosen player's hand into mine
   | { kind: 'mana'; amount: number } // refill the caster's mana (the '충전' ramp card)
-  | { kind: 'pierce'; amount: number; target: 'chosen' }; // damage that ignores shield/defense entirely
+  | { kind: 'pierce'; amount: number; target: 'chosen' } // damage that ignores shield/defense entirely
+  | { kind: 'swap' }       // swap the caster's current HP with a chosen player's HP
+  | { kind: 'manaburn'; amount: number }    // drain up to `amount` mana from a chosen player
+  | { kind: 'leech'; amount: number }       // hit every other living player, healing the caster by the HP actually removed
+  | { kind: 'desperation'; amount: number }; // hit a chosen player for `amount` + the caster's missing HP (comeback finisher)
 
 export interface CardDef {
   id: string;
@@ -94,6 +98,8 @@ export type GameEvent =
   | { type: 'turn_skipped'; playerId: string }
   | { type: 'gamble_resolved'; playerId: string; doubled: boolean }
   | { type: 'mana_gained'; playerId: string; amount: number; manaAfter: number }
+  | { type: 'mana_burned'; targetId: string; amount: number; manaAfter: number } // a chosen player's mana was drained
+  | { type: 'hp_swapped'; aId: string; bId: string; aHp: number; bHp: number }    // two players traded current HP
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

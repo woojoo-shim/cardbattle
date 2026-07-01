@@ -61,7 +61,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
         const lift = Math.abs(i - mid) * 8;
-        const hasDamage = def.effects.some((e) => e.kind === 'damage');
+        const isAtk = (k: string) => k === 'damage' || k === 'pierce' || k === 'leech' || k === 'desperation';
+        const hasDamage = def.effects.some((e) => isAtk(e.kind));
         const hasShield = def.effects.some((e) => e.kind === 'shield');
         const isReverse = def.effects.some((e) => e.kind === 'reverse');
         const isPeek = def.effects.some((e) => e.kind === 'peek');
@@ -70,7 +71,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         const isGamble = def.effects.some((e) => e.kind === 'gamble');
         const isSacrifice = def.effects.some((e) => e.kind === 'selfskip');
         const isMana = def.effects.some((e) => e.kind === 'mana');
-        const dmgValue = def.effects.reduce((m, e) => (e.kind === 'damage' ? Math.max(m, e.amount) : m), 0);
+        const isSwap = def.effects.some((e) => e.kind === 'swap');
+        const dmgValue = def.effects.reduce((m, e) => (isAtk(e.kind) && 'amount' in e ? Math.max(m, e.amount) : m), 0);
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
         // Affordability: on my turn, cards I can't currently pay for are dimmed and unclickable.
         const affordable = def.cost <= mana;
@@ -87,6 +89,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
           ? { style: gambleVal, label: <Icon name="dice" size={13} /> }
           : isSacrifice
           ? { style: sacrificeVal, label: <Icon name="fire" size={13} /> }
+          : isSwap
+          ? { style: revVal, label: <Icon name="heart" size={13} /> }
           : isMana
           ? { style: manaValPill, label: `+${value}` }
           : hasDamage

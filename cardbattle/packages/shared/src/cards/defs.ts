@@ -36,6 +36,14 @@ export const CARD_DEFS: Record<string, CardDef> = {
   meditate: { id: 'meditate', name: '명상',   rarity: 'common', cost: 1, element: 'none',     kind: 'special',effects: [{ kind: 'mana', amount: 2 }, { kind: 'heal', amount: 4 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🧘', desc: '마나 +2, 나를 4 회복', drawWeight: 9 },
   holynova: { id: 'holynova', name: '신성폭발',rarity:'legendary',cost:5, element: 'holy',     kind: 'magic',  effects: [{ kind: 'damage', amount: 10, target: 'all' }, { kind: 'heal', amount: 12 }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '🌟', desc: '나를 제외한 모두에게 10 피해, 나를 12 회복', drawWeight: 3 },
   execute:  { id: 'execute',  name: '처형',   rarity: 'legendary',cost:5, element: 'physical', kind: 'weapon', effects: [{ kind: 'pierce', amount: 18, target: 'chosen' }], cooldown: 0, vfxKey: 'snipe', sfxKey: 'snipe', icon: '🪓', desc: '대상에게 방어를 무시하는 18 관통 피해', drawWeight: 3 },
+  // Fresh mechanics — HP swap, mana siphon, AoE lifesteal, comeback finisher, chaos combos, a hand-rob strike.
+  fateswap: { id: 'fateswap', name: '운명교환',rarity: 'epic',    cost: 3, element: 'none',     kind: 'special',effects: [{ kind: 'swap' }],                              cooldown: 0, vfxKey: 'reverse', sfxKey: 'reverse', icon: '🔀', desc: '지목한 상대와 서로의 체력(HP)을 통째로 맞바꾼다', drawWeight: 4 },
+  mindsiphon:{id: 'mindsiphon',name:'정신흡수',rarity: 'rare',    cost: 2, element: 'lightning',kind: 'special',effects: [{ kind: 'manaburn', amount: 3 }, { kind: 'mana', amount: 3 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🧠', desc: '지목한 상대의 마나 3을 빨아들여 내 마나로 흡수한다', drawWeight: 5 },
+  bloodwave: { id: 'bloodwave', name: '흡혈파동',rarity:'epic',    cost: 4, element: 'poison',   kind: 'magic',  effects: [{ kind: 'leech', amount: 7 }],                  cooldown: 0, vfxKey: 'drain',   sfxKey: 'drain',   icon: '🌊', desc: '나를 제외한 모두에게 7 피해, 가한 피해만큼 나를 회복', drawWeight: 5 },
+  laststand: { id: 'laststand', name: '최후의발악',rarity:'epic',  cost: 3, element: 'physical', kind: 'weapon', effects: [{ kind: 'desperation', amount: 5 }],             cooldown: 0, vfxKey: 'snipe',   sfxKey: 'snipe',   icon: '💢', desc: '지목한 상대에게 5 피해 + 내가 잃은 체력만큼 추가 피해', drawWeight: 5 },
+  gale:     { id: 'gale',     name: '돌풍',   rarity: 'rare',   cost: 3, element: 'ice',      kind: 'special',effects: [{ kind: 'reverse' }, { kind: 'skip' }],          cooldown: 0, vfxKey: 'bind',    sfxKey: 'bind',    icon: '🌫️', desc: '진행 방향을 뒤집고 지목한 상대의 다음 턴을 건너뛰게 한다', drawWeight: 5 },
+  tempest:  { id: 'tempest',  name: '폭풍',   rarity: 'epic',   cost: 4, element: 'lightning',kind: 'magic',  effects: [{ kind: 'damage', amount: 7, target: 'all' }, { kind: 'reverse' }], cooldown: 0, vfxKey: 'bolt', sfxKey: 'bolt', icon: '🌩️', desc: '모두에게 7 피해를 주고 진행 방향을 반전시킨다', drawWeight: 4 },
+  backstab: { id: 'backstab', name: '기습',   rarity: 'rare',   cost: 3, element: 'poison',   kind: 'special',effects: [{ kind: 'steal' }, { kind: 'damage', amount: 4, target: 'chosen' }], cooldown: 0, vfxKey: 'plunder', sfxKey: 'plunder', icon: '🗡️', desc: '지목한 상대의 손패 1장을 빼앗고 4 피해를 준다', drawWeight: 5 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
@@ -43,6 +51,6 @@ export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
 /** Does this card require the player to pick a target before playing? */
 export function requiresTarget(def: CardDef): boolean {
   return def.effects.some(
-    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'pierce' || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal',
+    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'pierce' || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal' || e.kind === 'swap' || e.kind === 'manaburn' || e.kind === 'desperation',
   );
 }
