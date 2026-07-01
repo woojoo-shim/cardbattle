@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoom, joinRoomById, quickPlay, listLobby, type BattleConnection, type RoomInfo } from '../net/client.js';
+import { fetchMe, type Account } from '../net/auth.js';
+import { Shop } from './Shop.js';
 import { C, mono, sans } from './theme.js';
 
 interface Props {
-  name: string;
-  avatar: string;
+  account: Account;
+  onAccount: (a: Account) => void;
   onPick: (connect: () => Promise<BattleConnection>) => void;
+  onLogout?: () => void;
 }
 
 function headcount(r: RoomInfo): number {
@@ -14,11 +17,13 @@ function headcount(r: RoomInfo): number {
 
 /** StarCraft-style custom-game browser: live list of open rooms, host a new room,
  * or join by a 4-char code friends share. Quick-play drops straight into a bot game. */
-export function RoomBrowser({ name, avatar, onPick }: Props) {
+export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
+  const { display: name, avatar } = account;
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
+  const [shopOpen, setShopOpen] = useState(false);
   const roomsRef = useRef<RoomInfo[]>([]);
   roomsRef.current = rooms;
 
@@ -30,6 +35,9 @@ export function RoomBrowser({ name, avatar, onPick }: Props) {
       .catch(() => setErr('로비에 연결하지 못했습니다.'));
     return () => { disposed = true; off?.(); };
   }, []);
+
+  // Refresh the account (gold may have grown from a just-finished match) when we land here.
+  useEffect(() => { fetchMe().then((a) => { if (a) onAccount(a); }); }, []);
 
   const open = rooms
     .filter((r) => !r.metadata?.started && headcount(r) < r.maxClients)
@@ -48,6 +56,10 @@ export function RoomBrowser({ name, avatar, onPick }: Props) {
 
   return (
     <div style={wrap}>
+      <div style={topBar}>
+        <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기">🪙 {account.gold}&nbsp;&nbsp;상점</button>
+        {onLogout && <button style={logout} onClick={onLogout}>로그아웃</button>}
+      </div>
       <h1 style={brand}>CARD&nbsp;BATTLE</h1>
       <p style={who}>{name} 님 · 방을 만들거나 친구 방에 입장하세요</p>
 
@@ -100,6 +112,8 @@ export function RoomBrowser({ name, avatar, onPick }: Props) {
           {err && <p style={errLine}>{err}</p>}
         </section>
       </div>
+
+      {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
     </div>
   );
 }
@@ -156,3 +170,17 @@ const sep: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 10,
 };
 const errLine: React.CSSProperties = { margin: 0, color: C.enemy, fontSize: 13, textAlign: 'center' };
+const topBar: React.CSSProperties = {
+  position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
+};
+const goldChip: React.CSSProperties = {
+  padding: '8px 16px', fontSize: 13.5, fontWeight: 800, color: '#ffe08a', cursor: 'pointer',
+  borderRadius: 999, border: '1px solid #6a5620', fontFamily: sans,
+  background: 'linear-gradient(180deg, rgba(70,56,16,0.9), rgba(40,32,10,0.9))',
+  boxShadow: '0 6px 16px rgba(180,140,30,0.25)',
+};
+const logout: React.CSSProperties = {
+  padding: '8px 14px', fontSize: 13, fontWeight: 700,
+  color: C.dim, cursor: 'pointer', borderRadius: 999, border: `1px solid ${C.border}`,
+  background: 'rgba(20,24,34,0.8)', fontFamily: sans,
+};

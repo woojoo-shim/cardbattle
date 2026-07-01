@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
@@ -7,23 +7,39 @@ import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
+import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
 import './ui/arena.css';
 import type { BattleConnection } from './net/client.js';
 
 type Connect = () => Promise<BattleConnection>;
 
 export function App() {
-  const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
+  // undefined = still checking a stored token; null = logged out; Account = signed in.
+  const [account, setAccount] = useState<Account | null | undefined>(() => (getToken() ? undefined : null));
   const [connect, setConnect] = useState<Connect | null>(null);
 
-  if (profile === null) return <NameGate onSubmit={(name, avatar) => setProfile({ name, avatar })} />;
+  useEffect(() => {
+    if (account === undefined) fetchMe().then((a) => setAccount(a));
+  }, [account]);
+
+  if (account === undefined) return <Centered>불러오는 중…</Centered>;
+  if (account === null) return <AuthGate onAuthed={setAccount} />;
   // useState setters treat function values as updaters, so wrap to store the connect fn itself.
-  if (connect === null) return <RoomBrowser name={profile.name} avatar={profile.avatar} onPick={(c) => setConnect(() => c)} />;
+  if (connect === null) {
+    return (
+      <RoomBrowser
+        account={account}
+        onAccount={setAccount}
+        onPick={(c) => setConnect(() => c)}
+        onLogout={() => { clearToken(); setAccount(null); }}
+      />
+    );
+  }
   // Dropping `connect` unmounts Game → useRoom's cleanup leaves the room → back to the browser.
-  return <Game connect={connect} onExit={() => setConnect(null)} />;
+  return <Game connect={connect} onExit={() => setConnect(null)} borderCosmetic={account.equippedBorder} />;
 }
 
-function Game({ connect, onExit }: { connect: Connect; onExit: () => void }) {
+function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: () => void; borderCosmetic?: string }) {
   const { conn, ui, hand, events, error, send, setReady, addBot } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
@@ -33,7 +49,7 @@ function Game({ connect, onExit }: { connect: Connect; onExit: () => void }) {
   if (ui.phase === 'lobby') {
     return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} />;
   }
-  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} />;
+  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} />;
 }
 
 /** A fanned hand of real game cards, dealt across the void behind the title. */
@@ -45,19 +61,33 @@ const HERO_CARDS = [
   { id: 'sword',     rarity: 'common',    a: 22,  x: 168,  y: 34 },
 ] as const;
 
-function NameGate({ onSubmit }: { onSubmit: (name: string, avatar: string) => void }) {
-  const [value, setValue] = useState('');
+function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [avatar, setAvatar] = useState(AVATAR_CHOICES[0].id);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
   const go = () => {
-    const n = value.trim() || 'Player';
-    // On the first entry, ride this click to auto-open the install prompt so an app
-    // icon lands on the desktop with a single confirm. Only ask once per browser;
-    // if no prompt is available yet, the manual 앱 설치 button remains.
+    if (busy) return;
+    // Fire the install prompt synchronously (first line, before any await) so the click
+    // still counts as a user gesture. Only ask once per browser; the manual 앱 설치 button
+    // remains as a fallback when no prompt is available yet.
     if (!localStorage.getItem('cb_install_asked')) {
       promptInstall().then((r) => { if (r !== 'unavailable') localStorage.setItem('cb_install_asked', '1'); });
     }
-    onSubmit(n.slice(0, 16), avatar);
+    const u = username.trim();
+    if (!u || !password) { setError('아이디와 비밀번호를 입력하세요.'); return; }
+    setError(null);
+    setBusy(true);
+    const req = mode === 'login' ? login(u, password) : register(u, password, avatar);
+    req.then(onAuthed).catch((e: unknown) => {
+      setError(e instanceof Error ? e.message : '요청에 실패했습니다.');
+      setBusy(false);
+    });
   };
+
   return (
     <div style={gateWrap}>
       <InstallButton />
@@ -78,42 +108,62 @@ function NameGate({ onSubmit }: { onSubmit: (name: string, avatar: string) => vo
           ))}
         </div>
 
-        <span style={pickLabel}>캐릭터 선택</span>
-        <div style={pickRow}>
-          {AVATAR_CHOICES.map((c) => {
-            const on = c.id === avatar;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setAvatar(c.id)}
-                title={c.name}
-                aria-label={c.name}
-                aria-pressed={on}
-                style={pickCell(on)}
-              >
-                <AvatarArt avatar={c.id} size={40} />
-              </button>
-            );
-          })}
+        <div style={tabRow}>
+          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); }}>로그인</button>
+          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); }}>회원가입</button>
         </div>
 
-        <div style={field} className="cb-field">
+        {mode === 'register' && (
+          <>
+            <span style={pickLabel}>캐릭터 선택</span>
+            <div style={pickRow}>
+              {AVATAR_CHOICES.map((c) => {
+                const on = c.id === avatar;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setAvatar(c.id)}
+                    title={c.name}
+                    aria-label={c.name}
+                    aria-pressed={on}
+                    style={pickCell(on)}
+                  >
+                    <AvatarArt avatar={c.id} size={40} />
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div style={authFields} className="cb-field">
           <input
             className="cb-nick"
             autoFocus
-            value={value}
+            value={username}
             maxLength={16}
-            placeholder="닉네임을 입력하세요"
-            onChange={(e) => setValue(e.target.value)}
+            placeholder="아이디"
+            autoComplete="username"
+            onChange={(e) => setUsername(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && go()}
-            style={input}
+            style={authInput}
           />
-          <button className="cb-enter" onClick={go} style={enter} aria-label="입장">
-            입장&nbsp;<span style={{ fontWeight: 900 }}>→</span>
+          <input
+            value={password}
+            type="password"
+            maxLength={64}
+            placeholder="비밀번호"
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && go()}
+            style={authInput}
+          />
+          <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
+            {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<span style={{ fontWeight: 900 }}>→</span>
           </button>
         </div>
-        <p style={hint}>이름을 정하고 심연의 투기장에 뛰어드세요</p>
+        {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
       </div>
     </div>
   );
@@ -213,23 +263,41 @@ function pickCell(on: boolean): React.CSSProperties {
     transition: 'border-color .2s, box-shadow .2s, background .2s',
   };
 }
-// A single pill housing the name field + enter action; the whole pill lights on focus.
-const field: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 6, width: 'min(360px, 90vw)', padding: 6,
+// Segmented 로그인 / 회원가입 toggle.
+const tabRow: React.CSSProperties = {
+  display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 12,
+  background: 'rgba(20,24,34,0.72)', border: `1px solid ${C.border}`,
+};
+function tab(on: boolean): React.CSSProperties {
+  return {
+    padding: '9px 22px', fontSize: 14, fontWeight: 800, letterSpacing: 0.5, cursor: 'pointer',
+    border: 'none', borderRadius: 9, fontFamily: sans,
+    color: on ? '#fff' : C.dim,
+    background: on ? 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)' : 'transparent',
+    boxShadow: on ? '0 6px 16px rgba(123,92,255,0.35)' : 'none',
+    transition: 'color .2s, background .2s',
+  };
+}
+// A stacked card holding the id + password fields and the submit action.
+const authFields: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', gap: 8, width: 'min(360px, 90vw)', padding: 10,
   borderRadius: 14, background: 'rgba(20,24,34,0.72)', border: `1px solid ${C.border}`,
   boxShadow: '0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
   backdropFilter: 'blur(8px)',
 };
-const input: React.CSSProperties = {
-  flex: 1, minWidth: 0, padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
-  background: 'transparent', border: 'none', outline: 'none',
+const authInput: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
+  background: 'rgba(0,0,0,0.28)', border: `1px solid ${C.border}`, borderRadius: 10, outline: 'none',
 };
 const enter: React.CSSProperties = {
-  flexShrink: 0, padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
+  width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
   color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
   background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
   boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
 };
 const hint: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.faint, fontFamily: sans, letterSpacing: 0.2,
+};
+const errText: React.CSSProperties = {
+  margin: '16px 0 0', fontSize: 12.5, color: C.enemy, fontFamily: sans, letterSpacing: 0.2,
 };

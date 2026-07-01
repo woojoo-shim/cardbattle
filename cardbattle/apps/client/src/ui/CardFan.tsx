@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CardInstance } from '@cardbattle/shared';
-import { CARD_DEFS } from '@cardbattle/shared';
+import { CARD_DEFS, COSMETIC_BY_ID } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 
@@ -10,6 +10,22 @@ interface Props {
   pendingId: string | null;
   mana: number;
   onPlay: (card: CardInstance) => void;
+  /** Equipped cosmetic border id (from the account); 'none' or undefined = plain frame. */
+  borderCosmetic?: string;
+}
+
+/** A gradient-border overlay ring for an equipped cosmetic skin. Only the border area is
+ *  painted (transparent center via the padding/border-box clip trick), so the card content
+ *  underneath shows through. pointerEvents:none keeps clicks flowing to the card button. */
+function cosmeticRing(border: string): React.CSSProperties {
+  const grad = border.startsWith('linear') || border.startsWith('radial');
+  return {
+    position: 'absolute', inset: 0, borderRadius: 12, pointerEvents: 'none', zIndex: 4,
+    border: '2.5px solid transparent',
+    ...(grad
+      ? { backgroundImage: `${border}`, WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude', padding: '2.5px' }
+      : { borderColor: border }),
+  };
 }
 
 // Touch devices (iPad/phone) have no hover, so a single tap on an instant card would fire it
@@ -21,7 +37,9 @@ const IS_TOUCH =
 
 /** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
  * and the selected (pending-target) card lifts higher with a teal outline. */
-export function CardFan({ hand, enabled, pendingId, mana, onPlay }: Props) {
+export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic }: Props) {
+  const cos = borderCosmetic ? COSMETIC_BY_ID[borderCosmetic] : undefined;
+  const hasCos = !!cos && cos.id !== 'none';
   const [hover, setHover] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const n = hand.length;
@@ -105,11 +123,16 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay }: Props) {
               borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
               boxShadow: isPending
                 ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(56,232,200,0.3)`
+                : hasCos && isHover
+                ? `0 0 22px ${cos!.glow}, 0 26px 44px rgba(0,0,0,0.6)`
+                : hasCos
+                ? `0 0 14px ${cos!.glow}, 0 14px 26px rgba(0,0,0,0.55)`
                 : isHover
                 ? '0 26px 44px rgba(0,0,0,0.6)'
                 : '0 14px 26px rgba(0,0,0,0.55)',
             }}
           >
+            {hasCos && <div style={cosmeticRing(cos!.border)} />}
             {(isHover || isPending) && (
               <div style={tip}>
                 <div style={tipName}>{def.name}</div>

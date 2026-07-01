@@ -1,5 +1,6 @@
 import { Client, Room } from 'colyseus.js';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
+import { getToken } from './auth.js';
 
 // Dev: the Vite page (:5173) and the Colyseus server (:2567) run on separate ports.
 // Prod: the server serves the built client, so the websocket lives on the page's own
@@ -23,21 +24,25 @@ export interface RoomInfo {
 
 const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId });
 
+// The account token (if logged in) rides every join so the server's onAuth can seat the
+// player under their verified account name instead of a client-supplied (spoofable) one.
+const auth = () => { const token = getToken(); return token ? { token } : {}; };
+
 /** Quick match: drop into any open lobby or spin up a fresh one (solo/bot fast path). */
 export async function quickPlay(name: string, avatar: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).joinOrCreate('battle', { name, avatar });
+  const room = await new Client(endpoint).joinOrCreate('battle', { name, avatar, ...auth() });
   return wrap(room);
 }
 
 /** Host a brand-new named room; the returned room carries its own code (in state). */
 export async function createRoom(name: string, title: string, avatar: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).create('battle', { name, title, avatar });
+  const room = await new Client(endpoint).create('battle', { name, title, avatar, ...auth() });
   return wrap(room);
 }
 
 /** Join a specific room by its Colyseus roomId (used by both the list and code paths). */
 export async function joinRoomById(roomId: string, name: string, avatar: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).joinById(roomId, { name, avatar });
+  const room = await new Client(endpoint).joinById(roomId, { name, avatar, ...auth() });
   return wrap(room);
 }
 

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import express from 'express';
 import { BattleRoom } from './rooms/BattleRoom.js';
+import { register, login, me, buyCosmetic, equipCosmetic, AuthError } from './auth/auth.js';
 
 const port = Number(process.env.PORT ?? 2567);
 
@@ -13,6 +14,52 @@ const port = Number(process.env.PORT ?? 2567);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(here, '../../client/dist');
 const app = express();
+app.use(express.json());
+
+// Auth API — registered BEFORE the static/SPA handlers so /api/* isn't swallowed by
+// the index.html fallback. Bearer token in the Authorization header for /api/me.
+app.post('/api/register', (req, res) => {
+  try {
+    const { username, password, avatar } = req.body ?? {};
+    res.json(register(username, password, avatar));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+app.post('/api/login', (req, res) => {
+  try {
+    const { username, password } = req.body ?? {};
+    res.json(login(username, password));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+app.get('/api/me', (req, res) => {
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  const profile = me(token);
+  if (!profile) return res.status(401).json({ error: '세션이 만료되었습니다.' });
+  res.json(profile);
+});
+const bearer = (req: express.Request) => req.headers.authorization?.replace(/^Bearer\s+/i, '');
+app.post('/api/shop/buy', (req, res) => {
+  try {
+    res.json(buyCosmetic(bearer(req), (req.body ?? {}).itemId));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+app.post('/api/shop/equip', (req, res) => {
+  try {
+    res.json(equipCosmetic(bearer(req), (req.body ?? {}).itemId));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
 app.use(express.static(clientDist));
 // SPA fallback: anything not matched as a static asset returns index.html. Colyseus
 // matchmaking rides the websocket upgrade event, so it never reaches this handler.

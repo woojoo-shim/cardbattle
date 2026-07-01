@@ -20,9 +20,10 @@ interface Props {
   error: RoomError | null;
   send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'end_turn' }) => void;
   onExit: () => void;
+  borderCosmetic?: string;
 }
 
-export function Battle({ ui, myId, hand, events, error, send, onExit }: Props) {
+export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
@@ -87,7 +88,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit }: Props) {
             <span style={manaLabel}>MANA</span>
           </div>
         </div>
-        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} />
+        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         {isMyTurn && (
           <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); }}>
             턴 종료 ▶

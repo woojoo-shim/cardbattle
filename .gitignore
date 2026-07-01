@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env*.local
 *.log
+# Local user store (password hashes) — never commit; Render filesystem is ephemeral anyway
+cardbattle/apps/server/data/

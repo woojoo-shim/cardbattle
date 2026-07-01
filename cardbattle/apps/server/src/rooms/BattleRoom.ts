@@ -4,12 +4,17 @@ import {
   CARD_DEFS, requiresTarget,
   type GameState, type Action, type GameEvent, type PlayerState,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE, START_MANA, MANA_MAX,
-  BOT_AVATAR, sanitizeAvatar,
+  BOT_AVATAR, sanitizeAvatar, GOLD_PER_MATCH, GOLD_WIN_BONUS,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
+import { me, accountFromToken } from '../auth/auth.js';
+import { recordMatch } from '../auth/store.js';
 
-interface JoinOptions { name?: string; avatar?: string; }
-interface CreateOptions { name?: string; title?: string; avatar?: string; }
+interface JoinOptions { name?: string; avatar?: string; token?: string; }
+interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; }
+// Resolved by onAuth from a verified token; onJoin trusts this over client-sent name.
+// `username` (when present) marks a logged-in account eligible for post-match gold.
+interface Auth { display: string; avatar: string; username: string | null; }
 
 /** Short, friendly, unambiguous room code (no 0/O/1/I) friends can type to join. */
 function makeCode(): string {
@@ -27,6 +32,9 @@ export class BattleRoom extends Room<BattleState> {
   private botCounter = 0;
   private turnTimer?: ReturnType<typeof setTimeout>;
   private cardCounter = 0;
+  // sessionId → account username, for awarding gold to logged-in humans when the match ends.
+  private accounts = new Map<string, string>();
+  private awarded = false;
 
   private ctx() {
     return { nextCardId: () => `card-${this.cardCounter++}`, now: Date.now() };
@@ -68,10 +76,24 @@ export class BattleRoom extends Room<BattleState> {
     });
   }
 
+  // Verify the account token (if any). A valid token pins the seat to the account's
+  // display name so a player can't spoof another account's name; guests (no token)
+  // get an empty Auth and fall through to the client-supplied name in onJoin. onAuth
+  // must return a truthy value or Colyseus rejects the join, so guests get {} not null.
+  onAuth(_client: Client, options: JoinOptions): Auth {
+    const profile = me(options.token);
+    if (profile) return { display: profile.display, avatar: profile.avatar, username: profile.username };
+    return { display: '', avatar: '', username: accountFromToken(options.token) };
+  }
+
   onJoin(client: Client, options: JoinOptions): void {
     if (this.gs.phase !== 'lobby') { client.leave(); return; }
+    const auth = client.auth as Auth;
+    if (auth.username) this.accounts.set(client.sessionId, auth.username);
+    const name = auth.display || (options.name ?? 'Player').slice(0, 16);
+    const avatar = auth.avatar || options.avatar;
     this.gs.players.push({
-      id: client.sessionId, name: (options.name ?? 'Player').slice(0, 16), avatar: sanitizeAvatar(options.avatar),
+      id: client.sessionId, name, avatar: sanitizeAvatar(avatar),
       connected: true, seat: this.gs.players.length,
       hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
       skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
@@ -226,7 +248,24 @@ export class BattleRoom extends Room<BattleState> {
     syncToSchema(this.state, this.gs);
     this.pushHands();
     if (this.gs.phase === 'lobby') this.refreshLobby(); // keep the browser headcount live; no churn mid-game
+    if (!this.awarded && events.some((e) => e.type === 'game_over')) {
+      this.awarded = true; // guard: award exactly once even if publish runs again
+      this.awardGold();
+    }
     if (events.length) this.sendEvents(events);
+  }
+
+  /** Grant post-match gold to every logged-in human seat (guests/bots earn nothing). The
+   *  last survivor gets a win bonus; the store persists the new balance + W/L for auto-login. */
+  private awardGold(): void {
+    const winnerId = this.gs.winnerId;
+    for (const p of this.gs.players) {
+      if (this.bots.has(p.id)) continue;
+      const username = this.accounts.get(p.id);
+      if (!username) continue; // guest
+      const won = p.id === winnerId;
+      recordMatch(username, won, GOLD_PER_MATCH + (won ? GOLD_WIN_BONUS : 0));
+    }
   }
 
   /**
