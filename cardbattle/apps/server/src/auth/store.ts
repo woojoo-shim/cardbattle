@@ -15,17 +15,23 @@ export interface UserRecord {
   wins: number;
   losses: number;
   gold: number;             // earned per match, spent in the shop
-  owned: string[];          // cosmetic ids the account has bought
+  owned: string[];          // cosmetic ids the account has bought (borders, titles, effects)
   equippedBorder: string;   // currently equipped card-border cosmetic id
+  equippedTitle: string;    // currently equipped name title id
+  equippedEffect: string;   // currently equipped card-play burst effect id
 }
 
-// Older records (pre-gold) may lack the economy fields; backfill sane defaults on read so
-// the rest of the code can assume they exist.
+// Older records (pre-gold / pre-title) may lack the economy/cosmetic fields; backfill sane
+// defaults on read so the rest of the code can assume they exist.
 function normalize(u: UserRecord): UserRecord {
   if (typeof u.gold !== 'number') u.gold = 0;
   if (!Array.isArray(u.owned)) u.owned = ['none'];
-  if (!u.owned.includes('none')) u.owned.unshift('none');
+  for (const def of ['none', 'title_none', 'fx_none']) {
+    if (!u.owned.includes(def)) u.owned.push(def);
+  }
   if (typeof u.equippedBorder !== 'string') u.equippedBorder = 'none';
+  if (typeof u.equippedTitle !== 'string') u.equippedTitle = 'title_none';
+  if (typeof u.equippedEffect !== 'string') u.equippedEffect = 'fx_none';
   return u;
 }
 
@@ -94,5 +100,21 @@ export function setEquippedBorder(username: string, id: string): void {
   const rec = getUser(username);
   if (!rec) return;
   rec.equippedBorder = id;
+  scheduleSave();
+}
+
+/** Equip an already-owned name title. */
+export function setEquippedTitle(username: string, id: string): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  rec.equippedTitle = id;
+  scheduleSave();
+}
+
+/** Equip an already-owned card-play burst effect. */
+export function setEquippedEffect(username: string, id: string): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  rec.equippedEffect = id;
   scheduleSave();
 }

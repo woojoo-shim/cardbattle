@@ -61,6 +61,13 @@
   82%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(0.96) rotate(0deg); opacity: 0; }
 }
+/* A cosmetic play-effect particle: bursts outward from the caster's seat (--dx/--dy = pixel
+   delta), tumbles a little, and fades. Several fire at once in a ring for a sparkle/petal spray. */
+@keyframes cb-burst {
+  0%   { transform: translate(-50%, -50%) scale(0.3) rotate(0deg); opacity: 0; }
+  22%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot, 90deg)); opacity: 0; }
+}
 /* Peek reveal toast popping into view. */
 @keyframes revealPop {
   0%   { transform: scale(0.8) translateY(10px); opacity: 0; }

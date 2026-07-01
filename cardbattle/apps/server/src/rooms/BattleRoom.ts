@@ -4,7 +4,7 @@ import {
   CARD_DEFS, requiresTarget,
   type GameState, type Action, type GameEvent, type PlayerState,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE, START_MANA, MANA_MAX,
-  BOT_AVATAR, sanitizeAvatar, GOLD_PER_MATCH, GOLD_WIN_BONUS,
+  BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
 import { me, accountFromToken } from '../auth/auth.js';
@@ -14,7 +14,15 @@ interface JoinOptions { name?: string; avatar?: string; token?: string; }
 interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; }
 // Resolved by onAuth from a verified token; onJoin trusts this over client-sent name.
 // `username` (when present) marks a logged-in account eligible for post-match gold.
-interface Auth { display: string; avatar: string; username: string | null; }
+// The equipped cosmetics ride along so the room can broadcast them to every player.
+interface Auth {
+  display: string; avatar: string; username: string | null;
+  border: string; title: string; effect: string;
+}
+
+/** A seat's equipped cosmetics, mirrored into the schema so all clients render them. */
+interface SeatCosmetics { border: string; title: string; effect: string; }
+const DEFAULT_COSMETICS: SeatCosmetics = { border: 'none', title: 'title_none', effect: 'fx_none' };
 
 /** Short, friendly, unambiguous room code (no 0/O/1/I) friends can type to join. */
 function makeCode(): string {
@@ -34,6 +42,8 @@ export class BattleRoom extends Room<BattleState> {
   private cardCounter = 0;
   // sessionId → account username, for awarding gold to logged-in humans when the match ends.
   private accounts = new Map<string, string>();
+  // seat id (sessionId or bot id) → equipped cosmetics, mirrored to the schema each publish.
+  private cosmetics = new Map<string, SeatCosmetics>();
   private awarded = false;
 
   private ctx() {
@@ -82,14 +92,18 @@ export class BattleRoom extends Room<BattleState> {
   // must return a truthy value or Colyseus rejects the join, so guests get {} not null.
   onAuth(_client: Client, options: JoinOptions): Auth {
     const profile = me(options.token);
-    if (profile) return { display: profile.display, avatar: profile.avatar, username: profile.username };
-    return { display: '', avatar: '', username: accountFromToken(options.token) };
+    if (profile) return {
+      display: profile.display, avatar: profile.avatar, username: profile.username,
+      border: profile.equippedBorder, title: profile.equippedTitle, effect: profile.equippedEffect,
+    };
+    return { display: '', avatar: '', username: accountFromToken(options.token), ...DEFAULT_COSMETICS };
   }
 
   onJoin(client: Client, options: JoinOptions): void {
     if (this.gs.phase !== 'lobby') { client.leave(); return; }
     const auth = client.auth as Auth;
     if (auth.username) this.accounts.set(client.sessionId, auth.username);
+    this.cosmetics.set(client.sessionId, { border: auth.border, title: auth.title, effect: auth.effect });
     const name = auth.display || (options.name ?? 'Player').slice(0, 16);
     const avatar = auth.avatar || options.avatar;
     this.gs.players.push({
@@ -246,6 +260,12 @@ export class BattleRoom extends Room<BattleState> {
    */
   private publish(events: GameEvent[] = []): void {
     syncToSchema(this.state, this.gs);
+    // Mirror each seat's equipped cosmetics onto its schema player so all clients render them.
+    // These live outside the pure GameState, so they're applied here rather than in syncToSchema.
+    for (const [id, ps] of this.state.players) {
+      const cos = this.cosmetics.get(id) ?? DEFAULT_COSMETICS;
+      ps.border = cos.border; ps.titleCosmetic = cos.title; ps.effectCosmetic = cos.effect;
+    }
     this.pushHands();
     if (this.gs.phase === 'lobby') this.refreshLobby(); // keep the browser headcount live; no churn mid-game
     if (!this.awarded && events.some((e) => e.type === 'game_over')) {
@@ -255,16 +275,20 @@ export class BattleRoom extends Room<BattleState> {
     if (events.length) this.sendEvents(events);
   }
 
-  /** Grant post-match gold to every logged-in human seat (guests/bots earn nothing). The
-   *  last survivor gets a win bonus; the store persists the new balance + W/L for auto-login. */
+  /** Grant post-match gold to every logged-in human seat (guests/bots earn nothing). Winning a
+   *  3+ player match pays GOLD_WIN; losing pays a GOLD_LOSS consolation. Winning a 1v1 (2 seats
+   *  total) pays nothing — anti-farm so you can't grind gold against a single bot/friend. The
+   *  store persists the new balance + W/L for auto-login. */
   private awardGold(): void {
     const winnerId = this.gs.winnerId;
+    const isOneVsOne = this.gs.players.length <= 2;
     for (const p of this.gs.players) {
       if (this.bots.has(p.id)) continue;
       const username = this.accounts.get(p.id);
       if (!username) continue; // guest
       const won = p.id === winnerId;
-      recordMatch(username, won, GOLD_PER_MATCH + (won ? GOLD_WIN_BONUS : 0));
+      const gold = won ? (isOneVsOne ? GOLD_1V1_WIN : GOLD_WIN) : GOLD_LOSS;
+      recordMatch(username, won, gold);
     }
   }
 
@@ -297,6 +321,7 @@ export class BattleRoom extends Room<BattleState> {
       if (idx >= 0) this.gs.players.splice(idx, 1);
       this.gs.players.forEach((pp, i) => { pp.seat = i; }); // reindex so a new joiner's seat can't collide
       this.ready.delete(client.sessionId);
+      this.cosmetics.delete(client.sessionId);
       this.publish();
       return;
     }

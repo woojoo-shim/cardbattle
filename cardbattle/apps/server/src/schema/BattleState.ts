@@ -19,6 +19,11 @@ export class PlayerSchema extends Schema {
   @type('number') handCount = 0;
   @type('number') skipTurns = 0;
   @type('number') mana = 0;
+  // Equipped cosmetics, mirrored from the room's cosmetics map so every client sees them.
+  // Set in BattleRoom.publish() (not here) since they live outside the pure GameState.
+  @type('string') border = 'none';
+  @type('string') titleCosmetic = 'title_none';
+  @type('string') effectCosmetic = 'fx_none';
   @type([CardInstanceSchema]) hand = new ArraySchema<CardInstanceSchema>();
 }
 

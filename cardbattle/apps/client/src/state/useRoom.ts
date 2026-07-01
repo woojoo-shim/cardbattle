@@ -15,6 +15,10 @@ export interface UiPlayer {
   handCount: number;
   skipTurns: number;
   mana: number;
+  /** Equipped cosmetics, broadcast from the server so every player sees them. */
+  border: string;
+  title: string;
+  effect: string;
 }
 
 export interface UiState {
@@ -64,6 +68,9 @@ function snapshot(state: any): UiState {
       handCount: p.handCount,
       skipTurns: p.skipTurns ?? 0,
       mana: p.mana ?? 0,
+      border: p.border ?? 'none',
+      title: p.titleCosmetic ?? 'title_none',
+      effect: p.effectCosmetic ?? 'fx_none',
     });
   });
   players.sort((a, b) => a.seat - b.seat);

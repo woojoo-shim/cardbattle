@@ -54,7 +54,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     const iWon = ui.winnerId === myId;
     return (
       <div style={endWrap}>
-        <VfxLayer events={events} />
+        <VfxLayer events={events} players={ui.players} />
         <h1 style={{ ...endTitle, color: iWon ? C.you : C.enemy }}>
           {iWon ? '승리!' : `${winner?.name ?? '???'} 승리`}
         </h1>
@@ -68,7 +68,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 
   return (
     <div style={screen}>
-      <VfxLayer events={events} />
+      <VfxLayer events={events} players={ui.players} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>

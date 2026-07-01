@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Element, GameEvent } from '@cardbattle/shared';
-import { CARD_DEFS } from '@cardbattle/shared';
+import { CARD_DEFS, EFFECT_BY_ID } from '@cardbattle/shared';
+import type { UiPlayer } from '../state/useRoom.js';
 
 interface Props {
   events: GameEvent[];
+  /** Every seat, so the caster's equipped play-effect can be looked up on card_played. */
+  players?: UiPlayer[];
 }
 
 type Fx =
@@ -11,7 +14,8 @@ type Fx =
   | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; icon: string; name: string; color: string }
-  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; icon: string; color: string; spin: boolean };
+  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; icon: string; color: string; spin: boolean }
+  | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; glyph: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time. */
 const IMPACT_DELAY = 0.34;
@@ -63,11 +67,31 @@ function castPulse(id: string): void {
  * and a floating ±number rises off the target. Heals pulse teal. The screen edge still
  * flashes crimson on damage. In S4 this is superseded by a pooled PixiJS particle canvas.
  */
-export function VfxLayer({ events }: Props) {
+/** Spawn a ring of cosmetic burst particles at a seat when its owner plays a card. */
+function burstParticles(spawn: () => number, cx: number, cy: number, glyph: string, color: string): Fx[] {
+  const out: Fx[] = [];
+  const count = 8;
+  for (let i = 0; i < count; i++) {
+    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+    const dist = 34 + Math.random() * 22;
+    out.push({
+      id: spawn(), kind: 'burst', x: cx, y: cy,
+      dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist - 10, // slight upward bias
+      rot: (Math.random() - 0.5) * 220, glyph, color,
+    });
+  }
+  return out;
+}
+
+export function VfxLayer({ events, players }: Props) {
   const flashRef = useRef<HTMLDivElement>(null);
   const seen = useRef(0);
   const nextId = useRef(1);
   const [fx, setFx] = useState<Fx[]>([]);
+  // Freshest players in a ref so the events effect (keyed only on `events`) reads current
+  // equipped effects without re-subscribing on every player-state tick.
+  const playersRef = useRef<UiPlayer[] | undefined>(players);
+  playersRef.current = players;
 
   useEffect(() => {
     const fresh = events.slice(seen.current);
@@ -97,6 +121,12 @@ export function VfxLayer({ events }: Props) {
           add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, icon: def.icon, name: def.name, color });
         }
         castPulse(e.playerId);
+        // Cosmetic play-effect: a purchasable burst pops at the caster's seat — visible to all.
+        const caster = playersRef.current?.find((p) => p.id === e.playerId);
+        const fxDef = caster ? EFFECT_BY_ID[caster.effect] : undefined;
+        if (fxDef && fxDef.glyph) {
+          add.push(...burstParticles(() => nextId.current++, src.x, src.y, fxDef.glyph, fxDef.color));
+        }
       } else if (e.type === 'damage_dealt') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
@@ -150,6 +180,8 @@ export function VfxLayer({ events }: Props) {
             <span key={f.id} style={hurlStyle(f)}>{f.icon}</span>
           ) : f.kind === 'ring' ? (
             <span key={f.id} style={ringStyle(f)} />
+          ) : f.kind === 'burst' ? (
+            <span key={f.id} style={burstStyle(f)}>{f.glyph}</span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
               <span style={{ fontSize: 20, lineHeight: 1 }}>{f.icon}</span>
@@ -188,6 +220,14 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
     animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .46s cubic-bezier(.3,.55,.4,1) forwards`,
+  } as React.CSSProperties;
+}
+function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, fontSize: 16, lineHeight: 1, zIndex: 62,
+    filter: `drop-shadow(0 0 6px ${f.color})`, willChange: 'transform, opacity',
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
+    animation: 'cb-burst .72s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
 }
 function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {

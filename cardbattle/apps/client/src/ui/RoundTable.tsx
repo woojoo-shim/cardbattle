@@ -1,4 +1,5 @@
 import type { UiState } from '../state/useRoom.js';
+import { COSMETIC_BY_ID, TITLE_BY_ID } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 
@@ -51,6 +52,10 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         const spotTop = sTop * 0.66 + CY * 0.34;
         const cards = Math.max(0, p.handCount);
         const spread = cards > 1 ? Math.min(11, 64 / (cards - 1)) : 0;
+        // The player's equipped border cosmetic paints the back of their face-down cards, so
+        // everyone at the table sees which frame they've equipped — not just its owner's hand.
+        const cos = COSMETIC_BY_ID[p.border];
+        const hasCos = !!cos && cos.id !== 'none';
         return (
           <div key={`tc-${p.id}`} style={{ ...tableFan, left: `${spotLeft}%`, top: `${spotTop}%` }}>
             {Array.from({ length: cards }).map((_, ci) => {
@@ -58,7 +63,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               return (
                 <span
                   key={ci}
-                  style={{ ...miniBack, left: off * spread, transform: `translate(-50%,-50%) rotate(${off * 4}deg)`, zIndex: ci }}
+                  style={{ ...miniBack, ...(hasCos ? miniBackCos(cos!) : null), left: off * spread, transform: `translate(-50%,-50%) rotate(${off * 4}deg)`, zIndex: ci }}
                 >
                   <span style={{ fontSize: 8, color: 'rgba(56,232,200,0.45)' }}>◈</span>
                 </span>
@@ -128,6 +133,12 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}>◈{p.mana}</span>}
             </div>
+            {(() => {
+              // A player's equipped title (칭호), shown to everyone under their name.
+              const t = TITLE_BY_ID[p.title];
+              if (!t || !t.text) return null;
+              return <span style={titleLine(t.color)}>{t.text}</span>;
+            })()}
           </div>
         );
       })}
@@ -194,6 +205,17 @@ const miniBack: React.CSSProperties = {
   background: 'linear-gradient(160deg,#1b2336,#101626)', border: `1px solid ${C.border}`,
   boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(56,232,200,0.06)',
 };
+/** Paint a mini face-down card's border/glow from an equipped border cosmetic. Gradient
+ *  borders use the backgroundImage+clip trick; solid colors set borderColor directly. */
+function miniBackCos(cos: { border: string; glow: string }): React.CSSProperties {
+  const grad = cos.border.startsWith('linear') || cos.border.startsWith('radial');
+  return {
+    boxShadow: `0 0 8px ${cos.glow}, 0 3px 8px rgba(0,0,0,0.5)`,
+    ...(grad
+      ? { border: '1.5px solid transparent', backgroundImage: `linear-gradient(160deg,#1b2336,#101626), ${cos.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
+      : { borderColor: cos.border }),
+  };
+}
 const shieldChip: React.CSSProperties = {
   position: 'absolute', top: -32, left: 0, transform: 'translateX(-50%)',
   padding: '1px 6px', borderRadius: 6, fontSize: 10, fontWeight: 800, fontFamily: mono,
@@ -237,3 +259,13 @@ const nm: React.CSSProperties = {
 };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
 const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#6fb6ff', whiteSpace: 'nowrap' };
+/** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */
+function titleLine(color: string): React.CSSProperties {
+  const grad = color.startsWith('linear') || color.startsWith('radial');
+  return {
+    fontSize: 9.5, fontWeight: 900, letterSpacing: 0.4, marginTop: -1, whiteSpace: 'nowrap',
+    ...(grad
+      ? { backgroundImage: color, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
+      : { color }),
+  };
+}

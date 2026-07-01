@@ -16,6 +16,8 @@ export interface Account {
   gold: number;
   owned: string[];
   equippedBorder: string;
+  equippedTitle: string;
+  equippedEffect: string;
 }
 
 export function getToken(): string | null {
