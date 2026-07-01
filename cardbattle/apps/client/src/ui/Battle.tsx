@@ -121,24 +121,31 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
-  // Heavy violet-abyss mood: a brooding indigo darkness with a low violet halo pooling around
-  // the table, edges sinking into near-black so the arena feels oppressive and enclosed. The
-  // single mint pendant lamp is the lone warm key light cutting through the cold dark.
+  // A single enclosed chamber: a dim back wall up top meets a lit stone floor below at a soft
+  // violet horizon seam, the pendant lamp's halo pooling on the table and spilling onto the
+  // floor. Corners sink into black so the room feels walled-in and oppressive.
   background:
-    'radial-gradient(66% 48% at 50% 50%, rgba(104,58,168,0.16), transparent 70%),' +
-    'radial-gradient(120% 88% at 50% 4%, #17111f 0%, #0b0812 46%, #050409 100%), #050409',
-  boxShadow: 'inset 0 0 260px 70px rgba(0,0,0,0.92)',
+    'radial-gradient(58% 40% at 50% 44%, rgba(120,72,190,0.16), transparent 68%),' +   // lamp halo on the table
+    'radial-gradient(46% 24% at 50% 73%, rgba(96,64,158,0.12), transparent 74%),' +     // light spilling on the floor
+    'linear-gradient(180deg, transparent 48%, rgba(150,110,230,0.05) 53%, transparent 60%),' + // wall/floor horizon seam
+    'linear-gradient(180deg, #150f21 0%, #100b19 47%, #0c0714 55%, #070510 100%),' +     // back wall → floor tonal split
+    '#070510',
+  boxShadow: 'inset 0 0 240px 80px rgba(0,0,0,0.92)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = { position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' };
+// The stone floor of the chamber: a tiled grid tilted back in perspective so its lines converge
+// toward the horizon, making the table read as sitting on a receding floor inside a real room.
 const fieldGrid: React.CSSProperties = {
-  position: 'absolute', inset: 0,
+  position: 'absolute', left: '50%', bottom: '-6%', width: '172%', height: '62%',
+  transform: 'translateX(-50%) perspective(560px) rotateX(62deg)',
+  transformOrigin: '50% 100%', pointerEvents: 'none',
   backgroundImage:
-    'linear-gradient(rgba(140,104,224,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(140,104,224,0.03) 1px, transparent 1px)',
-  backgroundSize: '40px 40px',
-  WebkitMaskImage: 'radial-gradient(52% 60% at 50% 48%, #000, transparent)',
-  maskImage: 'radial-gradient(52% 60% at 50% 48%, #000, transparent)',
+    'linear-gradient(rgba(150,110,230,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(150,110,230,0.05) 1px, transparent 1px)',
+  backgroundSize: '46px 46px',
+  WebkitMaskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',
+  maskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',
 };
 const fieldHint: React.CSSProperties = {
   position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
