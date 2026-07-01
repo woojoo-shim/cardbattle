@@ -5,10 +5,11 @@
 // name titles (칭호), and card-play burst effects — all visible to every player at the table.
 
 // Gold awarded when a match ends. Winning pays well; losing still pays a little so grinding
-// isn't punishing. A 1v1 win pays nothing to stop farming gold against a single bot/friend.
+// isn't punishing. A 1v1 win pays a reduced reward (below the full multiplayer win) to soften
+// farming gold against a single bot/friend while still always beating a loss.
 export const GOLD_WIN = 10;   // last survivor in a 3+ player match
 export const GOLD_LOSS = 3;   // consolation for everyone else who was seated
-export const GOLD_1V1_WIN = 0; // anti-farm: winning a 2-player match earns nothing
+export const GOLD_1V1_WIN = 5; // reduced win reward for a 2-player match (anti-farm, but > loss)
 
 /** A cosmetic card-border skin buyable with gold and equipped account-wide. */
 export interface Cosmetic {
