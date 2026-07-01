@@ -3,7 +3,7 @@ import {
   initGame, startGame, reduce, endTurn,
   CARD_DEFS, requiresTarget,
   type GameState, type Action, type GameEvent, type PlayerState,
-  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE,
+  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE, START_MANA, MANA_MAX,
   BOT_AVATAR, sanitizeAvatar,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
@@ -59,7 +59,7 @@ export class BattleRoom extends Room<BattleState> {
         id, name: `봇 ${this.botCounter}`, avatar: BOT_AVATAR,
         connected: true, seat: this.gs.players.length,
         hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-        skipTurns: 0, gamble: false, empower: 1,
+        skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
       });
       this.bots.add(id);
       this.ready.set(id, true); // bots are always ready
@@ -74,7 +74,7 @@ export class BattleRoom extends Room<BattleState> {
       id: client.sessionId, name: (options.name ?? 'Player').slice(0, 16), avatar: sanitizeAvatar(options.avatar),
       connected: true, seat: this.gs.players.length,
       hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-      skipTurns: 0, gamble: false, empower: 1,
+      skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
     });
     this.ready.set(client.sessionId, false);
     this.publish();
@@ -119,7 +119,8 @@ export class BattleRoom extends Room<BattleState> {
     }
   }
 
-  /** A bot plays one useful card (if any) then ends its turn. */
+  /** A bot plays useful cards one at a time — as many as its mana affords — then ends its turn.
+   *  Each play is spaced out so the table can watch a multi-card turn unfold, not a single burst. */
   private botTurn(): void {
     if (this.gs.phase !== 'playing') return;
     const cur = this.gs.turnOrder[this.gs.currentTurnIndex];
@@ -131,7 +132,8 @@ export class BattleRoom extends Room<BattleState> {
       const r = reduce(this.gs, action, this.ctx());
       this.gs = r.state; this.publish(r.events);
       if (this.gs.phase === 'ended') { this.clearTimer(); return; }
-      this.turnTimer = setTimeout(() => this.botEndTurn(), 700);
+      // Loop: keep taking affordable actions this same turn, then end when nothing's worth playing.
+      this.turnTimer = setTimeout(() => this.botTurn(), 700);
     } else {
       this.botEndTurn();
     }
@@ -144,22 +146,24 @@ export class BattleRoom extends Room<BattleState> {
     this.afterCurrent();
   }
 
-  /** Simple bot policy: heal when badly hurt, else play the first useful attack/utility card. */
+  /** Simple bot policy: heal when badly hurt, else play the first useful affordable card. Only
+   *  ever returns actions the bot can currently pay for — the caller loops until this yields null. */
   private chooseBotAction(bot: PlayerState): Action | null {
     const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
     const has = (card: { defId: string }, kind: string, target?: string) =>
       CARD_DEFS[card.defId]?.effects.some((e) => e.kind === kind && (target === undefined || (e as any).target === target)) ?? false;
+    const affordable = (card: { defId: string }) => (CARD_DEFS[card.defId]?.cost ?? 99) <= bot.mana;
 
     // 1. Badly hurt: prefer a pure self-heal (potion/대회복), not a targeted lifesteal.
     if (bot.hp < bot.maxHp * 0.5) {
-      const healCard = bot.hand.find((c) => has(c, 'heal') && !requiresTarget(CARD_DEFS[c.defId]!));
+      const healCard = bot.hand.find((c) => affordable(c) && has(c, 'heal') && !requiresTarget(CARD_DEFS[c.defId]!));
       if (healCard) return { type: 'play_card', cardInstanceId: healCard.id };
     }
 
-    // 2. Otherwise act on the first playable card in hand order.
+    // 2. Otherwise act on the first playable (affordable) card in hand order.
     for (const card of bot.hand) {
       const def = CARD_DEFS[card.defId];
-      if (!def) continue;
+      if (!def || !affordable(card)) continue;
       if (requiresTarget(def)) {
         if (opponents.length > 0) {
           const target = opponents[Math.floor(Math.random() * opponents.length)];
@@ -173,8 +177,13 @@ export class BattleRoom extends Room<BattleState> {
       }
       if (has(card, 'heal') && bot.hp < bot.maxHp) return { type: 'play_card', cardInstanceId: card.id };
       if (has(card, 'shield') && bot.defense < 8) return { type: 'play_card', cardInstanceId: card.id };
-      // '역류'(reverse) has no direct value to the bot's heuristic — it simply ends its turn.
+      // '역류'(reverse) has no direct value to the bot's heuristic — it simply skips it.
     }
+
+    // 3. Nothing better to do this turn: bank mana with '충전' if it's still worth it (not near cap).
+    const chargeCard = bot.hand.find((c) => affordable(c) && has(c, 'mana') && bot.mana <= MANA_MAX - 3);
+    if (chargeCard) return { type: 'play_card', cardInstanceId: chargeCard.id };
+
     return null;
   }
 

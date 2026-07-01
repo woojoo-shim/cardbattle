@@ -126,6 +126,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                 {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? ' · 💤' : ''}
               </span>
               <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
+              {p.alive && <span style={manaVal}>◈{p.mana}</span>}
             </div>
           </div>
         );
@@ -235,3 +236,4 @@ const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
+const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#6fb6ff', whiteSpace: 'nowrap' };

@@ -14,6 +14,7 @@ export interface UiPlayer {
   alive: boolean;
   handCount: number;
   skipTurns: number;
+  mana: number;
 }
 
 export interface UiState {
@@ -62,6 +63,7 @@ function snapshot(state: any): UiState {
       alive: p.alive,
       handCount: p.handCount,
       skipTurns: p.skipTurns ?? 0,
+      mana: p.mana ?? 0,
     });
   });
   players.sort((a, b) => a.seat - b.seat);

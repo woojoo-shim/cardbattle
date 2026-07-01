@@ -36,6 +36,8 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
     const card = actor.hand[cardIdx];
     const def = CARD_DEFS[card.defId];
     if (!def) return { state: input, events: [] };
+    // can't afford it: not enough banked mana for this card's cost
+    if (actor.mana < def.cost) return { state: input, events: [] };
     // target validation for 'chosen' damage
     if (requiresTarget(def)) {
       const t = input.players.find((p) => p.id === action.targetId);
@@ -47,6 +49,7 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
     const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
     const sActor = state.players.find((p) => p.id === actorId)!;
     sActor.hand.splice(cardIdx, 1); // consume
+    sActor.mana -= def.cost;        // pay the cost BEFORE effects (so '충전' nets correctly)
     emit({ type: 'card_played', playerId: actorId, defId: def.id, targetId: action.targetId });
 
     const effCtx: EffectCtx = {

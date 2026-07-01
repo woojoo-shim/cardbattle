@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { initGame, startGame, endTurn } from '../engine/loop.js';
 import type { ReduceCtx } from '../types.js';
-import { START_HAND, START_HP, HAND_TARGET, TURN_SECONDS } from '../constants.js';
+import { START_HAND, START_HP, HAND_TARGET, DRAW_PER_TURN, TURN_SECONDS } from '../constants.js';
 
 let counter = 0;
 const ctx = (): ReduceCtx => ({ nextCardId: () => `c${counter++}`, now: 10000 });
@@ -18,7 +18,8 @@ describe('loop', () => {
     counter = 0;
     const s = startGame(initGame([{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }]), ctx());
     expect(s.state.phase).toBe('playing');
-    expect(s.state.players[0].hand).toHaveLength(START_HAND);
+    // player a opens the first turn, so beginTurn deals them the per-turn draw on top of the opening hand
+    expect(s.state.players[0].hand).toHaveLength(START_HAND + DRAW_PER_TURN);
     expect(s.state.players[1].hand).toHaveLength(START_HAND);
     expect(s.state.turnDeadline).toBe(10000 + TURN_SECONDS * 1000);
     expect(s.events.some((e) => e.type === 'turn_started' && e.playerId === 'a')).toBe(true);
@@ -44,7 +45,8 @@ describe('loop', () => {
     const afterLap = endTurn(afterB.state, ctx()); // b -> a, seam crossed -> lap
     expect(afterLap.events.some((e) => e.type === 'round_advanced')).toBe(true);
     expect(afterLap.state.roundCount).toBe(2);
-    expect(afterLap.state.players[0].hand).toHaveLength(HAND_TARGET);
+    // a lands on this new turn: refilled to the target floor, then draws the per-turn card on top
+    expect(afterLap.state.players[0].hand).toHaveLength(HAND_TARGET + DRAW_PER_TURN);
     expect(afterLap.state.players[1].hand).toHaveLength(HAND_TARGET);
   });
 

@@ -18,6 +18,7 @@ export class PlayerSchema extends Schema {
   @type('boolean') alive = true;
   @type('number') handCount = 0;
   @type('number') skipTurns = 0;
+  @type('number') mana = 0;
   @type([CardInstanceSchema]) hand = new ArraySchema<CardInstanceSchema>();
 }
 
@@ -64,5 +65,6 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
     ps.hp = p.hp; ps.maxHp = p.maxHp; ps.defense = p.defense; ps.alive = p.alive;
     ps.handCount = p.hand.length;
     ps.skipTurns = p.skipTurns;
+    ps.mana = p.mana;
   }
 }

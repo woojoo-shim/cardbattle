@@ -3,7 +3,7 @@ import { reduce } from '../engine/reducer.js';
 import type { GameState, PlayerState, ReduceCtx } from '../types.js';
 
 function player(id: string, seat: number, over: Partial<PlayerState> = {}): PlayerState {
-  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], buffs: [], alive: true, skipTurns: 0, gamble: false, empower: 1, ...over };
+  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], buffs: [], alive: true, skipTurns: 0, gamble: false, empower: 1, mana: 20, ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
   return { phase: 'playing', players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
@@ -123,6 +123,32 @@ describe('reduce: play_card', () => {
     // the empowered sword now deals round(10 * 1.5) = 15
     const r2 = reduce(r1.state, { type: 'play_card', cardInstanceId: 'c2', targetId: 'b' }, ctx);
     expect(r2.state.players[1].hp).toBe(25);       // 40 - 15
+  });
+
+  it('spends mana equal to the card cost', () => {
+    const s = game();
+    s.players[0].mana = 5;
+    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // cost 2
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[0].mana).toBe(3);
+  });
+
+  it('rejects a card the actor cannot afford', () => {
+    const s = game();
+    s.players[0].mana = 1;
+    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // cost 2 > 1
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(events).toHaveLength(0);
+    expect(state).toEqual(s);
+  });
+
+  it('charge nets +2 mana (cost 1, grants 3) and emits mana_gained', () => {
+    const s = game();
+    s.players[0].mana = 5;
+    s.players[0].hand = [{ id: 'c1', defId: 'charge' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].mana).toBe(7); // 5 - 1 + 3
+    expect(events).toContainEqual(expect.objectContaining({ type: 'mana_gained', playerId: 'a', manaAfter: 7 }));
   });
 
   it('gamble makes the next attack either double or whiff (and emits a resolution)', () => {

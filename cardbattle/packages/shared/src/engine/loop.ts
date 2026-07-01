@@ -1,5 +1,5 @@
 import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
-import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, TURN_SECONDS, DEFAULT_AVATAR } from '../constants.js';
+import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, HAND_CAP, TURN_SECONDS, DEFAULT_AVATAR, START_MANA, MANA_MAX, manaRegen } from '../constants.js';
 import { ALL_DEFS } from '../cards/defs.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
@@ -9,13 +9,14 @@ export function initGame(seats: { id: string; name: string }[]): GameState {
     id: s.id, name: s.name, avatar: DEFAULT_AVATAR, connected: true, seat: i,
     hp: START_HP, maxHp: START_HP, defense: START_DEFENSE,
     hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-    skipTurns: 0, gamble: false, empower: 1,
+    skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
   }));
   return { phase: 'lobby', players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
 }
 
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
 function drawCard(state: GameState, player: PlayerState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
+  if (player.hand.length >= HAND_CAP) return; // a hand never overflows past the cap
   const pick = weightedPick(state.rngSeed, ALL_DEFS, (d) => d.drawWeight);
   state.rngSeed = pick.seed;
   const inst = { id: ctx.nextCardId(), defId: pick.item.id };
@@ -43,6 +44,10 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
   const cur = state.players.find((p) => p.id === state.turnOrder[state.currentTurnIndex]);
   if (!cur) return;
   state.turnDeadline = ctx.now + TURN_SECONDS * 1000;
+  // Refill mana by the round-scaled amount (ramps up as the match goes longer), then draw.
+  const regained = manaRegen(state.roundCount);
+  cur.mana = Math.min(MANA_MAX, cur.mana + regained);
+  emit({ type: 'mana_gained', playerId: cur.id, amount: regained, manaAfter: cur.mana });
   for (let i = 0; i < DRAW_PER_TURN; i++) drawCard(state, cur, ctx, emit);
   emit({ type: 'turn_started', playerId: cur.id, deadline: state.turnDeadline });
 }

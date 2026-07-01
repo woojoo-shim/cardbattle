@@ -1,5 +1,6 @@
 import type { Effect, GameEvent, GameState, PlayerState, Element } from '../types.js';
 import { weightedPick } from '../engine/rng.js';
+import { MANA_MAX } from '../constants.js';
 
 export interface EffectCtx {
   state: GameState;
@@ -99,5 +100,9 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     const [stolen] = t.hand.splice(idx, 1);
     ctx.source.hand.push(stolen); // the card moves into my hand; its identity is only revealed to me via hand sync
     ctx.emit({ type: 'card_stolen', thiefId: ctx.source.id, targetId: t.id });
+  },
+  mana: (effect: Extract<Effect, { kind: 'mana' }>, ctx) => {
+    ctx.source.mana = Math.min(MANA_MAX, ctx.source.mana + effect.amount);
+    ctx.emit({ type: 'mana_gained', playerId: ctx.source.id, amount: effect.amount, manaAfter: ctx.source.mana });
   },
 };

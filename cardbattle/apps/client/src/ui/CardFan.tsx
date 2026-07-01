@@ -8,6 +8,7 @@ interface Props {
   hand: CardInstance[];
   enabled: boolean;
   pendingId: string | null;
+  mana: number;
   onPlay: (card: CardInstance) => void;
 }
 
@@ -20,7 +21,7 @@ const IS_TOUCH =
 
 /** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
  * and the selected (pending-target) card lifts higher with a teal outline. */
-export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
+export function CardFan({ hand, enabled, pendingId, mana, onPlay }: Props) {
   const [hover, setHover] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const n = hand.length;
@@ -49,8 +50,12 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
         const isSkip = def.effects.some((e) => e.kind === 'skip');
         const isGamble = def.effects.some((e) => e.kind === 'gamble');
         const isSacrifice = def.effects.some((e) => e.kind === 'selfskip');
+        const isMana = def.effects.some((e) => e.kind === 'mana');
         const dmgValue = def.effects.reduce((m, e) => (e.kind === 'damage' ? Math.max(m, e.amount) : m), 0);
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
+        // Affordability: on my turn, cards I can't currently pay for are dimmed and unclickable.
+        const affordable = def.cost <= mana;
+        const playable = enabled && affordable;
         const pill = isReverse
           ? { style: revVal, label: '↔' }
           : isPeek
@@ -63,6 +68,8 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
           ? { style: gambleVal, label: '🎲' }
           : isSacrifice
           ? { style: sacrificeVal, label: '🔥' }
+          : isMana
+          ? { style: manaValPill, label: `+${value}` }
           : hasDamage
           ? { style: dmgVal, label: `${dmgValue}` }
           : hasShield
@@ -84,6 +91,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
               if (!enabled) return;
               // On touch, the first tap only previews the card; the second tap commits.
               if (IS_TOUCH && preview !== c.id) { setPreview(c.id); return; }
+              if (!affordable) return; // can't pay for it — reads fine, just won't play
               setPreview(null);
               onPlay(c);
             }}
@@ -91,9 +99,9 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
               ...card,
               transform,
               zIndex: z,
-              cursor: enabled ? 'pointer' : 'default',
-              opacity: enabled ? 1 : 0.5,
-              filter: enabled ? 'none' : 'grayscale(0.3)',
+              cursor: !enabled ? 'default' : affordable ? 'pointer' : 'not-allowed',
+              opacity: !enabled ? 0.5 : affordable ? 1 : 0.42,
+              filter: playable ? 'none' : 'grayscale(0.4)',
               borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
               boxShadow: isPending
                 ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(56,232,200,0.3)`
@@ -109,6 +117,7 @@ export function CardFan({ hand, enabled, pendingId, onPlay }: Props) {
                 {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
               </div>
             )}
+            <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
             <CardArt id={def.id} size="clamp(48px, 5vw, 72px)" />
             <div style={cname}>{def.name}</div>
             <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
@@ -134,6 +143,19 @@ const card: React.CSSProperties = {
 };
 const cname: React.CSSProperties = { fontSize: 'clamp(13px, 1.25vw, 17px)', fontWeight: 700 };
 const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
+const manaValPill: React.CSSProperties = { color: '#bfe0ff', background: 'rgba(90,160,255,0.18)', border: '1px solid #2a4a80' };
+// Mana cost, top-left. Turns red when the player can't currently afford it (on their turn).
+const costBadge: React.CSSProperties = {
+  position: 'absolute', top: 6, left: 6, minWidth: 20, height: 20, padding: '0 5px',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
+  fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', fontWeight: 800, borderRadius: 7, zIndex: 3,
+  color: '#cfe6ff', background: 'linear-gradient(160deg, rgba(30,58,110,0.95), rgba(16,30,60,0.95))',
+  border: '1px solid #3a6bb0', boxShadow: '0 2px 8px rgba(40,90,190,0.4)',
+};
+const costBadgeShort: React.CSSProperties = {
+  color: '#ffc2cf', background: 'linear-gradient(160deg, rgba(90,30,48,0.95), rgba(50,16,26,0.95))',
+  border: '1px solid #b0466a', boxShadow: '0 2px 8px rgba(190,50,90,0.4)',
+};
 const dmgVal: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,59,107,0.16)', border: '1px solid #5a2436' };
 const healVal: React.CSSProperties = { color: '#bff6ec', background: 'rgba(56,232,200,0.16)', border: '1px solid #1f5a4c' };
 const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127,182,255,0.16)', border: '1px solid #2a4870' };

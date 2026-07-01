@@ -26,6 +26,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
+  const myMana = ui.players.find((p) => p.id === myId)?.mana ?? 0;
 
   // Clear a half-finished target selection whenever the turn passes away from me.
   useEffect(() => { if (!isMyTurn) setPending(null); }, [isMyTurn]);
@@ -79,7 +80,14 @@ export function Battle({ ui, myId, hand, events, error, send, onExit }: Props) {
         {error && <div style={errToast}>{error.message}</div>}
       </div>
       <div style={handRow}>
-        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} onPlay={playCard} />
+        <div style={manaDock}>
+          <span style={{ ...manaOrb, opacity: isMyTurn ? 1 : 0.6 }}>◈</span>
+          <div style={manaText}>
+            <span style={manaNum}>{myMana}</span>
+            <span style={manaLabel}>MANA</span>
+          </div>
+        </div>
+        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} />
         {isMyTurn && (
           <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); }}>
             턴 종료 ▶
@@ -122,6 +130,22 @@ const errToast: React.CSSProperties = {
   padding: '8px 16px', background: 'rgba(255,59,107,0.2)', border: `1px solid ${C.enemy}`,
   borderRadius: 8, color: '#ff9cba', fontSize: 13, zIndex: 17,
 };
+// My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). Sized in clamp units so it
+// keeps proportion on iPad. Always visible; the orb dims a touch when it isn't my turn.
+const manaDock: React.CSSProperties = {
+  position: 'absolute', bottom: 30, left: 32, zIndex: 16,
+  display: 'flex', alignItems: 'center', gap: 10,
+  padding: 'clamp(8px, 1vw, 12px) clamp(12px, 1.4vw, 18px)', borderRadius: 12,
+  background: 'linear-gradient(180deg, rgba(20,30,54,0.92), rgba(12,18,34,0.92))',
+  border: '1px solid #2a4a80', boxShadow: '0 8px 20px rgba(30,70,150,0.3)',
+};
+const manaOrb: React.CSSProperties = {
+  fontSize: 'clamp(20px, 2.2vw, 30px)', color: '#6fb6ff',
+  textShadow: '0 0 14px rgba(90,160,255,0.8)', transition: 'opacity .3s ease',
+};
+const manaText: React.CSSProperties = { display: 'flex', flexDirection: 'column', lineHeight: 1 };
+const manaNum: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(20px, 2.2vw, 30px)', fontWeight: 900, color: '#cfe6ff' };
+const manaLabel: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(8px, 0.8vw, 10px)', letterSpacing: 2, color: C.faint, marginTop: 2 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
   color: '#04231b', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,

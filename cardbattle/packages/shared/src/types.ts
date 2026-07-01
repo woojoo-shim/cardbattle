@@ -14,7 +14,8 @@ export type Effect =
   | { kind: 'gamble' }     // the caster's next attack this turn is doubled or nullified (50/50)
   | { kind: 'empower'; amount: number } // multiply the caster's damage this turn (e.g. 1.5x)
   | { kind: 'selfskip' }   // the caster forfeits their own next turn
-  | { kind: 'steal' };     // take one random card from a chosen player's hand into mine
+  | { kind: 'steal' }      // take one random card from a chosen player's hand into mine
+  | { kind: 'mana'; amount: number }; // refill the caster's mana (the '충전' ramp card)
 
 export interface CardDef {
   id: string;
@@ -51,6 +52,7 @@ export interface PlayerState {
   skipTurns: number;         // pending turns to skip (from '결박' / '희생'); decremented on arrival
   gamble: boolean;           // a '도박' is armed: the next attack this turn is doubled or whiffs
   empower: number;           // damage multiplier for this turn (1 = none, 1.5 = '희생')
+  mana: number;              // bankable resource spent to play cards; refills (ramping) each turn
 }
 
 export interface GameState {
@@ -86,6 +88,7 @@ export type GameEvent =
   | { type: 'card_stolen'; thiefId: string; targetId: string } // PUBLIC: identity stays hidden; thief learns it via hand sync
   | { type: 'turn_skipped'; playerId: string }
   | { type: 'gamble_resolved'; playerId: string; doubled: boolean }
+  | { type: 'mana_gained'; playerId: string; amount: number; manaAfter: number }
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 
