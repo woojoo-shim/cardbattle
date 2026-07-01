@@ -42,7 +42,7 @@ export function App() {
 }
 
 function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: () => void; borderCosmetic?: string }) {
-  const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote } = useRoom(connect);
+  const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote, reward } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
   if (!ui) {
@@ -51,7 +51,7 @@ function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: (
   if (ui.phase === 'lobby') {
     return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} />;
   }
-  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} />;
+  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} />;
 }
 
 /** A fanned hand of real game cards, dealt across the void behind the title. */

@@ -77,13 +77,15 @@ export function upsertUser(rec: UserRecord): void {
   scheduleSave();
 }
 
-/** Record a finished match's outcome + gold for one account. Mutates in place, persists. */
-export function recordMatch(username: string, won: boolean, gold: number): void {
+/** Record a finished match's outcome + gold for one account. Mutates in place, persists.
+ *  Returns the account's new gold balance (or null if the account no longer exists). */
+export function recordMatch(username: string, won: boolean, gold: number): number | null {
   const rec = getUser(username);
-  if (!rec) return;
+  if (!rec) return null;
   if (won) rec.wins += 1; else rec.losses += 1;
   rec.gold += gold;
   scheduleSave();
+  return rec.gold;
 }
 
 /** Buy a cosmetic: deduct gold and grant ownership. Caller validates price/ownership. */

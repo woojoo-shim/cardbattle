@@ -313,10 +313,13 @@ export class BattleRoom extends Room<BattleState> {
     for (const p of this.gs.players) {
       if (this.bots.has(p.id)) continue;
       const username = this.accounts.get(p.id);
-      if (!username) continue; // guest
       const won = p.id === winnerId;
       const gold = won ? (isOneVsOne ? GOLD_1V1_WIN : GOLD_WIN) : GOLD_LOSS;
-      recordMatch(username, won, gold);
+      // Guests earn nothing but still get a reward card (0 gold) so the end screen reads the same.
+      const balance = username ? recordMatch(username, won, gold) : null;
+      const earned = username ? gold : 0;
+      const client = this.clients.find((c) => c.sessionId === p.id);
+      client?.send('reward', { earned, balance, won, guest: !username });
     }
   }
 

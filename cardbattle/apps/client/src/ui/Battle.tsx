@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, requiresTarget, resolveMode } from '@cardbattle/shared';
-import type { UiState, RoomError, LiveEmote } from '../state/useRoom.js';
+import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
@@ -27,9 +27,10 @@ interface Props {
   borderCosmetic?: string;
   emotes: LiveEmote[];
   sendEmote: (id: string) => void;
+  reward?: Reward | null;
 }
 
-export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote }: Props) {
+export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote, reward }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
@@ -66,6 +67,19 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           {iWon ? '승리!' : `${winner?.name ?? '???'} 승리`}
         </h1>
         <p style={endSub}>{iWon ? '최후의 생존자가 되었습니다.' : '다음 기회에…'}</p>
+        {reward && !reward.guest && (
+          <div style={rewardPill}>
+            <Icon name="coin" size={18} />
+            <span style={rewardEarned}>+{reward.earned}</span>
+            <span style={rewardLabel}>골드</span>
+            {reward.balance != null && (
+              <span style={rewardBalance}>보유 {reward.balance}</span>
+            )}
+          </div>
+        )}
+        {reward && reward.guest && (
+          <p style={rewardGuest}>게스트는 골드를 얻지 못합니다. 로그인하면 골드가 적립됩니다.</p>
+        )}
         <button className="cb-enter" style={returnBtn} onClick={onExit}>
           로비로 돌아가기&nbsp;<Icon name="arrowRight" size={16} />
         </button>
@@ -157,6 +171,16 @@ const endWrap: React.CSSProperties = {
 };
 const endTitle: React.CSSProperties = { margin: 0, fontSize: 64, fontWeight: 900, letterSpacing: 4, textShadow: '0 0 50px currentColor' };
 const endSub: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 18 };
+const rewardPill: React.CSSProperties = {
+  marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 8,
+  padding: '10px 18px', borderRadius: 999, fontFamily: mono,
+  color: '#ffd66b', background: 'rgba(255,196,64,0.10)',
+  border: '1px solid rgba(255,196,64,0.35)', boxShadow: '0 0 22px rgba(255,196,64,0.20)',
+};
+const rewardEarned: React.CSSProperties = { fontSize: 22, fontWeight: 900 };
+const rewardLabel: React.CSSProperties = { fontSize: 14, opacity: 0.8 };
+const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fontSize: 13, color: C.dim, borderLeft: '1px solid rgba(255,255,255,0.14)' };
+const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
 const returnBtn: React.CSSProperties = {
   marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 800, letterSpacing: 0.5,
   color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
