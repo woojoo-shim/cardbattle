@@ -49,6 +49,7 @@ export interface UseRoom {
   send: (action: Action) => void;
   setReady: (ready: boolean) => void;
   addBot: () => void;
+  removeBot: (botId?: string) => void;
 }
 
 /** Build a plain UiState snapshot from the decoded Colyseus schema. */
@@ -129,6 +130,7 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const send = (action: Action) => connRef.current?.room.send('action', action);
   const setReady = (ready: boolean) => connRef.current?.room.send('setReady', { ready });
   const addBot = () => connRef.current?.room.send('addBot');
+  const removeBot = (botId?: string) => connRef.current?.room.send('removeBot', botId ? { botId } : {});
 
-  return { conn, ui, hand, events, error, send, setReady, addBot };
+  return { conn, ui, hand, events, error, send, setReady, addBot, removeBot };
 }

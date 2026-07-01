@@ -11,7 +11,7 @@ import { me, accountFromToken } from '../auth/auth.js';
 import { recordMatch } from '../auth/store.js';
 
 interface JoinOptions { name?: string; avatar?: string; token?: string; }
-interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; mode?: GameModeId; }
+interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; mode?: GameModeId; private?: boolean; }
 // Resolved by onAuth from a verified token; onJoin trusts this over client-sent name.
 // `username` (when present) marks a logged-in account eligible for post-match gold.
 // The equipped cosmetics ride along so the room can broadcast them to every player.
@@ -38,6 +38,7 @@ export class BattleRoom extends Room<BattleState> {
   private ready = new Map<string, boolean>();
   private bots = new Set<string>();
   private botCounter = 0;
+  private unlisted = false; // a private room: hidden from the browser, joinable only by code
   private turnTimer?: ReturnType<typeof setTimeout>;
   private cardCounter = 0;
   // sessionId → account username, for awarding gold to logged-in humans when the match ends.
@@ -54,6 +55,7 @@ export class BattleRoom extends Room<BattleState> {
     this.setState(new BattleState());
     const mode = resolveMode(options.mode).id;
     this.gs = initGame([], mode); // empty; players added on join (lobby)
+    this.unlisted = !!options.private;
 
     // Custom-room identity: a typeable code for friends + a title shown in the browser.
     this.state.code = makeCode();
@@ -80,6 +82,20 @@ export class BattleRoom extends Room<BattleState> {
       this.ready.set(id, true); // bots are always ready
       this.publish();
       if (this.allReady()) this.begin();
+    });
+
+    this.onMessage('removeBot', (_client, msg: { botId?: string } = {}) => {
+      if (this.gs.phase !== 'lobby') return;
+      // Remove the named bot, or the most-recently-added one if no id is given.
+      const botId = msg?.botId && this.bots.has(msg.botId) ? msg.botId : [...this.bots].pop();
+      if (!botId) return;
+      const idx = this.gs.players.findIndex((p) => p.id === botId);
+      if (idx < 0) return;
+      this.gs.players.splice(idx, 1);
+      this.gs.players.forEach((p, i) => { p.seat = i; }); // reindex seats after removal
+      this.bots.delete(botId);
+      this.ready.delete(botId);
+      this.publish();
     });
   }
 
@@ -114,6 +130,7 @@ export class BattleRoom extends Room<BattleState> {
       title: this.state.title,
       code: this.state.code,
       mode: this.gs.mode,
+      unlisted: this.unlisted,
       players: this.gs.players.length,
       started: this.gs.phase !== 'lobby',
     }).then(() => updateLobby(this)).catch(() => {});

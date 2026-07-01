@@ -19,7 +19,7 @@ export interface RoomInfo {
   roomId: string;
   clients: number;
   maxClients: number;
-  metadata: { title?: string; code?: string; mode?: GameModeId; players?: number; started?: boolean };
+  metadata: { title?: string; code?: string; mode?: GameModeId; players?: number; started?: boolean; unlisted?: boolean };
 }
 
 const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId });
@@ -34,9 +34,10 @@ export async function quickPlay(name: string, avatar: string): Promise<BattleCon
   return wrap(room);
 }
 
-/** Host a brand-new named room; the returned room carries its own code (in state). */
-export async function createRoom(name: string, title: string, avatar: string, mode: GameModeId): Promise<BattleConnection> {
-  const room = await new Client(endpoint).create('battle', { name, title, avatar, mode, ...auth() });
+/** Host a brand-new named room; the returned room carries its own code (in state).
+ * A private room is hidden from the browser list — it's joinable only via its code. */
+export async function createRoom(name: string, title: string, avatar: string, mode: GameModeId, isPrivate: boolean): Promise<BattleConnection> {
+  const room = await new Client(endpoint).create('battle', { name, title, avatar, mode, private: isPrivate, ...auth() });
   return wrap(room);
 }
 

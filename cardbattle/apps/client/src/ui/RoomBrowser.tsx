@@ -23,6 +23,8 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
   const [mode, setMode] = useState<GameModeId>(DEFAULT_MODE);
+  const [showModes, setShowModes] = useState(false); // special modes stay collapsed (standard) by default
+  const [isPrivate, setIsPrivate] = useState(false); // public rooms are listed; private ones join-by-code only
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
@@ -42,10 +44,12 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
   useEffect(() => { fetchMe().then((a) => { if (a) onAccount(a); }); }, []);
 
   const open = rooms
-    .filter((r) => !r.metadata?.started && headcount(r) < r.maxClients)
+    .filter((r) => !r.metadata?.started && !r.metadata?.unlisted && headcount(r) < r.maxClients)
     .sort((a, b) => (a.metadata?.title ?? '').localeCompare(b.metadata?.title ?? ''));
 
-  const create = () => onPick(() => createRoom(name, title.trim(), avatar, mode));
+  // Collapsing the special-mode picker snaps the room back to the standard ruleset.
+  const toggleModes = () => setShowModes((v) => { if (v) setMode(DEFAULT_MODE); return !v; });
+  const create = () => onPick(() => createRoom(name, title.trim(), avatar, mode, isPrivate));
   const join = (roomId: string) => onPick(() => joinRoomById(roomId, name, avatar));
   const quick = () => onPick(() => quickPlay(name, avatar));
   const joinByCode = () => {
@@ -98,23 +102,40 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && create()}
           />
-          <div style={modeGrid}>
-            {MODE_LIST.map((m) => {
-              const on = m.id === mode;
-              return (
-                <button
-                  key={m.id}
-                  style={{ ...modeCard, ...(on ? modeCardOn : null) }}
-                  onClick={() => setMode(m.id)}
-                  title={m.desc}
-                >
-                  <span style={modeIcon}>{m.icon}</span>
-                  <span style={modeName}>{m.name}</span>
-                  <span style={modeTag}>{m.tagline}</span>
-                </button>
-              );
-            })}
+          <div style={visRow}>
+            <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(false)}>
+              🌐 공개
+            </button>
+            <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(true)}>
+              🔒 비공개
+            </button>
           </div>
+          <p style={visHint}>
+            {isPrivate ? '목록에 표시되지 않고, 코드로만 입장할 수 있습니다.' : '누구나 방 목록에서 볼 수 있습니다.'}
+          </p>
+
+          <button style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
+            ✨ 특별 모드 {showModes ? '접기 ▲' : '선택하기 ▼'}
+          </button>
+          {showModes && (
+            <div style={modeGrid}>
+              {MODE_LIST.map((m) => {
+                const on = m.id === mode;
+                return (
+                  <button
+                    key={m.id}
+                    style={{ ...modeCard, ...(on ? modeCardOn : null) }}
+                    onClick={() => setMode(m.id)}
+                    title={m.desc}
+                  >
+                    <span style={modeIcon}>{m.icon}</span>
+                    <span style={modeName}>{m.name}</span>
+                    <span style={modeTag}>{m.tagline}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <button style={primary} onClick={create}>+ 방 만들기</button>
 
           <div style={sep}><span>또는 코드로 입장</span></div>
@@ -172,6 +193,22 @@ const roomRow: React.CSSProperties = {
 };
 const rTitle: React.CSSProperties = { fontWeight: 700, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 7 };
 const rMode: React.CSSProperties = { fontSize: 15, flexShrink: 0 };
+const visRow: React.CSSProperties = { display: 'flex', gap: 8 };
+const visBtn: React.CSSProperties = {
+  flex: 1, padding: '11px 12px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'pointer',
+  borderRadius: 10, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.25)', fontFamily: sans,
+  transition: 'border-color .12s, background .12s, color .12s',
+};
+const visBtnOn: React.CSSProperties = {
+  color: C.text, border: '1px solid #7b5cff', background: 'rgba(123,92,255,0.14)', boxShadow: '0 0 14px rgba(123,92,255,0.28)',
+};
+const visHint: React.CSSProperties = { margin: '-4px 0 2px', color: C.faint, fontSize: 12, lineHeight: 1.3 };
+const modeToggle: React.CSSProperties = {
+  padding: '11px 14px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'pointer',
+  borderRadius: 10, border: `1px dashed ${C.borderHi}`, background: 'rgba(255,255,255,0.03)', fontFamily: sans,
+  transition: 'border-color .12s, color .12s, background .12s',
+};
+const modeToggleOn: React.CSSProperties = { color: '#5af0d3', border: '1px solid rgba(56,232,200,0.5)', background: 'rgba(56,232,200,0.06)' };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',

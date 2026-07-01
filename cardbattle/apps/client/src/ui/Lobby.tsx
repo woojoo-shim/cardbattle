@@ -8,9 +8,10 @@ interface Props {
   myId: string;
   onReady: (ready: boolean) => void;
   onAddBot: () => void;
+  onRemoveBot: (botId?: string) => void;
 }
 
-export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
+export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot }: Props) {
   const [ready, setReady] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); onReady(next); };
   const n = ui.players.length;
@@ -36,17 +37,25 @@ export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
         {n}/{MAX_PLAYERS} 플레이어 · 최소 {MIN_PLAYERS}명 필요
       </p>
       <ul style={list}>
-        {ui.players.map((p) => (
-          <li key={p.id} style={{ ...row, ...(p.id === myId ? rowMe : null) }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: p.connected ? 1 : 0.4 }}>
-              <span style={thumb}>
-                <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={30} />
+        {ui.players.map((p) => {
+          const isBot = p.id.startsWith('bot-');
+          return (
+            <li key={p.id} style={{ ...row, ...(p.id === myId ? rowMe : null) }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: p.connected ? 1 : 0.4 }}>
+                <span style={thumb}>
+                  <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={30} />
+                </span>
+                {p.name}{p.id === myId ? ' (나)' : ''}
               </span>
-              {p.name}{p.id === myId ? ' (나)' : ''}
-            </span>
-            <span style={{ color: '#3df2c0', fontSize: 13 }}>좌석 {p.seat + 1}</span>
-          </li>
-        ))}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ color: '#3df2c0', fontSize: 13 }}>좌석 {p.seat + 1}</span>
+                {isBot && (
+                  <button style={kickBtn} onClick={() => onRemoveBot(p.id)} title="봇 내보내기">✕</button>
+                )}
+              </span>
+            </li>
+          );
+        })}
       </ul>
       <div style={{ display: 'flex', gap: 12 }}>
         <button onClick={onAddBot} disabled={n >= MAX_PLAYERS} style={botBtn}>
@@ -112,5 +121,10 @@ const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#1fae
 const botBtn: React.CSSProperties = {
   padding: '14px 26px', fontSize: 16, fontWeight: 700, color: '#cfcfe0', cursor: 'pointer',
   border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+};
+const kickBtn: React.CSSProperties = {
+  width: 24, height: 24, display: 'grid', placeItems: 'center', flexShrink: 0,
+  fontSize: 12, fontWeight: 800, color: '#ff9a9a', cursor: 'pointer', lineHeight: 1,
+  border: '1px solid rgba(255,120,120,0.35)', borderRadius: 7, background: 'rgba(255,80,80,0.1)',
 };
 const hint: React.CSSProperties = { margin: 0, color: '#6a6a80', fontSize: 13 };
