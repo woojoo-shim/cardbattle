@@ -1,7 +1,7 @@
 // Minimal service worker — makes the game installable and gives the app shell
 // an offline fallback. It never touches the Colyseus server (different origin),
 // so live multiplayer traffic is untouched.
-const CACHE = 'cardbattle-v1';
+const CACHE = 'cardbattle-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -23,6 +23,11 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // leave the game server alone
+
+  // Never cache API calls — they carry live account state (gold, profile, wins). Serving a
+  // stale /api/me from cache froze the lobby's gold so post-match rewards looked like they
+  // never arrived. Let these hit the network untouched.
+  if (url.pathname.startsWith('/api/')) return;
 
   // App navigation: try the network, fall back to the cached shell when offline.
   if (request.mode === 'navigate') {
