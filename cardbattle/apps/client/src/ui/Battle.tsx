@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
-import { CARD_DEFS, requiresTarget } from '@cardbattle/shared';
+import { CARD_DEFS, requiresTarget, resolveMode } from '@cardbattle/shared';
 import type { UiState, RoomError, LiveEmote } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
@@ -10,6 +10,7 @@ import { Log } from './Log.js';
 import { RevealOverlay } from './RevealOverlay.js';
 import { EmoteBar } from './EmoteBar.js';
 import { EmoteLayer } from './EmoteLayer.js';
+import { ManaBar } from './ManaBar.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
@@ -33,6 +34,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
   const myMana = ui.players.find((p) => p.id === myId)?.mana ?? 0;
+  const manaMax = resolveMode(ui.mode).rules.manaMax;
 
   // Clear a half-finished target selection whenever the turn passes away from me.
   useEffect(() => { if (!isMyTurn) setPending(null); }, [isMyTurn]);
@@ -88,11 +90,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       </div>
       <div style={handRow}>
         <div style={manaDock}>
-          <span style={{ ...manaOrb, opacity: isMyTurn ? 1 : 0.6 }}>◈</span>
-          <div style={manaText}>
-            <span style={manaNum}>{myMana}</span>
-            <span style={manaLabel}>MANA</span>
-          </div>
+          <ManaBar mana={myMana} max={manaMax} lit={isMyTurn} />
         </div>
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
@@ -138,22 +136,11 @@ const errToast: React.CSSProperties = {
   padding: '8px 16px', background: 'rgba(255,59,107,0.2)', border: `1px solid ${C.enemy}`,
   borderRadius: 8, color: '#ff9cba', fontSize: 13, zIndex: 17,
 };
-// My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). Sized in clamp units so it
-// keeps proportion on iPad. Always visible; the orb dims a touch when it isn't my turn.
+// My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). The ManaBar carries its
+// own frame; this just pins it to the corner. Bounded width keeps it clear of the card fan on iPad.
 const manaDock: React.CSSProperties = {
-  position: 'absolute', bottom: 28, left: 28, zIndex: 16,
-  display: 'flex', alignItems: 'center', gap: 14,
-  padding: 'clamp(12px, 1.4vw, 18px) clamp(18px, 2vw, 28px)', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(20,30,54,0.94), rgba(12,18,34,0.94))',
-  border: '1.5px solid #3a5da0', boxShadow: '0 10px 28px rgba(30,70,150,0.42), inset 0 0 20px rgba(80,150,255,0.12)',
+  position: 'absolute', bottom: 24, left: 24, zIndex: 16,
 };
-const manaOrb: React.CSSProperties = {
-  fontSize: 'clamp(34px, 3.6vw, 52px)', color: '#6fb6ff',
-  textShadow: '0 0 22px rgba(90,160,255,0.95), 0 0 8px rgba(150,200,255,0.9)', transition: 'opacity .3s ease',
-};
-const manaText: React.CSSProperties = { display: 'flex', flexDirection: 'column', lineHeight: 1 };
-const manaNum: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(34px, 3.6vw, 52px)', fontWeight: 900, color: '#e2f0ff', textShadow: '0 0 12px rgba(120,180,255,0.5)' };
-const manaLabel: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(11px, 1vw, 14px)', letterSpacing: 3, color: '#7fa8d8', marginTop: 4 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
   color: '#04231b', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
