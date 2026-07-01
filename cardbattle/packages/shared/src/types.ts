@@ -13,7 +13,8 @@ export type Effect =
   | { kind: 'skip' }       // make a chosen player skip their next turn
   | { kind: 'gamble' }     // the caster's next attack this turn is doubled or nullified (50/50)
   | { kind: 'empower'; amount: number } // multiply the caster's damage this turn (e.g. 1.5x)
-  | { kind: 'selfskip' };  // the caster forfeits their own next turn
+  | { kind: 'selfskip' }   // the caster forfeits their own next turn
+  | { kind: 'steal' };     // take one random card from a chosen player's hand into mine
 
 export interface CardDef {
   id: string;
@@ -81,6 +82,7 @@ export type GameEvent =
   | { type: 'round_advanced'; round: number }
   | { type: 'card_revealed'; viewerId: string; targetId: string; cardInstanceId: string; defId: string } // PRIVATE: server sends only to viewerId
   | { type: 'card_discarded'; targetId: string; cardInstanceId: string; defId: string }
+  | { type: 'card_stolen'; thiefId: string; targetId: string } // PUBLIC: identity stays hidden; thief learns it via hand sync
   | { type: 'turn_skipped'; playerId: string }
   | { type: 'gamble_resolved'; playerId: string; doubled: boolean }
   | { type: 'player_eliminated'; playerId: string }

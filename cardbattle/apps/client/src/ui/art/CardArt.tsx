@@ -387,6 +387,31 @@ function Judgment() {
   );
 }
 
+function Plunder() {
+  return (
+    <>
+      <Glow color="#9be85a" o={0.4} />
+      {/* a card being yanked away, trailing motion lines */}
+      <g transform="rotate(-14 30 30)">
+        <rect x="14" y="10" width="22" height="30" rx="3" fill="#16202c" stroke="#7ad04a" strokeWidth="1.6" />
+        <rect x="14" y="10" width="22" height="30" rx="3" fill="#0e1620" opacity="0.4" />
+        <path d="M25 16 L28 22 L34 23 L29 27 L30 33 L25 30 L20 33 L21 27 L16 23 L22 22 Z" fill="#bdf08a" opacity="0.85" />
+      </g>
+      {/* motion streaks */}
+      <path d="M40 14 L50 12" stroke="#bdf08a" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+      <path d="M42 20 L52 19" stroke="#bdf08a" strokeWidth="2" strokeLinecap="round" opacity="0.45" />
+      {/* grabbing hand */}
+      <path d="M34 42 Q34 36 39 36 L48 36 Q54 36 54 42 L54 50 Q54 58 44 58 L40 58 Q34 58 33 52 L31 46 Q30 42 34 44 Z"
+        fill="#2c3a22" stroke="#9be85a" strokeWidth="1.6" />
+      {/* fingers */}
+      {[39, 44, 49].map((x, i) => (
+        <rect key={i} x={x - 1.5} y="33" width="3" height="8" rx="1.5" fill="#3a4c2c" stroke="#9be85a" strokeWidth="1" />
+      ))}
+      <rect x="52" y="42" width="5" height="3.5" rx="1.75" fill="#3a4c2c" stroke="#9be85a" strokeWidth="1" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -407,6 +432,7 @@ const ART: Record<string, () => JSX.Element> = {
   firstaid: FirstAid,
   snipe: Snipe,
   judgment: Judgment,
+  plunder: Plunder,
 };
 
 export function CardArt({ id, size = 44 }: Props) {

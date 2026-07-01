@@ -23,6 +23,7 @@ export const CARD_DEFS: Record<string, CardDef> = {
   firstaid: { id: 'firstaid', name: '응급처치',rarity: 'rare',   cost: 0, element: 'holy',     kind: 'heal',   effects: [{ kind: 'heal', amount: 6 }, { kind: 'shield', amount: 6 }], cooldown: 0, vfxKey: 'heal', sfxKey: 'heal', icon: '🩹', desc: '나를 6 회복하고 방어 +6', drawWeight: 6 },
   snipe:    { id: 'snipe',    name: '저격',   rarity: 'legendary',cost:0, element: 'physical', kind: 'weapon', effects: [{ kind: 'damage', amount: 20, target: 'chosen' }], cooldown: 0, vfxKey: 'snipe',  sfxKey: 'snipe',  icon: '🎯', desc: '대상에게 20 피해', drawWeight: 3 },
   judgment: { id: 'judgment', name: '심판',   rarity: 'epic',   cost: 0, element: 'holy',     kind: 'magic',  effects: [{ kind: 'damage', amount: 8, target: 'all' }, { kind: 'heal', amount: 8 }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '⚖️', desc: '나를 제외한 모두에게 8 피해, 나를 8 회복', drawWeight: 4 },
+  plunder:  { id: 'plunder',  name: '강탈',   rarity: 'epic',   cost: 0, element: 'poison',   kind: 'special',effects: [{ kind: 'steal' }],                             cooldown: 0, vfxKey: 'plunder',sfxKey: 'plunder',icon: '🫳', desc: '지목한 상대의 손패 1장을 무작위로 빼앗아 온다', drawWeight: 5 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
@@ -30,6 +31,6 @@ export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
 /** Does this card require the player to pick a target before playing? */
 export function requiresTarget(def: CardDef): boolean {
   return def.effects.some(
-    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip',
+    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal',
   );
 }

@@ -8,7 +8,7 @@ interface Props {
   ui: UiState;
 }
 
-type Line = { text: string; tone: 'turn' | 'card' | 'dmg' | 'heal' | 'shield' | 'reverse' | 'round' | 'out' | 'win' | 'reveal' | 'discard' | 'skip' | 'gamble' };
+type Line = { text: string; tone: 'turn' | 'card' | 'dmg' | 'heal' | 'shield' | 'reverse' | 'round' | 'out' | 'win' | 'reveal' | 'discard' | 'skip' | 'gamble' | 'steal' };
 
 function nameOf(ui: UiState, id: string): string {
   return ui.players.find((p) => p.id === id)?.name ?? id.slice(0, 4);
@@ -24,6 +24,7 @@ function line(ui: UiState, e: GameEvent): Line | null {
     case 'direction_reversed': return { text: `🔄 진행 방향 반전! (${e.direction === -1 ? '역방향' : '정방향'})`, tone: 'reverse' };
     case 'card_revealed': return { text: `🔮 ${nameOf(ui, e.viewerId)} 가 ${nameOf(ui, e.targetId)} 의 손패를 엿봤다`, tone: 'reveal' };
     case 'card_discarded': return { text: `🗑 ${nameOf(ui, e.targetId)} 의 ${CARD_DEFS[e.defId]?.name ?? e.defId} 파괴됨`, tone: 'discard' };
+    case 'card_stolen': return { text: `🫳 ${nameOf(ui, e.thiefId)} 가 ${nameOf(ui, e.targetId)} 의 손패 1장을 강탈`, tone: 'steal' };
     case 'turn_skipped': return { text: `💤 ${nameOf(ui, e.playerId)} 의 턴 건너뜀`, tone: 'skip' };
     case 'gamble_resolved': return { text: e.doubled ? `🎲 ${nameOf(ui, e.playerId)} 도박 성공! 2배 피해` : `🎲 ${nameOf(ui, e.playerId)} 도박 실패… 빗나감`, tone: 'gamble' };
     case 'round_advanced': return { text: `↻ ROUND ${e.round} — 손패 보충`, tone: 'round' };
@@ -36,7 +37,7 @@ function line(ui: UiState, e: GameEvent): Line | null {
 const TONE: Record<Line['tone'], string> = {
   turn: C.dim, card: C.text, dmg: '#ff8aa6', heal: '#7fe9d6',
   shield: '#7fb6ff', reverse: '#c9a0ff', round: C.rare, out: C.faint, win: C.rare,
-  reveal: '#8be3ff', discard: '#9be85a', skip: '#5fd0ff', gamble: '#ffd84a',
+  reveal: '#8be3ff', discard: '#9be85a', skip: '#5fd0ff', gamble: '#ffd84a', steal: '#c9a0ff',
 };
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */

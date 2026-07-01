@@ -10,7 +10,11 @@ type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number }
-  | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; icon: string; name: string; color: string };
+  | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; icon: string; name: string; color: string }
+  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; icon: string; color: string; spin: boolean };
+
+/** When the projectile lands, the impact ring/number pops — synced to the hurl travel time. */
+const IMPACT_DELAY = 0.34;
 
 /** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
 const ELEM: Record<Element, string> = {
@@ -79,25 +83,37 @@ export function VfxLayer({ events }: Props) {
         const def = CARD_DEFS[e.defId];
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
-        // Lay the card on the table just in front of the player (a third of the way to centre).
-        const c = tableCenter();
-        const spot = c ? { x: src.x + (c.x - src.x) * 0.34, y: src.y + (c.y - src.y) * 0.34 } : src;
-        add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, icon: def.icon, name: def.name, color });
+        const isAttack = def.effects.some((ef) => ef.kind === 'damage');
+        if (isAttack) {
+          // Per-item projectile: the weapon/spell is hurled from the caster toward its target
+          // (a chosen foe, or the table centre for area/random hits). Blades spin; magic glides.
+          const chosen = e.targetId ? centerOf(e.targetId) : null;
+          const dest = chosen ?? tableCenter() ?? src;
+          add.push({ id: nextId.current++, kind: 'hurl', x: src.x, y: src.y, dx: dest.x - src.x, dy: dest.y - src.y, icon: def.icon, color, spin: def.kind === 'weapon' });
+        } else {
+          // Non-offensive cards (heal/shield/tempo) are dealt onto the table in front of the player.
+          const c = tableCenter();
+          const spot = c ? { x: src.x + (c.x - src.x) * 0.34, y: src.y + (c.y - src.y) * 0.34 } : src;
+          add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, icon: def.icon, name: def.name, color });
+        }
         castPulse(e.playerId);
       } else if (e.type === 'damage_dealt') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
-        const src = centerOf(e.sourceId);
-        const hasBolt = !!src && (src.x !== tgt.x || src.y !== tgt.y);
-        if (hasBolt && src) {
-          add.push({ id: nextId.current++, kind: 'bolt', x: src.x, y: src.y, dx: tgt.x - src.x, dy: tgt.y - src.y, color });
+        // The projectile was already launched by the preceding card_played; the impact lands as it arrives.
+        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay: IMPACT_DELAY });
+        setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
+      } else if (e.type === 'card_stolen') {
+        // A card is yanked from the victim's hand and flies across to the thief.
+        const from = centerOf(e.targetId);
+        const to = centerOf(e.thiefId);
+        if (from && to) {
+          add.push({ id: nextId.current++, kind: 'hurl', x: from.x, y: from.y, dx: to.x - from.x, dy: to.y - from.y, icon: '🎴', color: '#c9a0ff', spin: true });
+          castPulse(e.thiefId);
         }
-        const delay = hasBolt ? 0.2 : 0; // let the projectile land before the impact pops
-        add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color, delay });
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay });
-        shake(e.targetId);
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
@@ -130,6 +146,8 @@ export function VfxLayer({ events }: Props) {
         {fx.map((f) =>
           f.kind === 'bolt' ? (
             <span key={f.id} style={boltStyle(f)} />
+          ) : f.kind === 'hurl' ? (
+            <span key={f.id} style={hurlStyle(f)}>{f.icon}</span>
           ) : f.kind === 'ring' ? (
             <span key={f.id} style={ringStyle(f)} />
           ) : f.kind === 'cast' ? (
@@ -161,6 +179,15 @@ function boltStyle(f: Extract<Fx, { kind: 'bolt' }>): React.CSSProperties {
     animation: 'cb-bolt .3s cubic-bezier(.45,0,.55,1) forwards',
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+  } as React.CSSProperties;
+}
+function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, fontSize: 28, lineHeight: 1, zIndex: 61,
+    filter: `drop-shadow(0 0 10px ${f.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))`,
+    willChange: 'transform, opacity',
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+    animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .46s cubic-bezier(.3,.55,.4,1) forwards`,
   } as React.CSSProperties;
 }
 function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {

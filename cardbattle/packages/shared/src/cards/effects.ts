@@ -89,4 +89,15 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
   selfskip: (_effect: Extract<Effect, { kind: 'selfskip' }>, ctx) => {
     ctx.source.skipTurns += 1; // forfeit my own next turn
   },
+  steal: (_effect: Extract<Effect, { kind: 'steal' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId);
+    if (!t || !t.alive || t.hand.length === 0) return;
+    const pick = weightedPick(ctx.state.rngSeed, t.hand, () => 1);
+    ctx.state.rngSeed = pick.seed;
+    const idx = t.hand.findIndex((c) => c.id === pick.item.id);
+    if (idx < 0) return;
+    const [stolen] = t.hand.splice(idx, 1);
+    ctx.source.hand.push(stolen); // the card moves into my hand; its identity is only revealed to me via hand sync
+    ctx.emit({ type: 'card_stolen', thiefId: ctx.source.id, targetId: t.id });
+  },
 };
