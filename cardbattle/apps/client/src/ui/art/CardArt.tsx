@@ -412,6 +412,175 @@ function Plunder() {
   );
 }
 
+function Dagger() {
+  return (
+    <>
+      <Glow color="#ff5c8a" o={0.3} />
+      {/* short stabbing blade */}
+      <path d="M32 8 L35 16 L34 36 L32 42 L30 36 L29 16 Z" fill={STEEL} stroke="#eef2ff" strokeWidth="1" />
+      <path d="M32 8 L32 42 L30 36 L29 16 Z" fill={STEEL_D} opacity="0.6" />
+      <path d="M32 9 L32 41" stroke="#ff90b3" strokeWidth="1" opacity="0.8" />
+      {/* guard */}
+      <rect x="24" y="41" width="16" height="4" rx="2" fill="#b98a3c" stroke="#e7c272" strokeWidth="1" />
+      {/* grip + pommel */}
+      <rect x="30" y="45" width="4" height="10" fill={WOOD} stroke={WOOD_D} strokeWidth="0.8" />
+      <circle cx="32" cy="56" r="3" fill="#b98a3c" stroke="#e7c272" strokeWidth="1" />
+    </>
+  );
+}
+
+function Fireball() {
+  return (
+    <>
+      <Glow color="#ff7a3c" o={0.55} />
+      {/* molten core */}
+      <circle cx="32" cy="36" r="16" fill="url(#fb-core)" stroke="#ff9a4a" strokeWidth="1.5" />
+      <defs>
+        <radialGradient id="fb-core" cx="0.4" cy="0.36" r="0.7">
+          <stop offset="0" stopColor="#fff1a8" />
+          <stop offset="0.5" stopColor="#ff8a3c" />
+          <stop offset="1" stopColor="#c0264a" />
+        </radialGradient>
+      </defs>
+      {/* trailing flames */}
+      <path d="M32 20 Q24 8 20 4 Q26 14 22 16 Q30 12 32 20 Z" fill="#ff8a3c" opacity="0.9" />
+      <path d="M40 24 Q48 14 52 10 Q46 20 50 22 Q42 20 40 24 Z" fill="#ffb45a" opacity="0.8" />
+      {/* inner spark */}
+      <circle cx="28" cy="32" r="4" fill="#fff1a8" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+    </>
+  );
+}
+
+function Frostbolt() {
+  return (
+    <>
+      <Glow color="#7fd6ff" o={0.45} />
+      {/* icy arrow shaft */}
+      <line x1="12" y1="52" x2="48" y2="16" stroke="#bfeaff" strokeWidth="3" strokeLinecap="round" />
+      <line x1="14" y1="50" x2="46" y2="18" stroke="#e6f7ff" strokeWidth="1" opacity="0.8" />
+      {/* crystalline head */}
+      <path d="M48 16 L40 18 L46 24 Z" fill="#d6f4ff" stroke="#8be3ff" strokeWidth="1" />
+      <path d="M52 12 L44 15 L49 20 L54 18 Z" fill="#eaffff" stroke="#8be3ff" strokeWidth="0.8" />
+      {/* frost shards flaking off */}
+      <path d="M22 26 L26 30 L21 31 Z" fill="#d6f4ff" opacity="0.85" />
+      <path d="M32 36 L36 40 L31 41 Z" fill="#d6f4ff" opacity="0.7" />
+      {/* fletching */}
+      <path d="M12 52 L18 50 L16 44 Z" fill="#7fd6ff" opacity="0.8" />
+      <path d="M12 52 L14 46 L20 48 Z" fill="#7fd6ff" opacity="0.7" />
+    </>
+  );
+}
+
+function Windfury() {
+  return (
+    <>
+      <Glow color="#7af0d3" o={0.4} />
+      {/* three swift slash arcs */}
+      <path d="M14 18 Q40 22 50 46" fill="none" stroke="#d6fff7" strokeWidth="3.5" strokeLinecap="round" opacity="0.9" />
+      <path d="M12 30 Q38 34 48 56" fill="none" stroke="#7af0d3" strokeWidth="3.5" strokeLinecap="round" opacity="0.8" />
+      <path d="M18 10 Q46 12 56 34" fill="none" stroke="#bff6ec" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+      {/* speed sparks at the tips */}
+      <circle cx="50" cy="46" r="2" fill="#eafffb" opacity="0.9" />
+      <circle cx="48" cy="56" r="1.6" fill="#eafffb" opacity="0.75" />
+      <circle cx="56" cy="34" r="1.6" fill="#eafffb" opacity="0.7" />
+    </>
+  );
+}
+
+function Bulwark() {
+  return (
+    <>
+      <Glow color="#7fb6ff" o={0.4} />
+      {/* fortress wall of stone blocks */}
+      <rect x="12" y="20" width="40" height="34" rx="3" fill="#1a2536" stroke="#7fb6ff" strokeWidth="2" />
+      {/* battlement crenellations */}
+      <rect x="12" y="14" width="8" height="8" fill="#22314a" stroke="#7fb6ff" strokeWidth="1.4" />
+      <rect x="28" y="14" width="8" height="8" fill="#22314a" stroke="#7fb6ff" strokeWidth="1.4" />
+      <rect x="44" y="14" width="8" height="8" fill="#22314a" stroke="#7fb6ff" strokeWidth="1.4" />
+      {/* brick seams */}
+      <line x1="12" y1="32" x2="52" y2="32" stroke="#3a4c68" strokeWidth="1.2" />
+      <line x1="12" y1="43" x2="52" y2="43" stroke="#3a4c68" strokeWidth="1.2" />
+      <line x1="26" y1="20" x2="26" y2="32" stroke="#3a4c68" strokeWidth="1.2" />
+      <line x1="38" y1="32" x2="38" y2="43" stroke="#3a4c68" strokeWidth="1.2" />
+      <line x1="22" y1="43" x2="22" y2="54" stroke="#3a4c68" strokeWidth="1.2" />
+      <line x1="42" y1="43" x2="42" y2="54" stroke="#3a4c68" strokeWidth="1.2" />
+      {/* sheen */}
+      <path d="M16 20 L24 20 L18 54 L12 54 L12 24 Z" fill="#9ec6ff" opacity="0.12" />
+    </>
+  );
+}
+
+function Meditate() {
+  return (
+    <>
+      <Glow color="#38e8c8" o={0.42} />
+      {/* aura rings */}
+      <circle cx="32" cy="34" r="20" fill="none" stroke="#7af0d3" strokeWidth="1" opacity="0.4" />
+      <circle cx="32" cy="34" r="14" fill="none" stroke="#7af0d3" strokeWidth="1" opacity="0.55" />
+      {/* seated figure silhouette */}
+      <circle cx="32" cy="24" r="5" fill="#bff6ec" />
+      <path d="M20 50 Q32 34 44 50 Q44 54 32 54 Q20 54 20 50 Z" fill="#2e6f66" stroke="#7af0d3" strokeWidth="1.4" />
+      {/* meditative hands */}
+      <path d="M24 46 Q32 40 40 46" fill="none" stroke="#d6fff7" strokeWidth="2" strokeLinecap="round" />
+      {/* rising motes of calm */}
+      <circle cx="32" cy="10" r="2" fill="#d6fff7" opacity="0.85" />
+      <circle cx="24" cy="14" r="1.4" fill="#d6fff7" opacity="0.7" />
+      <circle cx="40" cy="14" r="1.4" fill="#d6fff7" opacity="0.7" />
+    </>
+  );
+}
+
+function HolyNova() {
+  return (
+    <>
+      <Glow color="#f4c44a" o={0.6} />
+      {/* radiant burst rays */}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <line
+          key={i}
+          x1="32"
+          y1="32"
+          x2={32 + 28 * Math.cos((i * Math.PI) / 6)}
+          y2={32 + 28 * Math.sin((i * Math.PI) / 6)}
+          stroke="#ffe9a8"
+          strokeWidth={i % 2 ? 1.5 : 3}
+          opacity="0.6"
+          strokeLinecap="round"
+        />
+      ))}
+      {/* blazing core */}
+      <circle cx="32" cy="32" r="12" fill="url(#hn-core)" stroke="#fff3c8" strokeWidth="1.5" />
+      <defs>
+        <radialGradient id="hn-core" cx="0.5" cy="0.5" r="0.6">
+          <stop offset="0" stopColor="#fffef0" />
+          <stop offset="1" stopColor="#f4c44a" />
+        </radialGradient>
+      </defs>
+      <circle cx="32" cy="32" r="5" fill="#fffef0" opacity="0.95" style={{ filter: 'blur(1px)' }} />
+    </>
+  );
+}
+
+function Execute() {
+  return (
+    <>
+      <Glow color="#ff3b6b" o={0.5} />
+      {/* headsman's axe */}
+      <rect x="30" y="10" width="4" height="46" rx="1.5" fill={WOOD} stroke={WOOD_D} strokeWidth="0.8" />
+      {/* broad blade */}
+      <path d="M32 12 Q52 12 52 30 Q44 26 32 28 Z" fill={STEEL} stroke="#eef2ff" strokeWidth="1.2" />
+      <path d="M32 12 Q52 12 52 30 Q44 26 32 28 Z" fill="#ff90b3" opacity="0.18" />
+      <path d="M32 12 L32 28 Q44 26 52 30" fill="none" stroke="#ffd0db" strokeWidth="1" opacity="0.7" />
+      {/* back spike */}
+      <path d="M30 16 Q18 16 16 26 Q24 22 30 24 Z" fill={STEEL_D} stroke="#c9d0e0" strokeWidth="1" />
+      {/* blood edge */}
+      <path d="M52 30 Q49 34 46 33" stroke="#c0264a" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* pommel */}
+      <circle cx="32" cy="57" r="3" fill="#b98a3c" stroke="#e7c272" strokeWidth="1" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -433,6 +602,14 @@ const ART: Record<string, () => JSX.Element> = {
   snipe: Snipe,
   judgment: Judgment,
   plunder: Plunder,
+  dagger: Dagger,
+  fireball: Fireball,
+  frostbolt: Frostbolt,
+  windfury: Windfury,
+  bulwark: Bulwark,
+  meditate: Meditate,
+  holynova: HolyNova,
+  execute: Execute,
 };
 
 export function CardArt({ id, size = 44 }: Props) {

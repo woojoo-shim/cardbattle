@@ -26,6 +26,16 @@ export const CARD_DEFS: Record<string, CardDef> = {
   plunder:  { id: 'plunder',  name: '강탈',   rarity: 'epic',   cost: 3, element: 'poison',   kind: 'special',effects: [{ kind: 'steal' }],                             cooldown: 0, vfxKey: 'plunder',sfxKey: 'plunder',icon: '🫳', desc: '지목한 상대의 손패 1장을 무작위로 빼앗아 온다', drawWeight: 5 },
   // Mana ramp: costs 1 but grants 3 (net +2), letting you bank toward a big multi-card turn.
   charge:   { id: 'charge',   name: '충전',   rarity: 'rare',   cost: 1, element: 'lightning',kind: 'special',effects: [{ kind: 'mana', amount: 3 }],                    cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🔷', desc: '마나 +3 (비용 1 → 실질 +2)', drawWeight: 8 },
+  // New wave — cheap filler, elemental nukes, a freeze-strike, a triple hit, a big wall,
+  // a ramp+heal, an AoE finisher, and an armor-piercing execution.
+  dagger:   { id: 'dagger',   name: '단검',   rarity: 'common', cost: 1, element: 'physical', kind: 'weapon', effects: [{ kind: 'damage', amount: 5, target: 'chosen' }], cooldown: 0, vfxKey: 'slash',   sfxKey: 'slash',   icon: '🔪', desc: '대상에게 5 피해', drawWeight: 18 },
+  fireball: { id: 'fireball', name: '화염구', rarity: 'epic',   cost: 3, element: 'fire',     kind: 'magic',  effects: [{ kind: 'damage', amount: 11, target: 'chosen' }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '🔥', desc: '대상에게 11 피해', drawWeight: 7 },
+  frostbolt:{ id: 'frostbolt',name: '서리화살',rarity:'epic',   cost: 4, element: 'ice',      kind: 'magic',  effects: [{ kind: 'damage', amount: 8, target: 'chosen' }, { kind: 'skip' }], cooldown: 0, vfxKey: 'bind', sfxKey: 'bind', icon: '🧊', desc: '대상에게 8 피해 + 다음 턴을 얼려 건너뛰게 한다', drawWeight: 5 },
+  windfury: { id: 'windfury', name: '질풍참', rarity: 'epic',   cost: 4, element: 'physical', kind: 'weapon', effects: [{ kind: 'damage', amount: 5, target: 'chosen' }, { kind: 'damage', amount: 5, target: 'chosen' }, { kind: 'damage', amount: 5, target: 'chosen' }], cooldown: 0, vfxKey: 'slash', sfxKey: 'slash', icon: '🌪️', desc: '대상에게 5 피해를 세 번 (총 15)', drawWeight: 5 },
+  bulwark:  { id: 'bulwark',  name: '성벽',   rarity: 'rare',   cost: 3, element: 'holy',     kind: 'equipment',effects:[{ kind: 'shield', amount: 16 }],                cooldown: 0, vfxKey: 'shield',  sfxKey: 'shield',  icon: '🧱', desc: '방어 +16 (받는 피해 감소)', drawWeight: 7 },
+  meditate: { id: 'meditate', name: '명상',   rarity: 'common', cost: 1, element: 'none',     kind: 'special',effects: [{ kind: 'mana', amount: 2 }, { kind: 'heal', amount: 4 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🧘', desc: '마나 +2, 나를 4 회복', drawWeight: 9 },
+  holynova: { id: 'holynova', name: '신성폭발',rarity:'legendary',cost:5, element: 'holy',     kind: 'magic',  effects: [{ kind: 'damage', amount: 10, target: 'all' }, { kind: 'heal', amount: 12 }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '🌟', desc: '나를 제외한 모두에게 10 피해, 나를 12 회복', drawWeight: 3 },
+  execute:  { id: 'execute',  name: '처형',   rarity: 'legendary',cost:5, element: 'physical', kind: 'weapon', effects: [{ kind: 'pierce', amount: 18, target: 'chosen' }], cooldown: 0, vfxKey: 'snipe', sfxKey: 'snipe', icon: '🪓', desc: '대상에게 방어를 무시하는 18 관통 피해', drawWeight: 3 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
@@ -33,6 +43,6 @@ export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
 /** Does this card require the player to pick a target before playing? */
 export function requiresTarget(def: CardDef): boolean {
   return def.effects.some(
-    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal',
+    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'pierce' || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal',
   );
 }

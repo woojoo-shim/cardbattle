@@ -15,7 +15,8 @@ export type Effect =
   | { kind: 'empower'; amount: number } // multiply the caster's damage this turn (e.g. 1.5x)
   | { kind: 'selfskip' }   // the caster forfeits their own next turn
   | { kind: 'steal' }      // take one random card from a chosen player's hand into mine
-  | { kind: 'mana'; amount: number }; // refill the caster's mana (the '충전' ramp card)
+  | { kind: 'mana'; amount: number } // refill the caster's mana (the '충전' ramp card)
+  | { kind: 'pierce'; amount: number; target: 'chosen' }; // damage that ignores shield/defense entirely
 
 export interface CardDef {
   id: string;

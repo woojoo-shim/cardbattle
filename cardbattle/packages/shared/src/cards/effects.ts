@@ -105,4 +105,25 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     ctx.source.mana = Math.min(MANA_MAX, ctx.source.mana + effect.amount);
     ctx.emit({ type: 'mana_gained', playerId: ctx.source.id, amount: effect.amount, manaAfter: ctx.source.mana });
   },
+  // Like damage, but the hit lands straight on HP — shield/defense is bypassed, not spent.
+  // Still an attack, so it obeys this turn's empower and any armed gamble.
+  pierce: (effect: Extract<Effect, { kind: 'pierce' }>, ctx) => {
+    const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive);
+    if (!t) return;
+    let amount = Math.round(effect.amount * (ctx.source.empower || 1));
+    if (ctx.source.gamble) {
+      ctx.source.gamble = false;
+      const flip = weightedPick(ctx.state.rngSeed, [0, 1], () => 1);
+      ctx.state.rngSeed = flip.seed;
+      const doubled = flip.item === 1;
+      amount = doubled ? amount * 2 : 0;
+      ctx.emit({ type: 'gamble_resolved', playerId: ctx.source.id, doubled });
+    }
+    t.hp = Math.max(0, t.hp - amount);
+    ctx.emit({ type: 'damage_dealt', sourceId: ctx.source.id, targetId: t.id, amount, element: ctx.element, targetHpAfter: t.hp });
+    if (t.hp === 0) {
+      t.alive = false;
+      ctx.emit({ type: 'player_eliminated', playerId: t.id });
+    }
+  },
 };
