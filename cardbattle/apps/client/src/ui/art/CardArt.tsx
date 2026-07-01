@@ -581,6 +581,34 @@ function Execute() {
   );
 }
 
+function Charge() {
+  return (
+    <>
+      <Glow color="#6fb6ff" o={0.5} />
+      {/* mana crystal being energized */}
+      <path d="M32 6 L44 26 L38 54 L26 54 L20 26 Z" fill="url(#charge-core)" stroke="#9ec6ff" strokeWidth="1.6" />
+      <defs>
+        <linearGradient id="charge-core" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#d6ecff" />
+          <stop offset="0.5" stopColor="#5aa0ff" />
+          <stop offset="1" stopColor="#2a4c9a" />
+        </linearGradient>
+      </defs>
+      {/* inner facet lines */}
+      <path d="M32 6 L32 54" stroke="#eaf4ff" strokeWidth="1" opacity="0.7" />
+      <path d="M20 26 L44 26" stroke="#bcd8ff" strokeWidth="1" opacity="0.6" />
+      <path d="M32 6 L20 26 L26 54 Z" fill="#ffffff" opacity="0.12" />
+      {/* charging lightning sparks */}
+      <path d="M12 14 L18 20 L14 22 L20 30" fill="none" stroke="#ffe46a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+      <path d="M52 16 L46 22 L50 24 L44 32" fill="none" stroke="#ffe46a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+      {/* rising energy motes */}
+      <circle cx="32" cy="32" r="4" fill="#eaf4ff" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+      <circle cx="26" cy="14" r="1.6" fill="#bfe0ff" opacity="0.8" />
+      <circle cx="40" cy="18" r="1.4" fill="#bfe0ff" opacity="0.7" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
   sword: Sword,
   bow: Bow,
@@ -610,6 +638,7 @@ const ART: Record<string, () => JSX.Element> = {
   meditate: Meditate,
   holynova: HolyNova,
   execute: Execute,
+  charge: Charge,
 };
 
 export function CardArt({ id, size = 44 }: Props) {
