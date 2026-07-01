@@ -1,0 +1,14 @@
+{
+  "name": "Card Battle — Abyssal Arena",
+  "short_name": "Card Battle",
+  "description": "심연의 투기장, 실시간 카드 배틀",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07080d",
+  "theme_color": "#0e1018",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

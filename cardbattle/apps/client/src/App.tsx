@@ -3,6 +3,7 @@ import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
+import { InstallButton } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
@@ -50,6 +51,7 @@ function NameGate({ onSubmit }: { onSubmit: (name: string, avatar: string) => vo
   const go = () => { const n = value.trim() || 'Player'; onSubmit(n.slice(0, 16), avatar); };
   return (
     <div style={gateWrap}>
+      <InstallButton />
       <div style={gateGlow} aria-hidden />
       <div style={gateVignette} aria-hidden />
 
