@@ -24,20 +24,20 @@ export interface RoomInfo {
 const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId });
 
 /** Quick match: drop into any open lobby or spin up a fresh one (solo/bot fast path). */
-export async function quickPlay(name: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).joinOrCreate('battle', { name });
+export async function quickPlay(name: string, avatar: string): Promise<BattleConnection> {
+  const room = await new Client(endpoint).joinOrCreate('battle', { name, avatar });
   return wrap(room);
 }
 
 /** Host a brand-new named room; the returned room carries its own code (in state). */
-export async function createRoom(name: string, title: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).create('battle', { name, title });
+export async function createRoom(name: string, title: string, avatar: string): Promise<BattleConnection> {
+  const room = await new Client(endpoint).create('battle', { name, title, avatar });
   return wrap(room);
 }
 
 /** Join a specific room by its Colyseus roomId (used by both the list and code paths). */
-export async function joinRoomById(roomId: string, name: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).joinById(roomId, { name });
+export async function joinRoomById(roomId: string, name: string, avatar: string): Promise<BattleConnection> {
+  const room = await new Client(endpoint).joinById(roomId, { name, avatar });
   return wrap(room);
 }
 

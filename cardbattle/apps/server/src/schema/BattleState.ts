@@ -9,6 +9,7 @@ export class CardInstanceSchema extends Schema {
 export class PlayerSchema extends Schema {
   @type('string') id = '';
   @type('string') name = '';
+  @type('string') avatar = '';
   @type('boolean') connected = true;
   @type('number') seat = 0;
   @type('number') hp = 0;
@@ -59,7 +60,7 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
   for (const p of gs.players) {
     let ps = schema.players.get(p.id);
     if (!ps) { ps = new PlayerSchema(); ps.id = p.id; schema.players.set(p.id, ps); }
-    ps.name = p.name; ps.connected = p.connected; ps.seat = p.seat;
+    ps.name = p.name; ps.avatar = p.avatar; ps.connected = p.connected; ps.seat = p.seat;
     ps.hp = p.hp; ps.maxHp = p.maxHp; ps.defense = p.defense; ps.alive = p.alive;
     ps.handCount = p.hand.length;
     ps.skipTurns = p.skipTurns;

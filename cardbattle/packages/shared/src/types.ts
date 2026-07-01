@@ -37,6 +37,7 @@ export interface CardInstance { id: string; defId: string; }
 export interface PlayerState {
   id: string;
   name: string;
+  avatar: string;            // chosen character id (humans: HUMAN_AVATARS; bots: BOT_AVATAR)
   connected: boolean;
   seat: number;
   hp: number;

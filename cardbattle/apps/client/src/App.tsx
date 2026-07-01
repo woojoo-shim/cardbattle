@@ -5,18 +5,19 @@ import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
+import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import './ui/arena.css';
 import type { BattleConnection } from './net/client.js';
 
 type Connect = () => Promise<BattleConnection>;
 
 export function App() {
-  const [name, setName] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
   const [connect, setConnect] = useState<Connect | null>(null);
 
-  if (name === null) return <NameGate onSubmit={setName} />;
+  if (profile === null) return <NameGate onSubmit={(name, avatar) => setProfile({ name, avatar })} />;
   // useState setters treat function values as updaters, so wrap to store the connect fn itself.
-  if (connect === null) return <RoomBrowser name={name} onPick={(c) => setConnect(() => c)} />;
+  if (connect === null) return <RoomBrowser name={profile.name} avatar={profile.avatar} onPick={(c) => setConnect(() => c)} />;
   // Dropping `connect` unmounts Game → useRoom's cleanup leaves the room → back to the browser.
   return <Game connect={connect} onExit={() => setConnect(null)} />;
 }
@@ -43,9 +44,10 @@ const HERO_CARDS = [
   { id: 'sword',     rarity: 'common',    a: 22,  x: 168,  y: 34 },
 ] as const;
 
-function NameGate({ onSubmit }: { onSubmit: (name: string) => void }) {
+function NameGate({ onSubmit }: { onSubmit: (name: string, avatar: string) => void }) {
   const [value, setValue] = useState('');
-  const go = () => { const n = value.trim() || 'Player'; onSubmit(n.slice(0, 16)); };
+  const [avatar, setAvatar] = useState(AVATAR_CHOICES[0].id);
+  const go = () => { const n = value.trim() || 'Player'; onSubmit(n.slice(0, 16), avatar); };
   return (
     <div style={gateWrap}>
       <div style={gateGlow} aria-hidden />
@@ -63,6 +65,26 @@ function NameGate({ onSubmit }: { onSubmit: (name: string) => void }) {
               <CardArt id={c.id} size={54} />
             </div>
           ))}
+        </div>
+
+        <span style={pickLabel}>캐릭터 선택</span>
+        <div style={pickRow}>
+          {AVATAR_CHOICES.map((c) => {
+            const on = c.id === avatar;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setAvatar(c.id)}
+                title={c.name}
+                aria-label={c.name}
+                aria-pressed={on}
+                style={pickCell(on)}
+              >
+                <AvatarArt avatar={c.id} size={40} />
+              </button>
+            );
+          })}
         </div>
 
         <div style={field} className="cb-field">
@@ -162,6 +184,24 @@ const heroSheen: React.CSSProperties = {
   background: 'linear-gradient(150deg, rgba(255,255,255,0.10), transparent 42%)',
 };
 
+const pickLabel: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10, letterSpacing: 3, color: C.faint, textTransform: 'uppercase',
+  marginBottom: 10,
+};
+const pickRow: React.CSSProperties = {
+  display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8,
+  width: 'min(360px, 90vw)', marginBottom: 18,
+};
+function pickCell(on: boolean): React.CSSProperties {
+  return {
+    width: 52, height: 52, padding: 0, cursor: 'pointer', borderRadius: 12,
+    display: 'grid', placeItems: 'center',
+    background: on ? 'linear-gradient(160deg, rgba(56,232,200,0.16), rgba(123,92,255,0.12))' : 'rgba(20,24,34,0.6)',
+    border: `1px solid ${on ? C.you : C.border}`,
+    boxShadow: on ? `0 0 0 1px ${C.you}, 0 0 16px rgba(56,232,200,0.35)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+    transition: 'border-color .2s, box-shadow .2s, background .2s',
+  };
+}
 // A single pill housing the name field + enter action; the whole pill lights on focus.
 const field: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 6, width: 'min(360px, 90vw)', padding: 6,

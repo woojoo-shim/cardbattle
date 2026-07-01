@@ -4,11 +4,12 @@ import {
   CARD_DEFS, requiresTarget,
   type GameState, type Action, type GameEvent, type PlayerState,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE,
+  BOT_AVATAR, sanitizeAvatar,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
 
-interface JoinOptions { name?: string; }
-interface CreateOptions { name?: string; title?: string; }
+interface JoinOptions { name?: string; avatar?: string; }
+interface CreateOptions { name?: string; title?: string; avatar?: string; }
 
 /** Short, friendly, unambiguous room code (no 0/O/1/I) friends can type to join. */
 function makeCode(): string {
@@ -55,7 +56,7 @@ export class BattleRoom extends Room<BattleState> {
       if (this.gs.players.length >= MAX_PLAYERS) return;
       const id = `bot-${this.botCounter++}`;
       this.gs.players.push({
-        id, name: `봇 ${this.botCounter}`,
+        id, name: `봇 ${this.botCounter}`, avatar: BOT_AVATAR,
         connected: true, seat: this.gs.players.length,
         hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
         skipTurns: 0, gamble: false, empower: 1,
@@ -70,7 +71,7 @@ export class BattleRoom extends Room<BattleState> {
   onJoin(client: Client, options: JoinOptions): void {
     if (this.gs.phase !== 'lobby') { client.leave(); return; }
     this.gs.players.push({
-      id: client.sessionId, name: (options.name ?? 'Player').slice(0, 16),
+      id: client.sessionId, name: (options.name ?? 'Player').slice(0, 16), avatar: sanitizeAvatar(options.avatar),
       connected: true, seat: this.gs.players.length,
       hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
       skipTurns: 0, gamble: false, empower: 1,

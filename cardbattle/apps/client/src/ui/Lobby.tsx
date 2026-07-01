@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
 import { MIN_PLAYERS, MAX_PLAYERS } from '@cardbattle/shared';
+import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 
 interface Props {
   ui: UiState;
@@ -31,7 +32,10 @@ export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
       <ul style={list}>
         {ui.players.map((p) => (
           <li key={p.id} style={{ ...row, ...(p.id === myId ? rowMe : null) }}>
-            <span style={{ opacity: p.connected ? 1 : 0.4 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: p.connected ? 1 : 0.4 }}>
+              <span style={thumb}>
+                <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={30} />
+              </span>
               {p.name}{p.id === myId ? ' (나)' : ''}
             </span>
             <span style={{ color: '#3df2c0', fontSize: 13 }}>좌석 {p.seat + 1}</span>
@@ -82,6 +86,10 @@ const row: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)',
 };
 const rowMe: React.CSSProperties = { borderColor: '#7b5cff', boxShadow: '0 0 16px rgba(123,92,255,0.4)' };
+const thumb: React.CSSProperties = {
+  width: 34, height: 34, borderRadius: 9, display: 'grid', placeItems: 'center', flexShrink: 0,
+  background: 'linear-gradient(160deg,#1b2336,#101626)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
+};
 const btn: React.CSSProperties = {
   padding: '14px 40px', fontSize: 18, fontWeight: 700, color: '#fff', cursor: 'pointer',
   border: 'none', borderRadius: 12, background: 'linear-gradient(90deg,#7b5cff,#5b3cff)',

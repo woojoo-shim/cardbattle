@@ -5,6 +5,7 @@ import type { BattleConnection } from '../net/client.js';
 export interface UiPlayer {
   id: string;
   name: string;
+  avatar: string;
   connected: boolean;
   seat: number;
   hp: number;
@@ -52,6 +53,7 @@ function snapshot(state: any): UiState {
     players.push({
       id: p.id,
       name: p.name,
+      avatar: p.avatar ?? '',
       connected: p.connected,
       seat: p.seat,
       hp: p.hp,

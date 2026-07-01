@@ -43,22 +43,22 @@ function Goblin() {
   );
 }
 
-/** 2 — Automaton */
-function Automaton() {
+/** 2 — Automaton (the bot shape). `tint` colors its glowing parts so each bot differs. */
+function Automaton({ tint = RED }: { tint?: string }) {
   return (
     <>
       <path d="M16 16 L48 16 L52 24 L52 52 L12 52 L12 24 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
       <path d="M16 16 L32 16 L32 52 L12 52 L12 24 Z" fill="#1f2638" opacity="0.6" />
       <rect x="20" y="26" width="24" height="12" rx="2" fill="#0a0d14" stroke="#3a4256" strokeWidth="1.2" />
-      <rect x="22" y="29" width="20" height="2" fill={RED} opacity="0.5" />
-      <circle cx="32" cy="32" r="3.5" fill={RED} style={{ filter: 'blur(0.5px)' }} />
+      <rect x="22" y="29" width="20" height="2" fill={tint} opacity="0.5" />
+      <circle cx="32" cy="32" r="3.5" fill={tint} style={{ filter: 'blur(0.5px)' }} />
       <circle cx="32" cy="32" r="1.5" fill="#fff" />
       <rect x="22" y="44" width="20" height="4" rx="1" fill="#161b27" stroke="#3a4256" strokeWidth="0.8" />
       <line x1="26" y1="44" x2="26" y2="48" stroke="#3a4256" strokeWidth="0.8" />
       <line x1="32" y1="44" x2="32" y2="48" stroke="#3a4256" strokeWidth="0.8" />
       <line x1="38" y1="44" x2="38" y2="48" stroke="#3a4256" strokeWidth="0.8" />
       <line x1="32" y1="8" x2="32" y2="16" stroke="#566180" strokeWidth="1.5" />
-      <circle cx="32" cy="7" r="2.5" fill={RED} />
+      <circle cx="32" cy="7" r="2.5" fill={tint} />
     </>
   );
 }
@@ -163,21 +163,33 @@ function Hero() {
   );
 }
 
-const CREATURES = [Mage, Goblin, Automaton, Dragon, Ogre, Vampire, Bat, Ghost];
+/** Avatar id -> portrait component. 'bot' is the reserved Automaton (only bots use it). */
+const AVATARS: Record<string, () => JSX.Element> = {
+  hero: Hero, mage: Mage, goblin: Goblin, dragon: Dragon,
+  ogre: Ogre, vampire: Vampire, bat: Bat, ghost: Ghost,
+};
 
-export function CreatureArt({ seat, size = 58 }: { seat: number; size?: number }) {
-  const Art = CREATURES[seat % CREATURES.length];
+/** Human-selectable characters (id + Korean label), in picker order. Excludes the bot shape. */
+export const AVATAR_CHOICES: { id: string; name: string }[] = [
+  { id: 'hero', name: '기사' },
+  { id: 'mage', name: '마법사' },
+  { id: 'goblin', name: '고블린' },
+  { id: 'dragon', name: '드래곤' },
+  { id: 'ogre', name: '오우거' },
+  { id: 'vampire', name: '뱀파이어' },
+  { id: 'bat', name: '박쥐' },
+  { id: 'ghost', name: '유령' },
+];
+
+/** Distinct glow colors so each bot at the table reads as its own machine. */
+export const BOT_TINTS = ['#ff3b6b', '#38e8c8', '#ffd84a', '#8b6cff', '#5aa9ff', '#ff8a3b', '#5df08a', '#ff5ad0'];
+
+/** Unified portrait renderer. `bot` avatars render the Automaton tinted by `tint`. */
+export function AvatarArt({ avatar, tint, size = 58 }: { avatar: string; tint?: string; size?: number }) {
+  const isBot = avatar === 'bot' || !AVATARS[avatar];
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
-      <Art />
-    </svg>
-  );
-}
-
-export function HeroArt({ size = 48 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
-      <Hero />
+      {isBot ? <Automaton tint={tint} /> : AVATARS[avatar]()}
     </svg>
   );
 }

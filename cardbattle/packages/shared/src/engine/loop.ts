@@ -1,12 +1,12 @@
 import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
-import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, TURN_SECONDS } from '../constants.js';
+import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, TURN_SECONDS, DEFAULT_AVATAR } from '../constants.js';
 import { ALL_DEFS } from '../cards/defs.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
 
 export function initGame(seats: { id: string; name: string }[]): GameState {
   const players: PlayerState[] = seats.map((s, i) => ({
-    id: s.id, name: s.name, connected: true, seat: i,
+    id: s.id, name: s.name, avatar: DEFAULT_AVATAR, connected: true, seat: i,
     hp: START_HP, maxHp: START_HP, defense: START_DEFENSE,
     hand: [], equipment: [], statuses: [], buffs: [], alive: true,
     skipTurns: 0, gamble: false, empower: 1,

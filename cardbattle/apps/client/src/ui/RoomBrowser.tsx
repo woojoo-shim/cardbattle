@@ -4,6 +4,7 @@ import { C, mono, sans } from './theme.js';
 
 interface Props {
   name: string;
+  avatar: string;
   onPick: (connect: () => Promise<BattleConnection>) => void;
 }
 
@@ -13,7 +14,7 @@ function headcount(r: RoomInfo): number {
 
 /** StarCraft-style custom-game browser: live list of open rooms, host a new room,
  * or join by a 4-char code friends share. Quick-play drops straight into a bot game. */
-export function RoomBrowser({ name, onPick }: Props) {
+export function RoomBrowser({ name, avatar, onPick }: Props) {
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
@@ -34,9 +35,9 @@ export function RoomBrowser({ name, onPick }: Props) {
     .filter((r) => !r.metadata?.started && headcount(r) < r.maxClients)
     .sort((a, b) => (a.metadata?.title ?? '').localeCompare(b.metadata?.title ?? ''));
 
-  const create = () => onPick(() => createRoom(name, title.trim()));
-  const join = (roomId: string) => onPick(() => joinRoomById(roomId, name));
-  const quick = () => onPick(() => quickPlay(name));
+  const create = () => onPick(() => createRoom(name, title.trim(), avatar));
+  const join = (roomId: string) => onPick(() => joinRoomById(roomId, name, avatar));
+  const quick = () => onPick(() => quickPlay(name, avatar));
   const joinByCode = () => {
     const c = code.trim().toUpperCase();
     if (!c) return;

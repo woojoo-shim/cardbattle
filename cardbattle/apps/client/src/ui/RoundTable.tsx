@@ -1,6 +1,6 @@
 import type { UiState } from '../state/useRoom.js';
 import { C, mono, sans } from './theme.js';
-import { CreatureArt, HeroArt } from './art/CreatureArt.js';
+import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 
 interface Props {
   ui: UiState;
@@ -112,7 +112,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             >
               {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}>🛡{p.defense}</span>}
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}>⚠</span>}
-              {isMe ? <HeroArt size={56} /> : <CreatureArt seat={p.seat} size={56} />}
+              <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={56} />
               {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
               {!p.alive && <span style={skull}>☠</span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(56,232,200,0.4)' : 'rgba(255,59,107,0.35)'}, transparent 70%)` }} />}
