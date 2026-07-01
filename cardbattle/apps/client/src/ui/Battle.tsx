@@ -133,19 +133,19 @@ const errToast: React.CSSProperties = {
 // My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). Sized in clamp units so it
 // keeps proportion on iPad. Always visible; the orb dims a touch when it isn't my turn.
 const manaDock: React.CSSProperties = {
-  position: 'absolute', bottom: 30, left: 32, zIndex: 16,
-  display: 'flex', alignItems: 'center', gap: 10,
-  padding: 'clamp(8px, 1vw, 12px) clamp(12px, 1.4vw, 18px)', borderRadius: 12,
-  background: 'linear-gradient(180deg, rgba(20,30,54,0.92), rgba(12,18,34,0.92))',
-  border: '1px solid #2a4a80', boxShadow: '0 8px 20px rgba(30,70,150,0.3)',
+  position: 'absolute', bottom: 28, left: 28, zIndex: 16,
+  display: 'flex', alignItems: 'center', gap: 14,
+  padding: 'clamp(12px, 1.4vw, 18px) clamp(18px, 2vw, 28px)', borderRadius: 16,
+  background: 'linear-gradient(180deg, rgba(20,30,54,0.94), rgba(12,18,34,0.94))',
+  border: '1.5px solid #3a5da0', boxShadow: '0 10px 28px rgba(30,70,150,0.42), inset 0 0 20px rgba(80,150,255,0.12)',
 };
 const manaOrb: React.CSSProperties = {
-  fontSize: 'clamp(20px, 2.2vw, 30px)', color: '#6fb6ff',
-  textShadow: '0 0 14px rgba(90,160,255,0.8)', transition: 'opacity .3s ease',
+  fontSize: 'clamp(34px, 3.6vw, 52px)', color: '#6fb6ff',
+  textShadow: '0 0 22px rgba(90,160,255,0.95), 0 0 8px rgba(150,200,255,0.9)', transition: 'opacity .3s ease',
 };
 const manaText: React.CSSProperties = { display: 'flex', flexDirection: 'column', lineHeight: 1 };
-const manaNum: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(20px, 2.2vw, 30px)', fontWeight: 900, color: '#cfe6ff' };
-const manaLabel: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(8px, 0.8vw, 10px)', letterSpacing: 2, color: C.faint, marginTop: 2 };
+const manaNum: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(34px, 3.6vw, 52px)', fontWeight: 900, color: '#e2f0ff', textShadow: '0 0 12px rgba(120,180,255,0.5)' };
+const manaLabel: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(11px, 1vw, 14px)', letterSpacing: 3, color: '#7fa8d8', marginTop: 4 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
   color: '#04231b', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
