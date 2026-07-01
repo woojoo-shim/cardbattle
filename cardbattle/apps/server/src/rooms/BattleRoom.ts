@@ -4,7 +4,7 @@ import {
   CARD_DEFS, requiresTarget, resolveMode,
   type GameState, type Action, type GameEvent, type PlayerState, type GameModeId,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, MANA_MAX,
-  BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN,
+  BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
 import { me, accountFromToken } from '../auth/auth.js';
@@ -46,6 +46,8 @@ export class BattleRoom extends Room<BattleState> {
   // seat id (sessionId or bot id) → equipped cosmetics, mirrored to the schema each publish.
   private cosmetics = new Map<string, SeatCosmetics>();
   private awarded = false;
+  // sessionId → last emote timestamp, for per-sender rate limiting.
+  private emoteAt = new Map<string, number>();
 
   private ctx() {
     return { nextCardId: () => `card-${this.cardCounter++}`, now: Date.now() };
@@ -82,6 +84,20 @@ export class BattleRoom extends Room<BattleState> {
       this.ready.set(id, true); // bots are always ready
       this.publish();
       if (this.allReady()) this.begin();
+    });
+
+    // Quick-emote: a seated player broadcasts a preset reaction to the whole table.
+    // Rate-limited (one per ~1.2s per sender) so it can't be spammed. Validates the emote
+    // id against the shared preset list — free text is impossible by construction.
+    this.onMessage('emote', (client, msg: { id?: string }) => {
+      const emote = msg?.id ? EMOTE_BY_ID[msg.id] : undefined;
+      if (!emote) return;
+      if (!this.gs.players.some((p) => p.id === client.sessionId)) return; // must be seated
+      const last = this.emoteAt.get(client.sessionId) ?? 0;
+      const now = Date.now();
+      if (now - last < 1200) return; // rate limit
+      this.emoteAt.set(client.sessionId, now);
+      this.broadcast('emote', { playerId: client.sessionId, id: emote.id });
     });
 
     this.onMessage('removeBot', (_client, msg: { botId?: string } = {}) => {

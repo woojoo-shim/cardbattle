@@ -40,16 +40,26 @@ export interface RoomError {
   message: string;
 }
 
+/** A live emote bubble to draw over a seat. `key` is unique so re-sending the same
+ * emote restarts its bubble; the layer removes it when it expires. */
+export interface LiveEmote {
+  key: number;
+  playerId: string;
+  id: string;
+}
+
 export interface UseRoom {
   conn: BattleConnection | null;
   ui: UiState | null;
   hand: CardInstance[];
   events: GameEvent[];
   error: RoomError | null;
+  emotes: LiveEmote[];
   send: (action: Action) => void;
   setReady: (ready: boolean) => void;
   addBot: () => void;
   removeBot: (botId?: string) => void;
+  sendEmote: (id: string) => void;
 }
 
 /** Build a plain UiState snapshot from the decoded Colyseus schema. */
@@ -99,7 +109,9 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const [hand, setHand] = useState<CardInstance[]>([]);
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [error, setError] = useState<RoomError | null>(null);
+  const [emotes, setEmotes] = useState<LiveEmote[]>([]);
   const connRef = useRef<BattleConnection | null>(null);
+  const emoteKey = useRef(0);
 
   useEffect(() => {
     let disposed = false;
@@ -117,6 +129,13 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
         c.room.onMessage('events', (evts: GameEvent[]) =>
           setEvents((prev) => [...prev, ...evts]));
         c.room.onMessage('error', (err: RoomError) => setError(err));
+        c.room.onMessage('emote', (m: { playerId: string; id: string }) => {
+          // One bubble per player at a time: replace any existing bubble for this seat,
+          // then auto-dismiss this one after it has been on screen a few seconds.
+          const key = ++emoteKey.current;
+          setEmotes((prev) => [...prev.filter((e) => e.playerId !== m.playerId), { key, playerId: m.playerId, id: m.id }]);
+          setTimeout(() => setEmotes((prev) => prev.filter((e) => e.key !== key)), 3200);
+        });
       })
       .catch((err) => setError({ code: 'JOIN_FAILED', message: String(err?.message ?? err) }));
 
@@ -131,6 +150,7 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const setReady = (ready: boolean) => connRef.current?.room.send('setReady', { ready });
   const addBot = () => connRef.current?.room.send('addBot');
   const removeBot = (botId?: string) => connRef.current?.room.send('removeBot', botId ? { botId } : {});
+  const sendEmote = (id: string) => connRef.current?.room.send('emote', { id });
 
-  return { conn, ui, hand, events, error, send, setReady, addBot, removeBot };
+  return { conn, ui, hand, events, error, emotes, send, setReady, addBot, removeBot, sendEmote };
 }

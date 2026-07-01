@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, requiresTarget } from '@cardbattle/shared';
-import type { UiState, RoomError } from '../state/useRoom.js';
+import type { UiState, RoomError, LiveEmote } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
 import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
 import { RevealOverlay } from './RevealOverlay.js';
+import { EmoteBar } from './EmoteBar.js';
+import { EmoteLayer } from './EmoteLayer.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
@@ -22,9 +24,11 @@ interface Props {
   send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'end_turn' }) => void;
   onExit: () => void;
   borderCosmetic?: string;
+  emotes: LiveEmote[];
+  sendEmote: (id: string) => void;
 }
 
-export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic }: Props) {
+export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
@@ -70,6 +74,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   return (
     <div style={screen}>
       <VfxLayer events={events} players={ui.players} />
+      <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
@@ -90,6 +95,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           </div>
         </div>
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
+        <EmoteBar onSend={sendEmote} />
         {isMyTurn && (
           <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); }}>
             턴 종료&nbsp;<Icon name="arrowRight" size={15} />
