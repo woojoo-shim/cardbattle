@@ -3,7 +3,8 @@ import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
-import { C, mono, sans } from './ui/theme.js';
+import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
+import { CardArt } from './ui/art/CardArt.js';
 import './ui/arena.css';
 import type { BattleConnection } from './net/client.js';
 
@@ -32,14 +33,13 @@ function Game({ connect }: { connect: Connect }) {
   return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} />;
 }
 
-/** Drifting suit glyphs scattered in the deep behind the entry card. */
-const GLYPHS = [
-  { ch: '♠', x: '11%', y: '20%', size: 58, color: C.magic, delay: 0,   dur: 9 },
-  { ch: '♥', x: '83%', y: '24%', size: 46, color: C.enemy, delay: 1.4, dur: 11 },
-  { ch: '♦', x: '17%', y: '73%', size: 42, color: C.you,   delay: 0.8, dur: 10 },
-  { ch: '♣', x: '87%', y: '69%', size: 52, color: C.rare,  delay: 2.1, dur: 12 },
-  { ch: '♦', x: '67%', y: '13%', size: 28, color: C.you,   delay: 2.6, dur: 10 },
-  { ch: '♠', x: '50%', y: '87%', size: 30, color: C.magic, delay: 1.0, dur: 13 },
+/** A fanned hand of real game cards, dealt across the void behind the title. */
+const HERO_CARDS = [
+  { id: 'reverse',   rarity: 'rare',      a: -22, x: -168, y: 34 },
+  { id: 'bomb',      rarity: 'epic',      a: -11, x: -88,  y: 9 },
+  { id: 'snipe',     rarity: 'legendary', a: 0,   x: 0,    y: 0 },
+  { id: 'greatheal', rarity: 'rare',      a: 11,  x: 88,   y: 9 },
+  { id: 'sword',     rarity: 'common',    a: 22,  x: 168,  y: 34 },
 ] as const;
 
 function NameGate({ onSubmit }: { onSubmit: (name: string) => void }) {
@@ -47,34 +47,24 @@ function NameGate({ onSubmit }: { onSubmit: (name: string) => void }) {
   const go = () => { const n = value.trim() || 'Player'; onSubmit(n.slice(0, 16)); };
   return (
     <div style={gateWrap}>
-      <div style={gateBg} className="cb-abyss-bg" aria-hidden />
+      <div style={gateGlow} aria-hidden />
       <div style={gateVignette} aria-hidden />
-      <div style={glyphLayer} aria-hidden>
-        {GLYPHS.map((g, i) => (
-          <span
-            key={i}
-            className="cb-drift"
-            style={{
-              position: 'absolute', left: g.x, top: g.y, fontSize: g.size, color: g.color,
-              opacity: 0.16, textShadow: `0 0 24px ${g.color}`, userSelect: 'none',
-              ['--dur' as string]: `${g.dur}s`, ['--delay' as string]: `${g.delay}s`,
-            } as React.CSSProperties}
-          >
-            {g.ch}
-          </span>
-        ))}
-      </div>
 
       <div style={gateContent} className="cb-gate-in">
-        <div style={crest} aria-hidden>
-          <span style={crestRing} className="cb-crest-ring" />
-          <span style={crestGlyph}>⚔</span>
-        </div>
-        <h1 style={brand} className="cb-brand">CARD&nbsp;BATTLE</h1>
-        <p style={tagline}>◈&nbsp;&nbsp;THE ABYSSAL ARENA&nbsp;&nbsp;◈</p>
+        <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
+        <h1 style={brand}>CARD&nbsp;BATTLE</h1>
+        <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
 
-        <div style={panel}>
-          <label style={label}>플레이어 이름</label>
+        <div style={heroFan} className="cb-hero-float" aria-hidden>
+          {HERO_CARDS.map((c) => (
+            <div key={c.id} style={heroCard(c)}>
+              <div style={heroSheen} />
+              <CardArt id={c.id} size={54} />
+            </div>
+          ))}
+        </div>
+
+        <div style={field} className="cb-field">
           <input
             className="cb-nick"
             autoFocus
@@ -85,9 +75,11 @@ function NameGate({ onSubmit }: { onSubmit: (name: string) => void }) {
             onKeyDown={(e) => e.key === 'Enter' && go()}
             style={input}
           />
-          <button className="cb-enter" onClick={go} style={enter}>입장하기</button>
+          <button className="cb-enter" onClick={go} style={enter} aria-label="입장">
+            입장&nbsp;<span style={{ fontWeight: 900 }}>→</span>
+          </button>
         </div>
-        <p style={hint}>이름을 정하고 심연의 투기장에 입장하세요</p>
+        <p style={hint}>이름을 정하고 심연의 투기장에 뛰어드세요</p>
       </div>
     </div>
   );
@@ -104,75 +96,88 @@ const center: React.CSSProperties = {
 
 const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: C.void, fontFamily: sans,
-};
-const gateBg: React.CSSProperties = {
-  position: 'absolute', inset: '-20%', pointerEvents: 'none',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
   background:
-    'radial-gradient(60% 55% at 50% 38%, rgba(123,92,255,0.28), transparent 62%),' +
-    'radial-gradient(70% 60% at 50% 108%, rgba(56,232,200,0.20), transparent 60%),' +
-    'radial-gradient(40% 40% at 82% 12%, rgba(255,59,107,0.14), transparent 70%)',
+    'radial-gradient(72% 52% at 50% 116%, rgba(56,232,200,0.10), transparent 60%),' +
+    'radial-gradient(60% 46% at 50% -12%, rgba(123,92,255,0.11), transparent 62%),' +
+    '#07080d',
+};
+// One restrained pool of light behind the hand — glow is a moment, not wallpaper.
+const gateGlow: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '46%', width: 520, height: 300,
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at center, rgba(123,92,255,0.16), transparent 68%)',
+  filter: 'blur(6px)',
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(4,5,9,0.85) 100%)',
-  boxShadow: 'inset 0 0 220px rgba(0,0,0,0.9)',
-};
-const glyphLayer: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none',
-  fontFamily: '"Geist", system-ui, sans-serif',
+  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,5,9,0.92) 100%)',
 };
 
 const gateContent: React.CSSProperties = {
   position: 'relative', zIndex: 2,
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+  display: 'flex', flexDirection: 'column', alignItems: 'center',
   padding: '0 20px',
 };
-const crest: React.CSSProperties = {
-  position: 'relative', width: 72, height: 72, display: 'grid', placeItems: 'center', marginBottom: 2,
+const kicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 11, letterSpacing: 6, color: C.faint, textTransform: 'uppercase',
+  marginBottom: 12,
 };
-const crestRing: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: '50%',
-  border: `1.5px dashed ${C.borderHi}`,
-  boxShadow: `0 0 26px rgba(123,92,255,0.35), inset 0 0 18px rgba(56,232,200,0.18)`,
-};
-const crestGlyph: React.CSSProperties = {
-  fontSize: 34, lineHeight: 1, filter: 'drop-shadow(0 0 12px rgba(244,196,74,0.6))',
-};
+// Brushed-metal title — near-white with a top-lit sheen, engraved by a soft drop shadow.
 const brand: React.CSSProperties = {
-  margin: 0, fontSize: 'clamp(40px, 9vw, 64px)', fontWeight: 900, letterSpacing: 6, lineHeight: 1,
+  margin: 0, fontSize: 'clamp(44px, 9.5vw, 70px)', fontWeight: 900, letterSpacing: 3, lineHeight: 1,
   fontFamily: sans,
-  background: 'linear-gradient(90deg,#7b5cff,#3df2c0,#ff5c8a,#7b5cff)',
+  background: 'linear-gradient(180deg, #ffffff 0%, #d3d8ea 46%, #8890a8 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
 };
-const tagline: React.CSSProperties = {
-  margin: '2px 0 10px', fontFamily: mono, fontSize: 12, letterSpacing: 5,
-  color: C.dim, textTransform: 'uppercase',
+const ruleWrap: React.CSSProperties = {
+  marginTop: 14, width: 'min(340px, 74vw)', height: 2, borderRadius: 2, overflow: 'hidden',
 };
-const panel: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 12, width: 300,
-  padding: '22px 22px 24px', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(31,36,52,0.72), rgba(14,16,24,0.82))',
-  border: `1px solid ${C.border}`,
-  boxShadow: '0 30px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+const rule: React.CSSProperties = {
+  display: 'block', width: '100%', height: '100%',
+  background: 'linear-gradient(90deg, transparent, #38e8c8 32%, #8b6cff 68%, transparent)',
+  backgroundSize: '220% 100%',
+};
+
+const heroFan: React.CSSProperties = {
+  position: 'relative', width: 'min(440px, 92vw)', height: 168, margin: '30px 0 34px',
+  pointerEvents: 'none', filter: 'drop-shadow(0 22px 44px rgba(0,0,0,0.55))',
+};
+function heroCard(c: (typeof HERO_CARDS)[number]): React.CSSProperties {
+  const depth = Math.abs(c.a);
+  const opacity = depth === 0 ? 1 : depth >= 22 ? 0.66 : 0.85;
+  return {
+    position: 'absolute', left: '50%', top: '50%', width: 88, height: 122, opacity,
+    transform: `translate(-50%, -50%) translate(${c.x}px, ${c.y}px) rotate(${c.a}deg)`,
+    background: 'linear-gradient(180deg, #1c2233, #0d121c)',
+    border: `1px solid ${RARITY_BORDER[c.rarity]}`, borderRadius: 12,
+    display: 'grid', placeItems: 'center', overflow: 'hidden',
+    boxShadow: `0 12px 26px rgba(0,0,0,0.5), inset 0 0 22px ${RARITY_BORDER[c.rarity]}22`,
+  };
+}
+const heroSheen: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none',
+  background: 'linear-gradient(150deg, rgba(255,255,255,0.10), transparent 42%)',
+};
+
+// A single pill housing the name field + enter action; the whole pill lights on focus.
+const field: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 6, width: 'min(360px, 90vw)', padding: 6,
+  borderRadius: 14, background: 'rgba(20,24,34,0.72)', border: `1px solid ${C.border}`,
+  boxShadow: '0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
   backdropFilter: 'blur(8px)',
 };
-const label: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, letterSpacing: 2, color: C.faint, textTransform: 'uppercase',
-  textAlign: 'left',
-};
 const input: React.CSSProperties = {
-  padding: '13px 16px', fontSize: 16, width: '100%', boxSizing: 'border-box', textAlign: 'center',
-  color: C.text, fontFamily: sans,
-  background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.borderHi}`, borderRadius: 10, outline: 'none',
+  flex: 1, minWidth: 0, padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
+  background: 'transparent', border: 'none', outline: 'none',
 };
 const enter: React.CSSProperties = {
-  padding: '13px 20px', fontSize: 16, fontWeight: 800, letterSpacing: 1, color: '#fff', cursor: 'pointer',
-  border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg,#7b5cff,#5b3cff 55%,#38e8c8)',
-  boxShadow: '0 8px 24px rgba(123,92,255,0.45)',
+  flexShrink: 0, padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
+  color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
+  boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
 };
 const hint: React.CSSProperties = {
-  margin: '4px 0 0', fontSize: 12, color: C.faint, fontFamily: sans,
+  margin: '16px 0 0', fontSize: 12.5, color: C.faint, fontFamily: sans, letterSpacing: 0.2,
 };
