@@ -17,6 +17,7 @@ type Fx =
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
+  | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -122,11 +123,12 @@ export function VfxLayer({ events, players }: Props) {
         const color = ELEM[def.element] ?? ELEM.none;
         const isAttack = def.effects.some((ef) => ef.kind === 'damage');
         if (isAttack) {
-          // Per-item projectile: the weapon/spell is hurled from the caster toward its target
-          // (a chosen foe, or the table centre for area/random hits). Blades spin; magic glides.
+          // A sleek light-streak lances from the caster toward its target (a chosen foe, or the
+          // table centre for area/random hits) — an element-tinted comet, not a thrown blade.
           const chosen = e.targetId ? centerOf(e.targetId) : null;
           const dest = chosen ?? tableCenter() ?? src;
-          add.push({ id: nextId.current++, kind: 'hurl', x: src.x, y: src.y, dx: dest.x - src.x, dy: dest.y - src.y, defId: e.defId, color, spin: def.kind === 'weapon' });
+          const dx = dest.x - src.x, dy = dest.y - src.y;
+          add.push({ id: nextId.current++, kind: 'streak', x: src.x, y: src.y, dx, dy, color, ang: Math.atan2(dy, dx) * 180 / Math.PI });
         } else {
           // Non-offensive cards (heal/shield/tempo) are dealt onto the table in front of the player.
           const c = tableCenter();
@@ -196,6 +198,8 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={hurlStyle(f)}>
               {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
             </span>
+          ) : f.kind === 'streak' ? (
+            <span key={f.id} style={streakStyle(f)} />
           ) : f.kind === 'bloom' ? (
             <span key={f.id} style={bloomStyle(f)} />
           ) : f.kind === 'burst' ? (
@@ -238,6 +242,18 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
     animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .64s cubic-bezier(.34,.32,.2,1) forwards`,
+  } as React.CSSProperties;
+}
+/** A slender element-tinted comet — bright head, fading tail — that lances caster->target.
+ *  Oriented along the travel angle so it always leads with its glowing head. */
+function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 54, height: 3, borderRadius: 3,
+    background: `linear-gradient(90deg, transparent, ${f.color} 62%, #fff)`,
+    boxShadow: `0 0 12px ${f.color}, 0 0 22px ${f.color}`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
+    animation: 'cb-streak .46s cubic-bezier(.4,0,.3,1) forwards',
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
