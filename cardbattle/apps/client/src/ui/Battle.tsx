@@ -121,11 +121,13 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
-  // A deeper, heavier well of dark than S1: one restrained pool of light over the table, edges
-  // sinking into near-black so the arena feels weighty and enclosed rather than bright and busy.
+  // Heavy violet-abyss mood: a brooding indigo darkness with a low violet halo pooling around
+  // the table, edges sinking into near-black so the arena feels oppressive and enclosed. The
+  // single mint pendant lamp is the lone warm key light cutting through the cold dark.
   background:
-    'radial-gradient(110% 82% at 50% 5%, #10131e 0%, #090b12 44%, #040509 100%), #040509',
-  boxShadow: 'inset 0 0 260px 60px rgba(0,0,0,0.9)',
+    'radial-gradient(66% 48% at 50% 50%, rgba(104,58,168,0.16), transparent 70%),' +
+    'radial-gradient(120% 88% at 50% 4%, #17111f 0%, #0b0812 46%, #050409 100%), #050409',
+  boxShadow: 'inset 0 0 260px 70px rgba(0,0,0,0.92)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
@@ -133,7 +135,7 @@ const tableRow: React.CSSProperties = { position: 'relative', minHeight: 0, disp
 const fieldGrid: React.CSSProperties = {
   position: 'absolute', inset: 0,
   backgroundImage:
-    'linear-gradient(rgba(56,232,200,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(56,232,200,0.025) 1px, transparent 1px)',
+    'linear-gradient(rgba(140,104,224,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(140,104,224,0.03) 1px, transparent 1px)',
   backgroundSize: '40px 40px',
   WebkitMaskImage: 'radial-gradient(52% 60% at 50% 48%, #000, transparent)',
   maskImage: 'radial-gradient(52% 60% at 50% 48%, #000, transparent)',

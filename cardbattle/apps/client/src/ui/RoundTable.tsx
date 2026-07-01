@@ -152,15 +152,16 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   width: '62%', height: '70%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 38%, #15324a 0%, #102438 45%, #0a1626 100%)',
-  border: '2px solid #1d3a52', boxShadow: 'inset 0 0 60px rgba(0,0,0,0.6), 0 30px 70px rgba(0,0,0,0.55)',
+  // Deep oxblood-violet felt: a heavy, blood-dark table that sinks into the abyss at its rim.
+  background: 'radial-gradient(ellipse at 50% 38%, #2a1a3e 0%, #1c1230 45%, #0d0819 100%)',
+  border: '2px solid #35234f', boxShadow: 'inset 0 0 62px rgba(0,0,0,0.66), 0 30px 72px rgba(0,0,0,0.6)',
 };
 const feltRim: React.CSSProperties = {
-  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(56,232,200,0.18)',
+  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(150,110,255,0.16)',
 };
 const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
-  boxShadow: 'inset 0 0 40px rgba(56,232,200,0.08)',
+  boxShadow: 'inset 0 0 44px rgba(124,88,220,0.10)',
 };
 // Pendant lamp over the table centre. The fixture (cord + shade) is always lit; the emitted
 // light (bulb, cone, floor pool) plays the cb-lampon flicker once when RoundTable mounts (= game start).
