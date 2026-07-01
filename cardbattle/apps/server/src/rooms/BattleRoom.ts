@@ -175,7 +175,7 @@ export class BattleRoom extends Room<BattleState> {
     if (this.gs.phase !== 'playing') return;
     const cur = this.gs.turnOrder[this.gs.currentTurnIndex];
     if (this.bots.has(cur)) {
-      this.turnTimer = setTimeout(() => this.botTurn(), 900);
+      this.turnTimer = setTimeout(() => this.botTurn(), 1500);
     } else {
       this.armTimer();
     }
@@ -195,9 +195,11 @@ export class BattleRoom extends Room<BattleState> {
       this.gs = r.state; this.publish(r.events);
       if (this.gs.phase === 'ended') { this.clearTimer(); return; }
       // Loop: keep taking affordable actions this same turn, then end when nothing's worth playing.
-      this.turnTimer = setTimeout(() => this.botTurn(), 700);
+      // Deliberately slow — each play should land with weight before the next, not rattle off.
+      this.turnTimer = setTimeout(() => this.botTurn(), 1250);
     } else {
-      this.botEndTurn();
+      // A held beat before the turn passes, so the table isn't yanked to the next seat.
+      this.turnTimer = setTimeout(() => this.botEndTurn(), 700);
     }
   }
 

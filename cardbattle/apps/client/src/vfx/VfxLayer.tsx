@@ -19,8 +19,9 @@ type Fx =
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
-/** When the projectile lands, the impact ring/number pops — synced to the hurl travel time. */
-const IMPACT_DELAY = 0.34;
+/** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
+ *  Kept in step with the slower, weightier hurl so the hit reads as a deliberate arrival. */
+const IMPACT_DELAY = 0.46;
 
 /** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
 const ELEM: Record<Element, string> = {
@@ -47,20 +48,21 @@ function tableCenter(): { x: number; y: number } | null {
   return { x: x / els.length, y: y / els.length };
 }
 
-/** Briefly jolt the struck portrait with a damped, eased recoil that settles in place. */
+/** Jolt the struck portrait with a heavy, damped recoil that settles slowly in place —
+ *  a weighty blow, not a quick flinch. */
 function shake(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  el.style.animation = 'cb-shake .42s cubic-bezier(.33,.06,.28,.98)';
-  setTimeout(() => { el.style.animation = ''; }, 440);
+  el.style.animation = 'cb-shake .58s cubic-bezier(.33,.06,.28,.98)';
+  setTimeout(() => { el.style.animation = ''; }, 600);
 }
 
-/** The acting portrait glows up then eases back as it plays a card (smooth ramp, no flicker). */
+/** The acting portrait swells up then eases back as it plays a card — a slow, deliberate glow. */
 function castPulse(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  el.style.animation = 'cb-cast .5s ease-in-out';
-  setTimeout(() => { el.style.animation = ''; }, 520);
+  el.style.animation = 'cb-cast .72s ease-in-out';
+  setTimeout(() => { el.style.animation = ''; }, 740);
 }
 
 /**
@@ -160,14 +162,16 @@ export function VfxLayer({ events, players }: Props) {
     }
 
     if (damaged && flashRef.current) {
-      flashRef.current.style.boxShadow = 'inset 0 0 120px rgba(255,92,138,0.55)';
-      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(255,92,138,0)'; }, 90);
+      // A deep, unhurried crimson bloom at the screen edge — the hit sinks in, then recedes.
+      flashRef.current.style.boxShadow = 'inset 0 0 160px 20px rgba(196,42,74,0.5)';
+      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 260);
     }
 
     if (add.length) {
       setFx((cur) => [...cur, ...add]);
       const ids = new Set(add.map((a) => a.id));
-      setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 1300);
+      // Outlive the slowest effect (a delayed damage number rises for ~1.5s after landing).
+      setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2200);
     }
   }, [events]);
 
@@ -201,7 +205,7 @@ export function VfxLayer({ events, players }: Props) {
 }
 
 const flash: React.CSSProperties = {
-  position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 50, transition: 'box-shadow .4s ease-out',
+  position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 50, transition: 'box-shadow .6s ease-out',
 };
 const stage: React.CSSProperties = {
   position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 60, overflow: 'hidden',
@@ -223,7 +227,7 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
     filter: `drop-shadow(0 0 10px ${f.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))`,
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
-    animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .46s cubic-bezier(.3,.55,.4,1) forwards`,
+    animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .64s cubic-bezier(.34,.32,.2,1) forwards`,
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
@@ -238,7 +242,7 @@ function ringStyle(f: Extract<Fx, { kind: 'ring' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, width: 96, height: 96, borderRadius: '50%',
     border: `3px solid ${f.color}`, boxShadow: `0 0 22px ${f.color}`, willChange: 'transform, opacity',
-    animation: `cb-ring .62s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
+    animation: `cb-ring .84s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
@@ -249,7 +253,7 @@ function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
     boxShadow: `0 0 14px ${f.color}, 0 8px 18px rgba(0,0,0,0.6)`,
     fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
-    animation: 'cb-deal 1.1s cubic-bezier(.2,.7,.3,1) forwards',
+    animation: 'cb-deal 1.45s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
 }
 function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
@@ -258,6 +262,6 @@ function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
     fontFamily: '"Geist Mono", ui-monospace, monospace', fontWeight: 800, fontSize: 30,
     textShadow: `0 0 10px ${f.color}, 0 2px 4px rgba(0,0,0,0.7)`, whiteSpace: 'nowrap',
     willChange: 'transform, opacity',
-    animation: `cb-rise 1.15s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
+    animation: `cb-rise 1.5s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
 }

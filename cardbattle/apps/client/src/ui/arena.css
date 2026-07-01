@@ -13,11 +13,11 @@
    offset is baked into every key to keep the shake a tiny vibration in place, not a jump. */
 @keyframes cb-shake {
   0%   { transform: translate(-50%, -50%); }
-  14%  { transform: translate(calc(-50% - 3px),   calc(-50% + 1.6px)); }
-  28%  { transform: translate(calc(-50% + 2.6px), calc(-50% - 1.2px)); }
-  43%  { transform: translate(calc(-50% - 1.9px), calc(-50% + 1px)); }
-  58%  { transform: translate(calc(-50% + 1.3px), calc(-50% - 0.7px)); }
-  74%  { transform: translate(calc(-50% - 0.8px), calc(-50% + 0.4px)); }
+  13%  { transform: translate(calc(-50% - 4.4px), calc(-50% + 2.4px)); }
+  27%  { transform: translate(calc(-50% + 3.6px), calc(-50% - 1.8px)); }
+  42%  { transform: translate(calc(-50% - 2.6px), calc(-50% + 1.4px)); }
+  58%  { transform: translate(calc(-50% + 1.8px), calc(-50% - 0.9px)); }
+  75%  { transform: translate(calc(-50% - 1px),   calc(-50% + 0.5px)); }
   100% { transform: translate(-50%, -50%); }
 }
 /* The table lamp powering on at game start: a few stutters, then settles to full glow. */
