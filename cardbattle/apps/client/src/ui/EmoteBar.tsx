@@ -57,7 +57,7 @@ export function EmoteBar({ onSend }: Props) {
 }
 
 const wrap: React.CSSProperties = {
-  position: 'absolute', bottom: 30, right: 150, zIndex: 18,
+  position: 'absolute', bottom: 30, right: 230, zIndex: 18,
   display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12, fontFamily: sans,
 };
 const grid: React.CSSProperties = {
