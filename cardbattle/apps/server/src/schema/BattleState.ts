@@ -30,6 +30,7 @@ export class PlayerSchema extends Schema {
 export class BattleState extends Schema {
   @type('string') code = '';
   @type('string') title = '';
+  @type('string') mode = 'standard';
   @type('string') phase = 'lobby';
   @type('number') currentTurnIndex = 0;
   @type('number') turnDir = 1;
@@ -42,6 +43,7 @@ export class BattleState extends Schema {
 
 /** Mirror the authoritative plain GameState into the Colyseus schema (delta-synced). */
 export function syncToSchema(schema: BattleState, gs: GameState): void {
+  schema.mode = gs.mode;
   schema.phase = gs.phase;
   schema.currentTurnIndex = gs.currentTurnIndex;
   schema.turnDir = gs.turnDir;

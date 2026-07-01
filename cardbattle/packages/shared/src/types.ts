@@ -1,3 +1,5 @@
+import type { GameModeId, RuleSet } from './modes.js';
+
 export type Phase = 'lobby' | 'playing' | 'ended';
 export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'poison' | 'holy' | 'none';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -58,6 +60,8 @@ export interface PlayerState {
 
 export interface GameState {
   phase: Phase;
+  mode: GameModeId;    // selected rule variant (label); mechanics come from `rules`
+  rules: RuleSet;      // the active mode's tunables; the pure engine reads these, not module constants
   players: PlayerState[];
   turnOrder: string[];
   currentTurnIndex: number;

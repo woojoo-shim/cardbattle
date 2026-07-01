@@ -1,22 +1,30 @@
 import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
-import { START_HP, START_DEFENSE, START_HAND, DRAW_PER_TURN, HAND_TARGET, HAND_CAP, TURN_SECONDS, DEFAULT_AVATAR, START_MANA, MANA_MAX, manaRegen } from '../constants.js';
+import { DEFAULT_AVATAR } from '../constants.js';
+import { resolveMode, manaRegenFor, DEFAULT_MODE, type GameModeId, type RuleSet } from '../modes.js';
 import { ALL_DEFS } from '../cards/defs.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
 
-export function initGame(seats: { id: string; name: string }[]): GameState {
-  const players: PlayerState[] = seats.map((s, i) => ({
-    id: s.id, name: s.name, avatar: DEFAULT_AVATAR, connected: true, seat: i,
-    hp: START_HP, maxHp: START_HP, defense: START_DEFENSE,
+/** Build a fresh lobby-ready player under the given ruleset. Shared by initGame and the
+ *  room's mid-lobby joins/bot adds so every seat honours the selected mode's starting stats. */
+export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: string, avatar: string): PlayerState {
+  return {
+    id, name, avatar, connected: true, seat,
+    hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
     hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-    skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
-  }));
-  return { phase: 'lobby', players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
+    skipTurns: 0, gamble: false, empower: 1, mana: rules.startMana,
+  };
+}
+
+export function initGame(seats: { id: string; name: string }[], mode: GameModeId = DEFAULT_MODE): GameState {
+  const m = resolveMode(mode);
+  const players: PlayerState[] = seats.map((s, i) => spawnPlayer(m.rules, i, s.id, s.name, DEFAULT_AVATAR));
+  return { phase: 'lobby', mode: m.id, rules: m.rules, players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
 }
 
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
 function drawCard(state: GameState, player: PlayerState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
-  if (player.hand.length >= HAND_CAP) return; // a hand never overflows past the cap
+  if (player.hand.length >= state.rules.handCap) return; // a hand never overflows past the cap
   const pick = weightedPick(state.rngSeed, ALL_DEFS, (d) => d.drawWeight);
   state.rngSeed = pick.seed;
   const inst = { id: ctx.nextCardId(), defId: pick.item.id };
@@ -33,7 +41,7 @@ export function startGame(input: GameState, ctx: ReduceCtx): ReduceResult {
   state.currentTurnIndex = 0;
   // opening hands (drawn silently into hand; card_drawn still emitted for log)
   for (const p of state.players) {
-    for (let i = 0; i < START_HAND; i++) drawCard(state, p, ctx, emit);
+    for (let i = 0; i < state.rules.startHand; i++) drawCard(state, p, ctx, emit);
   }
   beginTurn(state, ctx, emit);
   return { state, events };
@@ -43,12 +51,12 @@ export function startGame(input: GameState, ctx: ReduceCtx): ReduceResult {
 function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   const cur = state.players.find((p) => p.id === state.turnOrder[state.currentTurnIndex]);
   if (!cur) return;
-  state.turnDeadline = ctx.now + TURN_SECONDS * 1000;
+  state.turnDeadline = ctx.now + state.rules.turnSeconds * 1000;
   // Refill mana by the round-scaled amount (ramps up as the match goes longer), then draw.
-  const regained = manaRegen(state.roundCount);
-  cur.mana = Math.min(MANA_MAX, cur.mana + regained);
+  const regained = manaRegenFor(state.rules, state.roundCount);
+  cur.mana = Math.min(state.rules.manaMax, cur.mana + regained);
   emit({ type: 'mana_gained', playerId: cur.id, amount: regained, manaAfter: cur.mana });
-  for (let i = 0; i < DRAW_PER_TURN; i++) drawCard(state, cur, ctx, emit);
+  for (let i = 0; i < state.rules.drawPerTurn; i++) drawCard(state, cur, ctx, emit);
   emit({ type: 'turn_started', playerId: cur.id, deadline: state.turnDeadline });
 }
 
@@ -56,7 +64,7 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
 function refillHands(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   for (const p of state.players) {
     if (!p.alive) continue;
-    while (p.hand.length < HAND_TARGET) drawCard(state, p, ctx, emit);
+    while (p.hand.length < state.rules.handTarget) drawCard(state, p, ctx, emit);
   }
 }
 

@@ -1,5 +1,5 @@
 import { Client, Room } from 'colyseus.js';
-import type { CardInstance, GameEvent } from '@cardbattle/shared';
+import type { CardInstance, GameEvent, GameModeId } from '@cardbattle/shared';
 import { getToken } from './auth.js';
 
 // Dev: the Vite page (:5173) and the Colyseus server (:2567) run on separate ports.
@@ -19,7 +19,7 @@ export interface RoomInfo {
   roomId: string;
   clients: number;
   maxClients: number;
-  metadata: { title?: string; code?: string; players?: number; started?: boolean };
+  metadata: { title?: string; code?: string; mode?: GameModeId; players?: number; started?: boolean };
 }
 
 const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId });
@@ -35,8 +35,8 @@ export async function quickPlay(name: string, avatar: string): Promise<BattleCon
 }
 
 /** Host a brand-new named room; the returned room carries its own code (in state). */
-export async function createRoom(name: string, title: string, avatar: string): Promise<BattleConnection> {
-  const room = await new Client(endpoint).create('battle', { name, title, avatar, ...auth() });
+export async function createRoom(name: string, title: string, avatar: string, mode: GameModeId): Promise<BattleConnection> {
+  const room = await new Client(endpoint).create('battle', { name, title, avatar, mode, ...auth() });
   return wrap(room);
 }
 

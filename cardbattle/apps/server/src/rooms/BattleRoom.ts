@@ -1,9 +1,9 @@
 import { Room, Client, updateLobby } from '@colyseus/core';
 import {
-  initGame, startGame, reduce, endTurn,
-  CARD_DEFS, requiresTarget,
-  type GameState, type Action, type GameEvent, type PlayerState,
-  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, START_HP, START_DEFENSE, START_MANA, MANA_MAX,
+  initGame, startGame, reduce, endTurn, spawnPlayer,
+  CARD_DEFS, requiresTarget, resolveMode,
+  type GameState, type Action, type GameEvent, type PlayerState, type GameModeId,
+  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, MANA_MAX,
   BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
@@ -11,7 +11,7 @@ import { me, accountFromToken } from '../auth/auth.js';
 import { recordMatch } from '../auth/store.js';
 
 interface JoinOptions { name?: string; avatar?: string; token?: string; }
-interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; }
+interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; mode?: GameModeId; }
 // Resolved by onAuth from a verified token; onJoin trusts this over client-sent name.
 // `username` (when present) marks a logged-in account eligible for post-match gold.
 // The equipped cosmetics ride along so the room can broadcast them to every player.
@@ -52,10 +52,12 @@ export class BattleRoom extends Room<BattleState> {
 
   onCreate(options: CreateOptions = {}): void {
     this.setState(new BattleState());
-    this.gs = initGame([]); // empty; players added on join (lobby)
+    const mode = resolveMode(options.mode).id;
+    this.gs = initGame([], mode); // empty; players added on join (lobby)
 
     // Custom-room identity: a typeable code for friends + a title shown in the browser.
     this.state.code = makeCode();
+    this.state.mode = mode;
     this.state.title = (options.title ?? '').slice(0, 24) || `${options.name ?? '누군가'}의 방`;
     this.refreshLobby();
 
@@ -73,12 +75,7 @@ export class BattleRoom extends Room<BattleState> {
       if (this.gs.phase !== 'lobby') return;
       if (this.gs.players.length >= MAX_PLAYERS) return;
       const id = `bot-${this.botCounter++}`;
-      this.gs.players.push({
-        id, name: `봇 ${this.botCounter}`, avatar: BOT_AVATAR,
-        connected: true, seat: this.gs.players.length,
-        hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-        skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
-      });
+      this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, id, `봇 ${this.botCounter}`, BOT_AVATAR));
       this.bots.add(id);
       this.ready.set(id, true); // bots are always ready
       this.publish();
@@ -106,12 +103,7 @@ export class BattleRoom extends Room<BattleState> {
     this.cosmetics.set(client.sessionId, { border: auth.border, title: auth.title, effect: auth.effect });
     const name = auth.display || (options.name ?? 'Player').slice(0, 16);
     const avatar = auth.avatar || options.avatar;
-    this.gs.players.push({
-      id: client.sessionId, name, avatar: sanitizeAvatar(avatar),
-      connected: true, seat: this.gs.players.length,
-      hp: START_HP, maxHp: START_HP, defense: START_DEFENSE, hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-      skipTurns: 0, gamble: false, empower: 1, mana: START_MANA,
-    });
+    this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, client.sessionId, name, sanitizeAvatar(avatar)));
     this.ready.set(client.sessionId, false);
     this.publish();
   }
@@ -121,6 +113,7 @@ export class BattleRoom extends Room<BattleState> {
     this.setMetadata({
       title: this.state.title,
       code: this.state.code,
+      mode: this.gs.mode,
       players: this.gs.players.length,
       started: this.gs.phase !== 'lobby',
     }).then(() => updateLobby(this)).catch(() => {});

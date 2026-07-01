@@ -1,6 +1,21 @@
 import type { Effect, GameEvent, GameState, PlayerState, Element } from '../types.js';
 import { weightedPick } from '../engine/rng.js';
-import { MANA_MAX } from '../constants.js';
+
+/** Resolve an attack's amount after this turn's empower and any gamble (armed or mode-forced).
+ *  A gamble flips 50/50: the hit either doubles or whiffs entirely. Emits gamble_resolved when it fires. */
+function resolveAttackAmount(ctx: EffectCtx, base: number): number {
+  let amount = Math.round(base * (ctx.source.empower || 1));
+  const gambling = ctx.source.gamble || ctx.state.rules.forceGamble;
+  if (gambling) {
+    ctx.source.gamble = false; // consume any armed gamble
+    const flip = weightedPick(ctx.state.rngSeed, [0, 1], () => 1);
+    ctx.state.rngSeed = flip.seed;
+    const doubled = flip.item === 1;
+    amount = doubled ? amount * 2 : 0;
+    ctx.emit({ type: 'gamble_resolved', playerId: ctx.source.id, doubled });
+  }
+  return amount;
+}
 
 export interface EffectCtx {
   state: GameState;
@@ -35,16 +50,9 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
       effect.target === 'all'   ? livingOthers(ctx.state, ctx.source.id)
     : effect.target === 'random'? ctx.randomOrder.slice(0, 1)
     : (() => { const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive); return t ? [t] : []; })();
-    // '희생' empowers every attack this turn; '도박', if armed, then either doubles or whiffs it.
-    let amount = Math.round(effect.amount * (ctx.source.empower || 1));
-    if (ctx.source.gamble) {
-      ctx.source.gamble = false; // consumed by this attack
-      const flip = weightedPick(ctx.state.rngSeed, [0, 1], () => 1);
-      ctx.state.rngSeed = flip.seed;
-      const doubled = flip.item === 1;
-      amount = doubled ? amount * 2 : 0;
-      ctx.emit({ type: 'gamble_resolved', playerId: ctx.source.id, doubled });
-    }
+    // '희생' empowers every attack this turn; a gamble (armed by '도박', or forced in 도박장 mode)
+    // then either doubles or whiffs it.
+    const amount = resolveAttackAmount(ctx, effect.amount);
     for (const t of targets) damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
   },
   heal: (effect: Extract<Effect, { kind: 'heal' }>, ctx) => {
@@ -102,7 +110,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     ctx.emit({ type: 'card_stolen', thiefId: ctx.source.id, targetId: t.id });
   },
   mana: (effect: Extract<Effect, { kind: 'mana' }>, ctx) => {
-    ctx.source.mana = Math.min(MANA_MAX, ctx.source.mana + effect.amount);
+    ctx.source.mana = Math.min(ctx.state.rules.manaMax, ctx.source.mana + effect.amount);
     ctx.emit({ type: 'mana_gained', playerId: ctx.source.id, amount: effect.amount, manaAfter: ctx.source.mana });
   },
   // Like damage, but the hit lands straight on HP — shield/defense is bypassed, not spent.
@@ -110,15 +118,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
   pierce: (effect: Extract<Effect, { kind: 'pierce' }>, ctx) => {
     const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive);
     if (!t) return;
-    let amount = Math.round(effect.amount * (ctx.source.empower || 1));
-    if (ctx.source.gamble) {
-      ctx.source.gamble = false;
-      const flip = weightedPick(ctx.state.rngSeed, [0, 1], () => 1);
-      ctx.state.rngSeed = flip.seed;
-      const doubled = flip.item === 1;
-      amount = doubled ? amount * 2 : 0;
-      ctx.emit({ type: 'gamble_resolved', playerId: ctx.source.id, doubled });
-    }
+    const amount = resolveAttackAmount(ctx, effect.amount);
     t.hp = Math.max(0, t.hp - amount);
     ctx.emit({ type: 'damage_dealt', sourceId: ctx.source.id, targetId: t.id, amount, element: ctx.element, targetHpAfter: t.hp });
     if (t.hp === 0) {

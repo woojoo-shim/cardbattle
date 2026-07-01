@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
-import { MIN_PLAYERS, MAX_PLAYERS } from '@cardbattle/shared';
+import { MIN_PLAYERS, MAX_PLAYERS, GAME_MODES, type GameModeId } from '@cardbattle/shared';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 
 interface Props {
@@ -14,11 +14,17 @@ export function Lobby({ ui, myId, onReady, onAddBot }: Props) {
   const [ready, setReady] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); onReady(next); };
   const n = ui.players.length;
+  const gm = GAME_MODES[(ui.mode as GameModeId)] ?? GAME_MODES.standard;
 
   return (
     <div style={wrap}>
       <h1 style={title}>CARD&nbsp;BATTLE</h1>
       {ui.title && <p style={roomTitle}>{ui.title}</p>}
+      <div style={modeBadge} title={gm.desc}>
+        <span style={modeBadgeIcon}>{gm.icon}</span>
+        <span style={modeBadgeName}>{gm.name}</span>
+        <span style={modeBadgeTag}>{gm.tagline}</span>
+      </div>
       {ui.code && (
         <div style={codeBadge}>
           <span style={codeLabel}>방 코드</span>
@@ -66,6 +72,13 @@ const title: React.CSSProperties = {
 };
 const subtitle: React.CSSProperties = { margin: 0, color: '#9a9ab0' };
 const roomTitle: React.CSSProperties = { margin: 0, fontSize: 18, fontWeight: 700, color: '#e8e8f0' };
+const modeBadge: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 999,
+  background: 'rgba(56,232,200,0.1)', border: '1px solid rgba(56,232,200,0.4)',
+};
+const modeBadgeIcon: React.CSSProperties = { fontSize: 18 };
+const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#5af0d3', letterSpacing: 1 };
+const modeBadgeTag: React.CSSProperties = { fontSize: 12, color: '#9a9ab0' };
 const codeBadge: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
   background: 'rgba(123,92,255,0.12)', border: '1px solid rgba(123,92,255,0.4)',

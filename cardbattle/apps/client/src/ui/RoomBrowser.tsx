@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoom, joinRoomById, quickPlay, listLobby, type BattleConnection, type RoomInfo } from '../net/client.js';
 import { fetchMe, type Account } from '../net/auth.js';
+import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
 import { C, mono, sans } from './theme.js';
 
@@ -21,6 +22,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
   const { display: name, avatar } = account;
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
+  const [mode, setMode] = useState<GameModeId>(DEFAULT_MODE);
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
@@ -43,7 +45,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
     .filter((r) => !r.metadata?.started && headcount(r) < r.maxClients)
     .sort((a, b) => (a.metadata?.title ?? '').localeCompare(b.metadata?.title ?? ''));
 
-  const create = () => onPick(() => createRoom(name, title.trim(), avatar));
+  const create = () => onPick(() => createRoom(name, title.trim(), avatar, mode));
   const join = (roomId: string) => onPick(() => joinRoomById(roomId, name, avatar));
   const quick = () => onPick(() => quickPlay(name, avatar));
   const joinByCode = () => {
@@ -71,7 +73,12 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
             {open.length === 0 && <p style={empty}>열린 방이 없습니다. 새로 만들어 보세요.</p>}
             {open.map((r) => (
               <button key={r.roomId} style={roomRow} onClick={() => join(r.roomId)}>
-                <span style={rTitle}>{r.metadata?.title || '제목 없음'}</span>
+                <span style={rTitle}>
+                  <span style={rMode} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
+                    {GAME_MODES[r.metadata?.mode ?? 'standard']?.icon ?? '⚔️'}
+                  </span>
+                  {r.metadata?.title || '제목 없음'}
+                </span>
                 <span style={rCode}>{r.metadata?.code}</span>
                 <span style={rCount}>{headcount(r)}/{r.maxClients}</span>
                 <span style={rGo}>입장 ▶</span>
@@ -91,6 +98,23 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && create()}
           />
+          <div style={modeGrid}>
+            {MODE_LIST.map((m) => {
+              const on = m.id === mode;
+              return (
+                <button
+                  key={m.id}
+                  style={{ ...modeCard, ...(on ? modeCardOn : null) }}
+                  onClick={() => setMode(m.id)}
+                  title={m.desc}
+                >
+                  <span style={modeIcon}>{m.icon}</span>
+                  <span style={modeName}>{m.name}</span>
+                  <span style={modeTag}>{m.tagline}</span>
+                </button>
+              );
+            })}
+          </div>
           <button style={primary} onClick={create}>+ 방 만들기</button>
 
           <div style={sep}><span>또는 코드로 입장</span></div>
@@ -146,7 +170,20 @@ const roomRow: React.CSSProperties = {
   padding: '12px 14px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
   background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: C.text, fontFamily: sans,
 };
-const rTitle: React.CSSProperties = { fontWeight: 700, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rTitle: React.CSSProperties = { fontWeight: 700, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 7 };
+const rMode: React.CSSProperties = { fontSize: 15, flexShrink: 0 };
+const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 };
+const modeCard: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
+  borderRadius: 10, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.25)', color: C.text, fontFamily: sans,
+  transition: 'border-color .12s, background .12s, box-shadow .12s',
+};
+const modeCardOn: React.CSSProperties = {
+  border: '1px solid #5af0d3', background: 'rgba(56,232,200,0.1)', boxShadow: '0 0 16px rgba(56,232,200,0.28)',
+};
+const modeIcon: React.CSSProperties = { fontSize: 18, lineHeight: 1 };
+const modeName: React.CSSProperties = { fontWeight: 800, fontSize: 13.5 };
+const modeTag: React.CSSProperties = { fontSize: 11, color: C.dim, lineHeight: 1.25 };
 const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.rare, letterSpacing: 2 };
 const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.dim };
 const rGo: React.CSSProperties = { fontSize: 13, color: C.you, fontWeight: 700 };

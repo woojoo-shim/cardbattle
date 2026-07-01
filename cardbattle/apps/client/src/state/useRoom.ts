@@ -24,6 +24,7 @@ export interface UiPlayer {
 export interface UiState {
   code: string;
   title: string;
+  mode: string;
   phase: string;
   currentTurnIndex: number;
   turnDir: number;
@@ -77,6 +78,7 @@ function snapshot(state: any): UiState {
   return {
     code: state.code ?? '',
     title: state.title ?? '',
+    mode: state.mode ?? 'standard',
     phase: state.phase,
     currentTurnIndex: state.currentTurnIndex,
     turnDir: state.turnDir ?? 1,
