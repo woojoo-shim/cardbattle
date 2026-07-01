@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { C, mono, sans } from './theme.js';
 
-// The browser fires `beforeinstallprompt` when the PWA is installable; we stash
-// that event and fire it from our own button so users get an obvious "install"
-// affordance instead of hunting for the address-bar icon. iOS Safari has no such
-// event, so there we show a short "share → add to home screen" hint instead.
+// The browser fires `beforeinstallprompt` when the PWA is installable; main.tsx
+// stashes that event on `window.__installPrompt` (it fires before React mounts).
+// We read it here and fire it from our own button. When no prompt is available
+// (iOS, Firefox, or the event hasn't fired yet) we fall back to a short manual
+// how-to so the button is always useful.
 interface BIPEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
+
+const getStashed = () =>
+  (window as unknown as { __installPrompt?: BIPEvent }).__installPrompt ?? null;
 
 const isStandalone = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
@@ -19,35 +23,41 @@ const isIOS = () =>
   /iphone|ipad|ipod/i.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+function manualHint(): string {
+  if (isIOS()) return '사파리 공유 버튼 ⬆ → "홈 화면에 추가"를 누르세요.';
+  if (/firefox/i.test(navigator.userAgent)) return '브라우저 메뉴(≡) → "이 사이트 설치"를 누르세요.';
+  return '주소창 오른쪽의 설치 아이콘(⊕/⬇) 또는 브라우저 메뉴 → "앱 설치"를 누르세요.';
+}
+
 export function InstallButton() {
-  const [deferred, setDeferred] = useState<BIPEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
-  const [iosHint, setIosHint] = useState(false);
+  const [deferred, setDeferred] = useState<BIPEvent | null>(getStashed);
+  const [installed, setInstalled] = useState(isStandalone());
+  const [hint, setHint] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isStandalone()) { setInstalled(true); return; }
-    const onPrompt = (e: Event) => { e.preventDefault(); setDeferred(e as BIPEvent); };
-    const onInstalled = () => { setInstalled(true); setDeferred(null); };
-    window.addEventListener('beforeinstallprompt', onPrompt);
+    const onAvailable = () => setDeferred(getStashed());
+    const onInstalled = () => { setInstalled(true); setDeferred(null); setHint(null); };
+    window.addEventListener('pwa-installable', onAvailable);
     window.addEventListener('appinstalled', onInstalled);
     return () => {
-      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('pwa-installable', onAvailable);
       window.removeEventListener('appinstalled', onInstalled);
     };
   }, []);
 
   if (installed) return null;
-  // Show for Chromium (deferred prompt ready) or iOS (manual instructions).
-  if (!deferred && !isIOS()) return null;
 
   const onClick = async () => {
-    if (deferred) {
-      await deferred.prompt();
-      await deferred.userChoice;
+    const evt = deferred ?? getStashed();
+    if (evt) {
+      await evt.prompt();
+      const { outcome } = await evt.userChoice;
+      (window as unknown as { __installPrompt?: BIPEvent }).__installPrompt = undefined;
       setDeferred(null);
+      if (outcome !== 'accepted') setHint(manualHint());
       return;
     }
-    setIosHint((v) => !v); // iOS: toggle the how-to hint
+    setHint((h) => (h ? null : manualHint())); // no prompt: toggle manual how-to
   };
 
   return (
@@ -55,11 +65,7 @@ export function InstallButton() {
       <button style={btn} onClick={onClick} aria-label="앱 설치">
         <span style={{ fontSize: 16 }}>⬇</span>&nbsp;앱 설치
       </button>
-      {iosHint && (
-        <div style={hint}>
-          공유 버튼 <span style={{ fontWeight: 900 }}>⬆</span> → <b>홈 화면에 추가</b>
-        </div>
-      )}
+      {hint && <div style={hintBox}>{hint}</div>}
     </div>
   );
 }
@@ -75,8 +81,8 @@ const btn: React.CSSProperties = {
   background: 'linear-gradient(180deg, rgba(28,40,72,0.94), rgba(16,24,44,0.94))',
   boxShadow: '0 8px 22px rgba(30,70,150,0.4)', backdropFilter: 'blur(6px)',
 };
-const hint: React.CSSProperties = {
-  maxWidth: 220, padding: '8px 12px', borderRadius: 10, fontFamily: mono, fontSize: 12,
-  color: C.text, background: 'rgba(16,20,30,0.96)', border: `1px solid ${C.border}`,
+const hintBox: React.CSSProperties = {
+  maxWidth: 240, padding: '9px 13px', borderRadius: 10, fontFamily: mono, fontSize: 12, lineHeight: 1.5,
+  color: C.text, background: 'rgba(16,20,30,0.97)', border: `1px solid ${C.border}`,
   boxShadow: '0 12px 30px rgba(0,0,0,0.5)', textAlign: 'right',
 };
