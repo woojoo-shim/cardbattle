@@ -37,29 +37,83 @@ function normalize(u: UserRecord): UserRecord {
 
 const DB_PATH = process.env.AUTH_DB_PATH ?? path.resolve(process.cwd(), 'data/users.json');
 
+// Optional durable backend: Upstash Redis (REST). When both env vars are set the store
+// persists to Redis instead of the local file, so accounts survive Render's ephemeral-fs
+// wipes on every redeploy. Absent the vars we fall back to the JSON file (local dev).
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const REDIS_KEY = process.env.UPSTASH_REDIS_KEY ?? 'cardbattle:users';
+const useRedis = !!(REDIS_URL && REDIS_TOKEN);
+
 const users = new Map<string, UserRecord>();
 let loaded = false;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
-function load(): void {
-  if (loaded) return;
-  loaded = true;
+/** Run one Redis command via the Upstash REST endpoint (single-command form). */
+async function redisCmd(cmd: unknown[]): Promise<{ result: unknown }> {
+  const res = await fetch(REDIS_URL!, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(cmd),
+  });
+  if (!res.ok) throw new Error(`Upstash ${res.status} ${await res.text()}`);
+  return res.json() as Promise<{ result: unknown }>;
+}
+
+function hydrate(arr: UserRecord[]): void {
+  for (const u of arr) users.set(u.username, normalize(u));
+}
+
+function loadFile(): void {
   try {
     const raw = readFileSync(DB_PATH, 'utf8');
-    const arr = JSON.parse(raw) as UserRecord[];
-    for (const u of arr) users.set(u.username, normalize(u));
+    hydrate(JSON.parse(raw) as UserRecord[]);
     console.log(`[auth] loaded ${users.size} account(s) from ${DB_PATH}`);
   } catch {
     console.log(`[auth] no user store at ${DB_PATH} — starting empty`);
   }
 }
 
+/** Populate the in-memory store at boot. Awaited before the server listens so every
+ *  sync getUser() below reads a fully-loaded Map. Redis when configured, else the file. */
+export async function initStore(): Promise<void> {
+  if (loaded) return;
+  loaded = true;
+  if (!useRedis) return loadFile();
+  try {
+    const { result } = await redisCmd(['GET', REDIS_KEY]);
+    if (typeof result === 'string' && result) {
+      hydrate(JSON.parse(result) as UserRecord[]);
+      console.log(`[auth] loaded ${users.size} account(s) from Upstash Redis`);
+    } else {
+      console.log('[auth] Upstash Redis store empty — starting fresh');
+    }
+  } catch (err) {
+    console.error('[auth] Redis load failed — falling back to file', err);
+    loadFile();
+  }
+}
+
+// Lazy sync guard for the file path: if a getUser() ever fires before initStore() (only
+// possible in file mode), load the file on demand. In Redis mode initStore() has already
+// flipped `loaded`, so this is a no-op and the async-loaded Redis data is used.
+function load(): void {
+  if (loaded) return;
+  loaded = true;
+  loadFile();
+}
+
 function scheduleSave(): void {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
+    const data = JSON.stringify([...users.values()], null, 2);
+    if (useRedis) {
+      redisCmd(['SET', REDIS_KEY, data]).catch((err) => console.error('[auth] Redis save failed', err));
+      return;
+    }
     try {
       mkdirSync(path.dirname(DB_PATH), { recursive: true });
-      writeFileSync(DB_PATH, JSON.stringify([...users.values()], null, 2));
+      writeFileSync(DB_PATH, data);
     } catch (err) {
       console.error('[auth] failed to persist user store', err);
     }
