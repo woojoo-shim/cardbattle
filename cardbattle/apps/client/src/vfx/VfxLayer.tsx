@@ -13,7 +13,6 @@ interface Props {
 
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
-  | { id: number; kind: 'bloom'; x: number; y: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
@@ -75,12 +74,6 @@ function castPulse(id: string): void {
  * and a floating ±number rises off the target. Heals pulse teal. The screen edge still
  * flashes crimson on damage. In S4 this is superseded by a pooled PixiJS particle canvas.
  */
-/** A single additive light flash at (cx,cy) on the struck face — no expanding ring, just a
- *  burst of colour that lands with the hit. Shared by damage/heal/shield (tinted per effect). */
-function impact(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
-  return [{ id: spawn(), kind: 'bloom', x: cx, y: cy, color, delay }];
-}
-
 /** Spawn a ring of cosmetic burst particles at a seat when its owner plays a card. */
 function burstParticles(spawn: () => number, cx: number, cy: number, effect: string, color: string): Fx[] {
   const out: Fx[] = [];
@@ -147,9 +140,8 @@ export function VfxLayer({ events, players }: Props) {
         if (!tgt) continue;
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
-        // The projectile was already launched by the preceding card_played; the impact lands as it
-        // arrives: a quick light flash on the face, then the damage number rising off the target.
-        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, color, IMPACT_DELAY));
+        // The streak was already launched by the preceding card_played; as it arrives the target
+        // recoils and the damage number rises off the face — no flash, just weight.
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay: IMPACT_DELAY });
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
@@ -163,12 +155,10 @@ export function VfxLayer({ events, players }: Props) {
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, HEAL, 0));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0 });
       } else if (e.type === 'shielded') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push(...impact(() => nextId.current++, tgt.x, tgt.y, SHIELD, 0));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
       }
     }
@@ -200,8 +190,6 @@ export function VfxLayer({ events, players }: Props) {
             </span>
           ) : f.kind === 'streak' ? (
             <span key={f.id} style={streakStyle(f)} />
-          ) : f.kind === 'bloom' ? (
-            <span key={f.id} style={bloomStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -263,15 +251,6 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
     animation: 'cb-burst .72s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
-}
-/** Additive light flash at the hit point — screen-blended so it reads as real light on the dark table. */
-function bloomStyle(f: Extract<Fx, { kind: 'bloom' }>): React.CSSProperties {
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: 120, height: 120, borderRadius: '50%',
-    background: `radial-gradient(circle, #fff 0%, ${f.color} 30%, transparent 68%)`,
-    mixBlendMode: 'screen', willChange: 'transform, opacity',
-    animation: `cb-bloom .6s ease-out ${f.delay}s backwards`,
-  };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
