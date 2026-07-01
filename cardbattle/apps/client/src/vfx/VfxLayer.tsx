@@ -14,7 +14,6 @@ interface Props {
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'bloom'; x: number; y: number; color: string; delay: number }
-  | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
@@ -79,18 +78,6 @@ function castPulse(id: string): void {
  *  burst of colour that lands with the hit. Shared by damage/heal/shield (tinted per effect). */
 function impact(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
   return [{ id: spawn(), kind: 'bloom', x: cx, y: cy, color, delay }];
-}
-
-/** A radial spray of bright sparks flung off a strike point — grit that sells the blow's weight. */
-function sparkParticles(spawn: () => number, cx: number, cy: number, color: string, delay: number): Fx[] {
-  const out: Fx[] = [];
-  const count = 7;
-  for (let i = 0; i < count; i++) {
-    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.5;
-    const dist = 30 + Math.random() * 32;
-    out.push({ id: spawn(), kind: 'spark', x: cx, y: cy, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay });
-  }
-  return out;
 }
 
 /** Spawn a ring of cosmetic burst particles at a seat when its owner plays a card. */
@@ -158,10 +145,9 @@ export function VfxLayer({ events, players }: Props) {
         if (!tgt) continue;
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
-        // The projectile was already launched by the preceding card_played; the impact lands as it arrives:
-        // a bloom + double shockwave, a spray of sparks, then the damage number rising off the target.
+        // The projectile was already launched by the preceding card_played; the impact lands as it
+        // arrives: a quick light flash on the face, then the damage number rising off the target.
         add.push(...impact(() => nextId.current++, tgt.x, tgt.y, color, IMPACT_DELAY));
-        add.push(...sparkParticles(() => nextId.current++, tgt.x, tgt.y, color, IMPACT_DELAY));
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay: IMPACT_DELAY });
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
@@ -212,8 +198,6 @@ export function VfxLayer({ events, players }: Props) {
             </span>
           ) : f.kind === 'bloom' ? (
             <span key={f.id} style={bloomStyle(f)} />
-          ) : f.kind === 'spark' ? (
-            <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -272,16 +256,6 @@ function bloomStyle(f: Extract<Fx, { kind: 'bloom' }>): React.CSSProperties {
     mixBlendMode: 'screen', willChange: 'transform, opacity',
     animation: `cb-bloom .6s ease-out ${f.delay}s backwards`,
   };
-}
-/** A single bright spark shard flung off the strike. */
-function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: 5, height: 5, borderRadius: '50%',
-    background: `radial-gradient(circle, #fff, ${f.color} 60%, transparent)`,
-    boxShadow: `0 0 8px ${f.color}`, willChange: 'transform, opacity',
-    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
-    animation: `cb-spark .5s cubic-bezier(.12,.7,.3,1) ${f.delay}s backwards`,
-  } as React.CSSProperties;
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
