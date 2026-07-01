@@ -3,6 +3,7 @@ import { createRoom, joinRoomById, quickPlay, listLobby, type BattleConnection, 
 import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
+import { Icon, MODE_ICON } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 
 interface Props {
@@ -63,7 +64,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
   return (
     <div style={wrap}>
       <div style={topBar}>
-        <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기">🪙 {account.gold}&nbsp;&nbsp;상점</button>
+        <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;상점</button>
         {onLogout && <button style={logout} onClick={onLogout}>로그아웃</button>}
       </div>
       <h1 style={brand}>CARD&nbsp;BATTLE</h1>
@@ -79,13 +80,13 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
               <button key={r.roomId} style={roomRow} onClick={() => join(r.roomId)}>
                 <span style={rTitle}>
                   <span style={rMode} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
-                    {GAME_MODES[r.metadata?.mode ?? 'standard']?.icon ?? '⚔️'}
+                    <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={16} color={C.rare} />
                   </span>
                   {r.metadata?.title || '제목 없음'}
                 </span>
                 <span style={rCode}>{r.metadata?.code}</span>
                 <span style={rCount}>{headcount(r)}/{r.maxClients}</span>
-                <span style={rGo}>입장 ▶</span>
+                <span style={rGo}>입장&nbsp;<Icon name="arrowRight" size={13} /></span>
               </button>
             ))}
           </div>
@@ -104,10 +105,10 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
           />
           <div style={visRow}>
             <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(false)}>
-              🌐 공개
+              <Icon name="globe" size={15} />&nbsp;공개
             </button>
             <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(true)}>
-              🔒 비공개
+              <Icon name="lock" size={15} />&nbsp;비공개
             </button>
           </div>
           <p style={visHint}>
@@ -115,7 +116,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
           </p>
 
           <button style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
-            ✨ 특별 모드 {showModes ? '접기 ▲' : '선택하기 ▼'}
+            <Icon name="sparkle" size={15} />&nbsp;특별 모드 {showModes ? <>접기&nbsp;<Icon name="chevronUp" size={13} /></> : <>선택하기&nbsp;<Icon name="chevronDown" size={13} /></>}
           </button>
           {showModes && (
             <div style={modeGrid}>
@@ -128,7 +129,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
                     onClick={() => setMode(m.id)}
                     title={m.desc}
                   >
-                    <span style={modeIcon}>{m.icon}</span>
+                    <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
                     <span style={modeName}>{m.name}</span>
                     <span style={modeTag}>{m.tagline}</span>
                   </button>
@@ -152,7 +153,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
           </div>
 
           <div style={sep}><span>혼자 연습</span></div>
-          <button style={ghost} onClick={quick}>⚡ 빠른 입장 (봇과 연습)</button>
+          <button style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;빠른 입장 (봇과 연습)</button>
 
           {err && <p style={errLine}>{err}</p>}
         </section>

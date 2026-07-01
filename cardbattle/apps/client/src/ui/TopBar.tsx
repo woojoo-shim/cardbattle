@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
+import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 
 interface Props {
@@ -32,10 +33,10 @@ export function TopBar({ ui, myId }: Props) {
   return (
     <div style={{ ...bar, background: isMyTurn ? ribbonLit : ribbonIdle }}>
       <div style={round}>
-        ☠ ROUND <b style={{ color: C.text }}>{ui.roundCount}</b>
+        <Icon name="skull" size={13} />&nbsp;ROUND <b style={{ color: C.text }}>{ui.roundCount}</b>
         <span title={ui.turnDir === -1 ? '역방향 진행' : '정방향 진행'}
           style={{ ...dirTag, color: ui.turnDir === -1 ? C.enemy : C.dim }}>
-          {ui.turnDir === -1 ? '↺' : '↻'}
+          <Icon name={ui.turnDir === -1 ? 'arrowCCW' : 'arrowCW'} size={15} />
         </span>
         {' · '}생존{' '}
         <b style={{ color: C.text }}>{alive}</b>

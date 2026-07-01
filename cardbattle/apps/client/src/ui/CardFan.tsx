@@ -3,6 +3,7 @@ import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS, COSMETIC_BY_ID } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
+import { Icon } from './art/Icon.js';
 
 interface Props {
   hand: CardInstance[];
@@ -74,18 +75,18 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         // Affordability: on my turn, cards I can't currently pay for are dimmed and unclickable.
         const affordable = def.cost <= mana;
         const playable = enabled && affordable;
-        const pill = isReverse
-          ? { style: revVal, label: '↔' }
+        const pill: { style: React.CSSProperties; label: React.ReactNode } = isReverse
+          ? { style: revVal, label: <Icon name="arrowSwap" size={13} /> }
           : isPeek
-          ? { style: peekVal, label: '👁' }
+          ? { style: peekVal, label: <Icon name="eye" size={13} /> }
           : isDiscard
-          ? { style: shatterVal, label: '✖' }
+          ? { style: shatterVal, label: <Icon name="close" size={12} /> }
           : isSkip
-          ? { style: skipVal, label: '⛓' }
+          ? { style: skipVal, label: <Icon name="chain" size={13} /> }
           : isGamble
-          ? { style: gambleVal, label: '🎲' }
+          ? { style: gambleVal, label: <Icon name="dice" size={13} /> }
           : isSacrifice
-          ? { style: sacrificeVal, label: '🔥' }
+          ? { style: sacrificeVal, label: <Icon name="fire" size={13} /> }
           : isMana
           ? { style: manaValPill, label: `+${value}` }
           : hasDamage

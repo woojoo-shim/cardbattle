@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { C, mono, sans } from './theme.js';
+import { Icon } from './art/Icon.js';
 
 // The browser fires `beforeinstallprompt` when the PWA is installable; main.tsx
 // stashes that event on `window.__installPrompt` (it fires before React mounts).
@@ -38,9 +39,9 @@ const isIOS = () =>
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 function manualHint(): string {
-  if (isIOS()) return '사파리 공유 버튼 ⬆ → "홈 화면에 추가"를 누르세요.';
-  if (/firefox/i.test(navigator.userAgent)) return '브라우저 메뉴(≡) → "이 사이트 설치"를 누르세요.';
-  return '주소창 오른쪽의 설치 아이콘(⊕/⬇) 또는 브라우저 메뉴 → "앱 설치"를 누르세요.';
+  if (isIOS()) return '사파리 하단의 공유 버튼을 누른 뒤 "홈 화면에 추가"를 선택하세요.';
+  if (/firefox/i.test(navigator.userAgent)) return '브라우저 메뉴(오른쪽 위 줄 세 개)에서 "이 사이트 설치"를 누르세요.';
+  return '주소창 오른쪽의 설치 아이콘, 또는 브라우저 메뉴에서 "앱 설치"를 누르세요.';
 }
 
 export function InstallButton() {
@@ -74,7 +75,7 @@ export function InstallButton() {
   return (
     <div style={wrap}>
       <button style={btn} onClick={onClick} aria-label="앱 설치">
-        <span style={{ fontSize: 16 }}>⬇</span>&nbsp;앱 설치
+        <Icon name="download" size={16} />&nbsp;앱 설치
       </button>
       {hint && <div style={hintBox}>{hint}</div>}
     </div>

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { Element, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, EFFECT_BY_ID } from '@cardbattle/shared';
 import type { UiPlayer } from '../state/useRoom.js';
+import { CardArt } from '../ui/art/CardArt.js';
+import { Icon, EFFECT_ICON, type IconName } from '../ui/art/Icon.js';
 
 interface Props {
   events: GameEvent[];
@@ -12,10 +14,10 @@ interface Props {
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'ring'; x: number; y: number; color: string; delay: number }
-  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number }
-  | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; icon: string; name: string; color: string }
-  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; icon: string; color: string; spin: boolean }
-  | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; glyph: string; color: string };
+  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
+  | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
+  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
+  | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time. */
 const IMPACT_DELAY = 0.34;
@@ -68,7 +70,7 @@ function castPulse(id: string): void {
  * flashes crimson on damage. In S4 this is superseded by a pooled PixiJS particle canvas.
  */
 /** Spawn a ring of cosmetic burst particles at a seat when its owner plays a card. */
-function burstParticles(spawn: () => number, cx: number, cy: number, glyph: string, color: string): Fx[] {
+function burstParticles(spawn: () => number, cx: number, cy: number, effect: string, color: string): Fx[] {
   const out: Fx[] = [];
   const count = 8;
   for (let i = 0; i < count; i++) {
@@ -77,7 +79,7 @@ function burstParticles(spawn: () => number, cx: number, cy: number, glyph: stri
     out.push({
       id: spawn(), kind: 'burst', x: cx, y: cy,
       dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist - 10, // slight upward bias
-      rot: (Math.random() - 0.5) * 220, glyph, color,
+      rot: (Math.random() - 0.5) * 220, effect, color,
     });
   }
   return out;
@@ -113,19 +115,19 @@ export function VfxLayer({ events, players }: Props) {
           // (a chosen foe, or the table centre for area/random hits). Blades spin; magic glides.
           const chosen = e.targetId ? centerOf(e.targetId) : null;
           const dest = chosen ?? tableCenter() ?? src;
-          add.push({ id: nextId.current++, kind: 'hurl', x: src.x, y: src.y, dx: dest.x - src.x, dy: dest.y - src.y, icon: def.icon, color, spin: def.kind === 'weapon' });
+          add.push({ id: nextId.current++, kind: 'hurl', x: src.x, y: src.y, dx: dest.x - src.x, dy: dest.y - src.y, defId: e.defId, color, spin: def.kind === 'weapon' });
         } else {
           // Non-offensive cards (heal/shield/tempo) are dealt onto the table in front of the player.
           const c = tableCenter();
           const spot = c ? { x: src.x + (c.x - src.x) * 0.34, y: src.y + (c.y - src.y) * 0.34 } : src;
-          add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, icon: def.icon, name: def.name, color });
+          add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, defId: e.defId, name: def.name, color });
         }
         castPulse(e.playerId);
         // Cosmetic play-effect: a purchasable burst pops at the caster's seat — visible to all.
         const caster = playersRef.current?.find((p) => p.id === e.playerId);
         const fxDef = caster ? EFFECT_BY_ID[caster.effect] : undefined;
-        if (fxDef && fxDef.glyph) {
-          add.push(...burstParticles(() => nextId.current++, src.x, src.y, fxDef.glyph, fxDef.color));
+        if (fxDef && EFFECT_ICON[caster!.effect]) {
+          add.push(...burstParticles(() => nextId.current++, src.x, src.y, caster!.effect, fxDef.color));
         }
       } else if (e.type === 'damage_dealt') {
         const tgt = centerOf(e.targetId);
@@ -141,7 +143,7 @@ export function VfxLayer({ events, players }: Props) {
         const from = centerOf(e.targetId);
         const to = centerOf(e.thiefId);
         if (from && to) {
-          add.push({ id: nextId.current++, kind: 'hurl', x: from.x, y: from.y, dx: to.x - from.x, dy: to.y - from.y, icon: '🎴', color: '#c9a0ff', spin: true });
+          add.push({ id: nextId.current++, kind: 'hurl', x: from.x, y: from.y, dx: to.x - from.x, dy: to.y - from.y, defId: null, color: '#c9a0ff', spin: true });
           castPulse(e.thiefId);
         }
       } else if (e.type === 'healed') {
@@ -153,7 +155,7 @@ export function VfxLayer({ events, players }: Props) {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
         add.push({ id: nextId.current++, kind: 'ring', x: tgt.x, y: tgt.y, color: SHIELD, delay: 0 });
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `🛡+${e.amount}`, color: SHIELD, delay: 0 });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
       }
     }
 
@@ -177,18 +179,20 @@ export function VfxLayer({ events, players }: Props) {
           f.kind === 'bolt' ? (
             <span key={f.id} style={boltStyle(f)} />
           ) : f.kind === 'hurl' ? (
-            <span key={f.id} style={hurlStyle(f)}>{f.icon}</span>
+            <span key={f.id} style={hurlStyle(f)}>
+              {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
+            </span>
           ) : f.kind === 'ring' ? (
             <span key={f.id} style={ringStyle(f)} />
           ) : f.kind === 'burst' ? (
-            <span key={f.id} style={burstStyle(f)}>{f.glyph}</span>
+            <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
-              <span style={{ fontSize: 20, lineHeight: 1 }}>{f.icon}</span>
+              <CardArt id={f.defId} size={22} />
               <span style={{ fontSize: 8, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', letterSpacing: 0.2 }}>{f.name}</span>
             </span>
           ) : (
-            <span key={f.id} style={numStyle(f)}>{f.text}</span>
+            <span key={f.id} style={numStyle(f)}>{f.icon && <Icon name={f.icon} size={22} style={{ marginRight: 2 }} />}{f.text}</span>
           ),
         )}
       </div>

@@ -6,6 +6,7 @@ import { RoomBrowser } from './ui/RoomBrowser.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
+import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
 import './ui/arena.css';
@@ -160,7 +161,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             style={authInput}
           />
           <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
-            {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<span style={{ fontWeight: 900 }}>→</span>
+            {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
           </button>
         </div>
         {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}

@@ -9,6 +9,7 @@ import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
 import { RevealOverlay } from './RevealOverlay.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
+import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 import './arena.css';
 
@@ -60,7 +61,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         </h1>
         <p style={endSub}>{iWon ? '최후의 생존자가 되었습니다.' : '다음 기회에…'}</p>
         <button className="cb-enter" style={returnBtn} onClick={onExit}>
-          로비로 돌아가기&nbsp;<span style={{ fontWeight: 900 }}>→</span>
+          로비로 돌아가기&nbsp;<Icon name="arrowRight" size={16} />
         </button>
       </div>
     );
@@ -77,7 +78,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
         <span style={fieldHint}>◈ ABYSSAL TABLE ◈</span>
         <Log events={events} ui={ui} />
-        {pending && <div style={targetHint}>🎯 대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
+        {pending && <div style={targetHint}><Icon name="target" size={15} />&nbsp;대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
         {error && <div style={errToast}>{error.message}</div>}
       </div>
       <div style={handRow}>
@@ -91,7 +92,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         {isMyTurn && (
           <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); }}>
-            턴 종료 ▶
+            턴 종료&nbsp;<Icon name="arrowRight" size={15} />
           </button>
         )}
       </div>

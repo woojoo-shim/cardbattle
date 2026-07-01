@@ -2,6 +2,7 @@ import type { UiState } from '../state/useRoom.js';
 import { COSMETIC_BY_ID, TITLE_BY_ID } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
+import { Icon } from './art/Icon.js';
 
 interface Props {
   ui: UiState;
@@ -69,7 +70,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                 </span>
               );
             })}
-            {p.defense > 0 && <span style={shieldChip}>🛡{p.defense}</span>}
+            {p.defense > 0 && <span style={shieldChip}><Icon name="shield" size={11} />{p.defense}</span>}
           </div>
         );
       })}
@@ -115,11 +116,11 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                   : '0 10px 24px rgba(0,0,0,0.5)',
               }}
             >
-              {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}>🛡{p.defense}</span>}
-              {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}>⚠</span>}
+              {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}><Icon name="shield" size={11} />{p.defense}</span>}
+              {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}><Icon name="warn" size={12} /></span>}
               <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={56} />
               {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
-              {!p.alive && <span style={skull}>☠</span>}
+              {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(56,232,200,0.4)' : 'rgba(255,59,107,0.35)'}, transparent 70%)` }} />}
             </div>
 
@@ -128,7 +129,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
-                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? ' · 💤' : ''}
+                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
               </span>
               <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}>◈{p.mana}</span>}

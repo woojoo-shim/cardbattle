@@ -4,6 +4,7 @@ import { CARD_DEFS } from '@cardbattle/shared';
 import type { UiState } from '../state/useRoom.js';
 import { C, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
+import { Icon } from './art/Icon.js';
 
 interface Props {
   events: GameEvent[];
@@ -41,7 +42,7 @@ export function RevealOverlay({ events, myId, ui }: Props) {
   return (
     <div style={wrap}>
       <div style={card}>
-        <div style={head}>🔮 {reveal.targetName} 의 손패</div>
+        <div style={head}><Icon name="crystal" size={16} />&nbsp;{reveal.targetName} 의 손패</div>
         <CardArt id={reveal.defId} size="96px" />
         <div style={name}>{def?.name ?? reveal.defId}</div>
         <div style={desc}>{def?.desc ?? ''}</div>

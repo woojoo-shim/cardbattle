@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
 import { MIN_PLAYERS, MAX_PLAYERS, GAME_MODES, type GameModeId } from '@cardbattle/shared';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
+import { Icon, MODE_ICON } from './art/Icon.js';
 
 interface Props {
   ui: UiState;
@@ -22,7 +23,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot }: Props) {
       <h1 style={title}>CARD&nbsp;BATTLE</h1>
       {ui.title && <p style={roomTitle}>{ui.title}</p>}
       <div style={modeBadge} title={gm.desc}>
-        <span style={modeBadgeIcon}>{gm.icon}</span>
+        <span style={modeBadgeIcon}><Icon name={MODE_ICON[gm.id]} size={18} color="#5af0d3" /></span>
         <span style={modeBadgeName}>{gm.name}</span>
         <span style={modeBadgeTag}>{gm.tagline}</span>
       </div>
@@ -50,7 +51,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot }: Props) {
               <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#3df2c0', fontSize: 13 }}>좌석 {p.seat + 1}</span>
                 {isBot && (
-                  <button style={kickBtn} onClick={() => onRemoveBot(p.id)} title="봇 내보내기">✕</button>
+                  <button style={kickBtn} onClick={() => onRemoveBot(p.id)} title="봇 내보내기"><Icon name="close" size={12} /></button>
                 )}
               </span>
             </li>
@@ -62,7 +63,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot }: Props) {
           + 봇 추가
         </button>
         <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
-          {ready ? '준비 완료 ✓' : '준비하기'}
+          {ready ? <>준비 완료&nbsp;<Icon name="check" size={16} /></> : '준비하기'}
         </button>
       </div>
       <p style={hint}>봇을 추가하면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!</p>
