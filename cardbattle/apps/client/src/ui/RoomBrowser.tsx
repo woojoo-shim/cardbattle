@@ -11,6 +11,7 @@ interface Props {
   account: Account;
   onAccount: (a: Account) => void;
   onPick: (connect: () => Promise<BattleConnection>) => void;
+  onBack?: () => void;
   onLogout?: () => void;
 }
 
@@ -20,7 +21,7 @@ function headcount(r: RoomInfo): number {
 
 /** StarCraft-style custom-game browser: live list of open rooms, host a new room,
  * or join by a 4-char code friends share. Quick-play drops straight into a bot game. */
-export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
+export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Props) {
   const { display: name, avatar } = account;
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
@@ -65,6 +66,7 @@ export function RoomBrowser({ account, onAccount, onPick, onLogout }: Props) {
   return (
     <div style={wrap}>
       <div style={topBar}>
+        {onBack && <button style={logout} onClick={onBack}>← 메뉴</button>}
         <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;상점</button>
         {onLogout && <button style={logout} onClick={onLogout}>로그아웃</button>}
       </div>

@@ -3,6 +3,8 @@ import { useRoom } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
+import { MainMenu } from './ui/MainMenu.js';
+import { quickPlay } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
 import { CardArt } from './ui/art/CardArt.js';
@@ -19,6 +21,8 @@ export function App() {
   // undefined = still checking a stored token; null = logged out; Account = signed in.
   const [account, setAccount] = useState<Account | null | undefined>(() => (getToken() ? undefined : null));
   const [connect, setConnect] = useState<Connect | null>(null);
+  // After login we land on the main menu; 멀티플레이어 opens the room browser.
+  const [view, setView] = useState<'menu' | 'browser'>('menu');
 
   useEffect(() => {
     if (account === undefined) fetchMe().then((a) => setAccount(a));
@@ -28,11 +32,23 @@ export function App() {
   if (account === null) return <AuthGate onAuthed={setAccount} />;
   // useState setters treat function values as updaters, so wrap to store the connect fn itself.
   if (connect === null) {
+    if (view === 'menu') {
+      return (
+        <MainMenu
+          account={account}
+          onAccount={setAccount}
+          onStart={() => setConnect(() => () => quickPlay(account.display, account.avatar))}
+          onMultiplayer={() => setView('browser')}
+          onLogout={() => { clearToken(); setAccount(null); }}
+        />
+      );
+    }
     return (
       <RoomBrowser
         account={account}
         onAccount={setAccount}
         onPick={(c) => setConnect(() => c)}
+        onBack={() => setView('menu')}
         onLogout={() => { clearToken(); setAccount(null); }}
       />
     );
