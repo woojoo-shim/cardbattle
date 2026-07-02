@@ -25,6 +25,19 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
 
+// Face-down cards raining down behind the title — slow, dim, staggered so there's always motion
+// in the back room without pulling focus from the menu. Deterministic so it doesn't reshuffle.
+const FALLING: { l: number; dur: number; delay: number; r0: number; r1: number; o: number; s: number }[] = [
+  { l: 12, dur: 15, delay: 0, r0: -20, r1: 160, o: 0.16, s: 0.9 },
+  { l: 27, dur: 19, delay: -6, r0: 30, r1: 260, o: 0.13, s: 1.05 },
+  { l: 41, dur: 13, delay: -3, r0: -10, r1: 200, o: 0.18, s: 0.85 },
+  { l: 58, dur: 21, delay: -11, r0: 15, r1: 300, o: 0.12, s: 1.1 },
+  { l: 70, dur: 16, delay: -8, r0: -25, r1: 180, o: 0.16, s: 0.95 },
+  { l: 84, dur: 18, delay: -2, r0: 20, r1: 240, o: 0.14, s: 1.0 },
+  { l: 49, dur: 24, delay: -14, r0: -5, r1: 340, o: 0.10, s: 1.15 },
+  { l: 92, dur: 14, delay: -9, r0: 35, r1: 210, o: 0.15, s: 0.8 },
+];
+
 // Face-down cards strewn around the frame like spent shells — dense at the edges, clearing the
 // centre so the title + menu read. Deterministic layout so it doesn't jitter on re-render.
 const SCATTER: { l: number; t: number; r: number; o: number; s: number }[] = [
@@ -57,6 +70,14 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
   return (
     <div style={wrap}>
+      {/* cards raining down behind the title */}
+      <div style={scatterLayer} aria-hidden>
+        {FALLING.map((c, i) => (
+          <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(56,232,200,0.4)' }}>◈</span>
+          </span>
+        ))}
+      </div>
       {/* strewn cards behind everything */}
       <div style={scatterLayer} aria-hidden>
         {SCATTER.map((c, i) => (
@@ -95,8 +116,10 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
                 onMouseEnter={() => setHover(it.key)}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={caret(on)}>◆</span>
-                <span style={menuLabel}>{it.label}</span>
+                <span style={labelWrap}>
+                  <span style={caret(on)}>◆</span>
+                  <span style={menuLabel}>{it.label}</span>
+                </span>
                 {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
               </button>
             );
@@ -139,6 +162,17 @@ const wrap: React.CSSProperties = {
 const scatterLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
 };
+function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
+  return {
+    position: 'absolute', left: `${c.l}%`, top: 0,
+    width: 74 * c.s, height: 104 * c.s, borderRadius: 9,
+    display: 'grid', placeItems: 'center', filter: 'blur(0.6px)',
+    background: 'linear-gradient(160deg,#1b2336,#0c1120)', border: `1px solid ${C.border}`,
+    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(56,232,200,0.05)',
+    animation: `cb-cardfall ${c.dur}s linear ${c.delay}s infinite`,
+    ['--r0' as string]: `${c.r0}deg`, ['--r1' as string]: `${c.r1}deg`, ['--o' as string]: `${c.o}`,
+  };
+}
 function scatterCard(c: { l: number; t: number; r: number; o: number; s: number }): React.CSSProperties {
   return {
     position: 'absolute', left: `${c.l}%`, top: `${c.t}%`,
@@ -179,23 +213,29 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: 'clamp(28px, 5vh, 54px)',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginTop: 'clamp(28px, 5vh, 54px)',
 };
 function menuItem(on: boolean, danger: boolean): React.CSSProperties {
   const base = danger ? C.enemy : C.you;
   return {
-    position: 'relative', display: 'flex', alignItems: 'baseline', gap: 12,
-    padding: '8px 18px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
+    // A centred column: label row on top, sub-caption centred beneath — so the labels line up
+    // dead-centre on the screen regardless of caption width.
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+    padding: '6px 18px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
     color: on ? '#fff' : 'rgba(226,220,214,0.62)',
     transform: on ? 'translateX(6px)' : 'none',
     textShadow: on ? `0 0 20px ${base}66` : 'none',
     transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
 }
+// The label + its hover caret. Relative so the caret can hang off the label's left edge without
+// nudging the label off-centre.
+const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
 function caret(on: boolean): React.CSSProperties {
   return {
-    position: 'absolute', left: -6, fontSize: 12, color: C.you,
-    opacity: on ? 1 : 0, transform: on ? 'translateX(0)' : 'translateX(-8px)',
+    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
+    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
+    opacity: on ? 1 : 0,
     transition: 'opacity .16s ease, transform .16s ease',
   };
 }
