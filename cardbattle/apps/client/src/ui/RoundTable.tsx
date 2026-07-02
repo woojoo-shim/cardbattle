@@ -12,8 +12,10 @@ interface Props {
 }
 
 // Ellipse the seats ride on, as % of the table area. cy sits a touch below centre so the
-// top arc clears the bar and the near (my) seat tucks just above the hand.
-const CX = 50, CY = 52, RX = 41, RY = 40;
+// top arc clears the bar and the near (my) seat tucks just above the hand. RY is squashed
+// well below RX so the ring reads as a table tilted away from us into the chamber's perspective
+// (foreshortened depth), matching the receding side-wall gear and the perspective floor.
+const CX = 50, CY = 52, RX = 41, RY = 31;
 
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
@@ -153,17 +155,20 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  width: '62%', height: '70%', borderRadius: '50%',
+  // Foreshortened oval (wider than tall) so the round table reads as tilted away into the room's
+  // perspective rather than seen dead top-down — its depth compressed like the floor and walls.
+  width: '64%', height: '46%', borderRadius: '50%',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room.
-  background: 'radial-gradient(ellipse at 50% 38%, #24331e 0%, #172414 45%, #0a1109 100%)',
+  background: 'radial-gradient(ellipse at 50% 34%, #24331e 0%, #172414 46%, #0a1109 100%)',
   // Stacked solid offsets fake a chunky wooden table rim under the felt — a slab with real
   // thickness catching the bulb on top and rotting into shadow below, then the floor shadow.
+  // Deeper now the top is foreshortened, so the near lip still reads as a solid edge.
   border: '2px solid #2c3a22',
   boxShadow:
     'inset 0 0 62px rgba(0,0,0,0.7),' +
-    '0 4px 0 #241813, 0 8px 0 #1d130d, 0 12px 0 #150d08, 0 16px 0 #0e0805,' +
-    '0 30px 72px rgba(0,0,0,0.62)',
+    '0 5px 0 #241813, 0 10px 0 #1d130d, 0 15px 0 #150d08, 0 20px 0 #0e0805, 0 25px 0 #090503,' +
+    '0 38px 78px rgba(0,0,0,0.64)',
 };
 // Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
 // caught from the room — the wear of a table that's seen a lot of bad nights.
@@ -224,8 +229,8 @@ const lampCone: React.CSSProperties = {
 };
 const lampPool: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  width: '52%', height: '54%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 42%, rgba(238,176,78,0.16), transparent 68%)',
+  width: '54%', height: '38%', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 40%, rgba(238,176,78,0.16), transparent 68%)',
   animation: 'cb-lampon 2.4s ease-out both',
 };
 const tableFan: React.CSSProperties = {
