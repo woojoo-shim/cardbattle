@@ -18,8 +18,8 @@ export function Splash({ onDone }: Props) {
   };
 
   useEffect(() => {
-    // Safety net: the CSS run is ~3.6s; bail to the menu by 4.4s no matter what.
-    const t = setTimeout(finish, 4400);
+    // Safety net: the CSS run is ~6.4s; bail to the menu by 7.4s no matter what.
+    const t = setTimeout(finish, 7400);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

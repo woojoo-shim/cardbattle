@@ -160,9 +160,9 @@
 /* Brand intro splash: the PHOTON logo swells out of the dark, holds, then fades back out
    before the menu appears (Diablo-style). animationend hands control to the menu. */
 @keyframes cb-splash {
-  0%   { opacity: 0; transform: scale(1.08); filter: blur(8px); }
-  20%  { opacity: 1; transform: scale(1);    filter: blur(0); }
-  74%  { opacity: 1; transform: scale(1);    filter: blur(0); }
-  100% { opacity: 0; transform: scale(1.03); filter: blur(4px); }
+  0%   { opacity: 0; transform: scale(1.06); filter: blur(8px); }
+  30%  { opacity: 1; transform: scale(1);    filter: blur(0); }
+  70%  { opacity: 1; transform: scale(1);    filter: blur(0); }
+  100% { opacity: 0; transform: scale(1.02); filter: blur(4px); }
 }
-.cb-splash { animation: cb-splash 3.6s cubic-bezier(.4,0,.2,1) both; will-change: opacity, transform, filter; }
+.cb-splash { animation: cb-splash 6.4s cubic-bezier(.4,0,.2,1) both; will-change: opacity, transform, filter; }
