@@ -80,7 +80,7 @@ function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: (
     return <Centered>{error ? `연결 실패: ${error.message}` : '연결 중…'}</Centered>;
   }
   if (ui.phase === 'lobby') {
-    return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} />;
+    return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} onExit={onExit} />;
   }
   return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} />;
 }
