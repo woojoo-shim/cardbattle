@@ -152,34 +152,26 @@ function ChamberDeco() {
           <stop offset="0.55" stopColor="#0e0809" />
           <stop offset="1" stopColor="#060304" />
         </radialGradient>
+        {/* Soft cast shadow so a cabinet reads as bolted to the wall and standing a little proud
+            of it — depth by relief, not by isometric side faces (which look like floor furniture
+            on this head-on view). */}
+        <filter id="cb-relief" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2.2" stdDeviation="1.8" floodColor="#000" floodOpacity="0.7" />
+        </filter>
       </defs>
 
-      {/* ===== SIDE WALLS — two trapezoid planes raking back toward the centre so the room
-           reads as a box. The ceiling/floor folds converge to a vanishing point behind the
-           table; the gear below sits ON these planes instead of floating in the dark. */}
-      <g pointerEvents="none">
-        <polygon points="0,0 46,29 46,80 0,108" fill="#180e11" opacity="0.9" />
-        <polygon points="192,0 146,29 146,80 192,108" fill="#180e11" opacity="0.9" />
-        <g stroke="#3c2831" strokeWidth="0.5" opacity="0.5" fill="none">
-          <path d="M0,0 L46,29 M0,108 L46,80 M46,29 L46,80" />
-          <path d="M192,0 L146,29 M192,108 L146,80 M146,29 L146,80" />
-        </g>
-      </g>
-
       {/* ===== LEFT WALL — mixer rack, tweeter box, big speaker, stacked papers =====
-           The whole group is sheared to lie flat on the raking left wall (its centre-facing
-           edge dips toward the vanishing point), and each cabinet is extruded up-and-right
-           (lit top face + shadowed right face) so it reads as a box mounted on that wall. */}
-      <g stroke="#2a1e1d" strokeWidth="0.4" transform="translate(16,0) skewY(7) translate(-16,0)">
+           Each cabinet casts a soft shadow (cb-relief) so it stands a little proud of the wall,
+           and carries a thin lit top edge — depth by relief, read straight-on, not isometric. */}
+      <g stroke="#2a1e1d" strokeWidth="0.4" filter="url(#cb-relief)">
         {/* tweeter box perched on top */}
-        <polygon points="20,29 31,29 34,26.8 23,26.8" fill="#221917" />
-        <polygon points="31,29 34,26.8 34,37.8 31,40" fill="#0b0708" />
         <rect x="20" y="29" width="11" height="11" rx="0.8" fill="#150f10" />
+        <rect x="20.4" y="29.3" width="10.2" height="0.9" rx="0.4" fill="#2c211f" stroke="none" />
         <circle cx="25.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
         {/* mixer / rack unit */}
-        <polygon points="0.5,40 30.5,40 33.5,37.5 3.5,37.5" fill="#241a18" />
-        <polygon points="30.5,40 33.5,37.5 33.5,63.5 30.5,66" fill="#0b0708" />
         <rect x="0.5" y="40" width="30" height="26" rx="1" fill="#160f10" />
+        <rect x="1" y="40.4" width="29" height="1" rx="0.5" fill="#2c211f" stroke="none" />
+        <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
         <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
         {/* fader bank */}
         <g stroke="none">
@@ -194,9 +186,8 @@ function ChamberDeco() {
           {[5, 9, 13, 17, 21, 25].map((x, i) => (<circle key={`l${x}`} cx={x} cy="63.4" r="0.5" fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e', '#4d6a52'][i]} />))}
         </g>
         {/* big speaker cabinet, sunk off the bottom */}
-        <polygon points="-1,66 26,66 29,63.5 2,63.5" fill="#201513" />
-        <polygon points="26,66 29,63.5 29,110 26,110" fill="#090506" />
         <rect x="-1" y="66" width="27" height="44" rx="1" fill="#130d0e" />
+        <rect x="-0.5" y="66.4" width="26" height="1" rx="0.5" fill="#2a1f1d" stroke="none" />
         <circle cx="8" cy="80.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
         <circle cx="8" cy="80.5" r="2.1" fill="#0a0607" />
         <circle cx="8" cy="96.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
@@ -210,13 +201,12 @@ function ChamberDeco() {
       </g>
 
       {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve =====
-           Sheared to lie on the raking right wall (mirror of the left), then extruded
-           up-and-left (lit top face + shadowed left face) so its depth throws into the room. */}
-      <g stroke="#2a1e1d" strokeWidth="0.4" transform="translate(175,0) skewY(-7) translate(-175,0)">
+           Same relief treatment as the left wall: a soft cast shadow lifts it off the wall,
+           a thin lit top edge catches the bulb. */}
+      <g stroke="#2a1e1d" strokeWidth="0.4" filter="url(#cb-relief)">
         {/* amp / machine unit */}
-        <polygon points="160,42 191,42 188,39.5 157,39.5" fill="#221917" />
-        <polygon points="160,42 157,39.5 157,64.5 160,67" fill="#090506" />
         <rect x="160" y="42" width="31" height="25" rx="1" fill="#160f10" />
+        <rect x="160.5" y="42.4" width="30" height="1" rx="0.5" fill="#2c211f" stroke="none" />
         {/* dead green screen */}
         <rect x="163" y="45" width="15" height="9" rx="0.6" fill="#0a1210" />
         <rect x="163.7" y="45.7" width="13.6" height="7.6" fill="#16302a" stroke="none" />
