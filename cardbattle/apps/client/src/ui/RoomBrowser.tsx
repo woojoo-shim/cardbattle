@@ -3,7 +3,6 @@ import { createRoom, joinRoomById, quickPlay, listLobby, findRoomByCode, type Ba
 import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
-import { BrandMark } from './BrandMark.js';
 import { Icon, MODE_ICON } from './art/Icon.js';
 import { C, mono } from './theme.js';
 
@@ -78,18 +77,21 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;SHOP</button>
         {onLogout && <button style={logout} onClick={onLogout}>LOGOUT</button>}
       </div>
-      <BrandMark size={72} />
-      <p style={who}><span style={promptMark}>guest@arena</span>:~$ login <b style={{ color: C.you }}>{name}</b> <span style={caret}>█</span></p>
+      <div style={banner}>
+        <div>ABYSSAL ARENA [Version 1.0.19045.2026]</div>
+        <div style={{ color: C.faint }}>(c) BACK-ROOM SYSTEMS. All rights reserved.</div>
+        <div style={{ height: 12 }} />
+        <div><span style={promptPath}>C:\arena&gt;</span> login {name} <span style={{ color: C.rare }}>[gold {account.gold}]</span></div>
+        <div><span style={promptPath}>C:\arena&gt;</span> <span style={caret}>█</span></div>
+      </div>
 
       <div style={cols}>
         {/* Left: live room list */}
         <section style={panel}>
           <div style={winBar}>
-            <span style={winDots}><i style={{ ...dot, background: C.enemy }} /><i style={{ ...dot, background: C.rare }} /><i style={{ ...dot, background: C.you }} /></span>
-            <span style={winTitle}>rooms.list</span>
-            <span style={winMeta}>{open.length} OPEN</span>
+            <span style={promptPath}>C:\arena&gt;</span>&nbsp;ls /rooms --open
+            <span style={winMeta}>{open.length} FOUND</span>
           </div>
-          <div style={hd}>&gt; ls --open-rooms</div>
           <div style={listBox}>
             {open.length === 0 && <p style={empty}>-- no open sessions --<br />&gt; run `new` to host one_</p>}
             {open.map((r) => (
@@ -111,11 +113,9 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         {/* Right: create / code / quick */}
         <section style={panel}>
           <div style={winBar}>
-            <span style={winDots}><i style={{ ...dot, background: C.enemy }} /><i style={{ ...dot, background: C.rare }} /><i style={{ ...dot, background: C.you }} /></span>
-            <span style={winTitle}>host.sh</span>
-            <span style={winMeta}>NEW</span>
+            <span style={promptPath}>C:\arena&gt;</span>&nbsp;host --new
           </div>
-          <div style={hd}>&gt; new --title</div>
+          <div style={hd}>&gt; enter title:</div>
           <input
             style={field}
             value={title}
@@ -190,28 +190,25 @@ const blinkCss = '@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacit
 
 const wrap: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'center', gap: 10, fontFamily: mono, color: C.text,
-  background:
-    'radial-gradient(70% 50% at 50% 8%, rgba(166,197,63,0.05), transparent 60%),' +
-    'linear-gradient(180deg, #060806 0%, #040503 52%, #030403 100%), #030403',
+  justifyContent: 'center', gap: 14, fontFamily: mono, color: C.you,
+  background: '#010200',
 };
-const who: React.CSSProperties = { margin: '10px 0 14px', color: C.dim, fontSize: 13, fontFamily: mono, letterSpacing: 0.5 };
-const promptMark: React.CSSProperties = { color: C.magic };
+const banner: React.CSSProperties = {
+  width: 'min(820px, 94vw)', fontFamily: mono, fontSize: 13, lineHeight: 1.5, color: C.you, letterSpacing: 0.3,
+};
+const promptPath: React.CSSProperties = { color: C.dim };
 const caret: React.CSSProperties = { color: C.you, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
-const cols: React.CSSProperties = { display: 'flex', gap: 20, width: 'min(820px, 94vw)', alignItems: 'stretch' };
+const cols: React.CSSProperties = { display: 'flex', gap: 16, width: 'min(820px, 94vw)', alignItems: 'stretch' };
 const panel: React.CSSProperties = {
-  flex: 1, display: 'flex', flexDirection: 'column', gap: 10, padding: 0, borderRadius: 6, overflow: 'hidden',
-  background: 'linear-gradient(180deg, #0a0c09, #070805)', border: `1px solid ${C.border}`,
-  boxShadow: '0 22px 50px rgba(0,0,0,0.6), inset 0 0 60px rgba(166,197,63,0.03)',
+  flex: 1, display: 'flex', flexDirection: 'column', gap: 10, padding: 0, borderRadius: 0, overflow: 'hidden',
+  background: '#020402', border: `1px solid #29331d`,
+  boxShadow: 'inset 0 0 50px rgba(166,197,63,0.03)',
 };
 const winBar: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
-  background: 'linear-gradient(180deg, #141712, #0c0e0a)', borderBottom: `1px solid ${C.border}`,
+  display: 'flex', alignItems: 'center', padding: '8px 14px', fontFamily: mono, fontSize: 12.5, color: C.you,
+  background: 'rgba(166,197,63,0.05)', borderBottom: `1px solid #29331d`, letterSpacing: 0.3,
 };
-const winDots: React.CSSProperties = { display: 'flex', gap: 5 };
-const dot: React.CSSProperties = { width: 9, height: 9, borderRadius: '50%', display: 'block', opacity: 0.8 };
-const winTitle: React.CSSProperties = { fontFamily: mono, fontSize: 12.5, color: C.dim, letterSpacing: 1, flex: 1 };
-const winMeta: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.you, letterSpacing: 1 };
+const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 11, color: C.dim, letterSpacing: 1 };
 const hd: React.CSSProperties = { margin: '2px 16px 0', fontFamily: mono, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, color: C.you };
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6, minHeight: 220, maxHeight: 340, overflowY: 'auto', padding: '4px 16px 16px' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 13, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.8 };
