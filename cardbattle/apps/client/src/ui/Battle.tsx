@@ -154,24 +154,23 @@ function ChamberDeco() {
         </radialGradient>
       </defs>
 
-      {/* ===== LEFT WALL — big speaker, mixer rack, tweeter box, stacked papers =====
-           Solid 3/4-view cabinets. Every box is extruded up-and-right along a shared depth
-           vector (+7,-5) with a lit top face (#2b201d) and a shadowed right face (#0a0708), so
-           the whole stack reads as chunky 3D gear. Drawn back-to-front: speaker (lowest/nearest
-           carries the mixer), then mixer, then the tweeter on top. */}
+      {/* ===== LEFT WALL — one tall equipment cabinet (speaker + mixer) with a tweeter on top =====
+           Speaker and mixer share a width so their shadowed right faces line up into a single
+           continuous side plane — it reads as one chunky unit standing flush against the left
+           wall, not scattered boxes. Shallow depth (+5,-2.5) keeps it hugging the wall instead
+           of jutting into the room. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* big speaker cabinet, sunk off the bottom */}
-        <polygon points="-1,66 26,66 33,61 6,61" fill="#2b201d" />
-        <polygon points="26,66 33,61 33,110 26,110" fill="#0a0708" />
-        <rect x="-1" y="66" width="27" height="44" rx="1" fill="#140d0e" />
-        <circle cx="8" cy="80.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <circle cx="8" cy="80.5" r="2.1" fill="#0a0607" />
-        <circle cx="8" cy="96.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <circle cx="8" cy="96.5" r="2.1" fill="#0a0607" />
-        {/* mixer / rack unit — sits on the speaker */}
-        <polygon points="0.5,40 30.5,40 37.5,35 7.5,35" fill="#2b201d" />
-        <polygon points="30.5,40 37.5,35 37.5,61 30.5,66" fill="#0a0708" />
-        <rect x="0.5" y="40" width="30" height="26" rx="1" fill="#170f10" />
+        {/* speaker — lower half of the cabinet */}
+        <polygon points="30,66 35,63.5 35,110 30,110" fill="#0a0708" />
+        <rect x="-1" y="66" width="31" height="44" rx="1" fill="#140d0e" />
+        <circle cx="9" cy="82" r="6.6" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <circle cx="9" cy="82" r="2.2" fill="#0a0607" />
+        <circle cx="9" cy="99" r="6.6" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <circle cx="9" cy="99" r="2.2" fill="#0a0607" />
+        {/* mixer — upper half, sits flush on the speaker so the side faces align */}
+        <polygon points="-1,40 30,40 35,37.5 4,37.5" fill="#2b201d" />
+        <polygon points="30,40 35,37.5 35,63.5 30,66" fill="#0a0708" />
+        <rect x="-1" y="40" width="31" height="26" rx="1" fill="#170f10" />
         <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
         {/* fader bank */}
         <g stroke="none">
@@ -185,16 +184,16 @@ function ChamberDeco() {
           {[5, 9, 13, 17, 21, 25].map((x) => (<circle key={x} cx={x} cy="59.5" r="1.5" fill="#241d1c" stroke="#0a0506" strokeWidth="0.25" />))}
           {[5, 9, 13, 17, 21, 25].map((x, i) => (<circle key={`l${x}`} cx={x} cy="63.4" r="0.5" fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e', '#4d6a52'][i]} />))}
         </g>
-        {/* tweeter box perched on the mixer */}
-        <polygon points="20,29 31,29 38,24 27,24" fill="#2b201d" />
-        <polygon points="31,29 38,24 38,35 31,40" fill="#0a0708" />
-        <rect x="20" y="29" width="11" height="11" rx="0.8" fill="#160f10" />
-        <circle cx="25.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
+        {/* tweeter box perched on top, flush to the left */}
+        <polygon points="3,29 14,29 19,26.5 8,26.5" fill="#2b201d" />
+        <polygon points="14,29 19,26.5 19,37.5 14,40" fill="#0a0708" />
+        <rect x="3" y="29" width="11" height="11" rx="0.8" fill="#160f10" />
+        <circle cx="8.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
         {/* papers/junk stacked against the cabinet */}
         <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
-          <rect x="18" y="88" width="15" height="2.6" transform="rotate(-3 25 89)" />
-          <rect x="18" y="91.4" width="15" height="2.6" transform="rotate(2 25 92)" />
-          <rect x="18" y="94.8" width="15" height="2.6" transform="rotate(-2 25 96)" />
+          <rect x="16" y="88" width="15" height="2.6" transform="rotate(-3 23 89)" />
+          <rect x="16" y="91.4" width="15" height="2.6" transform="rotate(2 23 92)" />
+          <rect x="16" y="94.8" width="15" height="2.6" transform="rotate(-2 23 96)" />
         </g>
       </g>
 
@@ -203,8 +202,8 @@ function ChamberDeco() {
            shadowed left face so the amp reads as a chunky 3D box facing into the room. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
         {/* amp / machine unit */}
-        <polygon points="160,42 191,42 184,37 153,37" fill="#2b201d" />
-        <polygon points="160,42 153,37 153,62 160,67" fill="#0a0708" />
+        <polygon points="160,42 191,42 186,39.5 155,39.5" fill="#2b201d" />
+        <polygon points="160,42 155,39.5 155,64.5 160,67" fill="#0a0708" />
         <rect x="160" y="42" width="31" height="25" rx="1" fill="#170f10" />
         {/* dead green screen */}
         <rect x="163" y="45" width="15" height="9" rx="0.6" fill="#0a1210" />
