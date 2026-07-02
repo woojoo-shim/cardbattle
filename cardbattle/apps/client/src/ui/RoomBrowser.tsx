@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createRoom, joinRoomById, quickPlay, listLobby, findRoomByCode, type BattleConnection, type RoomInfo } from '../net/client.js';
+import { createRoom, joinRoomById, quickPlay, listLobby, findRoomByCode, endpoint, type BattleConnection, type RoomInfo, type LobbyStatus } from '../net/client.js';
 import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
@@ -31,11 +31,12 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
+  const [lobbyStatus, setLobbyStatus] = useState<LobbyStatus>({ state: 'connecting' });
 
   useEffect(() => {
     let off: (() => void) | undefined;
     let disposed = false;
-    listLobby((list) => setRooms(list))
+    listLobby((list) => setRooms(list), (s) => setLobbyStatus(s))
       .then((unsub) => { if (disposed) unsub(); else off = unsub; })
       .catch(() => setErr('로비에 연결하지 못했습니다.'));
     return () => { disposed = true; off?.(); };
@@ -79,6 +80,13 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
       </div>
       <BrandMark size={72} />
       <p style={who}>{name} 님 · 방을 만들거나 친구 방에 입장하세요</p>
+
+      {/* TEMP diagnostic: shows exactly what this device sees (endpoint, lobby link state,
+          raw vs. visible room counts). Read this out loud to pinpoint cross-device issues. */}
+      <div style={diag}>
+        진단 · 서버: {endpoint} · 로비: {lobbyStatus.state}
+        {lobbyStatus.error ? ` (${lobbyStatus.error})` : ''} · 수신 방: {rooms.length} · 표시: {open.length}
+      </div>
 
       <div style={cols}>
         {/* Left: live room list */}
@@ -180,6 +188,10 @@ const wrap: React.CSSProperties = {
   background: 'radial-gradient(120% 90% at 50% 8%, #141826 0%, #0e1018 40%, #07080d 100%), #07080d',
 };
 const who: React.CSSProperties = { margin: '10px 0 14px', color: C.dim, fontSize: 14 };
+const diag: React.CSSProperties = {
+  margin: '0 0 12px', padding: '6px 12px', borderRadius: 8, maxWidth: '92vw', wordBreak: 'break-all',
+  fontFamily: mono, fontSize: 11, color: '#8fe', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(120,255,220,0.25)',
+};
 const cols: React.CSSProperties = { display: 'flex', gap: 20, width: 'min(820px, 94vw)', alignItems: 'stretch' };
 const panel: React.CSSProperties = {
   flex: 1, display: 'flex', flexDirection: 'column', gap: 12, padding: 20, borderRadius: 16,
