@@ -159,14 +159,15 @@ const felt: React.CSSProperties = {
   // perspective rather than seen dead top-down — its depth compressed like the floor and walls.
   width: '64%', height: '46%', borderRadius: '50%',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
-  // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room.
-  background: 'radial-gradient(ellipse at 50% 34%, #24331e 0%, #172414 46%, #0a1109 100%)',
+  // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
+  // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
+  background: 'radial-gradient(ellipse at 50% 32%, #1c2717 0%, #121b0f 40%, #0a1008 66%, #060a05 100%)',
   // Stacked solid offsets fake a chunky wooden table rim under the felt — a slab with real
   // thickness catching the bulb on top and rotting into shadow below, then the floor shadow.
   // Deeper now the top is foreshortened, so the near lip still reads as a solid edge.
-  border: '2px solid #2c3a22',
+  border: '2px solid #232e1b',
   boxShadow:
-    'inset 0 0 62px rgba(0,0,0,0.7),' +
+    'inset 0 0 96px 20px rgba(0,0,0,0.82),' +   // heavy vignette — edges rot into the dark
     '0 5px 0 #241813, 0 10px 0 #1d130d, 0 15px 0 #150d08, 0 20px 0 #0e0805, 0 25px 0 #090503,' +
     '0 38px 78px rgba(0,0,0,0.64)',
 };
@@ -175,12 +176,14 @@ const felt: React.CSSProperties = {
 const feltStains: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   backgroundImage:
-    'radial-gradient(circle at 38% 34%, rgba(0,0,0,0.30) 0 6%, transparent 12%),' +
-    'radial-gradient(circle at 66% 58%, rgba(0,0,0,0.26) 0 5%, transparent 11%),' +
-    'radial-gradient(circle at 52% 72%, rgba(0,0,0,0.22) 0 7%, transparent 13%),' +
-    'radial-gradient(circle at 30% 62%, rgba(120,90,40,0.14) 0 5%, transparent 12%),' +
-    'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.20) 0 4%, transparent 9%),' +
-    'radial-gradient(ellipse 14% 9% at 58% 46%, rgba(209,86,140,0.10), transparent 70%)',
+    'radial-gradient(circle at 38% 34%, rgba(0,0,0,0.40) 0 6%, transparent 13%),' +
+    'radial-gradient(circle at 66% 58%, rgba(0,0,0,0.36) 0 5%, transparent 12%),' +
+    'radial-gradient(circle at 52% 72%, rgba(0,0,0,0.32) 0 7%, transparent 14%),' +
+    'radial-gradient(circle at 30% 62%, rgba(110,82,36,0.16) 0 5%, transparent 12%),' +
+    'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.30) 0 4%, transparent 10%),' +
+    'radial-gradient(circle at 44% 54%, rgba(0,0,0,0.22) 0 8%, transparent 16%),' +   // bald worn patch mid-table
+    'radial-gradient(circle at 60% 42%, rgba(80,70,30,0.12) 0 6%, transparent 13%),' + // greasy sheen
+    'radial-gradient(ellipse 14% 9% at 58% 46%, rgba(209,86,140,0.09), transparent 70%)',
 };
 // A faded painted ring on the baize — the old betting circle, half worn away.
 const feltPaint: React.CSSProperties = {
