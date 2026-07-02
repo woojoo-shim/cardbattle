@@ -156,10 +156,10 @@
    left% is set inline; translate(-50%) keeps that the card's centre. --r0/--r1 spin it as it
    falls, --o is its (dim) peak opacity. */
 @keyframes cb-cardfall {
-  0%   { transform: translate(-50%, -24vh) rotate(var(--r0, 0deg)); opacity: 0; }
-  12%  { opacity: var(--o, 0.18); }
-  88%  { opacity: var(--o, 0.18); }
-  100% { transform: translate(-50%, 120vh) rotate(var(--r1, 220deg)); opacity: 0; }
+  0%   { transform: translate(-50%, -22vh) rotate(var(--r0, 0deg)); opacity: 0; }
+  8%   { opacity: var(--o, 0.4); }
+  92%  { opacity: var(--o, 0.4); }
+  100% { transform: translate(-50%, 124vh) rotate(var(--r1, 220deg)); opacity: 0; }
 }
 .cb-cardfall { will-change: transform, opacity; }
 

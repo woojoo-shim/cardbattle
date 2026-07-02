@@ -30,18 +30,18 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
 // slower & dimmer (further away); near/large cards fall a touch faster & brighter — a parallax
 // that sells the height of the fall. Deterministic so it never reshuffles on re-render.
 const FALLING: { l: number; dur: number; delay: number; r0: number; r1: number; o: number; s: number }[] = [
-  { l: 6, dur: 30, delay: 0, r0: -20, r1: 160, o: 0.20, s: 0.72 },
-  { l: 15, dur: 24, delay: -9, r0: 30, r1: 260, o: 0.24, s: 0.92 },
-  { l: 23, dur: 38, delay: -20, r0: -10, r1: 200, o: 0.14, s: 0.6 },
-  { l: 31, dur: 27, delay: -5, r0: 15, r1: 300, o: 0.26, s: 1.02 },
-  { l: 40, dur: 34, delay: -16, r0: -25, r1: 180, o: 0.16, s: 0.68 },
-  { l: 48, dur: 22, delay: -11, r0: 20, r1: 240, o: 0.28, s: 1.12 },
-  { l: 56, dur: 40, delay: -3, r0: -5, r1: 340, o: 0.12, s: 0.55 },
-  { l: 64, dur: 26, delay: -19, r0: 35, r1: 210, o: 0.25, s: 0.98 },
-  { l: 72, dur: 33, delay: -7, r0: -18, r1: 150, o: 0.17, s: 0.7 },
-  { l: 81, dur: 23, delay: -14, r0: 24, r1: 280, o: 0.27, s: 1.08 },
-  { l: 89, dur: 36, delay: -25, r0: -12, r1: 190, o: 0.13, s: 0.62 },
-  { l: 95, dur: 28, delay: -2, r0: 28, r1: 230, o: 0.22, s: 0.88 },
+  { l: 6, dur: 11, delay: 0, r0: -20, r1: 160, o: 0.42, s: 0.8 },
+  { l: 15, dur: 14, delay: -5, r0: 30, r1: 260, o: 0.5, s: 0.95 },
+  { l: 23, dur: 17, delay: -9, r0: -10, r1: 200, o: 0.32, s: 0.68 },
+  { l: 31, dur: 12, delay: -3, r0: 15, r1: 300, o: 0.55, s: 1.05 },
+  { l: 40, dur: 16, delay: -11, r0: -25, r1: 180, o: 0.34, s: 0.72 },
+  { l: 48, dur: 10, delay: -6, r0: 20, r1: 240, o: 0.6, s: 1.15 },
+  { l: 56, dur: 18, delay: -2, r0: -5, r1: 340, o: 0.3, s: 0.6 },
+  { l: 64, dur: 13, delay: -8, r0: 35, r1: 210, o: 0.5, s: 1.0 },
+  { l: 72, dur: 15, delay: -4, r0: -18, r1: 150, o: 0.36, s: 0.75 },
+  { l: 81, dur: 11, delay: -7, r0: 24, r1: 280, o: 0.54, s: 1.1 },
+  { l: 89, dur: 16, delay: -13, r0: -12, r1: 190, o: 0.3, s: 0.66 },
+  { l: 95, dur: 12, delay: -1, r0: 28, r1: 230, o: 0.44, s: 0.9 },
 ];
 
 // Face-down cards strewn around the frame like spent shells — dense at the edges, clearing the
