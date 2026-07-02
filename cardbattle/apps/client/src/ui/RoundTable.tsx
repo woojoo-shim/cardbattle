@@ -157,7 +157,13 @@ const felt: React.CSSProperties = {
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room.
   background: 'radial-gradient(ellipse at 50% 38%, #24331e 0%, #172414 45%, #0a1109 100%)',
-  border: '2px solid #2c3a22', boxShadow: 'inset 0 0 62px rgba(0,0,0,0.7), 0 30px 72px rgba(0,0,0,0.62)',
+  // Stacked solid offsets fake a chunky wooden table rim under the felt — a slab with real
+  // thickness catching the bulb on top and rotting into shadow below, then the floor shadow.
+  border: '2px solid #2c3a22',
+  boxShadow:
+    'inset 0 0 62px rgba(0,0,0,0.7),' +
+    '0 4px 0 #241813, 0 8px 0 #1d130d, 0 12px 0 #150d08, 0 16px 0 #0e0805,' +
+    '0 30px 72px rgba(0,0,0,0.62)',
 };
 // Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
 // caught from the room — the wear of a table that's seen a lot of bad nights.

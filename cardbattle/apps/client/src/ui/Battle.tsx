@@ -154,12 +154,18 @@ function ChamberDeco() {
         </radialGradient>
       </defs>
 
-      {/* ===== LEFT WALL — mixer rack, tweeter box, big speaker, stacked papers ===== */}
+      {/* ===== LEFT WALL — mixer rack, tweeter box, big speaker, stacked papers =====
+           Each cabinet is extruded up-and-right (lit top face + shadowed right face) so it
+           reads as a box with depth, not a flat panel — faux-3D, all hand-drawn. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
         {/* tweeter box perched on top */}
+        <polygon points="20,29 31,29 34,26.8 23,26.8" fill="#221917" />
+        <polygon points="31,29 34,26.8 34,37.8 31,40" fill="#0b0708" />
         <rect x="20" y="29" width="11" height="11" rx="0.8" fill="#150f10" />
         <circle cx="25.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
         {/* mixer / rack unit */}
+        <polygon points="0.5,40 30.5,40 33.5,37.5 3.5,37.5" fill="#241a18" />
+        <polygon points="30.5,40 33.5,37.5 33.5,63.5 30.5,66" fill="#0b0708" />
         <rect x="0.5" y="40" width="30" height="26" rx="1" fill="#160f10" />
         <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
         {/* fader bank */}
@@ -175,6 +181,8 @@ function ChamberDeco() {
           {[5, 9, 13, 17, 21, 25].map((x, i) => (<circle key={`l${x}`} cx={x} cy="63.4" r="0.5" fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e', '#4d6a52'][i]} />))}
         </g>
         {/* big speaker cabinet, sunk off the bottom */}
+        <polygon points="-1,66 26,66 29,63.5 2,63.5" fill="#201513" />
+        <polygon points="26,66 29,63.5 29,110 26,110" fill="#090506" />
         <rect x="-1" y="66" width="27" height="44" rx="1" fill="#130d0e" />
         <circle cx="8" cy="80.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
         <circle cx="8" cy="80.5" r="2.1" fill="#0a0607" />
@@ -188,9 +196,13 @@ function ChamberDeco() {
         </g>
       </g>
 
-      {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve ===== */}
+      {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve =====
+           Extruded up-and-left (lit top face + shadowed left face) so gear on this
+           wall throws its depth toward the room, mirroring the left cabinets. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
         {/* amp / machine unit */}
+        <polygon points="160,42 191,42 188,39.5 157,39.5" fill="#221917" />
+        <polygon points="160,42 157,39.5 157,64.5 160,67" fill="#090506" />
         <rect x="160" y="42" width="31" height="25" rx="1" fill="#160f10" />
         {/* dead green screen */}
         <rect x="163" y="45" width="15" height="9" rx="0.6" fill="#0a1210" />
@@ -211,6 +223,12 @@ function ChamberDeco() {
           <rect x="174" y="78" width="18" height="5" rx="2.5" />
           <rect x="174" y="87" width="18" height="5" rx="2.5" />
           <rect x="185" y="70" width="5" height="40" rx="2" />
+        </g>
+        {/* specular stripes to round the pipes into cylinders */}
+        <g stroke="none" opacity="0.5">
+          <rect x="175" y="79" width="16" height="0.9" rx="0.45" fill="#3a2b28" />
+          <rect x="175" y="88" width="16" height="0.9" rx="0.45" fill="#3a2b28" />
+          <rect x="185.7" y="71" width="0.9" height="38" rx="0.45" fill="#3a2b28" />
         </g>
         <g stroke="#33241f" strokeWidth="0.6" fill="none">
           <circle cx="182.5" cy="80.5" r="3.4" fill="#171110" />
