@@ -15,7 +15,7 @@ interface Props {
 // top arc clears the bar and the near (my) seat tucks just above the hand. RY is squashed
 // well below RX so the ring reads as a table tilted away from us into the chamber's perspective
 // (foreshortened depth), matching the receding side-wall gear and the perspective floor.
-const CX = 50, CY = 52, RX = 41, RY = 31;
+const CX = 50, CY = 58, RX = 41, RY = 31;
 
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
