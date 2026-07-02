@@ -189,88 +189,88 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 const blinkCss = '@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }';
 
 const wrap: React.CSSProperties = {
-  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'center', gap: 14, fontFamily: mono, color: C.you,
-  background: '#010200',
+  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+  justifyContent: 'flex-start', gap: 20, fontFamily: mono, color: C.you,
+  padding: '40px 48px', background: '#010200',
 };
 const banner: React.CSSProperties = {
-  width: 'min(820px, 94vw)', fontFamily: mono, fontSize: 13, lineHeight: 1.5, color: C.you, letterSpacing: 0.3,
+  width: '100%', fontFamily: mono, fontSize: 19, lineHeight: 1.55, color: C.you, letterSpacing: 0.3,
 };
 const promptPath: React.CSSProperties = { color: C.dim };
 const caret: React.CSSProperties = { color: C.you, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
-const cols: React.CSSProperties = { display: 'flex', gap: 16, width: 'min(820px, 94vw)', alignItems: 'stretch' };
+const cols: React.CSSProperties = { display: 'flex', gap: 24, width: '100%', alignItems: 'stretch' };
 const panel: React.CSSProperties = {
-  flex: 1, display: 'flex', flexDirection: 'column', gap: 10, padding: 0, borderRadius: 0, overflow: 'hidden',
+  flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 0, overflow: 'hidden',
   background: '#020402', border: `1px solid #29331d`,
   boxShadow: 'inset 0 0 50px rgba(166,197,63,0.03)',
 };
 const winBar: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', padding: '8px 14px', fontFamily: mono, fontSize: 12.5, color: C.you,
+  display: 'flex', alignItems: 'center', padding: '12px 18px', fontFamily: mono, fontSize: 17, color: C.you,
   background: 'rgba(166,197,63,0.05)', borderBottom: `1px solid #29331d`, letterSpacing: 0.3,
 };
-const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 11, color: C.dim, letterSpacing: 1 };
-const hd: React.CSSProperties = { margin: '2px 16px 0', fontFamily: mono, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, color: C.you };
-const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6, minHeight: 220, maxHeight: 340, overflowY: 'auto', padding: '4px 16px 16px' };
-const empty: React.CSSProperties = { color: C.faint, fontSize: 13, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.8 };
+const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
+const hd: React.CSSProperties = { margin: '4px 20px 0', fontFamily: mono, fontSize: 16, fontWeight: 700, letterSpacing: 0.5, color: C.you };
+const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 300, maxHeight: '52vh', overflowY: 'auto', padding: '6px 20px 20px' };
+const empty: React.CSSProperties = { color: C.faint, fontSize: 16, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
-  display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 12,
-  padding: '10px 12px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
+  display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 16,
+  padding: '14px 16px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
   background: 'rgba(166,197,63,0.03)', border: `1px solid ${C.border}`, color: C.text, fontFamily: mono,
 };
-const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6, fontFamily: mono };
-const rMode: React.CSSProperties = { fontSize: 15, flexShrink: 0 };
+const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 17, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono };
+const rMode: React.CSSProperties = { fontSize: 19, flexShrink: 0 };
 const rArrow: React.CSSProperties = { color: C.you, marginRight: 2 };
-const visRow: React.CSSProperties = { display: 'flex', gap: 8, margin: '0 16px' };
+const visRow: React.CSSProperties = { display: 'flex', gap: 10, margin: '0 20px' };
 const visBtn: React.CSSProperties = {
-  flex: 1, padding: '10px 12px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  flex: 1, padding: '14px 14px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', fontFamily: mono,
   transition: 'border-color .12s, background .12s, color .12s',
 };
 const visBtnOn: React.CSSProperties = {
   color: C.rare, border: '1px solid #d8a23c', background: 'rgba(216,162,60,0.12)', boxShadow: '0 0 14px rgba(216,162,60,0.22)',
 };
-const visHint: React.CSSProperties = { margin: '-2px 16px 2px', color: C.faint, fontSize: 12, lineHeight: 1.3, fontFamily: mono };
+const visHint: React.CSSProperties = { margin: '-2px 20px 2px', color: C.faint, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
 const modeToggle: React.CSSProperties = {
-  margin: '0 16px', padding: '10px 14px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  margin: '0 20px', padding: '14px 16px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 4, border: `1px dashed ${C.borderHi}`, background: 'rgba(166,197,63,0.02)', fontFamily: mono,
   transition: 'border-color .12s, color .12s, background .12s',
 };
 const modeToggleOn: React.CSSProperties = { color: C.you, border: `1px solid rgba(166,197,63,0.5)`, background: 'rgba(166,197,63,0.06)' };
-const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '0 16px' };
+const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, margin: '0 20px' };
 const modeCard: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
+  display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
   borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', color: C.text, fontFamily: mono,
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const modeCardOn: React.CSSProperties = {
   border: '1px solid #c3e04d', background: 'rgba(166,197,63,0.1)', boxShadow: '0 0 16px rgba(166,197,63,0.24)',
 };
-const modeIcon: React.CSSProperties = { fontSize: 18, lineHeight: 1 };
-const modeName: React.CSSProperties = { fontWeight: 700, fontSize: 13, fontFamily: mono };
-const modeTag: React.CSSProperties = { fontSize: 11, color: C.dim, lineHeight: 1.25, fontFamily: mono };
-const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.rare, letterSpacing: 1 };
-const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.dim };
-const rGo: React.CSSProperties = { fontSize: 12, color: C.you, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
+const modeIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
+const modeName: React.CSSProperties = { fontWeight: 700, fontSize: 16, fontFamily: mono };
+const modeTag: React.CSSProperties = { fontSize: 13, color: C.dim, lineHeight: 1.3, fontFamily: mono };
+const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.rare, letterSpacing: 1 };
+const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.dim };
+const rGo: React.CSSProperties = { fontSize: 15, color: C.you, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
 const field: React.CSSProperties = {
-  margin: '0 16px', padding: '11px 14px', fontSize: 14, color: C.you, outline: 'none', letterSpacing: 0.5,
+  margin: '0 20px', padding: '14px 16px', fontSize: 17, color: C.you, outline: 'none', letterSpacing: 0.5,
   background: 'rgba(0,0,0,0.4)', border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: mono,
 };
-const codeRow: React.CSSProperties = { display: 'flex', gap: 8, margin: '0 16px' };
-const codeField: React.CSSProperties = { flex: 1, margin: 0, fontFamily: mono, letterSpacing: 6, textAlign: 'center', textTransform: 'uppercase' };
+const codeRow: React.CSSProperties = { display: 'flex', gap: 10, margin: '0 20px' };
+const codeField: React.CSSProperties = { flex: 1, margin: 0, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  margin: '2px 16px', padding: '13px 18px', fontSize: 15, fontWeight: 800, color: '#0a0d04', cursor: 'pointer', letterSpacing: 0.5,
+  margin: '4px 20px', padding: '16px 20px', fontSize: 18, fontWeight: 800, color: '#0a0d04', cursor: 'pointer', letterSpacing: 0.5,
   border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#c3e04d,#8fa832)', fontFamily: mono,
   boxShadow: '0 0 22px rgba(166,197,63,0.3)',
 };
 const ghost: React.CSSProperties = {
-  margin: '0 16px', padding: '12px 18px', fontSize: 14, fontWeight: 700, color: C.you, cursor: 'pointer', letterSpacing: 0.5,
+  margin: '0 20px', padding: '15px 20px', fontSize: 16, fontWeight: 700, color: C.you, cursor: 'pointer', letterSpacing: 0.5,
   border: `1px solid ${C.borderHi}`, borderRadius: 4, background: 'rgba(166,197,63,0.04)', fontFamily: mono,
 };
 const sep: React.CSSProperties = {
-  textAlign: 'center', color: C.faint, fontSize: 12, margin: '4px 16px', fontFamily: mono,
+  textAlign: 'center', color: C.faint, fontSize: 14, margin: '6px 20px', fontFamily: mono,
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
 };
-const errLine: React.CSSProperties = { margin: '0 16px 14px', color: C.enemy, fontSize: 13, textAlign: 'center', fontFamily: mono };
+const errLine: React.CSSProperties = { margin: '0 20px 18px', color: C.enemy, fontSize: 15, textAlign: 'center', fontFamily: mono };
 const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
