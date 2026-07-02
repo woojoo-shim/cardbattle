@@ -156,3 +156,13 @@
   100% { transform: translate(-50%, 120vh) rotate(var(--r1, 220deg)); opacity: 0; }
 }
 .cb-cardfall { will-change: transform, opacity; }
+
+/* Brand intro splash: the PHOTON logo swells out of the dark, holds, then fades back out
+   before the menu appears (Diablo-style). animationend hands control to the menu. */
+@keyframes cb-splash {
+  0%   { opacity: 0; transform: scale(1.06); filter: blur(6px) drop-shadow(0 0 40px rgba(56,160,255,0.28)); }
+  20%  { opacity: 1; transform: scale(1);    filter: blur(0)    drop-shadow(0 0 40px rgba(56,160,255,0.28)); }
+  74%  { opacity: 1; transform: scale(1);    filter: blur(0)    drop-shadow(0 0 44px rgba(56,160,255,0.32)); }
+  100% { opacity: 0; transform: scale(0.985);filter: blur(3px)  drop-shadow(0 0 20px rgba(56,160,255,0.15)); }
+}
+.cb-splash { animation: cb-splash 3.6s cubic-bezier(.4,0,.2,1) both; will-change: opacity, transform, filter; }

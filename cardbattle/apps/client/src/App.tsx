@@ -4,6 +4,7 @@ import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
 import { MainMenu } from './ui/MainMenu.js';
+import { Splash } from './ui/Splash.js';
 import { quickPlay } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
@@ -23,6 +24,8 @@ export function App() {
   const [connect, setConnect] = useState<Connect | null>(null);
   // After login we land on the main menu; 멀티플레이어 opens the room browser.
   const [view, setView] = useState<'menu' | 'browser'>('menu');
+  // The brand intro plays once per session, right before the menu first appears.
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     if (account === undefined) fetchMe().then((a) => setAccount(a));
@@ -30,6 +33,8 @@ export function App() {
 
   if (account === undefined) return <Centered>불러오는 중…</Centered>;
   if (account === null) return <AuthGate onAuthed={setAccount} />;
+  // Intro splash → menu: play the fade-in/hold/fade-out once, then reveal the menu.
+  if (!splashDone) return <Splash onDone={() => setSplashDone(true)} />;
   // useState setters treat function values as updaters, so wrap to store the connect fn itself.
   if (connect === null) {
     if (view === 'menu') {
