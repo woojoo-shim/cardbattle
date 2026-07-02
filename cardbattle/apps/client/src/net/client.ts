@@ -5,7 +5,7 @@ import { getToken } from './auth.js';
 // Dev: the Vite page (:5173) and the Colyseus server (:2567) run on separate ports.
 // Prod: the server serves the built client, so the websocket lives on the page's own
 // origin — use wss when the page is https so secure pages don't get mixed-content errors.
-export const endpoint = import.meta.env.DEV
+const endpoint = import.meta.env.DEV
   ? `ws://${location.hostname}:2567`
   : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
 
@@ -80,26 +80,18 @@ export async function joinRoomById(roomId: string, name: string, avatar: string)
  * and blanking the list on every blip made rooms flicker in and out. The fresh 'rooms' snapshot
  * from the new connection replaces the list wholesale a moment later, correcting any staleness.
  */
-export interface LobbyStatus { state: 'connecting' | 'live' | 'retrying'; error?: string; }
-
-export async function listLobby(
-  onUpdate: (rooms: RoomInfo[]) => void,
-  onStatus?: (s: LobbyStatus) => void,
-): Promise<() => void> {
+export async function listLobby(onUpdate: (rooms: RoomInfo[]) => void): Promise<() => void> {
   const byId = new Map<string, RoomInfo>();
   const emit = () => onUpdate([...byId.values()]);
-  const status = (s: LobbyStatus) => onStatus?.(s);
   let closed = false;
   let current: Room | null = null;
 
   const connect = async () => {
     if (closed) return;
-    status({ state: 'connecting' });
     try {
       const room = await new Client(endpoint).joinOrCreate('lobby', { filter: { name: 'battle' } });
       if (closed) { room.leave(); return; }
       current = room;
-      status({ state: 'live' });
 
       room.onMessage('rooms', (rooms: RoomInfo[]) => {
         byId.clear();
@@ -113,11 +105,10 @@ export async function listLobby(
       room.onLeave(() => {
         current = null;
         if (closed) return;
-        status({ state: 'retrying' });
         setTimeout(connect, 2000);
       });
-    } catch (e) {
-      if (!closed) { status({ state: 'retrying', error: String((e as Error)?.message ?? e) }); setTimeout(connect, 2000); }
+    } catch {
+      if (!closed) setTimeout(connect, 2000);
     }
   };
 
