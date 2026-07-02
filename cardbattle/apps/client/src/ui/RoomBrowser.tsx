@@ -177,7 +177,10 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 const wrap: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
   justifyContent: 'center', gap: 10, fontFamily: sans, color: C.text,
-  background: 'radial-gradient(120% 90% at 50% 8%, #141826 0%, #0e1018 40%, #07080d 100%), #07080d',
+  background:
+    'radial-gradient(58% 42% at 50% 12%, rgba(126,38,62,0.16), transparent 66%),' +
+    'radial-gradient(120% 90% at 50% 108%, rgba(216,162,60,0.06), transparent 62%),' +
+    'linear-gradient(180deg, #140b0e 0%, #0c0709 52%, #060305 100%), #060305',
 };
 const who: React.CSSProperties = { margin: '10px 0 14px', color: C.dim, fontSize: 14 };
 const cols: React.CSSProperties = { display: 'flex', gap: 20, width: 'min(820px, 94vw)', alignItems: 'stretch' };
@@ -206,7 +209,7 @@ const visBtn: React.CSSProperties = {
   transition: 'border-color .12s, background .12s, color .12s',
 };
 const visBtnOn: React.CSSProperties = {
-  color: C.text, border: '1px solid #7b5cff', background: 'rgba(123,92,255,0.14)', boxShadow: '0 0 14px rgba(123,92,255,0.28)',
+  color: C.text, border: '1px solid #d8a23c', background: 'rgba(216,162,60,0.14)', boxShadow: '0 0 14px rgba(216,162,60,0.28)',
 };
 const visHint: React.CSSProperties = { margin: '-4px 0 2px', color: C.faint, fontSize: 12, lineHeight: 1.3 };
 const modeToggle: React.CSSProperties = {
@@ -214,7 +217,7 @@ const modeToggle: React.CSSProperties = {
   borderRadius: 10, border: `1px dashed ${C.borderHi}`, background: 'rgba(255,255,255,0.03)', fontFamily: sans,
   transition: 'border-color .12s, color .12s, background .12s',
 };
-const modeToggleOn: React.CSSProperties = { color: '#5af0d3', border: '1px solid rgba(56,232,200,0.5)', background: 'rgba(56,232,200,0.06)' };
+const modeToggleOn: React.CSSProperties = { color: '#c3e04d', border: '1px solid rgba(166,197,63,0.5)', background: 'rgba(166,197,63,0.06)' };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
@@ -222,7 +225,7 @@ const modeCard: React.CSSProperties = {
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const modeCardOn: React.CSSProperties = {
-  border: '1px solid #5af0d3', background: 'rgba(56,232,200,0.1)', boxShadow: '0 0 16px rgba(56,232,200,0.28)',
+  border: '1px solid #c3e04d', background: 'rgba(166,197,63,0.1)', boxShadow: '0 0 16px rgba(166,197,63,0.28)',
 };
 const modeIcon: React.CSSProperties = { fontSize: 18, lineHeight: 1 };
 const modeName: React.CSSProperties = { fontWeight: 800, fontSize: 13.5 };
@@ -237,9 +240,9 @@ const field: React.CSSProperties = {
 const codeRow: React.CSSProperties = { display: 'flex', gap: 8 };
 const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 6, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  padding: '13px 18px', fontSize: 16, fontWeight: 800, color: '#04231b', cursor: 'pointer',
-  border: 'none', borderRadius: 10, background: 'linear-gradient(180deg,#5af0d3,#22c7a8)',
-  boxShadow: '0 8px 20px rgba(56,232,200,0.3)',
+  padding: '13px 18px', fontSize: 16, fontWeight: 800, color: '#141608', cursor: 'pointer',
+  border: 'none', borderRadius: 10, background: 'linear-gradient(180deg,#c3e04d,#8fa832)',
+  boxShadow: '0 8px 20px rgba(166,197,63,0.3)',
 };
 const ghost: React.CSSProperties = {
   padding: '13px 18px', fontSize: 15, fontWeight: 700, color: C.text, cursor: 'pointer',

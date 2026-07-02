@@ -28,7 +28,7 @@ const ELEM: Record<Element, string> = {
   physical: '#ff5c8a', fire: '#ff7a3c', ice: '#5fd0ff',
   lightning: '#ffd84a', poison: '#9be85a', holy: '#ffe9a8', none: '#ff5c8a',
 };
-const HEAL = '#38e8c8';
+const HEAL = '#a6c53f';
 const SHIELD = '#7fb6ff';
 
 /** Viewport-centre of a player's portrait (the face), so hits land on the person and not the

@@ -305,14 +305,14 @@ const manaDock: React.CSSProperties = {
 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
-  color: '#04231b', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(180deg,#5af0d3,#22c7a8)', boxShadow: '0 8px 20px rgba(56,232,200,0.35)',
+  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(180deg,#c3e04d,#8fa832)', boxShadow: '0 8px 20px rgba(166,197,63,0.35)',
   transition: 'transform .15s', zIndex: 16,
 };
 const endWrap: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   minHeight: '100vh', gap: 12, fontFamily: sans,
-  background: 'radial-gradient(120% 90% at 50% 30%, #141826 0%, #0e1018 40%, #07080d 100%), #07080d',
+  background: 'radial-gradient(120% 90% at 50% 30%, #191a12 0%, #101110 40%, #080807 100%), #080807',
 };
 const endTitle: React.CSSProperties = { margin: 0, fontSize: 64, fontWeight: 900, letterSpacing: 4, textShadow: '0 0 50px currentColor' };
 const endSub: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 18 };
@@ -328,7 +328,7 @@ const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fon
 const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
 const returnBtn: React.CSSProperties = {
   marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 800, letterSpacing: 0.5,
-  color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
-  boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
+  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
+  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };

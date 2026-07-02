@@ -52,10 +52,10 @@ const bubble: React.CSSProperties = {
   position: 'fixed', transform: 'translate(-50%, -118%)',
   display: 'flex', alignItems: 'center', gap: 8,
   padding: '9px 16px', borderRadius: 999, fontFamily: sans,
-  background: 'linear-gradient(180deg, rgba(20,30,52,0.97), rgba(12,18,34,0.97))',
+  background: 'linear-gradient(180deg, rgba(30,28,18,0.97), rgba(18,16,10,0.97))',
   border: `1.5px solid ${C.you}`,
-  boxShadow: '0 8px 24px rgba(56,232,200,0.32), inset 0 0 16px rgba(56,232,200,0.1)',
-  color: '#e6fbf5', fontSize: 16, fontWeight: 800, whiteSpace: 'nowrap',
+  boxShadow: '0 8px 24px rgba(166,197,63,0.32), inset 0 0 16px rgba(166,197,63,0.1)',
+  color: '#eef2d8', fontSize: 16, fontWeight: 800, whiteSpace: 'nowrap',
   animation: 'cb-bubble-pop 0.34s cubic-bezier(0.18,1.4,0.4,1) forwards',
 };
 const label: React.CSSProperties = { letterSpacing: 0.4 };

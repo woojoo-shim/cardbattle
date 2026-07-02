@@ -101,7 +101,7 @@ const wrap: React.CSSProperties = {
   // The same oxblood back-room haze as the main menu, so the flow feels of one place.
   background:
     'radial-gradient(58% 42% at 50% 20%, rgba(126,38,62,0.20), transparent 68%),' +
-    'radial-gradient(70% 50% at 50% 110%, rgba(56,232,200,0.06), transparent 62%),' +
+    'radial-gradient(70% 50% at 50% 110%, rgba(216,162,60,0.07), transparent 62%),' +
     'linear-gradient(180deg, #140b0e 0%, #0d070a 52%, #060305 100%),' +
     '#060305',
 };
@@ -133,20 +133,20 @@ const panel: React.CSSProperties = {
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 999,
-  background: 'rgba(56,232,200,0.08)', border: '1px solid rgba(56,232,200,0.32)',
+  background: 'rgba(166,197,63,0.08)', border: '1px solid rgba(166,197,63,0.32)',
 };
 const modeBadgeIcon: React.CSSProperties = { fontSize: 18 };
-const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#5af0d3', letterSpacing: 1 };
+const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#c3e04d', letterSpacing: 1 };
 const modeBadgeTag: React.CSSProperties = { fontSize: 12, color: C.dim };
 const codeBadge: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
-  background: 'rgba(123,92,255,0.1)', border: '1px solid rgba(123,92,255,0.34)',
-  boxShadow: '0 0 24px rgba(123,92,255,0.2)',
+  background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
+  boxShadow: '0 0 24px rgba(216,162,60,0.2)',
 };
 const codeLabel: React.CSSProperties = { fontSize: 13, color: C.dim };
 const codeValue: React.CSSProperties = {
   fontFamily: mono, fontSize: 26, fontWeight: 900, letterSpacing: 8,
-  color: C.you, textShadow: '0 0 16px rgba(61,242,192,0.5)',
+  color: C.rare, textShadow: '0 0 16px rgba(216,162,60,0.5)',
 };
 const codeShare: React.CSSProperties = { fontSize: 12, color: C.faint };
 const list: React.CSSProperties = {
@@ -157,18 +157,18 @@ const row: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px',
   background: 'rgba(0,0,0,0.28)', borderRadius: 10, border: `1px solid ${C.border}`,
 };
-const rowMe: React.CSSProperties = { borderColor: C.magic, boxShadow: '0 0 16px rgba(123,92,255,0.35)' };
+const rowMe: React.CSSProperties = { borderColor: C.magic, boxShadow: '0 0 16px rgba(111,160,140,0.35)' };
 const thumb: React.CSSProperties = {
   width: 34, height: 34, borderRadius: 9, display: 'grid', placeItems: 'center', flexShrink: 0,
-  background: 'linear-gradient(160deg,#1b2336,#101626)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
+  background: 'linear-gradient(160deg,#211a12,#100b08)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
 };
 const btn: React.CSSProperties = {
-  padding: '13px 34px', fontSize: 17, fontWeight: 800, color: '#fff', cursor: 'pointer',
+  padding: '13px 34px', fontSize: 17, fontWeight: 800, color: '#141608', cursor: 'pointer',
   border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
-  boxShadow: '0 8px 24px rgba(123,92,255,0.4)',
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
 };
-const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#1fae8a,#3df2c0)', color: '#04231b', boxShadow: '0 8px 24px rgba(61,242,192,0.35)' };
+const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#74902a,#b6d24a)', color: '#141608', boxShadow: '0 8px 24px rgba(166,197,63,0.35)' };
 const botBtn: React.CSSProperties = {
   padding: '13px 22px', fontSize: 15, fontWeight: 700, color: C.text, cursor: 'pointer',
   border: `1px solid ${C.borderHi}`, borderRadius: 12, background: 'rgba(255,255,255,0.05)', fontFamily: sans,

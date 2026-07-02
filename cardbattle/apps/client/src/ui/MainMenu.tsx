@@ -88,7 +88,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={scatterLayer} aria-hidden>
         {SCATTER.map((c, i) => (
           <span key={i} style={scatterCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(56,232,200,0.4)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -97,7 +97,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={fallLayer} aria-hidden>
         {FALLING.map((c, i) => (
           <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(56,232,200,0.4)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -219,8 +219,8 @@ function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
     position: 'absolute', left: `${c.l}%`, top: 0,
     width: 74 * c.s, height: 104 * c.s, borderRadius: 9,
     display: 'grid', placeItems: 'center', filter: 'blur(0.6px)',
-    background: 'linear-gradient(160deg,#1b2336,#0c1120)', border: `1px solid ${C.border}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(56,232,200,0.05)',
+    background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
+    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(166,197,63,0.05)',
     animation: `cb-cardfall ${c.dur}s linear ${c.delay}s infinite`,
     ['--r0' as string]: `${c.r0}deg`, ['--r1' as string]: `${c.r1}deg`, ['--o' as string]: `${c.o}`,
   };
@@ -231,8 +231,8 @@ function scatterCard(c: { l: number; t: number; r: number; o: number; s: number 
     width: 76 * c.s, height: 106 * c.s, borderRadius: 9,
     transform: `translate(-50%,-50%) rotate(${c.r}deg)`, opacity: c.o,
     display: 'grid', placeItems: 'center', filter: 'blur(0.4px)',
-    background: 'linear-gradient(160deg,#1b2336,#0c1120)', border: `1px solid ${C.border}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(56,232,200,0.05)',
+    background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
+    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(166,197,63,0.05)',
   };
 }
 const vignette: React.CSSProperties = {
@@ -327,7 +327,7 @@ const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 34, fon
 const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
 const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.4 };
 const creditsClose: React.CSSProperties = {
-  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#fff', cursor: 'pointer',
+  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer',
   border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)', boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };

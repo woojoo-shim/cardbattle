@@ -34,9 +34,9 @@ function Crest({ size }: { size: number }) {
     <svg viewBox="0 0 128 148" width={size} height={size * (148 / 128)} aria-hidden style={{ display: 'block' }}>
       <defs>
         <linearGradient id="cbRing" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#8b6cff" />
-          <stop offset="0.5" stopColor="#5ce0ff" />
-          <stop offset="1" stopColor="#38e8c8" />
+          <stop offset="0" stopColor="#d8a23c" />
+          <stop offset="0.5" stopColor="#c3e04d" />
+          <stop offset="1" stopColor="#a6c53f" />
         </linearGradient>
         <radialGradient id="cbAbyss" cx="0.5" cy="0.4" r="0.75">
           <stop offset="0" stopColor="#1a2340" />
@@ -115,12 +115,12 @@ const wordRow: React.CSSProperties = {
 const gap: React.CSSProperties = { width: '0.42em' };
 // Brushed-metal caps with a cool neon underglow — reads as engraved, not a flat gradient fill.
 const wordA: React.CSSProperties = {
-  background: 'linear-gradient(180deg,#ffffff 0%,#dfe6f6 44%,#9aa3c0 100%)',
+  background: 'linear-gradient(180deg,#fbf6e6 0%,#e6dcc2 44%,#b4ab90 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 10px rgba(123,92,255,0.45))',
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 10px rgba(216,162,60,0.45))',
 };
 const wordB: React.CSSProperties = {
-  background: 'linear-gradient(180deg,#eafff9 0%,#8ff0dc 46%,#2aa9b8 100%)',
+  background: 'linear-gradient(180deg,#f2f5da 0%,#c3e04d 46%,#7c9a2f 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 12px rgba(56,232,200,0.5))',
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 12px rgba(166,197,63,0.5))',
 };

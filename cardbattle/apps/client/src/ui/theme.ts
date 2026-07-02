@@ -1,20 +1,21 @@
-/** Shared visual tokens for the battle UI — "The Abyssal Arena" dark-fantasy palette.
- * Depth comes from luminance layers + 1px borders + drop shadows, not glow spam.
- * Glow is reserved for state-change moments (your turn, hit flash, targeting). */
+/** Shared visual tokens for the battle UI — Buckshot-Roulette-style grimy back-room palette.
+ * Warm, desaturated near-black surfaces + muddy borders; the only saturated colours are a
+ * sickly fluorescent institutional green, blood red, dirty amber, and a muted verdigris.
+ * Depth comes from luminance layers + 1px borders + drop shadows, not neon glow spam. */
 export const C = {
-  void: '#07080d',
-  stage: '#0e1018',
-  panel: '#161a26',
-  panelHi: '#1f2434',
-  border: '#2c3142',
-  borderHi: '#39405a',
-  text: '#e7e9f2',
-  dim: '#8b90a6',
-  faint: '#565c72',
-  you: '#38e8c8', // me / my turn / heal
-  enemy: '#ff3b6b', // opponents / damage / targeting / danger
-  rare: '#f4c44a', // rare/epic cards, victory
-  magic: '#8b6cff', // status effects, magic
+  void: '#080807', // wet-black room floor
+  stage: '#101110',
+  panel: '#181a16', // grimy warm-grey surface
+  panelHi: '#232620',
+  border: '#35362d', // muddy metal edge
+  borderHi: '#4a4b3a',
+  text: '#e7e3d5', // bone white
+  dim: '#9c988a',
+  faint: '#605d51',
+  you: '#a6c53f', // me / my turn / heal — sickly institutional green
+  enemy: '#cf3a30', // opponents / damage / targeting / danger — blood red
+  rare: '#d8a23c', // rare/epic cards, victory — dirty amber / lamp light
+  magic: '#6fa08c', // status effects, magic — muted verdigris
 } as const;
 
 export const RARITY_BORDER: Record<string, string> = {

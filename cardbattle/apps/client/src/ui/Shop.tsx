@@ -142,7 +142,7 @@ function TitleTab({ account, owns, busy, act }: TabProps) {
       </div>
       <div style={grid}>
         {TITLES.map((t) => (
-          <button key={t.id} style={swatch(t.id === sel.id, 'rgba(56,232,200,0.4)')} onClick={() => setSel(t)} title={t.name}>
+          <button key={t.id} style={swatch(t.id === sel.id, 'rgba(166,197,63,0.4)')} onClick={() => setSel(t)} title={t.name}>
             <span style={t.text ? titleText(t.color) : swatchName}>{t.text || t.name}</span>
             <span style={swatchPrice}>{t.id === account.equippedTitle ? '착용 중' : owns(t.id) ? '보유' : <Gold amount={t.price} />}</span>
           </button>
@@ -255,8 +255,8 @@ function effectPreviewBox(color: string): React.CSSProperties {
 const previewName: React.CSSProperties = { fontSize: 15, fontWeight: 800 };
 const equippedTag: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: C.you };
 const equipBtn: React.CSSProperties = {
-  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#04231b', cursor: 'pointer', border: 'none',
-  borderRadius: 10, background: 'linear-gradient(180deg,#5af0d3,#22c7a8)', boxShadow: '0 6px 16px rgba(56,232,200,0.3)',
+  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer', border: 'none',
+  borderRadius: 10, background: 'linear-gradient(180deg,#c3e04d,#8fa832)', boxShadow: '0 6px 16px rgba(166,197,63,0.3)',
 };
 const buyBtn: React.CSSProperties = {
   padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#2a1e04', cursor: 'pointer', border: 'none',

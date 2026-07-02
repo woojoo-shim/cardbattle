@@ -215,20 +215,21 @@ const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
   background:
-    'radial-gradient(72% 52% at 50% 116%, rgba(56,232,200,0.10), transparent 60%),' +
-    'radial-gradient(60% 46% at 50% -12%, rgba(123,92,255,0.11), transparent 62%),' +
-    '#07080d',
+    'radial-gradient(58% 40% at 50% 26%, rgba(126,38,62,0.18), transparent 68%),' +
+    'radial-gradient(72% 52% at 50% 116%, rgba(216,162,60,0.10), transparent 60%),' +
+    'linear-gradient(180deg, #140b0e 0%, #0c0709 54%, #060305 100%),' +
+    '#060305',
 };
-// One restrained pool of light behind the hand — glow is a moment, not wallpaper.
+// One restrained pool of dirty lamp light behind the hand — glow is a moment, not wallpaper.
 const gateGlow: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '46%', width: 520, height: 300,
   transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at center, rgba(123,92,255,0.16), transparent 68%)',
+  background: 'radial-gradient(ellipse at center, rgba(216,162,60,0.14), transparent 68%)',
   filter: 'blur(6px)',
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,5,9,0.92) 100%)',
+  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,3,5,0.92) 100%)',
 };
 
 const gateContent: React.CSSProperties = {
@@ -245,7 +246,7 @@ const ruleWrap: React.CSSProperties = {
 };
 const rule: React.CSSProperties = {
   display: 'block', width: '100%', height: '100%',
-  background: 'linear-gradient(90deg, transparent, #38e8c8 32%, #8b6cff 68%, transparent)',
+  background: 'linear-gradient(90deg, transparent, #a6c53f 32%, #d8a23c 68%, transparent)',
   backgroundSize: '220% 100%',
 };
 
@@ -282,43 +283,43 @@ function pickCell(on: boolean): React.CSSProperties {
   return {
     width: 52, height: 52, padding: 0, cursor: 'pointer', borderRadius: 12,
     display: 'grid', placeItems: 'center',
-    background: on ? 'linear-gradient(160deg, rgba(56,232,200,0.16), rgba(123,92,255,0.12))' : 'rgba(20,24,34,0.6)',
+    background: on ? 'linear-gradient(160deg, rgba(166,197,63,0.16), rgba(216,162,60,0.10))' : 'rgba(24,26,22,0.6)',
     border: `1px solid ${on ? C.you : C.border}`,
-    boxShadow: on ? `0 0 0 1px ${C.you}, 0 0 16px rgba(56,232,200,0.35)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+    boxShadow: on ? `0 0 0 1px ${C.you}, 0 0 16px rgba(166,197,63,0.35)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
     transition: 'border-color .2s, box-shadow .2s, background .2s',
   };
 }
 // Segmented 로그인 / 회원가입 toggle.
 const tabRow: React.CSSProperties = {
   display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 12,
-  background: 'rgba(20,24,34,0.72)', border: `1px solid ${C.border}`,
+  background: 'rgba(22,24,20,0.72)', border: `1px solid ${C.border}`,
 };
 function tab(on: boolean): React.CSSProperties {
   return {
     padding: '9px 22px', fontSize: 14, fontWeight: 800, letterSpacing: 0.5, cursor: 'pointer',
     border: 'none', borderRadius: 9, fontFamily: sans,
-    color: on ? '#fff' : C.dim,
-    background: on ? 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)' : 'transparent',
-    boxShadow: on ? '0 6px 16px rgba(123,92,255,0.35)' : 'none',
+    color: on ? '#141608' : C.dim,
+    background: on ? 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)' : 'transparent',
+    boxShadow: on ? '0 6px 16px rgba(0,0,0,0.45)' : 'none',
     transition: 'color .2s, background .2s',
   };
 }
 // A stacked card holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 8, width: 'min(360px, 90vw)', padding: 10,
-  borderRadius: 14, background: 'rgba(20,24,34,0.72)', border: `1px solid ${C.border}`,
+  borderRadius: 14, background: 'rgba(22,24,20,0.72)', border: `1px solid ${C.border}`,
   boxShadow: '0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
   backdropFilter: 'blur(8px)',
 };
 const authInput: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
-  background: 'rgba(0,0,0,0.28)', border: `1px solid ${C.border}`, borderRadius: 10, outline: 'none',
+  background: 'rgba(0,0,0,0.32)', border: `1px solid ${C.border}`, borderRadius: 10, outline: 'none',
 };
 const enter: React.CSSProperties = {
   width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
-  color: '#fff', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #6d4bff, #5b3cff 60%, #2fb8a0)',
-  boxShadow: '0 6px 18px rgba(123,92,255,0.4)',
+  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
+  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };
 const hint: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.faint, fontFamily: sans, letterSpacing: 0.2,
