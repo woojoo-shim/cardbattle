@@ -154,10 +154,23 @@ function ChamberDeco() {
         </radialGradient>
       </defs>
 
+      {/* ===== SIDE WALLS — two trapezoid planes raking back toward the centre so the room
+           reads as a box. The ceiling/floor folds converge to a vanishing point behind the
+           table; the gear below sits ON these planes instead of floating in the dark. */}
+      <g pointerEvents="none">
+        <polygon points="0,0 46,29 46,80 0,108" fill="#180e11" opacity="0.9" />
+        <polygon points="192,0 146,29 146,80 192,108" fill="#180e11" opacity="0.9" />
+        <g stroke="#3c2831" strokeWidth="0.5" opacity="0.5" fill="none">
+          <path d="M0,0 L46,29 M0,108 L46,80 M46,29 L46,80" />
+          <path d="M192,0 L146,29 M192,108 L146,80 M146,29 L146,80" />
+        </g>
+      </g>
+
       {/* ===== LEFT WALL — mixer rack, tweeter box, big speaker, stacked papers =====
-           Each cabinet is extruded up-and-right (lit top face + shadowed right face) so it
-           reads as a box with depth, not a flat panel — faux-3D, all hand-drawn. */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
+           The whole group is sheared to lie flat on the raking left wall (its centre-facing
+           edge dips toward the vanishing point), and each cabinet is extruded up-and-right
+           (lit top face + shadowed right face) so it reads as a box mounted on that wall. */}
+      <g stroke="#2a1e1d" strokeWidth="0.4" transform="translate(16,0) skewY(7) translate(-16,0)">
         {/* tweeter box perched on top */}
         <polygon points="20,29 31,29 34,26.8 23,26.8" fill="#221917" />
         <polygon points="31,29 34,26.8 34,37.8 31,40" fill="#0b0708" />
@@ -197,9 +210,9 @@ function ChamberDeco() {
       </g>
 
       {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve =====
-           Extruded up-and-left (lit top face + shadowed left face) so gear on this
-           wall throws its depth toward the room, mirroring the left cabinets. */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
+           Sheared to lie on the raking right wall (mirror of the left), then extruded
+           up-and-left (lit top face + shadowed left face) so its depth throws into the room. */}
+      <g stroke="#2a1e1d" strokeWidth="0.4" transform="translate(175,0) skewY(-7) translate(-175,0)">
         {/* amp / machine unit */}
         <polygon points="160,42 191,42 188,39.5 157,39.5" fill="#221917" />
         <polygon points="160,42 157,39.5 157,64.5 160,67" fill="#090506" />
