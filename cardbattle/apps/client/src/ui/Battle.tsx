@@ -121,28 +121,30 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
-  // A single enclosed chamber: a dim back wall up top meets a lit stone floor below at a soft
-  // violet horizon seam, the pendant lamp's halo pooling on the table and spilling onto the
-  // floor. Corners sink into black so the room feels walled-in and oppressive.
+  // A damp concrete pit somewhere under the city — the kind of back room you get to through a
+  // sewer grate. One dirty bulb pools jaundiced light on the table; sickly-green mildew creeps
+  // down the wall, a grimy waterline marks where the floor is always wet, and the corners drown
+  // in black so the room feels buried, walled-in, and nobody-knows-you're-here.
   background:
-    'radial-gradient(58% 40% at 50% 44%, rgba(120,72,190,0.16), transparent 68%),' +   // lamp halo on the table
-    'radial-gradient(46% 24% at 50% 73%, rgba(96,64,158,0.12), transparent 74%),' +     // light spilling on the floor
-    'linear-gradient(180deg, transparent 48%, rgba(150,110,230,0.05) 53%, transparent 60%),' + // wall/floor horizon seam
-    'linear-gradient(180deg, #150f21 0%, #100b19 47%, #0c0714 55%, #070510 100%),' +     // back wall → floor tonal split
-    '#070510',
-  boxShadow: 'inset 0 0 240px 80px rgba(0,0,0,0.92)',
+    'radial-gradient(54% 38% at 50% 43%, rgba(226,164,72,0.19), transparent 66%),' +   // bare bulb pooling on the table
+    'radial-gradient(44% 23% at 50% 73%, rgba(150,110,50,0.10), transparent 74%),' +    // dirty light on the wet floor
+    'radial-gradient(130% 76% at 50% 5%, rgba(70,92,64,0.10), transparent 60%),' +      // sickly-green mildew creeping down the wall
+    'linear-gradient(180deg, transparent 48%, rgba(96,120,84,0.05) 53%, transparent 60%),' + // grimy waterline seam
+    'linear-gradient(180deg, #0e0f0b 0%, #0b0c08 47%, #090a07 55%, #050603 100%),' +    // damp concrete wall → wet floor
+    '#050603',
+  boxShadow: 'inset 0 0 260px 92px rgba(0,0,0,0.95)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = { position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' };
-// The stone floor of the chamber: a tiled grid tilted back in perspective so its lines converge
-// toward the horizon, making the table read as sitting on a receding floor inside a real room.
+// The wet concrete floor of the pit: grimy tile seams tilted back in perspective so the lines
+// converge toward the horizon, making the table read as sitting on a receding floor in a real room.
 const fieldGrid: React.CSSProperties = {
   position: 'absolute', left: '50%', bottom: '-6%', width: '172%', height: '62%',
   transform: 'translateX(-50%) perspective(560px) rotateX(62deg)',
   transformOrigin: '50% 100%', pointerEvents: 'none',
   backgroundImage:
-    'linear-gradient(rgba(150,110,230,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(150,110,230,0.05) 1px, transparent 1px)',
+    'linear-gradient(rgba(122,140,102,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(122,140,102,0.045) 1px, transparent 1px)',
   backgroundSize: '46px 46px',
   WebkitMaskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',
   maskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',

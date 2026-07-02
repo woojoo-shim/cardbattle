@@ -152,16 +152,17 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   width: '62%', height: '70%', borderRadius: '50%',
-  // Deep oxblood-violet felt: a heavy, blood-dark table that sinks into the abyss at its rim.
-  background: 'radial-gradient(ellipse at 50% 38%, #2a1a3e 0%, #1c1230 45%, #0d0819 100%)',
-  border: '2px solid #35234f', boxShadow: 'inset 0 0 62px rgba(0,0,0,0.66), 0 30px 72px rgba(0,0,0,0.6)',
+  // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
+  // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room.
+  background: 'radial-gradient(ellipse at 50% 38%, #24331e 0%, #172414 45%, #0a1109 100%)',
+  border: '2px solid #2c3a22', boxShadow: 'inset 0 0 62px rgba(0,0,0,0.7), 0 30px 72px rgba(0,0,0,0.62)',
 };
 const feltRim: React.CSSProperties = {
-  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(150,110,255,0.16)',
+  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(150,168,110,0.15)',
 };
 const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
-  boxShadow: 'inset 0 0 44px rgba(124,88,220,0.10)',
+  boxShadow: 'inset 0 0 44px rgba(224,164,72,0.10)',
 };
 // Pendant lamp over the table centre. The fixture (cord + shade) is always lit; the emitted
 // light (bulb, cone, floor pool) plays the cb-lampon flicker once when RoundTable mounts (= game start).
@@ -169,33 +170,36 @@ const lampWrap: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
 };
 const lampCord: React.CSSProperties = {
+  // A frayed wire dropping from the dark — the kind strung up in a back room nobody pays rent on.
   position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)',
-  width: 2, height: '14%', background: 'linear-gradient(#0a121e,#26405a)',
+  width: 2, height: '14%', background: 'linear-gradient(#060504,#2a2216)',
 };
 const lampShade: React.CSSProperties = {
+  // A battered tin dish clamped over a bare bulb — dented metal, no fixture, just what was on hand.
   position: 'absolute', left: '50%', top: '13%', transform: 'translateX(-50%)',
   width: 64, height: 30, borderRadius: '50% 50% 46% 46% / 80% 80% 20% 20%',
-  background: 'linear-gradient(160deg,#2c4760,#16263a)', border: '1px solid #355472',
-  boxShadow: '0 6px 14px rgba(0,0,0,0.5)',
+  background: 'linear-gradient(160deg,#2a2620,#141009)', border: '1px solid #3d3428',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.6)',
 };
 const lampBulb: React.CSSProperties = {
+  // A single dirty sodium bulb — the only law in the room. Warm, jaundiced, buzzing.
   position: 'absolute', left: '50%', top: '20%', transform: 'translateX(-50%)',
   width: 16, height: 16, borderRadius: '50%',
-  background: 'radial-gradient(circle, #d8fff6 0%, #6ff0db 55%, rgba(56,232,200,0.2) 100%)',
-  boxShadow: '0 0 22px 6px rgba(120,240,220,0.6)',
+  background: 'radial-gradient(circle, #fff2cf 0%, #f0b256 52%, rgba(210,140,50,0.22) 100%)',
+  boxShadow: '0 0 22px 6px rgba(240,180,80,0.6)',
   animation: 'cb-lampon 2.4s ease-out both',
 };
 const lampCone: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '21%', transform: 'translateX(-50%)',
   width: 240, height: '46%',
-  background: 'linear-gradient(180deg, rgba(120,240,220,0.22), rgba(120,240,220,0))',
+  background: 'linear-gradient(180deg, rgba(238,176,78,0.20), rgba(238,176,78,0))',
   clipPath: 'polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%)',
   filter: 'blur(2px)', animation: 'cb-lampon 2.4s ease-out both',
 };
 const lampPool: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   width: '52%', height: '54%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 42%, rgba(120,240,220,0.16), transparent 68%)',
+  background: 'radial-gradient(ellipse at 50% 42%, rgba(238,176,78,0.16), transparent 68%)',
   animation: 'cb-lampon 2.4s ease-out both',
 };
 const tableFan: React.CSSProperties = {
