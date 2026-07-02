@@ -41,6 +41,27 @@ export async function createRoom(name: string, title: string, avatar: string, mo
   return wrap(room);
 }
 
+/** Resolve a 4-char room code to a live roomId with a fresh one-shot lobby query. Unlike reading
+ * the room-browser's own list (which can be empty or stale if that subscription's socket dropped,
+ * and only ever populates a moment after mount), this opens a throwaway lobby connection, reads
+ * the current full battle-room list once, then leaves. The lobby's raw list includes private
+ * rooms too (the server hides them only from the browser UI, not from matchmaking), so codes for
+ * private rooms resolve here as well. */
+export function findRoomByCode(code: string): Promise<string | null> {
+  const c = code.trim().toUpperCase();
+  if (!c) return Promise.resolve(null);
+  return new Promise((resolve, reject) => {
+    new Client(endpoint).joinOrCreate('lobby', { filter: { name: 'battle' } }).then((room) => {
+      const done = (roomId: string | null) => { clearTimeout(timer); room.leave(); resolve(roomId); };
+      const timer = setTimeout(() => done(null), 6000); // no 'rooms' snapshot arrived
+      room.onMessage('rooms', (rooms: RoomInfo[]) => {
+        const hit = rooms.find((r) => (r.metadata?.code ?? '').toUpperCase() === c && !r.metadata?.started);
+        done(hit ? hit.roomId : null);
+      });
+    }).catch(reject);
+  });
+}
+
 /** Join a specific room by its Colyseus roomId (used by both the list and code paths). */
 export async function joinRoomById(roomId: string, name: string, avatar: string): Promise<BattleConnection> {
   const room = await new Client(endpoint).joinById(roomId, { name, avatar, ...auth() });

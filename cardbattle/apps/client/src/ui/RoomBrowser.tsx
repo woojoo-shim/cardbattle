@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { createRoom, joinRoomById, quickPlay, listLobby, type BattleConnection, type RoomInfo } from '../net/client.js';
+import { useEffect, useState } from 'react';
+import { createRoom, joinRoomById, quickPlay, listLobby, findRoomByCode, type BattleConnection, type RoomInfo } from '../net/client.js';
 import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
@@ -31,8 +31,6 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
-  const roomsRef = useRef<RoomInfo[]>([]);
-  roomsRef.current = rooms;
 
   useEffect(() => {
     let off: (() => void) | undefined;
@@ -55,12 +53,21 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   const create = () => onPick(() => createRoom(name, title.trim(), avatar, mode, isPrivate));
   const join = (roomId: string) => onPick(() => joinRoomById(roomId, name, avatar));
   const quick = () => onPick(() => quickPlay(name, avatar));
-  const joinByCode = () => {
+  const joinByCode = async () => {
     const c = code.trim().toUpperCase();
     if (!c) return;
-    const hit = roomsRef.current.find((r) => (r.metadata?.code ?? '').toUpperCase() === c);
-    if (!hit) { setErr(`'${c}' 방을 찾을 수 없습니다.`); return; }
-    join(hit.roomId);
+    setErr('');
+    // Ask the server for the room right now — works for private rooms and survives a stale
+    // or disconnected lobby list (which is why the old local-list lookup could miss it).
+    let roomId: string | null;
+    try {
+      roomId = await findRoomByCode(c);
+    } catch {
+      setErr('서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.');
+      return;
+    }
+    if (!roomId) { setErr(`'${c}' 방을 찾을 수 없습니다.`); return; }
+    join(roomId);
   };
 
   return (
