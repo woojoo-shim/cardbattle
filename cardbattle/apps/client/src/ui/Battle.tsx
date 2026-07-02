@@ -135,9 +135,10 @@ const screen: React.CSSProperties = {
   boxShadow: 'inset 0 0 270px 96px rgba(0,0,0,0.96)',
   color: C.text,
 };
-// Grimy clutter overlay painted on the walls behind the table: dark cables strung across the
-// ceiling and pink/magenta grime splatter (blobs + droplet sprays), edges roughened by a
-// turbulence displacement so they read as thrown paint, not tidy circles. Purely decorative.
+// The back room, actually drawn: junked audio gear stacked against the side walls (a mixer rack
+// and a two-woofer speaker cabinet on the left; an amp with a dead green screen, pipes and a valve
+// wheel on the right), a couple of clamp spotlights hung off the ceiling, frayed cables drooping
+// across the top, and pink grime sprayed over all of it. Silhouette tones so it stays behind play.
 function ChamberDeco() {
   return (
     <svg style={chamberDeco} viewBox="0 0 192 108" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -146,21 +147,112 @@ function ChamberDeco() {
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n" />
           <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" />
         </filter>
+        <radialGradient id="cb-cone" cx="50%" cy="44%" r="56%">
+          <stop offset="0" stopColor="#2c1e1d" />
+          <stop offset="0.55" stopColor="#0e0809" />
+          <stop offset="1" stopColor="#060304" />
+        </radialGradient>
       </defs>
+
+      {/* ===== LEFT WALL — mixer rack, tweeter box, big speaker, stacked papers ===== */}
+      <g stroke="#2a1e1d" strokeWidth="0.4">
+        {/* tweeter box perched on top */}
+        <rect x="20" y="29" width="11" height="11" rx="0.8" fill="#150f10" />
+        <circle cx="25.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
+        {/* mixer / rack unit */}
+        <rect x="0.5" y="40" width="30" height="26" rx="1" fill="#160f10" />
+        <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
+        {/* fader bank */}
+        <g stroke="none">
+          <rect x="4" y="49.5" width="24" height="5" fill="#0c0708" />
+          {[5, 8, 11, 14, 17, 20, 23, 26].map((x) => (
+            <g key={x}><rect x={x - 0.4} y="50" width="0.8" height="4" fill="#241d1c" /><rect x={x - 0.7} y={50.4 + (x % 3) * 0.9} width="1.4" height="1" rx="0.4" fill="#4a3b39" /></g>
+          ))}
+        </g>
+        {/* knob + LED row */}
+        <g stroke="none">
+          {[5, 9, 13, 17, 21, 25].map((x) => (<circle key={x} cx={x} cy="59.5" r="1.5" fill="#241d1c" stroke="#0a0506" strokeWidth="0.25" />))}
+          {[5, 9, 13, 17, 21, 25].map((x, i) => (<circle key={`l${x}`} cx={x} cy="63.4" r="0.5" fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e', '#4d6a52'][i]} />))}
+        </g>
+        {/* big speaker cabinet, sunk off the bottom */}
+        <rect x="-1" y="66" width="27" height="44" rx="1" fill="#130d0e" />
+        <circle cx="8" cy="80.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <circle cx="8" cy="80.5" r="2.1" fill="#0a0607" />
+        <circle cx="8" cy="96.5" r="6.3" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <circle cx="8" cy="96.5" r="2.1" fill="#0a0607" />
+        {/* papers/junk stacked against the cabinet */}
+        <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
+          <rect x="18" y="88" width="15" height="2.6" transform="rotate(-3 25 89)" />
+          <rect x="18" y="91.4" width="15" height="2.6" transform="rotate(2 25 92)" />
+          <rect x="18" y="94.8" width="15" height="2.6" transform="rotate(-2 25 96)" />
+        </g>
+      </g>
+
+      {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve ===== */}
+      <g stroke="#2a1e1d" strokeWidth="0.4">
+        {/* amp / machine unit */}
+        <rect x="160" y="42" width="31" height="25" rx="1" fill="#160f10" />
+        {/* dead green screen */}
+        <rect x="163" y="45" width="15" height="9" rx="0.6" fill="#0a1210" />
+        <rect x="163.7" y="45.7" width="13.6" height="7.6" fill="#16302a" stroke="none" />
+        <g stroke="#204a42" strokeWidth="0.3" opacity="0.8">
+          <line x1="164.2" y1="47.4" x2="176.6" y2="47.4" /><line x1="164.2" y1="49.4" x2="176.6" y2="49.4" /><line x1="164.2" y1="51.4" x2="176.6" y2="51.4" />
+        </g>
+        {/* knobs */}
+        <g stroke="#0a0506" strokeWidth="0.25" fill="#241d1c">
+          <circle cx="182" cy="47.5" r="1.7" /><circle cx="187" cy="47.5" r="1.7" /><circle cx="182" cy="52.5" r="1.7" /><circle cx="187" cy="52.5" r="1.7" />
+        </g>
+        {/* vent slats */}
+        <g stroke="#0a0506" strokeWidth="0.5">
+          <line x1="163" y1="58" x2="188" y2="58" /><line x1="163" y1="60" x2="188" y2="60" /><line x1="163" y1="62" x2="188" y2="62" /><line x1="163" y1="64" x2="188" y2="64" />
+        </g>
+        {/* pipes running down the corner + a valve wheel */}
+        <g fill="#140e0d" stroke="#2a1e1d" strokeWidth="0.4">
+          <rect x="174" y="78" width="18" height="5" rx="2.5" />
+          <rect x="174" y="87" width="18" height="5" rx="2.5" />
+          <rect x="185" y="70" width="5" height="40" rx="2" />
+        </g>
+        <g stroke="#33241f" strokeWidth="0.6" fill="none">
+          <circle cx="182.5" cy="80.5" r="3.4" fill="#171110" />
+          <line x1="182.5" y1="77.1" x2="182.5" y2="83.9" /><line x1="179.1" y1="80.5" x2="185.9" y2="80.5" /><line x1="180.1" y1="78.1" x2="184.9" y2="82.9" /><line x1="180.1" y1="82.9" x2="184.9" y2="78.1" />
+        </g>
+      </g>
+
+      {/* ===== CLAMP SPOTLIGHTS hung off the ceiling ===== */}
+      <g stroke="#2a1e1d" strokeWidth="0.4">
+        <g transform="translate(52 23) rotate(26)">
+          <line x1="-2" y1="-9" x2="0" y2="-3.5" stroke="#0a0506" strokeWidth="0.6" />
+          <rect x="-6" y="-4" width="11" height="8.6" rx="1.2" fill="#100b0c" />
+          <rect x="5" y="-3.4" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
+          <rect x="5" y="2.5" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
+          <circle cx="5" cy="0.5" r="3.2" fill="#1c1310" stroke="#33241f" strokeWidth="0.5" />
+          <circle cx="5" cy="0.5" r="1.5" fill="#2e1f16" />
+        </g>
+        <g transform="translate(140 25) rotate(-24)">
+          <line x1="2" y1="-9" x2="0" y2="-3.5" stroke="#0a0506" strokeWidth="0.6" />
+          <rect x="-5" y="-4" width="11" height="8.6" rx="1.2" fill="#100b0c" />
+          <rect x="-9" y="-3.4" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
+          <rect x="-9" y="2.5" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
+          <circle cx="-5" cy="0.5" r="3.2" fill="#1c1310" stroke="#33241f" strokeWidth="0.5" />
+          <circle cx="-5" cy="0.5" r="1.5" fill="#2e1f16" />
+        </g>
+      </g>
+
       {/* frayed cables drooping across the ceiling */}
       <g stroke="#080405" strokeWidth="0.8" fill="none" opacity="0.9" strokeLinecap="round">
         <path d="M-2 9 Q 48 27 96 13 T 194 17" />
         <path d="M-2 4 Q 60 21 120 7 T 194 10" />
         <path d="M38 2 Q 70 23 104 6" />
       </g>
+
       {/* pink grime splatter — clustered on the upper walls and corners, fading toward the table */}
       <g filter="url(#cb-splat)">
-        <g fill="#d1568c" opacity="0.20"><circle cx="26" cy="24" r="7" /><circle cx="31" cy="17" r="2.2" /><circle cx="19" cy="31" r="1.5" /><circle cx="35" cy="29" r="1" /></g>
-        <g fill="#e08ab0" opacity="0.16"><circle cx="151" cy="30" r="5.6" /><circle cx="159" cy="23" r="1.8" /><circle cx="143" cy="38" r="1.2" /></g>
-        <g fill="#d1568c" opacity="0.14"><circle cx="119" cy="15" r="3.4" /><circle cx="126" cy="11" r="1" /></g>
-        <g fill="#e08ab0" opacity="0.13"><circle cx="169" cy="70" r="4.6" /><circle cx="177" cy="63" r="1.4" /></g>
-        <g fill="#d1568c" opacity="0.12"><circle cx="15" cy="74" r="4" /><circle cx="9" cy="81" r="1.2" /></g>
-        <g fill="#e08ab0" opacity="0.10"><circle cx="96" cy="87" r="3.2" /></g>
+        <g fill="#d1568c" opacity="0.20"><circle cx="40" cy="22" r="6.2" /><circle cx="45" cy="16" r="2" /><circle cx="34" cy="28" r="1.4" /><circle cx="48" cy="26" r="1" /></g>
+        <g fill="#e08ab0" opacity="0.16"><circle cx="151" cy="30" r="5" /><circle cx="159" cy="23" r="1.7" /><circle cx="143" cy="37" r="1.1" /></g>
+        <g fill="#d1568c" opacity="0.14"><circle cx="112" cy="14" r="3.2" /><circle cx="118" cy="10" r="0.9" /></g>
+        <g fill="#e08ab0" opacity="0.13"><circle cx="169" cy="72" r="4.2" /><circle cx="177" cy="65" r="1.3" /></g>
+        <g fill="#d1568c" opacity="0.12"><circle cx="120" cy="86" r="3.6" /><circle cx="128" cy="82" r="1.1" /></g>
+        <g fill="#e08ab0" opacity="0.10"><circle cx="86" cy="88" r="3" /></g>
       </g>
     </svg>
   );

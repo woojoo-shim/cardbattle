@@ -27,6 +27,8 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
   return (
     <div style={area}>
       <div style={felt} aria-hidden>
+        <span style={feltStains} />
+        <span style={feltPaint} />
         <span style={feltRim} />
         <span style={feltGlow} />
       </div>
@@ -156,6 +158,24 @@ const felt: React.CSSProperties = {
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room.
   background: 'radial-gradient(ellipse at 50% 38%, #24331e 0%, #172414 45%, #0a1109 100%)',
   border: '2px solid #2c3a22', boxShadow: 'inset 0 0 62px rgba(0,0,0,0.7), 0 30px 72px rgba(0,0,0,0.62)',
+};
+// Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
+// caught from the room — the wear of a table that's seen a lot of bad nights.
+const feltStains: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: '50%',
+  backgroundImage:
+    'radial-gradient(circle at 38% 34%, rgba(0,0,0,0.30) 0 6%, transparent 12%),' +
+    'radial-gradient(circle at 66% 58%, rgba(0,0,0,0.26) 0 5%, transparent 11%),' +
+    'radial-gradient(circle at 52% 72%, rgba(0,0,0,0.22) 0 7%, transparent 13%),' +
+    'radial-gradient(circle at 30% 62%, rgba(120,90,40,0.14) 0 5%, transparent 12%),' +
+    'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.20) 0 4%, transparent 9%),' +
+    'radial-gradient(ellipse 14% 9% at 58% 46%, rgba(209,86,140,0.10), transparent 70%)',
+};
+// A faded painted ring on the baize — the old betting circle, half worn away.
+const feltPaint: React.CSSProperties = {
+  position: 'absolute', inset: '24%', borderRadius: '50%',
+  border: '1.5px solid rgba(206,214,184,0.10)',
+  boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.25)',
 };
 const feltRim: React.CSSProperties = {
   position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(150,168,110,0.15)',
