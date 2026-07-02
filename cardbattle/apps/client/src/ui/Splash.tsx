@@ -26,7 +26,6 @@ export function Splash({ onDone }: Props) {
 
   return (
     <div style={wrap} onClick={finish} title="건너뛰기">
-      <div style={glow} aria-hidden />
       <img
         src="/photon-splash.png"
         alt="PHOTON"
@@ -42,18 +41,13 @@ export function Splash({ onDone }: Props) {
 
 const wrap: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 200, cursor: 'pointer',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: '#000', overflow: 'hidden',
 };
-// A cool electric pool behind the mark, echoing the logo's blue cracks.
-const glow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: '70vmin', height: '70vmin',
-  transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
-  background: 'radial-gradient(circle, rgba(56,160,255,0.14), transparent 66%)',
-  filter: 'blur(10px)',
-};
+// The logo image covers the entire viewport. Its own black background bleeds edge-to-edge so
+// there's no visible square, and object-fit: cover keeps the mark centred on any aspect ratio
+// (iPad 4:3, wide desktop, portrait phone) — cropping only the empty black margins.
 const logo: React.CSSProperties = {
-  position: 'relative', width: 'min(560px, 82vw)', height: 'auto',
+  position: 'absolute', inset: 0, width: '100%', height: '100%',
+  objectFit: 'cover', objectPosition: 'center',
   userSelect: 'none', pointerEvents: 'none',
-  filter: 'drop-shadow(0 0 40px rgba(56,160,255,0.28))',
 };
