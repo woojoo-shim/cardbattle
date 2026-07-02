@@ -25,17 +25,23 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
 
-// Face-down cards raining down behind the title — slow, dim, staggered so there's always motion
-// in the back room without pulling focus from the menu. Deterministic so it doesn't reshuffle.
+// Face-down cards drifting down from the sky — slow ("느릭느릭"), staggered across the whole
+// width and depth so the back room always has a gentle rain of cards. Deep/small cards fall
+// slower & dimmer (further away); near/large cards fall a touch faster & brighter — a parallax
+// that sells the height of the fall. Deterministic so it never reshuffles on re-render.
 const FALLING: { l: number; dur: number; delay: number; r0: number; r1: number; o: number; s: number }[] = [
-  { l: 12, dur: 15, delay: 0, r0: -20, r1: 160, o: 0.16, s: 0.9 },
-  { l: 27, dur: 19, delay: -6, r0: 30, r1: 260, o: 0.13, s: 1.05 },
-  { l: 41, dur: 13, delay: -3, r0: -10, r1: 200, o: 0.18, s: 0.85 },
-  { l: 58, dur: 21, delay: -11, r0: 15, r1: 300, o: 0.12, s: 1.1 },
-  { l: 70, dur: 16, delay: -8, r0: -25, r1: 180, o: 0.16, s: 0.95 },
-  { l: 84, dur: 18, delay: -2, r0: 20, r1: 240, o: 0.14, s: 1.0 },
-  { l: 49, dur: 24, delay: -14, r0: -5, r1: 340, o: 0.10, s: 1.15 },
-  { l: 92, dur: 14, delay: -9, r0: 35, r1: 210, o: 0.15, s: 0.8 },
+  { l: 6, dur: 30, delay: 0, r0: -20, r1: 160, o: 0.20, s: 0.72 },
+  { l: 15, dur: 24, delay: -9, r0: 30, r1: 260, o: 0.24, s: 0.92 },
+  { l: 23, dur: 38, delay: -20, r0: -10, r1: 200, o: 0.14, s: 0.6 },
+  { l: 31, dur: 27, delay: -5, r0: 15, r1: 300, o: 0.26, s: 1.02 },
+  { l: 40, dur: 34, delay: -16, r0: -25, r1: 180, o: 0.16, s: 0.68 },
+  { l: 48, dur: 22, delay: -11, r0: 20, r1: 240, o: 0.28, s: 1.12 },
+  { l: 56, dur: 40, delay: -3, r0: -5, r1: 340, o: 0.12, s: 0.55 },
+  { l: 64, dur: 26, delay: -19, r0: 35, r1: 210, o: 0.25, s: 0.98 },
+  { l: 72, dur: 33, delay: -7, r0: -18, r1: 150, o: 0.17, s: 0.7 },
+  { l: 81, dur: 23, delay: -14, r0: 24, r1: 280, o: 0.27, s: 1.08 },
+  { l: 89, dur: 36, delay: -25, r0: -12, r1: 190, o: 0.13, s: 0.62 },
+  { l: 95, dur: 28, delay: -2, r0: 28, r1: 230, o: 0.22, s: 0.88 },
 ];
 
 // Face-down cards strewn around the frame like spent shells — dense at the edges, clearing the
@@ -70,13 +76,13 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
   return (
     <div style={wrap}>
-      {/* cards raining down behind the title */}
-      <div style={scatterLayer} aria-hidden>
-        {FALLING.map((c, i) => (
-          <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(56,232,200,0.4)' }}>◈</span>
-          </span>
-        ))}
+      {/* the back-room scene: a receding floor plane, a far wall, and the table's lamp pooling
+          up from below — depth behind the falling cards, not just a flat wash */}
+      <div style={sceneLayer} aria-hidden>
+        <div style={sceneWall} />
+        <div style={sceneFloor} />
+        <div style={sceneHorizon} />
+        <div style={sceneLampPool} />
       </div>
       {/* strewn cards behind everything */}
       <div style={scatterLayer} aria-hidden>
@@ -87,6 +93,14 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
         ))}
       </div>
       <div style={vignette} aria-hidden />
+      {/* cards drifting down from the sky — above the vignette so the slow fall reads clearly */}
+      <div style={fallLayer} aria-hidden>
+        {FALLING.map((c, i) => (
+          <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(56,232,200,0.4)' }}>◈</span>
+          </span>
+        ))}
+      </div>
 
       {/* account chip, top-right */}
       <div style={topBar}>
@@ -159,8 +173,46 @@ const wrap: React.CSSProperties = {
     'linear-gradient(180deg, #140b0e 0%, #0d070a 52%, #060305 100%),' +
     '#060305',
 };
+// The back-room environment behind the cards: a far wall up top, a floor plane receding to a
+// horizon a little above centre, and the table lamp glowing up from the bottom edge.
+const sceneLayer: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden',
+};
+const sceneWall: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '58%',
+  background:
+    'radial-gradient(120% 90% at 50% 100%, rgba(126,38,62,0.16), transparent 70%),' +
+    'linear-gradient(180deg, #0a0508 0%, #100a0d 60%, #150c10 100%)',
+};
+// The floor: a lighter plane skewed to read as receding away from the viewer.
+const sceneFloor: React.CSSProperties = {
+  position: 'absolute', left: '-20%', right: '-20%', bottom: 0, height: '46%',
+  background:
+    'radial-gradient(80% 120% at 50% 120%, rgba(238,176,78,0.10), transparent 60%),' +
+    'linear-gradient(180deg, #160d10 0%, #0c0709 70%, #060305 100%)',
+  transform: 'perspective(520px) rotateX(58deg)', transformOrigin: 'center top',
+  boxShadow: 'inset 0 60px 80px rgba(0,0,0,0.6)',
+};
+// A hairline of light where wall meets floor — the room's vanishing seam.
+const sceneHorizon: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: '54%', height: 2,
+  background: 'linear-gradient(90deg, transparent, rgba(238,176,78,0.28) 30%, rgba(238,176,78,0.3) 70%, transparent)',
+  filter: 'blur(1px)',
+};
+// The table lamp's pool welling up from the bottom edge.
+const sceneLampPool: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '-8%', width: '70%', height: '46%',
+  transform: 'translateX(-50%)', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 50%, rgba(238,176,78,0.14), rgba(238,176,78,0.04) 55%, transparent 72%)',
+  filter: 'blur(6px)',
+};
 const scatterLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+};
+// Falling cards ride above the vignette (zIndex 1) but below the content (zIndex 2) so the
+// slow drift stays clearly visible against the darkened scene without covering the menu.
+const fallLayer: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
 };
 function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
   return {
