@@ -154,42 +154,30 @@ function ChamberDeco() {
         </radialGradient>
       </defs>
 
-      {/* ===== LEFT WALL — one tall equipment cabinet (speaker + mixer) with a tweeter on top =====
-           Speaker and mixer share a width so their shadowed right faces line up into a single
-           continuous side plane — it reads as one chunky unit standing flush against the left
-           wall, not scattered boxes. Shallow depth (+5,-2.5) keeps it hugging the wall instead
-           of jutting into the room. */}
+      {/* ===== LEFT WALL — audio cabinet turned ~90° to sit ALONG the wall running back into the
+           chamber. Its face recedes toward the room's central vanishing point (~96,36): the near
+           (front) edge at x=4 is tall, the far edge at x=34 shrinks. That receding foreshorten is
+           what makes it read as mounted on the side wall rather than a box facing the camera. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* speaker — lower half of the cabinet */}
-        <polygon points="30,66 35,63.5 35,110 30,110" fill="#0a0708" />
-        <rect x="-1" y="66" width="31" height="44" rx="1" fill="#140d0e" />
-        <circle cx="9" cy="82" r="6.6" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <circle cx="9" cy="82" r="2.2" fill="#0a0607" />
-        <circle cx="9" cy="99" r="6.6" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <circle cx="9" cy="99" r="2.2" fill="#0a0607" />
-        {/* mixer — upper half, sits flush on the speaker so the side faces align */}
-        <polygon points="-1,40 30,40 35,37.5 4,37.5" fill="#2b201d" />
-        <polygon points="30,40 35,37.5 35,63.5 30,66" fill="#0a0708" />
-        <rect x="-1" y="40" width="31" height="26" rx="1" fill="#170f10" />
-        <rect x="3" y="42" width="25" height="5" rx="0.5" fill="#0c0708" stroke="none" />
-        {/* fader bank */}
+        {/* lit top strip catching the ceiling lamp — the cabinet's top face seen edge-on */}
+        <polygon points="4,44 6,40 35,44.5 34,48" fill="#2b201d" />
+        {/* cabinet front face (faces the room), receding to the vanishing point */}
+        <polygon points="4,44 34,48 34,76 4,92" fill="#140d0e" />
+        {/* mixer panel — upper section, inset lighter */}
+        <polygon points="4,44 34,48 34,60.6 4,65.6" fill="#170f10" />
+        {/* speaker grille — lower section, darker */}
+        <polygon points="4,65.6 34,60.6 34,76 4,92" fill="#120c0d" />
+        {/* two woofers stacked low-near, larger up front (perspective) */}
+        <ellipse cx="11" cy="74" rx="6.2" ry="6.9" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <ellipse cx="11" cy="74" rx="2" ry="2.3" fill="#0a0607" />
+        <ellipse cx="11" cy="85" rx="6.2" ry="6.9" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
+        <ellipse cx="11" cy="85" rx="2" ry="2.3" fill="#0a0607" />
+        {/* mixer faders + knobs, shrinking toward the far (right) edge */}
         <g stroke="none">
-          <rect x="4" y="49.5" width="24" height="5" fill="#0c0708" />
-          {[5, 8, 11, 14, 17, 20, 23, 26].map((x) => (
-            <g key={x}><rect x={x - 0.4} y="50" width="0.8" height="4" fill="#241d1c" /><rect x={x - 0.7} y={50.4 + (x % 3) * 0.9} width="1.4" height="1" rx="0.4" fill="#4a3b39" /></g>
-          ))}
+          {[6, 10, 14, 18, 22, 26, 30].map((x) => { const t = (x - 4) / 30; return (<rect key={x} x={x - 0.4} y={50.5 + t * 3} width="0.8" height={5 - t * 2.2} fill="#241d1c" />); })}
+          {[7, 12, 17, 22, 27].map((x, i) => { const t = (x - 4) / 30; return (<g key={x}><circle cx={x} cy={61 - t * 3} r={1.6 - t * 0.7} fill="#241d1c" stroke="#0a0506" strokeWidth="0.2" /><circle cx={x} cy={64 - t * 3.4} r={0.5 - t * 0.15} fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e'][i]} /></g>); })}
         </g>
-        {/* knob + LED row */}
-        <g stroke="none">
-          {[5, 9, 13, 17, 21, 25].map((x) => (<circle key={x} cx={x} cy="59.5" r="1.5" fill="#241d1c" stroke="#0a0506" strokeWidth="0.25" />))}
-          {[5, 9, 13, 17, 21, 25].map((x, i) => (<circle key={`l${x}`} cx={x} cy="63.4" r="0.5" fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e', '#4d6a52'][i]} />))}
-        </g>
-        {/* tweeter box perched on top, flush to the left */}
-        <polygon points="3,29 14,29 19,26.5 8,26.5" fill="#2b201d" />
-        <polygon points="14,29 19,26.5 19,37.5 14,40" fill="#0a0708" />
-        <rect x="3" y="29" width="11" height="11" rx="0.8" fill="#160f10" />
-        <circle cx="8.5" cy="34.5" r="3.1" fill="url(#cb-cone)" />
-        {/* papers/junk stacked against the cabinet */}
+        {/* papers/junk on the floor at the cabinet's foot */}
         <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
           <rect x="16" y="88" width="15" height="2.6" transform="rotate(-3 23 89)" />
           <rect x="16" y="91.4" width="15" height="2.6" transform="rotate(2 23 92)" />
@@ -197,43 +185,45 @@ function ChamberDeco() {
         </g>
       </g>
 
-      {/* ===== RIGHT WALL — amp with dead screen, vents, pipes + valve =====
-           Mirror of the left wall: extruded up-and-left (+/-7,-5) with a lit top face and a
-           shadowed left face so the amp reads as a chunky 3D box facing into the room. */}
+      {/* ===== RIGHT WALL — amp cabinet, mirror of the left: turned ~90° to run along the right
+           wall back into the chamber. Face recedes to the same central vanishing point — near
+           (right) edge at x=188 tall, far edge at x=158 shrinking. Pipes + valve at the near
+           corner where the wall meets the front of the room. */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* amp / machine unit */}
-        <polygon points="160,42 191,42 186,39.5 155,39.5" fill="#2b201d" />
-        <polygon points="160,42 155,39.5 155,64.5 160,67" fill="#0a0708" />
-        <rect x="160" y="42" width="31" height="25" rx="1" fill="#170f10" />
-        {/* dead green screen */}
-        <rect x="163" y="45" width="15" height="9" rx="0.6" fill="#0a1210" />
-        <rect x="163.7" y="45.7" width="13.6" height="7.6" fill="#16302a" stroke="none" />
+        {/* lit top strip */}
+        <polygon points="188,44 186,40 157,44.5 158,48" fill="#2b201d" />
+        {/* amp front face, receding to the vanishing point */}
+        <polygon points="188,44 158,48 158,76 188,92" fill="#150e0f" />
+        <polygon points="188,44 158,48 158,64 188,66" fill="#170f10" />
+        {/* dead green screen, near-right */}
+        <polygon points="176,48 187,47 187,56 176,57" fill="#0a1210" />
+        <polygon points="177,49 186,48.2 186,55 177,55.8" fill="#16302a" stroke="none" />
         <g stroke="#204a42" strokeWidth="0.3" opacity="0.8">
-          <line x1="164.2" y1="47.4" x2="176.6" y2="47.4" /><line x1="164.2" y1="49.4" x2="176.6" y2="49.4" /><line x1="164.2" y1="51.4" x2="176.6" y2="51.4" />
+          <line x1="178" y1="50.4" x2="185.4" y2="49.8" /><line x1="178" y1="52.2" x2="185.4" y2="51.6" /><line x1="178" y1="54" x2="185.4" y2="53.4" />
         </g>
-        {/* knobs */}
-        <g stroke="#0a0506" strokeWidth="0.25" fill="#241d1c">
-          <circle cx="182" cy="47.5" r="1.7" /><circle cx="187" cy="47.5" r="1.7" /><circle cx="182" cy="52.5" r="1.7" /><circle cx="187" cy="52.5" r="1.7" />
+        {/* knobs, shrinking toward the far-left edge */}
+        <g stroke="#0a0506" strokeWidth="0.2" fill="#241d1c">
+          {[164, 169, 174].map((x) => { const t = (188 - x) / 30; return (<circle key={x} cx={x} cy={50 + t * 1.5} r={1.7 - t * 0.7} />); })}
+          {[164, 169, 174].map((x) => { const t = (188 - x) / 30; return (<circle key={`b${x}`} cx={x} cy={55 + t} r={1.7 - t * 0.7} />); })}
         </g>
-        {/* vent slats */}
+        {/* vent slats slanting with the perspective */}
         <g stroke="#0a0506" strokeWidth="0.5">
-          <line x1="163" y1="58" x2="188" y2="58" /><line x1="163" y1="60" x2="188" y2="60" /><line x1="163" y1="62" x2="188" y2="62" /><line x1="163" y1="64" x2="188" y2="64" />
+          <line x1="160" y1="70" x2="186" y2="72" /><line x1="160" y1="73" x2="186" y2="75" /><line x1="160" y1="76" x2="186" y2="78.5" />
         </g>
-        {/* pipes running down the corner + a valve wheel */}
+        {/* pipes running down the near corner + a valve wheel */}
         <g fill="#140e0d" stroke="#2a1e1d" strokeWidth="0.4">
-          <rect x="174" y="78" width="18" height="5" rx="2.5" />
-          <rect x="174" y="87" width="18" height="5" rx="2.5" />
-          <rect x="185" y="70" width="5" height="40" rx="2" />
+          <rect x="176" y="80" width="16" height="4.6" rx="2.3" />
+          <rect x="176" y="88" width="16" height="4.6" rx="2.3" />
+          <rect x="186" y="72" width="4.6" height="36" rx="2" />
         </g>
-        {/* specular stripes to round the pipes into cylinders */}
         <g stroke="none" opacity="0.5">
-          <rect x="175" y="79" width="16" height="0.9" rx="0.45" fill="#3a2b28" />
-          <rect x="175" y="88" width="16" height="0.9" rx="0.45" fill="#3a2b28" />
-          <rect x="185.7" y="71" width="0.9" height="38" rx="0.45" fill="#3a2b28" />
+          <rect x="177" y="81" width="14" height="0.8" rx="0.4" fill="#3a2b28" />
+          <rect x="177" y="89" width="14" height="0.8" rx="0.4" fill="#3a2b28" />
+          <rect x="186.6" y="73" width="0.8" height="34" rx="0.4" fill="#3a2b28" />
         </g>
         <g stroke="#33241f" strokeWidth="0.6" fill="none">
-          <circle cx="182.5" cy="80.5" r="3.4" fill="#171110" />
-          <line x1="182.5" y1="77.1" x2="182.5" y2="83.9" /><line x1="179.1" y1="80.5" x2="185.9" y2="80.5" /><line x1="180.1" y1="78.1" x2="184.9" y2="82.9" /><line x1="180.1" y1="82.9" x2="184.9" y2="78.1" />
+          <circle cx="184" cy="82.3" r="3.2" fill="#171110" />
+          <line x1="184" y1="79.1" x2="184" y2="85.5" /><line x1="180.8" y1="82.3" x2="187.2" y2="82.3" /><line x1="181.7" y1="80" x2="186.3" y2="84.6" /><line x1="181.7" y1="84.6" x2="186.3" y2="80" />
         </g>
       </g>
 
