@@ -49,23 +49,49 @@ export async function joinRoomById(roomId: string, name: string, avatar: string)
 
 /**
  * Subscribe to the live room browser. Connects to the 'lobby' room (battle-filtered) and
- * invokes onUpdate with the current open-room list on every change. Returns an unsubscribe
- * fn that leaves the lobby connection.
+ * invokes onUpdate with the current open-room list on every change. Returns an unsubscribe fn.
+ *
+ * The lobby socket can silently die when the server sleeps/restarts (Render free tier idles
+ * after ~15min, and every deploy restarts the process). Without reconnection the browser would
+ * keep a dead subscription and never see rooms created afterwards — so on an unexpected drop we
+ * clear the (now-stale) list and re-join with a short backoff until unsubscribed.
  */
 export async function listLobby(onUpdate: (rooms: RoomInfo[]) => void): Promise<() => void> {
-  const room = await new Client(endpoint).joinOrCreate('lobby', { filter: { name: 'battle' } });
   const byId = new Map<string, RoomInfo>();
   const emit = () => onUpdate([...byId.values()]);
+  let closed = false;
+  let current: Room | null = null;
 
-  room.onMessage('rooms', (rooms: RoomInfo[]) => {
-    byId.clear();
-    for (const r of rooms) byId.set(r.roomId, r);
-    emit();
-  });
-  room.onMessage('+', ([roomId, info]: [string, RoomInfo]) => { byId.set(roomId, info); emit(); });
-  room.onMessage('-', (roomId: string) => { byId.delete(roomId); emit(); });
+  const connect = async () => {
+    if (closed) return;
+    try {
+      const room = await new Client(endpoint).joinOrCreate('lobby', { filter: { name: 'battle' } });
+      if (closed) { room.leave(); return; }
+      current = room;
 
-  return () => { room.leave(); };
+      room.onMessage('rooms', (rooms: RoomInfo[]) => {
+        byId.clear();
+        for (const r of rooms) byId.set(r.roomId, r);
+        emit();
+      });
+      room.onMessage('+', ([roomId, info]: [string, RoomInfo]) => { byId.set(roomId, info); emit(); });
+      room.onMessage('-', (roomId: string) => { byId.delete(roomId); emit(); });
+
+      // Socket dropped (server restart/sleep) — drop the stale list and retry.
+      room.onLeave(() => {
+        current = null;
+        if (closed) return;
+        byId.clear();
+        emit();
+        setTimeout(connect, 2000);
+      });
+    } catch {
+      if (!closed) setTimeout(connect, 2000);
+    }
+  };
+
+  await connect();
+  return () => { closed = true; current?.leave(); };
 }
 
 export type { CardInstance, GameEvent };
