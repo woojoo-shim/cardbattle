@@ -45,20 +45,44 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
 
   return (
     <div ref={ref} style={wrap} aria-hidden>
+      {/* soft pool of light breathing under the compass */}
+      <span style={{ ...glowDisc, background: `radial-gradient(circle, ${color}33, transparent 68%)` }} />
+      {/* two rings turning against each other for depth */}
       <span style={{ ...ring, borderColor: `${color}44`, boxShadow: `0 0 34px ${color}33` }} />
+      <span style={{ ...ringInner, borderColor: `${color}2e` }} />
+
       <span style={{ ...needle, transform: `rotate(${angle}deg)` }}>
-        <svg width="124" height="48" viewBox="0 0 124 48" style={{ position: 'absolute', left: 0, top: -24, display: 'block', filter: `drop-shadow(0 0 8px ${color})` }}>
+        <svg width="152" height="54" viewBox="0 0 152 54" style={{ position: 'absolute', left: 0, top: -27, display: 'block', overflow: 'visible', filter: `drop-shadow(0 0 10px ${color})` }}>
           <defs>
             <linearGradient id="ta-grad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor={color} stopOpacity="0.08" />
+              <stop offset="0" stopColor={color} stopOpacity="0" />
+              <stop offset="0.55" stopColor={color} stopOpacity="0.55" />
               <stop offset="1" stopColor={color} stopOpacity="1" />
             </linearGradient>
+            <linearGradient id="ta-core" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#fff" stopOpacity="0" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0.9" />
+            </linearGradient>
           </defs>
-          <path d="M8 24 L86 24" stroke="url(#ta-grad)" strokeWidth="6" strokeLinecap="round" />
-          <path d="M82 9 L118 24 L82 39 L94 24 Z" fill={color} />
+          {/* tapered shaft */}
+          <path d="M12 27 L106 27" stroke="url(#ta-grad)" strokeWidth="7" strokeLinecap="round" />
+          {/* energy streaming toward the target */}
+          <path d="M16 27 L102 27" stroke={color} strokeWidth="2.6" strokeLinecap="round"
+            strokeDasharray="2 11" className="cb-arrow-flow" opacity="0.9" />
+          {/* bright inner core, brightest near the head */}
+          <path d="M44 27 L102 27" stroke="url(#ta-core)" strokeWidth="2" strokeLinecap="round" />
+          {/* fletching at the base */}
+          <path d="M13 27 L2 18 M13 27 L2 36" stroke={color} strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+          {/* elongated spear head */}
+          <path d="M98 9 L146 27 L98 45 L112 27 Z" fill={color} />
+          {/* specular highlight inside the head */}
+          <path d="M105 17 L134 27 L105 37 L116 27 Z" fill="#fff" opacity="0.34" />
         </svg>
       </span>
-      <span style={{ ...hub, background: color, boxShadow: `0 0 18px ${color}, 0 0 6px #fff` }} />
+
+      {/* hub: a slowly turning gem with a bright molten core */}
+      <span style={{ ...hubGem, borderColor: color, boxShadow: `0 0 16px ${color}` }} />
+      <span style={{ ...hub, background: color, boxShadow: `0 0 20px ${color}, 0 0 7px #fff` }} />
     </div>
   );
 }
@@ -66,14 +90,29 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
 const wrap: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, zIndex: 6, pointerEvents: 'none',
 };
+const glowDisc: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: 260, height: 260, borderRadius: '50%',
+  transform: 'translate(-50%, -50%)', animation: 'cb-arrow-breathe 3.6s ease-in-out infinite',
+  transformOrigin: 'center',
+};
 const ring: React.CSSProperties = {
   position: 'absolute', left: -118, top: -118, width: 236, height: 236, borderRadius: '50%',
   border: '2px dashed', animation: 'cb-spin 14s linear infinite',
+};
+const ringInner: React.CSSProperties = {
+  position: 'absolute', left: -92, top: -92, width: 184, height: 184, borderRadius: '50%',
+  border: '1px solid', animation: 'cb-spin-rev 22s linear infinite',
 };
 const needle: React.CSSProperties = {
   position: 'absolute', left: 0, top: 0, width: 0, height: 0, transformOrigin: '0 0',
   transition: 'transform .8s cubic-bezier(.45,.05,.25,1)',
 };
 const hub: React.CSSProperties = {
-  position: 'absolute', left: -8, top: -8, width: 16, height: 16, borderRadius: '50%',
+  position: 'absolute', left: -7, top: -7, width: 14, height: 14, borderRadius: '50%',
+};
+// A diamond gem framing the hub, turning slowly so the centre never feels static.
+const hubGem: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: 22, height: 22,
+  border: '2px solid', borderRadius: 4, background: 'rgba(0,0,0,0.35)',
+  animation: 'cb-hub-spin 9s linear infinite',
 };
