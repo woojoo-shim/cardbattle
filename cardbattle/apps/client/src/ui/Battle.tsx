@@ -89,6 +89,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 
   return (
     <div style={screen}>
+      <ChamberDeco />
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
@@ -97,7 +98,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         <div style={fieldGrid} />
         <RoundTable ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} />
         {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
-        <span style={fieldHint}>◈ ABYSSAL TABLE ◈</span>
+        <span style={fieldHint}>◈ BACK-ROOM TABLE ◈</span>
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}><Icon name="target" size={15} />&nbsp;대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
         {error && <div style={errToast}>{error.message}</div>}
@@ -118,22 +119,54 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   );
 }
 
+// A cluttered underground back room where nobody's supposed to be gambling — oxblood-stained
+// walls swallowed by black, a single dirty bulb pooling jaundiced light on the worn table, and
+// pink grime sprayed across the walls (see ChamberDeco). Corners drown so the room feels buried.
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
-  // A damp concrete pit somewhere under the city — the kind of back room you get to through a
-  // sewer grate. One dirty bulb pools jaundiced light on the table; sickly-green mildew creeps
-  // down the wall, a grimy waterline marks where the floor is always wet, and the corners drown
-  // in black so the room feels buried, walled-in, and nobody-knows-you're-here.
   background:
-    'radial-gradient(54% 38% at 50% 43%, rgba(226,164,72,0.19), transparent 66%),' +   // bare bulb pooling on the table
-    'radial-gradient(44% 23% at 50% 73%, rgba(150,110,50,0.10), transparent 74%),' +    // dirty light on the wet floor
-    'radial-gradient(130% 76% at 50% 5%, rgba(70,92,64,0.10), transparent 60%),' +      // sickly-green mildew creeping down the wall
-    'linear-gradient(180deg, transparent 48%, rgba(96,120,84,0.05) 53%, transparent 60%),' + // grimy waterline seam
-    'linear-gradient(180deg, #0e0f0b 0%, #0b0c08 47%, #090a07 55%, #050603 100%),' +    // damp concrete wall → wet floor
-    '#050603',
-  boxShadow: 'inset 0 0 260px 92px rgba(0,0,0,0.95)',
+    'radial-gradient(54% 38% at 50% 43%, rgba(226,164,72,0.17), transparent 66%),' +   // dirty bulb pooling on the table
+    'radial-gradient(66% 44% at 50% 26%, rgba(126,38,62,0.16), transparent 72%),' +     // oxblood haze bleeding down the back wall
+    'radial-gradient(44% 24% at 50% 74%, rgba(150,92,58,0.08), transparent 74%),' +     // grimy light on the wet floor
+    'linear-gradient(180deg, transparent 48%, rgba(120,52,66,0.05) 53%, transparent 60%),' + // grubby seam where wall meets floor
+    'linear-gradient(180deg, #170d10 0%, #120a0d 46%, #0d070a 55%, #060305 100%),' +    // oxblood wall → wet black floor
+    '#060305',
+  boxShadow: 'inset 0 0 270px 96px rgba(0,0,0,0.96)',
   color: C.text,
+};
+// Grimy clutter overlay painted on the walls behind the table: dark cables strung across the
+// ceiling and pink/magenta grime splatter (blobs + droplet sprays), edges roughened by a
+// turbulence displacement so they read as thrown paint, not tidy circles. Purely decorative.
+function ChamberDeco() {
+  return (
+    <svg style={chamberDeco} viewBox="0 0 192 108" preserveAspectRatio="xMidYMid slice" aria-hidden>
+      <defs>
+        <filter id="cb-splat" x="-25%" y="-25%" width="150%" height="150%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+      {/* frayed cables drooping across the ceiling */}
+      <g stroke="#080405" strokeWidth="0.8" fill="none" opacity="0.9" strokeLinecap="round">
+        <path d="M-2 9 Q 48 27 96 13 T 194 17" />
+        <path d="M-2 4 Q 60 21 120 7 T 194 10" />
+        <path d="M38 2 Q 70 23 104 6" />
+      </g>
+      {/* pink grime splatter — clustered on the upper walls and corners, fading toward the table */}
+      <g filter="url(#cb-splat)">
+        <g fill="#d1568c" opacity="0.20"><circle cx="26" cy="24" r="7" /><circle cx="31" cy="17" r="2.2" /><circle cx="19" cy="31" r="1.5" /><circle cx="35" cy="29" r="1" /></g>
+        <g fill="#e08ab0" opacity="0.16"><circle cx="151" cy="30" r="5.6" /><circle cx="159" cy="23" r="1.8" /><circle cx="143" cy="38" r="1.2" /></g>
+        <g fill="#d1568c" opacity="0.14"><circle cx="119" cy="15" r="3.4" /><circle cx="126" cy="11" r="1" /></g>
+        <g fill="#e08ab0" opacity="0.13"><circle cx="169" cy="70" r="4.6" /><circle cx="177" cy="63" r="1.4" /></g>
+        <g fill="#d1568c" opacity="0.12"><circle cx="15" cy="74" r="4" /><circle cx="9" cy="81" r="1.2" /></g>
+        <g fill="#e08ab0" opacity="0.10"><circle cx="96" cy="87" r="3.2" /></g>
+      </g>
+    </svg>
+  );
+}
+const chamberDeco: React.CSSProperties = {
+  position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0,
 };
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = { position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' };
