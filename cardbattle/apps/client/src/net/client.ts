@@ -75,7 +75,10 @@ export async function joinRoomById(roomId: string, name: string, avatar: string)
  * The lobby socket can silently die when the server sleeps/restarts (Render free tier idles
  * after ~15min, and every deploy restarts the process). Without reconnection the browser would
  * keep a dead subscription and never see rooms created afterwards — so on an unexpected drop we
- * clear the (now-stale) list and re-join with a short backoff until unsubscribed.
+ * re-join with a short backoff until unsubscribed. We deliberately KEEP the last-known list on
+ * the screen while reconnecting (rather than clearing it): free-tier sockets flap intermittently,
+ * and blanking the list on every blip made rooms flicker in and out. The fresh 'rooms' snapshot
+ * from the new connection replaces the list wholesale a moment later, correcting any staleness.
  */
 export async function listLobby(onUpdate: (rooms: RoomInfo[]) => void): Promise<() => void> {
   const byId = new Map<string, RoomInfo>();
@@ -98,12 +101,10 @@ export async function listLobby(onUpdate: (rooms: RoomInfo[]) => void): Promise<
       room.onMessage('+', ([roomId, info]: [string, RoomInfo]) => { byId.set(roomId, info); emit(); });
       room.onMessage('-', (roomId: string) => { byId.delete(roomId); emit(); });
 
-      // Socket dropped (server restart/sleep) — drop the stale list and retry.
+      // Socket dropped (server restart/sleep) — keep the last list visible and retry.
       room.onLeave(() => {
         current = null;
         if (closed) return;
-        byId.clear();
-        emit();
         setTimeout(connect, 2000);
       });
     } catch {
