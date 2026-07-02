@@ -31,6 +31,16 @@ export function App() {
     if (account === undefined) fetchMe().then((a) => setAccount(a));
   }, [account]);
 
+  // Go fullscreen on the visitor's first interaction — the browser only grants the Fullscreen
+  // API from a user gesture, so we can't request it on load. Fire once, then let go.
+  useEffect(() => {
+    const goFullscreen = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+    };
+    window.addEventListener('pointerdown', goFullscreen, { once: true });
+    return () => window.removeEventListener('pointerdown', goFullscreen);
+  }, []);
+
   if (account === undefined) return <Centered>불러오는 중…</Centered>;
   if (account === null) return <AuthGate onAuthed={setAccount} />;
   // Intro splash → menu: play the fade-in/hold/fade-out once, then reveal the menu.

@@ -43,11 +43,12 @@ const wrap: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 200, cursor: 'pointer',
   background: '#000', overflow: 'hidden',
 };
-// The logo image covers the entire viewport. Its own black background bleeds edge-to-edge so
-// there's no visible square, and object-fit: cover keeps the mark centred on any aspect ratio
-// (iPad 4:3, wide desktop, portrait phone) — cropping only the empty black margins.
+// The logo fills the viewport with object-fit: contain — the whole mark stays visible (never
+// cropped) and, because both the image's own background and the page are pure black, the
+// letterbox margins are invisible. Reads as a seamless full-screen splash on any aspect ratio
+// (iPad 4:3, wide desktop, portrait phone).
 const logo: React.CSSProperties = {
   position: 'absolute', inset: 0, width: '100%', height: '100%',
-  objectFit: 'cover', objectPosition: 'center',
+  objectFit: 'contain', objectPosition: 'center',
   userSelect: 'none', pointerEvents: 'none',
 };
