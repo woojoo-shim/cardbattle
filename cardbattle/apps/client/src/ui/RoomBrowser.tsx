@@ -78,18 +78,19 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         {onLogout && <button style={logout} onClick={onLogout}>LOGOUT</button>}
       </div>
       <div style={banner}>
-        <div>ABYSSAL ARENA [Version 1.0.19045.2026]</div>
-        <div style={{ color: C.faint }}>(c) BACK-ROOM SYSTEMS. All rights reserved.</div>
-        <div style={{ height: 12 }} />
-        <div><span style={promptPath}>C:\arena&gt;</span> login {name} <span style={{ color: C.rare }}>[gold {account.gold}]</span></div>
-        <div><span style={promptPath}>C:\arena&gt;</span> <span style={caret}>█</span></div>
+        <div style={welcome}>WELCOME, {name}</div>
+        <div style={subline}>
+          ABYSSAL ARENA &middot; BACK-ROOM TERMINAL &nbsp;&middot;&nbsp;
+          <span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
+          &nbsp;<span style={caret}>█</span>
+        </div>
       </div>
 
       <div style={cols}>
         {/* Left: live room list */}
         <section style={panel}>
           <div style={winBar}>
-            <span style={promptPath}>C:\arena&gt;</span>&nbsp;ls /rooms --open
+            <span>OPEN SESSIONS</span>
             <span style={winMeta}>{open.length} FOUND</span>
           </div>
           <div style={listBox}>
@@ -113,7 +114,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         {/* Right: create / code / quick */}
         <section style={panel}>
           <div style={winBar}>
-            <span style={promptPath}>C:\arena&gt;</span>&nbsp;host --new
+            <span>HOST NEW SESSION</span>
           </div>
           <div style={hd}>&gt; enter title:</div>
           <input
@@ -194,9 +195,16 @@ const wrap: React.CSSProperties = {
   padding: '40px 48px', background: '#010200',
 };
 const banner: React.CSSProperties = {
-  width: '100%', fontFamily: mono, fontSize: 19, lineHeight: 1.55, color: C.you, letterSpacing: 0.3,
+  width: '100%', fontFamily: mono, color: C.you, letterSpacing: 0.3,
 };
-const promptPath: React.CSSProperties = { color: C.dim };
+const welcome: React.CSSProperties = {
+  display: 'inline-block', fontSize: 32, fontWeight: 800, letterSpacing: 5, textTransform: 'uppercase',
+  color: C.you, borderBottom: `2px solid ${C.you}`, paddingBottom: 8,
+  textShadow: '0 0 14px rgba(166,197,63,0.55)',
+};
+const subline: React.CSSProperties = {
+  marginTop: 12, fontSize: 15, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase',
+};
 const caret: React.CSSProperties = { color: C.you, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
 const cols: React.CSSProperties = { display: 'flex', gap: 24, width: '100%', alignItems: 'stretch' };
 const panel: React.CSSProperties = {
@@ -205,8 +213,9 @@ const panel: React.CSSProperties = {
   boxShadow: 'inset 0 0 50px rgba(166,197,63,0.03)',
 };
 const winBar: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', padding: '12px 18px', fontFamily: mono, fontSize: 17, color: C.you,
-  background: 'rgba(166,197,63,0.05)', borderBottom: `1px solid #29331d`, letterSpacing: 0.3,
+  display: 'flex', alignItems: 'center', padding: '14px 18px', fontFamily: mono, fontSize: 17, fontWeight: 700,
+  color: C.you, textTransform: 'uppercase', letterSpacing: 2.5,
+  background: 'rgba(166,197,63,0.05)', borderBottom: `1px dashed #3c4a2a`,
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 const hd: React.CSSProperties = { margin: '4px 20px 0', fontFamily: mono, fontSize: 16, fontWeight: 700, letterSpacing: 0.5, color: C.you };
