@@ -325,7 +325,7 @@ const floorSheen: React.CSSProperties = {
 // square here; the parent's rotateX foreshortens it onto the tiles. Cast-iron frame with a lit
 // top edge and a shadow skirt so it reads as set into the floor near the wall.
 const floorDrain: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '5%', width: 92, height: 92,
+  position: 'absolute', left: '50%', top: '5%', width: 150, height: 150,
   transform: 'translateX(-50%)', borderRadius: 3,
   background: 'linear-gradient(160deg, #55534d 0%, #35342f 40%, #201f1b 100%)',
   border: '1px solid rgba(20,19,16,0.9)',
