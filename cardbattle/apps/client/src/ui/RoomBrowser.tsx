@@ -195,9 +195,9 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 const blinkCss = '@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }';
 
 const wrap: React.CSSProperties = {
-  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'center', gap: 20, fontFamily: mono, color: C.you,
-  padding: '48px 24px',
+  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+  justifyContent: 'flex-start', gap: 20, fontFamily: mono, color: C.you,
+  padding: '28px 32px',
   background: 'radial-gradient(78% 60% at 50% 0%, #130b0e 0%, #070406 58%, #030203 100%)',
 };
 // The whole browser lives inside one curved CRT monitor: a heavy plastic bezel, a phosphor-dark
