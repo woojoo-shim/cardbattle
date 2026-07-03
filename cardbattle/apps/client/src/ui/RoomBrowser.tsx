@@ -120,69 +120,76 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
           <div style={winBar}>
             <span>HOST NEW SESSION</span>
           </div>
-          <div style={hd}>&gt; enter title:</div>
-          <input
-            style={field}
-            value={title}
-            maxLength={24}
-            placeholder="세션 이름 입력..."
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && create()}
-          />
-          <div style={hd}>&gt; set --visibility</div>
-          <div style={visRow}>
-            <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(false)}>
-              <Icon name="globe" size={15} />&nbsp;PUBLIC
-            </button>
-            <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(true)}>
-              <Icon name="lock" size={15} />&nbsp;PRIVATE
-            </button>
-          </div>
-          <p style={visHint}>
-            {isPrivate ? '# 목록 비표시 · 코드 입력으로만 접속 가능' : '# 로비 목록에 공개 노출됩니다'}
-          </p>
-
-          <button style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
-            <Icon name="sparkle" size={15} />&nbsp;--mode {showModes ? <>[collapse]&nbsp;<Icon name="chevronUp" size={13} /></> : <>[expand]&nbsp;<Icon name="chevronDown" size={13} /></>}
-          </button>
-          {showModes && (
-            <div style={modeGrid}>
-              {MODE_LIST.map((m) => {
-                const on = m.id === mode;
-                return (
-                  <button
-                    key={m.id}
-                    style={{ ...modeCard, ...(on ? modeCardOn : null) }}
-                    onClick={() => setMode(m.id)}
-                    title={m.desc}
-                  >
-                    <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
-                    <span style={modeName}>{on ? '> ' : ''}{m.name}</span>
-                    <span style={modeTag}>{m.tagline}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          <button style={primary} onClick={create}>[ ▶ EXECUTE — 방 생성 ]</button>
-
-          <div style={sep}><span>── join --code ──</span></div>
-          <div style={codeRow}>
+          <div style={form}>
+            <label style={cap}><span style={capDot}>&#9670;</span>&nbsp;세션 이름 <span style={capHint}>TITLE</span></label>
             <input
-              style={{ ...field, ...codeField }}
-              value={code}
-              maxLength={4}
-              placeholder="ABCD"
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === 'Enter' && joinByCode()}
+              className="cb-input"
+              style={field}
+              value={title}
+              maxLength={24}
+              placeholder="세션 이름 입력..."
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && create()}
             />
-            <button style={ghost} onClick={joinByCode}>CONNECT</button>
+
+            <label style={cap}><span style={capDot}>&#9670;</span>&nbsp;공개 설정 <span style={capHint}>VISIBILITY</span></label>
+            <div style={visRow}>
+              <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(false)}>
+                <Icon name="globe" size={15} />&nbsp;PUBLIC
+              </button>
+              <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(true)}>
+                <Icon name="lock" size={15} />&nbsp;PRIVATE
+              </button>
+            </div>
+            <p style={visHint}>
+              {isPrivate ? '# 목록 비표시 · 코드 입력으로만 접속 가능' : '# 로비 목록에 공개 노출됩니다'}
+            </p>
+
+            <button style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
+              <Icon name="sparkle" size={15} />&nbsp;게임 규칙 {showModes ? <>[접기]&nbsp;<Icon name="chevronUp" size={13} /></> : <>[펼치기]&nbsp;<Icon name="chevronDown" size={13} /></>}
+            </button>
+            {showModes && (
+              <div style={modeGrid}>
+                {MODE_LIST.map((m) => {
+                  const on = m.id === mode;
+                  return (
+                    <button
+                      key={m.id}
+                      style={{ ...modeCard, ...(on ? modeCardOn : null) }}
+                      onClick={() => setMode(m.id)}
+                      title={m.desc}
+                    >
+                      <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
+                      <span style={modeName}>{on ? '> ' : ''}{m.name}</span>
+                      <span style={modeTag}>{m.tagline}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <button className="cb-exec" style={primary} onClick={create}>
+              <span style={execArrow}>&#9654;</span>&nbsp;방 생성 &middot; EXECUTE
+            </button>
+
+            <div style={sep} className="cb-sep"><span>코드로 참가</span></div>
+            <div style={codeRow}>
+              <input
+                className="cb-input"
+                style={{ ...field, ...codeField }}
+                value={code}
+                maxLength={4}
+                placeholder="ABCD"
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === 'Enter' && joinByCode()}
+              />
+              <button style={ghost} onClick={joinByCode}>CONNECT</button>
+            </div>
+
+            <div style={sep} className="cb-sep"><span>연습</span></div>
+            <button style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;봇과 빠른 대전</button>
+
+            {err && <p style={errLine}>! {err}</p>}
           </div>
-
-          <div style={sep}><span>── practice ──</span></div>
-          <button style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;./quickplay --vs-bots</button>
-
-          {err && <p style={errLine}>! {err}</p>}
         </section>
         </div>
       </div>
@@ -192,7 +199,28 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   );
 }
 
-const blinkCss = '@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }';
+const blinkCss = `
+@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+.cb-input:focus {
+  border-color: #a6c53f !important;
+  background: rgba(166,197,63,0.06) !important;
+  box-shadow: inset 0 0 0 1px rgba(166,197,63,0.4), 0 0 18px rgba(166,197,63,0.22) !important;
+}
+.cb-input::placeholder { color: rgba(166,197,63,0.28); }
+.cb-exec { position: relative; overflow: hidden; transition: box-shadow .14s, transform .08s; }
+.cb-exec:hover { box-shadow: 0 0 30px rgba(166,197,63,0.5); }
+.cb-exec:active { transform: translateY(1px); }
+.cb-exec::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
+  transform: translateX(-120%); transition: transform .55s ease;
+}
+.cb-exec:hover::after { transform: translateX(120%); }
+.cb-sep::before, .cb-sep::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(166,197,63,0.24), transparent);
+}
+`;
 
 const wrap: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
@@ -248,7 +276,16 @@ const winBar: React.CSSProperties = {
   background: 'rgba(166,197,63,0.05)', borderBottom: `1px dashed #3c4a2a`,
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
-const hd: React.CSSProperties = { margin: '4px 20px 0', fontFamily: mono, fontSize: 16, fontWeight: 700, letterSpacing: 0.5, color: C.you };
+// Padded body for the host form so every field shares one consistent gutter and rhythm.
+const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
+// Field caption: a lit ◆ marker, the Korean label, and a dim English tag on the right.
+const cap: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', fontFamily: mono, fontSize: 14, fontWeight: 700,
+  letterSpacing: 0.5, color: C.you, marginTop: 4,
+};
+const capDot: React.CSSProperties = { color: C.rare, fontSize: 11, textShadow: '0 0 8px rgba(216,162,60,0.6)' };
+const capHint: React.CSSProperties = { marginLeft: 'auto', fontSize: 11, letterSpacing: 2, color: C.faint, fontWeight: 600 };
+const execArrow: React.CSSProperties = { fontSize: 13 };
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 300, maxHeight: '52vh', overflowY: 'auto', padding: '6px 20px 20px' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 16, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
@@ -259,7 +296,7 @@ const roomRow: React.CSSProperties = {
 const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 17, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono };
 const rMode: React.CSSProperties = { fontSize: 19, flexShrink: 0 };
 const rArrow: React.CSSProperties = { color: C.you, marginRight: 2 };
-const visRow: React.CSSProperties = { display: 'flex', gap: 10, margin: '0 20px' };
+const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
   flex: 1, padding: '14px 14px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', fontFamily: mono,
@@ -268,14 +305,14 @@ const visBtn: React.CSSProperties = {
 const visBtnOn: React.CSSProperties = {
   color: C.rare, border: '1px solid #d8a23c', background: 'rgba(216,162,60,0.12)', boxShadow: '0 0 14px rgba(216,162,60,0.22)',
 };
-const visHint: React.CSSProperties = { margin: '-2px 20px 2px', color: C.faint, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
+const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: C.faint, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
 const modeToggle: React.CSSProperties = {
-  margin: '0 20px', padding: '14px 16px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  marginTop: 4, padding: '14px 16px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 4, border: `1px dashed ${C.borderHi}`, background: 'rgba(166,197,63,0.02)', fontFamily: mono,
   transition: 'border-color .12s, color .12s, background .12s',
 };
 const modeToggleOn: React.CSSProperties = { color: C.you, border: `1px solid rgba(166,197,63,0.5)`, background: 'rgba(166,197,63,0.06)' };
-const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, margin: '0 20px' };
+const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
   borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', color: C.text, fontFamily: mono,
@@ -291,25 +328,28 @@ const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.ra
 const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.dim };
 const rGo: React.CSSProperties = { fontSize: 15, color: C.you, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
 const field: React.CSSProperties = {
-  margin: '0 20px', padding: '14px 16px', fontSize: 17, color: C.you, outline: 'none', letterSpacing: 0.5,
+  padding: '14px 16px', fontSize: 17, color: C.you, outline: 'none', letterSpacing: 0.5,
   background: 'rgba(0,0,0,0.4)', border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: mono,
+  transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
-const codeRow: React.CSSProperties = { display: 'flex', gap: 10, margin: '0 20px' };
-const codeField: React.CSSProperties = { flex: 1, margin: 0, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
+const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
+const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  margin: '4px 20px', padding: '16px 20px', fontSize: 18, fontWeight: 800, color: '#0a0d04', cursor: 'pointer', letterSpacing: 0.5,
-  border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#c3e04d,#8fa832)', fontFamily: mono,
-  boxShadow: '0 0 22px rgba(166,197,63,0.3)',
+  marginTop: 6, padding: '17px 20px', fontSize: 18, fontWeight: 800, color: '#0a0d04', cursor: 'pointer', letterSpacing: 1,
+  border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#d3ef5f,#8fa832)', fontFamily: mono,
+  boxShadow: '0 0 22px rgba(166,197,63,0.3), inset 0 1px 0 rgba(255,255,255,0.4)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 const ghost: React.CSSProperties = {
-  margin: '0 20px', padding: '15px 20px', fontSize: 16, fontWeight: 700, color: C.you, cursor: 'pointer', letterSpacing: 0.5,
+  padding: '15px 20px', fontSize: 16, fontWeight: 700, color: C.you, cursor: 'pointer', letterSpacing: 0.5,
   border: `1px solid ${C.borderHi}`, borderRadius: 4, background: 'rgba(166,197,63,0.04)', fontFamily: mono,
 };
 const sep: React.CSSProperties = {
-  textAlign: 'center', color: C.faint, fontSize: 14, margin: '6px 20px', fontFamily: mono,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+  textAlign: 'center', color: C.faint, fontSize: 12, margin: '8px 0 2px', fontFamily: mono,
+  letterSpacing: 2.5, textTransform: 'uppercase',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
 };
-const errLine: React.CSSProperties = { margin: '0 20px 18px', color: C.enemy, fontSize: 15, textAlign: 'center', fontFamily: mono };
+const errLine: React.CSSProperties = { margin: '2px 0 0', color: C.enemy, fontSize: 15, textAlign: 'center', fontFamily: mono };
 const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
