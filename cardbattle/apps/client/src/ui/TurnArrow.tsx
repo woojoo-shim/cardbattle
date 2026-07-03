@@ -45,11 +45,15 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
 
   return (
     <div ref={ref} style={wrap} aria-hidden>
-      {/* soft pool of light breathing under the compass */}
-      <span style={{ ...glowDisc, background: `radial-gradient(circle, ${color}33, transparent 68%)` }} />
-      {/* two rings turning against each other for depth */}
-      <span style={{ ...ring, borderColor: `${color}44`, boxShadow: `0 0 34px ${color}33` }} />
-      <span style={{ ...ringInner, borderColor: `${color}2e` }} />
+      {/* Everything decorative lies flat on the table: squashed to the felt's foreshortened
+          ellipse so the rings read as circles painted on the tilted table, not floating discs. */}
+      <div style={plane}>
+        {/* soft pool of light breathing under the compass */}
+        <span style={{ ...glowDisc, background: `radial-gradient(circle, ${color}33, transparent 68%)` }} />
+        {/* two rings turning against each other for depth */}
+        <span style={{ ...ring, borderColor: `${color}44`, boxShadow: `0 0 34px ${color}33` }} />
+        <span style={{ ...ringInner, borderColor: `${color}2e` }} />
+      </div>
 
       <span style={{ ...needle, transform: `rotate(${angle}deg)` }}>
         <svg width="152" height="54" viewBox="0 0 152 54" style={{ position: 'absolute', left: 0, top: -27, display: 'block', overflow: 'visible', filter: `drop-shadow(0 0 10px ${color})` }}>
@@ -89,6 +93,12 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
 
 const wrap: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, zIndex: 6, pointerEvents: 'none',
+};
+// Foreshorten the decorative rings/glow to the table's tilt (felt is 46%/64% ≈ 0.72 tall→wide),
+// so the spinning rings lie flat on the baize as an ellipse instead of standing up as a circle.
+const plane: React.CSSProperties = {
+  position: 'absolute', left: 0, top: 0, width: 0, height: 0,
+  transform: 'scaleY(0.72)', transformOrigin: '0 0',
 };
 const glowDisc: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: 260, height: 260, borderRadius: '50%',
