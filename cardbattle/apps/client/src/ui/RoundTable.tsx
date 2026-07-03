@@ -15,7 +15,10 @@ interface Props {
 // top arc clears the bar and the near (my) seat tucks just above the hand. RY is squashed
 // well below RX so the ring reads as a table tilted away from us into the chamber's perspective
 // (foreshortened depth), matching the receding side-wall gear and the perspective floor.
-const CX = 50, CY = 58, RX = 41, RY = 31;
+// Seat ring flattened to hug the steeply-tilted felt: its projected rim is much shorter than
+// wide now, so RY is well below RX and the whole ring is a touch higher (CY) than the felt centre
+// so the far seats tuck onto the back rim instead of floating up the wall.
+const CX = 50, CY = 57, RX = 34, RY = 21;
 
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
@@ -171,7 +174,7 @@ const feltRail: React.CSSProperties = {
   // Tilted onto the SAME plane as the felt (same perspective + rotateX about the same centre line)
   // so the padded bumper hoops the baize as one coherent piece of furniture seen from above.
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
-  width: '82%', height: '76%', borderRadius: '50%',
+  width: '68%', height: '66%', borderRadius: '50%',
   background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
   border: '1px solid #4d2e22',
   boxShadow:
@@ -185,7 +188,7 @@ const felt: React.CSSProperties = {
   // so the near edge swells toward the viewer and the far edge recedes — a real desk you look down
   // onto (Buckshot framing). All children (grid, betting rings, stains) tilt with it as one plane.
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
-  width: '74%', height: '66%', borderRadius: '50%', overflow: 'hidden',
+  width: '60%', height: '58%', borderRadius: '50%', overflow: 'hidden',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
   // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
