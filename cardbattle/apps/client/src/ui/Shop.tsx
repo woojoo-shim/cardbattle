@@ -8,6 +8,9 @@ import { C, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon, EFFECT_ICON } from './art/Icon.js';
 
+// The engraved display serif shared with the menu/lobby — one back-room voice across screens.
+const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
+
 /** Price tag / gold amount with the coin glyph. */
 function Gold({ amount }: { amount: number }) {
   return <><Icon name="coin" size={14} />&nbsp;{amount}</>;
@@ -50,7 +53,10 @@ export function Shop({ account, onAccount, onClose }: Props) {
     <div style={overlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <div style={head}>
-          <h2 style={hd}>상점</h2>
+          <div style={hdCol}>
+            <span style={hdKicker}>◈&nbsp;&nbsp;암시장 · BLACK MARKET</span>
+            <h2 style={hd}>상점</h2>
+          </div>
           <span style={goldPill}><Gold amount={account.gold} /></span>
           <button style={closeBtn} onClick={onClose} aria-label="닫기"><Icon name="close" size={14} /></button>
         </div>
@@ -185,17 +191,30 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
 
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
-  background: 'rgba(4,5,9,0.72)', backdropFilter: 'blur(4px)', fontFamily: sans,
+  // Oxblood haze over wet black, matching the menu's back-room mood.
+  background:
+    'radial-gradient(70% 60% at 50% 30%, rgba(126,38,62,0.22), transparent 70%),' +
+    'rgba(6,3,5,0.8)',
+  backdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(720px, 94vw)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  borderRadius: 18, background: `linear-gradient(180deg, ${C.panelHi}, ${C.panel})`,
-  border: `1px solid ${C.borderHi}`, boxShadow: '0 30px 80px rgba(0,0,0,0.65)', color: C.text,
+  borderRadius: 18, background: 'linear-gradient(180deg, #1a1013 0%, #120b0d 55%, #0c0709 100%)',
+  border: `1px solid ${C.borderHi}`, color: C.text,
+  boxShadow: '0 40px 90px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,238,206,0.05)',
 };
 const head: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(126,38,62,0.12), transparent)',
 };
-const hd: React.CSSProperties = { margin: 0, fontSize: 18, fontWeight: 900, letterSpacing: 1, flex: 1 };
+const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
+const hdKicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
+};
+const hd: React.CSSProperties = {
+  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
+  textShadow: '0 2px 0 #1a0f10, 0 0 24px rgba(126,38,62,0.4)',
+};
 const goldPill: React.CSSProperties = {
   fontFamily: mono, fontSize: 15, fontWeight: 800, color: '#ffd75e', padding: '5px 12px', borderRadius: 999,
   border: '1px solid #6a5620', background: 'rgba(60,48,12,0.5)',
@@ -222,9 +241,9 @@ function cardFrame(c: Cosmetic): React.CSSProperties {
   const grad = isGrad(c.border);
   return {
     width: 120, height: 166, borderRadius: 14, display: 'grid', placeItems: 'center',
-    background: 'linear-gradient(180deg, #1c2233, #0d121c)', padding: 3,
+    background: 'linear-gradient(180deg, #211a12, #100a08)', padding: 3,
     ...(grad
-      ? { border: '3px solid transparent', backgroundImage: `linear-gradient(#101622,#101622), ${c.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
+      ? { border: '3px solid transparent', backgroundImage: `linear-gradient(#161009,#161009), ${c.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
       : { border: `3px solid ${c.border}` }),
     boxShadow: `0 0 26px ${c.glow}, 0 14px 30px rgba(0,0,0,0.5)`,
   };
@@ -232,7 +251,7 @@ function cardFrame(c: Cosmetic): React.CSSProperties {
 const titlePreviewBox: React.CSSProperties = {
   width: 168, height: 120, borderRadius: 14, display: 'flex', flexDirection: 'column',
   alignItems: 'center', justifyContent: 'center', gap: 6,
-  background: 'linear-gradient(180deg, #1c2233, #0d121c)', border: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${C.border}`,
 };
 const titlePreviewName: React.CSSProperties = { fontSize: 17, fontWeight: 800, color: C.text };
 function titleText(color: string): React.CSSProperties {
@@ -248,7 +267,7 @@ const titleNone: React.CSSProperties = { fontSize: 13, color: C.dim };
 function effectPreviewBox(color: string): React.CSSProperties {
   return {
     width: 168, height: 120, borderRadius: 14, display: 'grid', placeItems: 'center',
-    background: 'radial-gradient(circle at center, rgba(255,255,255,0.05), #0d121c 70%)',
+    background: 'radial-gradient(circle at center, rgba(255,238,206,0.06), #100a08 70%)',
     border: `1px solid ${C.border}`, boxShadow: `inset 0 0 30px ${color}`,
   };
 }
