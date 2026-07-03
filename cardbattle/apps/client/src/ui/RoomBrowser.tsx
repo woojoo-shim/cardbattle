@@ -77,16 +77,20 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;SHOP</button>
         {onLogout && <button style={logout} onClick={onLogout}>LOGOUT</button>}
       </div>
-      <div style={banner}>
-        <div style={welcome}>WELCOME, {name}</div>
-        <div style={subline}>
-          ABYSSAL ARENA &middot; BACK-ROOM TERMINAL &nbsp;&middot;&nbsp;
-          <span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
-          &nbsp;<span style={caret}>█</span>
-        </div>
-      </div>
+      <div style={screen}>
+        <span style={scanlines} aria-hidden />
+        <span style={curve} aria-hidden />
 
-      <div style={cols}>
+        <div style={banner}>
+          <div style={welcome}>WELCOME, {name}</div>
+          <div style={subline}>
+            ABYSSAL ARENA &middot; BACK-ROOM TERMINAL &nbsp;&middot;&nbsp;
+            <span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
+            &nbsp;<span style={caret}>█</span>
+          </div>
+        </div>
+
+        <div style={cols}>
         {/* Left: live room list */}
         <section style={panel}>
           <div style={winBar}>
@@ -180,6 +184,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
           {err && <p style={errLine}>! {err}</p>}
         </section>
+        </div>
       </div>
 
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
@@ -190,12 +195,37 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 const blinkCss = '@keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }';
 
 const wrap: React.CSSProperties = {
-  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-  justifyContent: 'flex-start', gap: 20, fontFamily: mono, color: C.you,
-  padding: '40px 48px', background: '#010200',
+  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
+  justifyContent: 'center', gap: 20, fontFamily: mono, color: C.you,
+  padding: '48px 24px',
+  background: 'radial-gradient(78% 60% at 50% 0%, #130b0e 0%, #070406 58%, #030203 100%)',
+};
+// The whole browser lives inside one curved CRT monitor: a heavy plastic bezel, a phosphor-dark
+// glass, screen-edge curvature vignette and hard scanlines — so it reads as a terminal screen,
+// not a web page. Content sits above the overlays via zIndex.
+const screen: React.CSSProperties = {
+  position: 'relative', width: 'min(1180px, 94vw)', display: 'flex', flexDirection: 'column', gap: 26,
+  padding: '48px 52px 42px', borderRadius: 28, overflow: 'hidden',
+  background: 'radial-gradient(130% 105% at 50% 0%, #0d1608 0%, #070c04 52%, #030602 100%)',
+  border: '2px solid #2b3620',
+  boxShadow:
+    '0 0 0 12px #0b0c08, 0 0 0 14px #1c1f15, 0 0 0 15px #050603,' + // molded bezel rings
+    'inset 0 0 140px 30px rgba(0,0,0,0.9), inset 0 0 70px rgba(166,197,63,0.06),' + // glass depth + phosphor haze
+    '0 46px 100px rgba(0,0,0,0.75), 0 0 70px rgba(166,197,63,0.14)',              // drop + green bloom
+};
+const scanlines: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3, borderRadius: 28,
+  background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.34) 0px, rgba(0,0,0,0.34) 1px, transparent 2px, transparent 4px)',
+  mixBlendMode: 'multiply',
+};
+const curve: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4, borderRadius: 28,
+  background: 'radial-gradient(128% 118% at 50% 44%, transparent 52%, rgba(2,4,1,0.82) 100%)',
+  boxShadow: 'inset 0 0 100px 34px rgba(2,4,1,0.9)',
 };
 const banner: React.CSSProperties = {
-  width: '100%', fontFamily: mono, color: C.you, letterSpacing: 0.3,
+  width: '100%', fontFamily: mono, color: C.you, letterSpacing: 0.3, textAlign: 'center',
+  position: 'relative', zIndex: 5,
 };
 const welcome: React.CSSProperties = {
   display: 'inline-block', fontSize: 32, fontWeight: 800, letterSpacing: 5, textTransform: 'uppercase',
@@ -206,11 +236,11 @@ const subline: React.CSSProperties = {
   marginTop: 12, fontSize: 15, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase',
 };
 const caret: React.CSSProperties = { color: C.you, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
-const cols: React.CSSProperties = { display: 'flex', gap: 24, width: '100%', alignItems: 'stretch' };
+const cols: React.CSSProperties = { display: 'flex', gap: 26, width: '100%', alignItems: 'stretch', position: 'relative', zIndex: 5 };
 const panel: React.CSSProperties = {
-  flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 0, overflow: 'hidden',
-  background: '#020402', border: `1px solid #29331d`,
-  boxShadow: 'inset 0 0 50px rgba(166,197,63,0.03)',
+  flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
+  background: 'rgba(4,8,3,0.55)', border: `1px solid rgba(166,197,63,0.16)`,
+  boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5)',
 };
 const winBar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '14px 18px', fontFamily: mono, fontSize: 17, fontWeight: 700,
