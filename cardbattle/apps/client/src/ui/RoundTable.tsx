@@ -34,6 +34,9 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
       <span style={feltRail} aria-hidden />
       <div style={felt} aria-hidden>
         <span style={feltNap} />
+        {/* Perspective grid raked across the baize — the painted lines of the play surface,
+            converging toward the far edge so the top reads as a desk seen from above (Buckshot-style). */}
+        <span style={feltGrid} />
         <span style={feltStains} />
         <span style={feltPaint} />
         <span style={feltPaintInner} />
@@ -165,7 +168,7 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 // whole table stands proud of the floor like real furniture.
 const feltRail: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  width: '71%', height: '53%', borderRadius: '50%',
+  width: '82%', height: '59%', borderRadius: '50%',
   background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
   border: '1px solid #4d2e22',
   boxShadow:
@@ -177,7 +180,8 @@ const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   // Foreshortened oval (wider than tall) so the round table reads as tilted away into the room's
   // perspective rather than seen dead top-down — its depth compressed like the floor and walls.
-  width: '64%', height: '46%', borderRadius: '50%',
+  // Enlarged to fill the foreground like a desk you're leaning over (Buckshot Roulette framing).
+  width: '74%', height: '52%', borderRadius: '50%', overflow: 'hidden',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
   // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
@@ -192,6 +196,19 @@ const felt: React.CSSProperties = {
 const feltNap: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.10), transparent 62%)',
+};
+// The painted play-surface grid, laid IN perspective (tilted back with rotateX) so the lines
+// converge toward the far edge — the single strongest cue that you're looking DOWN onto a desk.
+// Clipped to the felt oval by the parent's overflow:hidden and faded at the rim by the mask.
+const feltGrid: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '-4%', width: '150%', height: '128%',
+  transform: 'translateX(-50%) perspective(440px) rotateX(66deg)', transformOrigin: '50% 100%',
+  backgroundImage:
+    'linear-gradient(rgba(188,208,150,0.16) 1px, transparent 1px),' +
+    'linear-gradient(90deg, rgba(188,208,150,0.13) 1px, transparent 1px)',
+  backgroundSize: '11% 15%',
+  WebkitMaskImage: 'radial-gradient(66% 78% at 50% 62%, #000 34%, transparent 84%)',
+  maskImage: 'radial-gradient(66% 78% at 50% 62%, #000 34%, transparent 84%)',
 };
 // Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
 // caught from the room — the wear of a table that's seen a lot of bad nights.
