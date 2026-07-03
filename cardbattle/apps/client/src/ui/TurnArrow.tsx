@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { C } from './theme.js';
 
+// The felt is tilted rotateX(62°); its vertical extent projects to ~cos(62°) on screen. The
+// needle lies ON that plane, so we un-foreshorten the screen delta by this factor to find the
+// in-plane angle that will *project* to point at a seat, and tilt the needle by the same 62°.
+const TILT_DEG = 62;
+const COS_TILT = Math.cos((TILT_DEG * Math.PI) / 180);
+
 interface Props {
   activeId: string;
   isMyTurn: boolean;
@@ -28,7 +34,9 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
       const cy = hr.top + hr.height / 2;
       const tx = tr.left + tr.width / 2;
       const ty = tr.top + tr.height / 2;
-      const want = (Math.atan2(ty - cy, tx - cx) * 180) / Math.PI;
+      // Un-squash the vertical delta into the felt's own plane so the in-plane angle projects
+      // (after rotateX) straight at the seat rather than aiming as if the table were flat.
+      const want = (Math.atan2((ty - cy) / COS_TILT, tx - cx) * 180) / Math.PI;
       // Screen y grows downward, so a positive angle step rotates clockwise. Drive the sweep in
       // the play direction: forward → keep adding (CW), reversed → keep subtracting (CCW).
       const raw = ((want - angleRef.current) % 360 + 360) % 360; // 0..360 the clockwise way
@@ -55,7 +63,7 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
         <span style={{ ...ringInner, borderColor: `${color}2e` }} />
       </div>
 
-      <span style={{ ...needle, transform: `rotate(${angle}deg)` }}>
+      <span style={{ ...needle, transform: `perspective(620px) rotateX(${TILT_DEG}deg) rotate(${angle}deg)` }}>
         <svg width="152" height="54" viewBox="0 0 152 54" style={{ position: 'absolute', left: 0, top: -27, display: 'block', overflow: 'visible', filter: `drop-shadow(0 0 10px ${color})` }}>
           <defs>
             <linearGradient id="ta-grad" x1="0" y1="0" x2="1" y2="0">
