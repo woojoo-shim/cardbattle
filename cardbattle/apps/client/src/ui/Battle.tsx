@@ -135,10 +135,11 @@ const screen: React.CSSProperties = {
   boxShadow: 'inset 0 0 270px 96px rgba(0,0,0,0.96)',
   color: C.text,
 };
-// The back room, actually drawn: junked audio gear stacked against the side walls (a mixer rack
-// and a two-woofer speaker cabinet on the left; an amp with a dead green screen, pipes and a valve
-// wheel on the right), a couple of clamp spotlights hung off the ceiling, frayed cables drooping
-// across the top, and pink grime sprayed over all of it. Silhouette tones so it stays behind play.
+// The back room, redrawn from scratch: a buried gambling den with an exposed-brick back wall under
+// peeling plaster, a barred window leaking cold street-light, a caged wall lamp burning amber, a
+// crooked framed picture, an electrical junction box with live LEDs, junked gear receding down both
+// side walls (metal shelving left, a locker with a dead CRT + pipes right), ceiling conduit and
+// frayed cables, a cracked concrete floor with an iron drain, all sunk in shadow and old pink grime.
 function ChamberDeco() {
   return (
     <svg style={chamberDeco} viewBox="0 0 192 108" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -147,79 +148,164 @@ function ChamberDeco() {
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n" />
           <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" />
         </filter>
+        <filter id="cb-grime" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.16 0.24" numOctaves="3" seed="11" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="4" />
+        </filter>
         <radialGradient id="cb-cone" cx="50%" cy="44%" r="56%">
           <stop offset="0" stopColor="#2c1e1d" />
           <stop offset="0.55" stopColor="#0e0809" />
           <stop offset="1" stopColor="#060304" />
         </radialGradient>
+        <linearGradient id="cb-side" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#1d1315" />
+          <stop offset="1" stopColor="#090507" />
+        </linearGradient>
+        <radialGradient id="cb-glass" cx="50%" cy="38%" r="66%">
+          <stop offset="0" stopColor="#42565f" />
+          <stop offset="0.55" stopColor="#1b2a30" />
+          <stop offset="1" stopColor="#0a1013" />
+        </radialGradient>
+        <radialGradient id="cb-amber" cx="50%" cy="42%" r="60%">
+          <stop offset="0" stopColor="#ffe7ad" />
+          <stop offset="0.42" stopColor="#e29433" />
+          <stop offset="1" stopColor="rgba(226,148,51,0)" />
+        </radialGradient>
       </defs>
 
-      {/* ===== LEFT WALL — audio cabinet turned ~90° to sit ALONG the wall running back into the
-           chamber. Its face recedes toward the room's central vanishing point (~96,36): the near
-           (front) edge at x=4 is tall, the far edge at x=34 shrinks. That receding foreshorten is
-           what makes it read as mounted on the side wall rather than a box facing the camera. */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* lit top strip catching the ceiling lamp — the cabinet's top face seen edge-on */}
-        <polygon points="4,44 6,40 35,44.5 34,48" fill="#2b201d" />
-        {/* cabinet front face (faces the room), receding to the vanishing point */}
-        <polygon points="4,44 34,48 34,76 4,92" fill="#140d0e" />
-        {/* mixer panel — upper section, inset lighter */}
-        <polygon points="4,44 34,48 34,60.6 4,65.6" fill="#170f10" />
-        {/* speaker grille — lower section, darker */}
-        <polygon points="4,65.6 34,60.6 34,76 4,92" fill="#120c0d" />
-        {/* two woofers stacked low-near, larger up front (perspective) */}
-        <ellipse cx="11" cy="74" rx="6.2" ry="6.9" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <ellipse cx="11" cy="74" rx="2" ry="2.3" fill="#0a0607" />
-        <ellipse cx="11" cy="85" rx="6.2" ry="6.9" fill="url(#cb-cone)" stroke="#2a1e1d" strokeWidth="0.5" />
-        <ellipse cx="11" cy="85" rx="2" ry="2.3" fill="#0a0607" />
-        {/* mixer faders + knobs, shrinking toward the far (right) edge */}
-        <g stroke="none">
-          {[6, 10, 14, 18, 22, 26, 30].map((x) => { const t = (x - 4) / 30; return (<rect key={x} x={x - 0.4} y={50.5 + t * 3} width="0.8" height={5 - t * 2.2} fill="#241d1c" />); })}
-          {[7, 12, 17, 22, 27].map((x, i) => { const t = (x - 4) / 30; return (<g key={x}><circle cx={x} cy={61 - t * 3} r={1.6 - t * 0.7} fill="#241d1c" stroke="#0a0506" strokeWidth="0.2" /><circle cx={x} cy={64 - t * 3.4} r={0.5 - t * 0.15} fill={['#4d6a52', '#7a5a2e', '#4d6a52', '#3a4a6a', '#7a5a2e'][i]} /></g>); })}
+      {/* ===== ANGLED SIDE WALLS receding to the room's centre (~96,42) — they frame the den and
+           throw the corners into deep shadow so the eye falls on the lit table. */}
+      <polygon points="0,0 40,15 40,93 0,108" fill="url(#cb-side)" />
+      <polygon points="192,0 152,15 152,93 192,108" fill="url(#cb-side)" />
+      {/* corner seams where the side walls fold into the back wall */}
+      <line x1="40" y1="15" x2="40" y2="93" stroke="#060304" strokeWidth="0.6" />
+      <line x1="152" y1="15" x2="152" y2="93" stroke="#060304" strokeWidth="0.6" />
+
+      {/* ===== BACK WALL — grimy plaster with a scar of exposed brick ===== */}
+      {/* damp / peeling plaster blotches */}
+      <g filter="url(#cb-grime)" opacity="0.6">
+        <rect x="44" y="8" width="104" height="18" fill="#22161a" />
+        <rect x="60" y="40" width="74" height="10" fill="#1a1013" />
+      </g>
+      {/* exposed brick patch, plaster fallen away (upper-left of the back wall) */}
+      <g>
+        <rect x="49" y="14" width="31" height="27" fill="#160c0d" />
+        <g stroke="#0d0607" strokeWidth="0.3">
+          {[0, 1, 2, 3, 4, 5].map((r) => {
+            const y = 15.5 + r * 4;
+            const off = r % 2 ? 3 : 0;
+            return [0, 1, 2, 3, 4].map((c) => (
+              <rect key={`br-${r}-${c}`} x={49.5 + off + c * 6} y={y} width="5.4" height="3.4"
+                fill={(r + c) % 3 === 0 ? '#281618' : '#201315'} />
+            ));
+          })}
         </g>
-        {/* papers/junk on the floor at the cabinet's foot */}
-        <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
-          <rect x="16" y="88" width="15" height="2.6" transform="rotate(-3 23 89)" />
-          <rect x="16" y="91.4" width="15" height="2.6" transform="rotate(2 23 92)" />
-          <rect x="16" y="94.8" width="15" height="2.6" transform="rotate(-2 23 96)" />
+        {/* ragged plaster edge overhanging the brick */}
+        <path d="M49 14 Q47 26 49 41 L52 41 Q50 26 52 20 L80 15 L80 14 Z" fill="#221619" opacity="0.9" />
+        <path d="M80 41 Q82 30 80 20 L77 22 Q79 31 77 41 Z" fill="#221619" opacity="0.7" />
+      </g>
+
+      {/* barred window, upper-right of the back wall — cold outside light bleeding through */}
+      <g>
+        {/* faint cold spill washing down the wall under the sill */}
+        <polygon points="108,12 140,12 146,58 102,58" fill="#3a5560" opacity="0.06" />
+        <rect x="110" y="11" width="30" height="23" rx="1" fill="#0c0708" stroke="#2a1c1e" strokeWidth="0.8" />
+        <rect x="112" y="13" width="26" height="19" fill="url(#cb-glass)" />
+        {/* iron bars */}
+        <g stroke="#05070a" strokeWidth="1">
+          <line x1="119" y1="12.5" x2="119" y2="32.5" /><line x1="125" y1="12.5" x2="125" y2="32.5" />
+          <line x1="131" y1="12.5" x2="131" y2="32.5" />
+          <line x1="112.5" y1="22.5" x2="137.5" y2="22.5" strokeWidth="0.8" />
+        </g>
+        {/* cracked pane hints */}
+        <g stroke="#8fb0bb" strokeWidth="0.2" opacity="0.4">
+          <line x1="114" y1="15" x2="118" y2="20" /><line x1="133" y1="26" x2="136" y2="30" />
+        </g>
+        <rect x="109" y="33.5" width="32" height="1.6" fill="#160e10" />
+      </g>
+
+      {/* caged wall lamp burning amber, left of the window */}
+      <g>
+        <circle cx="96" cy="26" r="9" fill="url(#cb-amber)" opacity="0.5" />
+        <rect x="93.4" y="16" width="1.2" height="6" fill="#1a1110" />
+        <path d="M89 28 Q90 21 94 21 Q98 21 99 28 Z" fill="#120c0b" stroke="#2c1e1a" strokeWidth="0.4" />
+        <circle cx="94" cy="26" r="2.6" fill="#ffdf9c" />
+        {/* cage wires over the glass */}
+        <g stroke="#0d0808" strokeWidth="0.4" fill="none" opacity="0.85">
+          <path d="M89.5 27 Q94 22 98.5 27" /><line x1="94" y1="21.5" x2="94" y2="28" /><path d="M90.5 24.5 L97.5 28" /><path d="M97.5 24.5 L90.5 28" />
         </g>
       </g>
 
-      {/* ===== RIGHT WALL — amp cabinet, mirror of the left: turned ~90° to run along the right
-           wall back into the chamber. Face recedes to the same central vanishing point — near
-           (right) edge at x=188 tall, far edge at x=158 shrinking. Pipes + valve at the near
-           corner where the wall meets the front of the room. */}
+      {/* a crooked framed picture, gone black with grime */}
+      <g transform="rotate(-4 90 44)">
+        <rect x="82" y="38" width="16" height="12" fill="#0e0809" stroke="#2b2019" strokeWidth="0.8" />
+        <rect x="84" y="40" width="12" height="8" fill="#161011" />
+        <line x1="84" y1="40" x2="96" y2="48" stroke="#241a1a" strokeWidth="0.3" opacity="0.5" />
+      </g>
+
+      {/* electrical conduit dropping to a junction box with live indicator LEDs */}
+      <g>
+        <rect x="141" y="8" width="1.8" height="30" fill="#150f0e" stroke="#2a1e1a" strokeWidth="0.3" />
+        <rect x="137" y="38" width="10" height="8" rx="0.8" fill="#120d0c" stroke="#2c211d" strokeWidth="0.5" />
+        <circle cx="140" cy="41.5" r="0.9" fill="#7ad07f"><animate attributeName="opacity" values="1;0.3;1" dur="2.6s" repeatCount="indefinite" /></circle>
+        <circle cx="143.5" cy="41.5" r="0.9" fill="#d8a23c"><animate attributeName="opacity" values="0.4;1;0.4" dur="1.7s" repeatCount="indefinite" /></circle>
+        <rect x="138.5" y="43.6" width="7" height="1" rx="0.5" fill="#241a18" />
+      </g>
+
+      {/* ===== LEFT WALL — metal shelving rack receding to the vanishing point, loaded with junk ===== */}
       <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* lit top strip */}
-        <polygon points="188,44 186,40 157,44.5 158,48" fill="#2b201d" />
-        {/* amp front face, receding to the vanishing point */}
-        <polygon points="188,44 158,48 158,76 188,92" fill="#150e0f" />
-        <polygon points="188,44 158,48 158,64 188,66" fill="#170f10" />
-        {/* dead green screen, near-right */}
-        <polygon points="176,48 187,47 187,56 176,57" fill="#0a1210" />
-        <polygon points="177,49 186,48.2 186,55 177,55.8" fill="#16302a" stroke="none" />
-        <g stroke="#204a42" strokeWidth="0.3" opacity="0.8">
-          <line x1="178" y1="50.4" x2="185.4" y2="49.8" /><line x1="178" y1="52.2" x2="185.4" y2="51.6" /><line x1="178" y1="54" x2="185.4" y2="53.4" />
+        {/* uprights: near (x=6) tall, far (x=34) short */}
+        <polygon points="5,42 7,42 7,94 5,96" fill="#191110" />
+        <polygon points="33,46 34.4,46 34.4,80 33,80.5" fill="#160f0e" />
+        {/* three shelves foreshortening back */}
+        <polygon points="5,52 34,54 34,55.6 5,54" fill="#1d1513" />
+        <polygon points="5,66 34,66 34,67.6 5,68" fill="#1a1211" />
+        <polygon points="5,82 34,78.5 34,80.1 5,84" fill="#170f0e" />
+        {/* boxes / cans on the shelves, larger up front */}
+        <g stroke="#2c211f" strokeWidth="0.3">
+          <rect x="8" y="43.5" width="11" height="8.5" fill="#140d0d" />
+          <rect x="21" y="46" width="8" height="7" fill="#120c0c" />
+          <rect x="9" y="57" width="9" height="9" fill="#170f0e" />
+          <rect x="22" y="59.5" width="7" height="6" fill="#120c0c" />
+          {/* a jerrycan silhouette */}
+          <path d="M9 74 h9 v9 h-9 z M11 72 h5 v2 h-5 z" fill="#130d0c" />
+          <rect x="21" y="73.5" width="6.5" height="5" fill="#110b0b" />
         </g>
-        {/* knobs, shrinking toward the far-left edge */}
-        <g stroke="#0a0506" strokeWidth="0.2" fill="#241d1c">
-          {[164, 169, 174].map((x) => { const t = (188 - x) / 30; return (<circle key={x} cx={x} cy={50 + t * 1.5} r={1.7 - t * 0.7} />); })}
-          {[164, 169, 174].map((x) => { const t = (188 - x) / 30; return (<circle key={`b${x}`} cx={x} cy={55 + t} r={1.7 - t * 0.7} />); })}
+        {/* debris at the foot */}
+        <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
+          <rect x="14" y="90" width="16" height="2.6" transform="rotate(-3 22 91)" />
+          <rect x="14" y="93.6" width="16" height="2.6" transform="rotate(2 22 95)" />
         </g>
-        {/* vent slats slanting with the perspective */}
-        <g stroke="#0a0506" strokeWidth="0.5">
-          <line x1="160" y1="70" x2="186" y2="72" /><line x1="160" y1="73" x2="186" y2="75" /><line x1="160" y1="76" x2="186" y2="78.5" />
+      </g>
+
+      {/* ===== RIGHT WALL — a tall steel locker + dead CRT, pipes and a valve at the near corner ===== */}
+      <g stroke="#2a1e1d" strokeWidth="0.4">
+        {/* locker body receding */}
+        <polygon points="188,42 160,46 160,90 188,94" fill="#140e0f" />
+        <polygon points="188,42 174,44 174,90 188,92" fill="#181110" />
+        {/* louvred door slats */}
+        <g stroke="#0a0506" strokeWidth="0.4" opacity="0.8">
+          <line x1="176" y1="50" x2="186.6" y2="49" /><line x1="176" y1="53" x2="186.6" y2="52" />
+          <line x1="176" y1="56" x2="186.6" y2="55" /><line x1="176" y1="59" x2="186.6" y2="58" />
         </g>
-        {/* pipes running down the near corner + a valve wheel */}
+        {/* handle */}
+        <rect x="175.5" y="66" width="1.6" height="7" rx="0.6" fill="#2c211d" />
+        {/* dead green CRT bolted above, near-right */}
+        <polygon points="161,50 172,49 172,60 161,61" fill="#0a1210" />
+        <polygon points="162,51 171,50.2 171,59 162,59.8" fill="#153029" />
+        <g stroke="#1f4640" strokeWidth="0.3" opacity="0.7">
+          <line x1="163" y1="52.6" x2="170.4" y2="52" /><line x1="163" y1="54.6" x2="170.4" y2="54" /><line x1="163" y1="56.6" x2="170.4" y2="56" />
+        </g>
+        <circle cx="169.5" cy="58.4" r="0.7" fill="#3a6a5c" opacity="0.7"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.2s" repeatCount="indefinite" /></circle>
+        {/* pipes down the near corner + valve wheel */}
         <g fill="#140e0d" stroke="#2a1e1d" strokeWidth="0.4">
           <rect x="176" y="80" width="16" height="4.6" rx="2.3" />
           <rect x="176" y="88" width="16" height="4.6" rx="2.3" />
-          <rect x="186" y="72" width="4.6" height="36" rx="2" />
+          <rect x="186" y="60" width="4.6" height="48" rx="2" />
         </g>
         <g stroke="none" opacity="0.5">
           <rect x="177" y="81" width="14" height="0.8" rx="0.4" fill="#3a2b28" />
-          <rect x="177" y="89" width="14" height="0.8" rx="0.4" fill="#3a2b28" />
-          <rect x="186.6" y="73" width="0.8" height="34" rx="0.4" fill="#3a2b28" />
+          <rect x="186.6" y="61" width="0.8" height="46" rx="0.4" fill="#3a2b28" />
         </g>
         <g stroke="#33241f" strokeWidth="0.6" fill="none">
           <circle cx="184" cy="82.3" r="3.2" fill="#171110" />
@@ -227,41 +313,42 @@ function ChamberDeco() {
         </g>
       </g>
 
-      {/* ===== CLAMP SPOTLIGHTS hung off the ceiling ===== */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
-        <g transform="translate(52 23) rotate(26)">
-          <line x1="-2" y1="-9" x2="0" y2="-3.5" stroke="#0a0506" strokeWidth="0.6" />
-          <rect x="-6" y="-4" width="11" height="8.6" rx="1.2" fill="#100b0c" />
-          <rect x="5" y="-3.4" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
-          <rect x="5" y="2.5" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
-          <circle cx="5" cy="0.5" r="3.2" fill="#1c1310" stroke="#33241f" strokeWidth="0.5" />
-          <circle cx="5" cy="0.5" r="1.5" fill="#2e1f16" />
-        </g>
-        <g transform="translate(140 25) rotate(-24)">
-          <line x1="2" y1="-9" x2="0" y2="-3.5" stroke="#0a0506" strokeWidth="0.6" />
-          <rect x="-5" y="-4" width="11" height="8.6" rx="1.2" fill="#100b0c" />
-          <rect x="-9" y="-3.4" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
-          <rect x="-9" y="2.5" width="4" height="1.9" fill="#0d0809" stroke="#2a1e1d" strokeWidth="0.3" />
-          <circle cx="-5" cy="0.5" r="3.2" fill="#1c1310" stroke="#33241f" strokeWidth="0.5" />
-          <circle cx="-5" cy="0.5" r="1.5" fill="#2e1f16" />
+      {/* ===== CEILING — conduit pipe + a vent, frayed cables drooping across ===== */}
+      <g stroke="#2a1e1d" strokeWidth="0.4" fill="#120c0c">
+        <rect x="40" y="3" width="112" height="2.4" rx="1.2" />
+        <rect x="70" y="1.5" width="16" height="5" rx="0.6" fill="#0e0908" />
+        <g stroke="#0a0506" strokeWidth="0.4">
+          <line x1="72" y1="2.5" x2="72" y2="5.5" /><line x1="76" y1="2.5" x2="76" y2="5.5" /><line x1="80" y1="2.5" x2="80" y2="5.5" /><line x1="84" y1="2.5" x2="84" y2="5.5" />
         </g>
       </g>
-
-      {/* frayed cables drooping across the ceiling */}
       <g stroke="#080405" strokeWidth="0.8" fill="none" opacity="0.9" strokeLinecap="round">
         <path d="M-2 9 Q 48 27 96 13 T 194 17" />
         <path d="M-2 4 Q 60 21 120 7 T 194 10" />
-        <path d="M38 2 Q 70 23 104 6" />
+        <path d="M40 5 Q 70 24 104 8" />
+      </g>
+
+      {/* ===== FLOOR — cracked concrete with an iron drain grate, mostly under the table ===== */}
+      <g opacity="0.7">
+        <g stroke="#0a0607" strokeWidth="0.4" fill="none" opacity="0.6">
+          <path d="M20 100 L34 96 L46 101" /><path d="M150 99 L164 95 L176 100" /><path d="M96 104 L104 100" />
+        </g>
+        {/* iron drain grate, front-left of the floor */}
+        <g transform="translate(150 98)">
+          <rect x="-7" y="-7" width="14" height="14" rx="0.6" fill="#0d0908" stroke="#2a201c" strokeWidth="0.5" />
+          <g stroke="#241a17" strokeWidth="0.7">
+            <line x1="-5" y1="-4" x2="5" y2="-4" /><line x1="-5" y1="-1.5" x2="5" y2="-1.5" /><line x1="-5" y1="1" x2="5" y2="1" /><line x1="-5" y1="3.5" x2="5" y2="3.5" />
+          </g>
+        </g>
       </g>
 
       {/* pink grime splatter — clustered on the upper walls and corners, fading toward the table */}
       <g filter="url(#cb-splat)">
         <g fill="#d1568c" opacity="0.20"><circle cx="40" cy="22" r="6.2" /><circle cx="45" cy="16" r="2" /><circle cx="34" cy="28" r="1.4" /><circle cx="48" cy="26" r="1" /></g>
-        <g fill="#e08ab0" opacity="0.16"><circle cx="151" cy="30" r="5" /><circle cx="159" cy="23" r="1.7" /><circle cx="143" cy="37" r="1.1" /></g>
-        <g fill="#d1568c" opacity="0.14"><circle cx="112" cy="14" r="3.2" /><circle cx="118" cy="10" r="0.9" /></g>
+        <g fill="#e08ab0" opacity="0.16"><circle cx="158" cy="30" r="5" /><circle cx="166" cy="23" r="1.7" /><circle cx="150" cy="37" r="1.1" /></g>
+        <g fill="#d1568c" opacity="0.14"><circle cx="112" cy="52" r="3.2" /><circle cx="118" cy="48" r="0.9" /></g>
         <g fill="#e08ab0" opacity="0.13"><circle cx="169" cy="72" r="4.2" /><circle cx="177" cy="65" r="1.3" /></g>
-        <g fill="#d1568c" opacity="0.12"><circle cx="120" cy="86" r="3.6" /><circle cx="128" cy="82" r="1.1" /></g>
-        <g fill="#e08ab0" opacity="0.10"><circle cx="86" cy="88" r="3" /></g>
+        <g fill="#d1568c" opacity="0.12"><circle cx="120" cy="90" r="3.6" /><circle cx="128" cy="86" r="1.1" /></g>
+        <g fill="#e08ab0" opacity="0.10"><circle cx="30" cy="88" r="3" /></g>
       </g>
     </svg>
   );
