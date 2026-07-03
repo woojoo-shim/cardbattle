@@ -161,6 +161,12 @@ function ChamberDeco() {
           <stop offset="0" stopColor="#1d1315" />
           <stop offset="1" stopColor="#090507" />
         </linearGradient>
+        {/* floor: darkest at the far wall foot, a touch warmer near the viewer where the lamp reaches */}
+        <linearGradient id="cb-floor" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#080705" />
+          <stop offset="0.5" stopColor="#0e0b08" />
+          <stop offset="1" stopColor="#15110b" />
+        </linearGradient>
         <radialGradient id="cb-glass" cx="50%" cy="38%" r="66%">
           <stop offset="0" stopColor="#24343a" />
           <stop offset="0.55" stopColor="#121c20" />
@@ -168,13 +174,30 @@ function ChamberDeco() {
         </radialGradient>
       </defs>
 
-      {/* ===== ANGLED SIDE WALLS receding to the room's centre (~96,42) — they frame the den and
-           throw the corners into deep shadow so the eye falls on the lit table. */}
-      <polygon points="0,0 40,15 40,93 0,108" fill="url(#cb-side)" />
-      <polygon points="192,0 152,15 152,93 192,108" fill="url(#cb-side)" />
-      {/* corner seams where the side walls fold into the back wall */}
-      <line x1="40" y1="15" x2="40" y2="93" stroke="#060304" strokeWidth="0.6" />
-      <line x1="152" y1="15" x2="152" y2="93" stroke="#060304" strokeWidth="0.6" />
+      {/* ===== ANGLED SIDE WALLS. The back wall stops high (y58) so a big receding FLOOR opens
+           below it — the room is now seen from ABOVE, matching the tilted table oval instead of
+           a flat head-on wall. Side walls fold from the ceiling down to the floor at the seams. */}
+      <polygon points="0,0 40,15 40,58 0,108" fill="url(#cb-side)" />
+      <polygon points="192,0 152,15 152,58 192,108" fill="url(#cb-side)" />
+
+      {/* ===== FLOOR PLANE — the concrete pit floor, a wide quad receding from the near edge up to
+           the back wall foot (y58). Its seam lines converge to a high vanishing point (~96,24) so
+           the ground tilts up toward us at the SAME angle as the felt oval and the seat ring. */}
+      <polygon points="40,58 152,58 192,108 0,108" fill="url(#cb-floor)" />
+      <g stroke="#0a0908" strokeWidth="0.4" opacity="0.5">
+        {/* radial seams fanning from the back edge toward the viewer (depth lines) */}
+        <line x1="60" y1="58" x2="7" y2="108" /><line x1="80" y1="58" x2="56.5" y2="108" />
+        <line x1="96" y1="58" x2="96" y2="108" />
+        <line x1="112" y1="58" x2="135.5" y2="108" /><line x1="132" y1="58" x2="185" y2="108" />
+        {/* transverse depth bands, bunching as they recede */}
+        <line x1="28.8" y1="72" x2="163.2" y2="72" /><line x1="16" y1="88" x2="176" y2="88" />
+        <line x1="6.4" y1="100" x2="185.6" y2="100" />
+      </g>
+      {/* corner seams where the side walls fold into the back wall + down to the floor */}
+      <line x1="40" y1="15" x2="40" y2="58" stroke="#060304" strokeWidth="0.6" />
+      <line x1="152" y1="15" x2="152" y2="58" stroke="#060304" strokeWidth="0.6" />
+      {/* the bright-ish line where the back wall meets the floor */}
+      <line x1="40" y1="58" x2="152" y2="58" stroke="#221a12" strokeWidth="0.6" opacity="0.8" />
 
       {/* ===== BACK WALL — grimy plaster with a scar of exposed brick ===== */}
       {/* damp / peeling plaster blotches */}
