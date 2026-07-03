@@ -291,9 +291,12 @@ const lampPool: React.CSSProperties = {
   background: 'radial-gradient(ellipse at 50% 40%, rgba(238,176,78,0.16), transparent 68%)',
   animation: 'cb-lampon 2.4s ease-out both',
 };
+// The face-down pile each player has laid on the table. Tilted onto the felt's own plane
+// (perspective + rotateX) so the cards lie FLAT on the baize seen from above, not standing
+// upright like billboards — matching the looking-down-at-a-desk framing.
 const tableFan: React.CSSProperties = {
-  position: 'absolute', transform: 'translate(-50%,-50%)', width: 0, height: 0,
-  pointerEvents: 'none', zIndex: 3,
+  position: 'absolute', transform: 'translate(-50%,-50%) perspective(520px) rotateX(58deg)', width: 0, height: 0,
+  transformStyle: 'preserve-3d', pointerEvents: 'none', zIndex: 3,
 };
 const miniBack: React.CSSProperties = {
   position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
