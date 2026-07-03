@@ -28,10 +28,17 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 
   return (
     <div style={area}>
+      {/* A padded leather rail hoops the baize — the raised bumper of a real card table, catching
+          the bulb on its top curve and stitched just inside. It's what lifts the felt off the floor
+          and reads as furniture, not a painted disc. */}
+      <span style={feltRail} aria-hidden />
       <div style={felt} aria-hidden>
+        <span style={feltNap} />
         <span style={feltStains} />
         <span style={feltPaint} />
+        <span style={feltPaintInner} />
         <span style={feltRim} />
+        <span style={feltStitch} />
         <span style={feltGlow} />
       </div>
 
@@ -153,6 +160,19 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 }
 
 const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
+// The padded leather rail — a slightly larger oval sitting under/around the baize. A soft oxblood
+// leather bumper with a lit top curve (bulb catching the padding) and its own drop shadow so the
+// whole table stands proud of the floor like real furniture.
+const feltRail: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
+  width: '71%', height: '53%', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
+  border: '1px solid #4d2e22',
+  boxShadow:
+    'inset 0 4px 8px rgba(150,96,60,0.30),' +      // bulb catching the top of the leather roll
+    'inset 0 -12px 26px rgba(0,0,0,0.72),' +        // underside of the roll in shadow
+    '0 30px 62px rgba(0,0,0,0.6), 0 8px 0 #0a0504', // floor drop + a solid near lip
+};
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   // Foreshortened oval (wider than tall) so the round table reads as tilted away into the room's
@@ -161,15 +181,17 @@ const felt: React.CSSProperties = {
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
   // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
-  background: 'radial-gradient(ellipse at 50% 32%, #1c2717 0%, #121b0f 40%, #0a1008 66%, #060a05 100%)',
-  // Stacked solid offsets fake a chunky wooden table rim under the felt — a slab with real
-  // thickness catching the bulb on top and rotting into shadow below, then the floor shadow.
-  // Deeper now the top is foreshortened, so the near lip still reads as a solid edge.
-  border: '2px solid #232e1b',
+  background: 'radial-gradient(ellipse at 50% 32%, #223016 0%, #16210f 40%, #0c1208 66%, #070b05 100%)',
+  border: '2px solid #2c3a20',
   boxShadow:
-    'inset 0 0 96px 20px rgba(0,0,0,0.82),' +   // heavy vignette — edges rot into the dark
-    '0 5px 0 #241813, 0 10px 0 #1d130d, 0 15px 0 #150d08, 0 20px 0 #0e0805, 0 25px 0 #090503,' +
-    '0 38px 78px rgba(0,0,0,0.64)',
+    'inset 0 0 96px 20px rgba(0,0,0,0.8),' +    // heavy vignette — edges rot into the dark
+    'inset 0 3px 10px rgba(0,0,0,0.5),' +        // felt tucked just under the leading edge of the rail
+    '0 26px 60px rgba(0,0,0,0.5)',
+};
+// A soft radial sheen where the bulb rakes across the felt nap — the premium lit-baize look.
+const feltNap: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: '50%',
+  background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.10), transparent 62%)',
 };
 // Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
 // caught from the room — the wear of a table that's seen a lot of bad nights.
@@ -185,18 +207,28 @@ const feltStains: React.CSSProperties = {
     'radial-gradient(circle at 60% 42%, rgba(80,70,30,0.12) 0 6%, transparent 13%),' + // greasy sheen
     'radial-gradient(ellipse 14% 9% at 58% 46%, rgba(209,86,140,0.09), transparent 70%)',
 };
-// A faded painted ring on the baize — the old betting circle, half worn away.
+// The old betting circle, painted in faded gilt — a thin gold ring worn to a dull amber gleam.
 const feltPaint: React.CSSProperties = {
-  position: 'absolute', inset: '24%', borderRadius: '50%',
-  border: '1.5px solid rgba(206,214,184,0.10)',
-  boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.25)',
+  position: 'absolute', inset: '23%', borderRadius: '50%',
+  border: '1.5px solid rgba(216,162,60,0.28)',
+  boxShadow: 'inset 0 0 12px rgba(216,162,60,0.10), 0 0 6px rgba(216,162,60,0.08)',
+};
+// A second, tighter gilt ring inside it — the double-line betting circle of a proper table.
+const feltPaintInner: React.CSSProperties = {
+  position: 'absolute', inset: '27%', borderRadius: '50%',
+  border: '1px solid rgba(216,162,60,0.14)',
 };
 const feltRim: React.CSSProperties = {
-  position: 'absolute', inset: 10, borderRadius: '50%', border: '1px dashed rgba(150,168,110,0.15)',
+  position: 'absolute', inset: 6, borderRadius: '50%', border: '1px solid rgba(150,168,110,0.12)',
+};
+// Stitching where the baize meets the leather rail — a dashed thread just inside the felt edge.
+const feltStitch: React.CSSProperties = {
+  position: 'absolute', inset: 3, borderRadius: '50%',
+  border: '1px dashed rgba(200,150,70,0.14)',
 };
 const feltGlow: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
-  boxShadow: 'inset 0 0 44px rgba(224,164,72,0.10)',
+  boxShadow: 'inset 0 0 52px rgba(224,164,72,0.12)',
 };
 // Pendant lamp over the table centre. The fixture (cord + shade) is always lit; the emitted
 // light (bulb, cone, floor pool) plays the cb-lampon flicker once when RoundTable mounts (= game start).
