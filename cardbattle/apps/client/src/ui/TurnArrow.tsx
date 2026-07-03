@@ -91,29 +91,31 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
   );
 }
 
+// Centred on the felt itself (top 57% = RoundTable's CY), not the row's midpoint — otherwise
+// the needle radiates from above the table and the rings ride up onto the back wall.
 const wrap: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, zIndex: 6, pointerEvents: 'none',
+  position: 'absolute', left: '50%', top: '57%', width: 0, height: 0, zIndex: 6, pointerEvents: 'none',
 };
-// Foreshorten the decorative rings/glow to the table's tilt (felt is 46%/64% ≈ 0.72 tall→wide),
-// so the spinning rings lie flat on the baize as an ellipse instead of standing up as a circle.
+// Lay the decorative rings/glow ON the baize by tilting them with the SAME 3D transform the
+// felt uses (perspective + rotateX 62°), so they foreshorten into the table's real ellipse
+// instead of standing up as flat circles floating over the room.
 const plane: React.CSSProperties = {
   position: 'absolute', left: 0, top: 0, width: 0, height: 0,
-  transform: 'scaleY(0.72)', transformOrigin: '0 0',
+  transform: 'perspective(620px) rotateX(62deg)', transformOrigin: '0 0',
 };
-// Sized in vw so the rings scale with the table (the felt is 64% of the arena width). The
-// outer ring is set to ~the felt's painted betting circle; the plane's scaleY(0.72) then
-// squashes these into the table's foreshortened ellipse so they overlay it, not float above.
+// Circle diameters in vw; the plane's rotateX(62°) then squashes them to ~cos(62°) tall so they
+// sit inside the felt's painted betting circle rather than spilling onto the walls.
 const glowDisc: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: '30vw', height: '30vw', borderRadius: '50%',
+  position: 'absolute', left: '50%', top: '50%', width: '22vw', height: '22vw', borderRadius: '50%',
   transform: 'translate(-50%, -50%)', animation: 'cb-arrow-breathe 3.6s ease-in-out infinite',
   transformOrigin: 'center',
 };
 const ring: React.CSSProperties = {
-  position: 'absolute', left: '-16.5vw', top: '-16.5vw', width: '33vw', height: '33vw', borderRadius: '50%',
+  position: 'absolute', left: '-13vw', top: '-13vw', width: '26vw', height: '26vw', borderRadius: '50%',
   border: '2px dashed', animation: 'cb-spin 14s linear infinite',
 };
 const ringInner: React.CSSProperties = {
-  position: 'absolute', left: '-12.5vw', top: '-12.5vw', width: '25vw', height: '25vw', borderRadius: '50%',
+  position: 'absolute', left: '-9.5vw', top: '-9.5vw', width: '19vw', height: '19vw', borderRadius: '50%',
   border: '1px solid', animation: 'cb-spin-rev 22s linear infinite',
 };
 const needle: React.CSSProperties = {
