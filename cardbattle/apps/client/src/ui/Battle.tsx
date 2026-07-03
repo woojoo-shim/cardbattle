@@ -162,14 +162,9 @@ function ChamberDeco() {
           <stop offset="1" stopColor="#090507" />
         </linearGradient>
         <radialGradient id="cb-glass" cx="50%" cy="38%" r="66%">
-          <stop offset="0" stopColor="#42565f" />
-          <stop offset="0.55" stopColor="#1b2a30" />
+          <stop offset="0" stopColor="#24343a" />
+          <stop offset="0.55" stopColor="#121c20" />
           <stop offset="1" stopColor="#0a1013" />
-        </radialGradient>
-        <radialGradient id="cb-amber" cx="50%" cy="42%" r="60%">
-          <stop offset="0" stopColor="#ffe7ad" />
-          <stop offset="0.42" stopColor="#e29433" />
-          <stop offset="1" stopColor="rgba(226,148,51,0)" />
         </radialGradient>
       </defs>
 
@@ -208,7 +203,7 @@ function ChamberDeco() {
       {/* barred window, upper-right of the back wall — cold outside light bleeding through */}
       <g>
         {/* faint cold spill washing down the wall under the sill */}
-        <polygon points="108,12 140,12 146,58 102,58" fill="#3a5560" opacity="0.06" />
+        <polygon points="108,12 140,12 146,58 102,58" fill="#3a5560" opacity="0.03" />
         <rect x="110" y="11" width="30" height="23" rx="1" fill="#0c0708" stroke="#2a1c1e" strokeWidth="0.8" />
         <rect x="112" y="13" width="26" height="19" fill="url(#cb-glass)" />
         {/* iron bars */}
@@ -222,18 +217,6 @@ function ChamberDeco() {
           <line x1="114" y1="15" x2="118" y2="20" /><line x1="133" y1="26" x2="136" y2="30" />
         </g>
         <rect x="109" y="33.5" width="32" height="1.6" fill="#160e10" />
-      </g>
-
-      {/* caged wall lamp burning amber, left of the window */}
-      <g>
-        <circle cx="96" cy="26" r="9" fill="url(#cb-amber)" opacity="0.5" />
-        <rect x="93.4" y="16" width="1.2" height="6" fill="#1a1110" />
-        <path d="M89 28 Q90 21 94 21 Q98 21 99 28 Z" fill="#120c0b" stroke="#2c1e1a" strokeWidth="0.4" />
-        <circle cx="94" cy="26" r="2.6" fill="#ffdf9c" />
-        {/* cage wires over the glass */}
-        <g stroke="#0d0808" strokeWidth="0.4" fill="none" opacity="0.85">
-          <path d="M89.5 27 Q94 22 98.5 27" /><line x1="94" y1="21.5" x2="94" y2="28" /><path d="M90.5 24.5 L97.5 28" /><path d="M97.5 24.5 L90.5 28" />
-        </g>
       </g>
 
       {/* a crooked framed picture, gone black with grime */}
@@ -343,12 +326,12 @@ function ChamberDeco() {
 
       {/* pink grime splatter — clustered on the upper walls and corners, fading toward the table */}
       <g filter="url(#cb-splat)">
-        <g fill="#d1568c" opacity="0.20"><circle cx="40" cy="22" r="6.2" /><circle cx="45" cy="16" r="2" /><circle cx="34" cy="28" r="1.4" /><circle cx="48" cy="26" r="1" /></g>
-        <g fill="#e08ab0" opacity="0.16"><circle cx="158" cy="30" r="5" /><circle cx="166" cy="23" r="1.7" /><circle cx="150" cy="37" r="1.1" /></g>
-        <g fill="#d1568c" opacity="0.14"><circle cx="112" cy="52" r="3.2" /><circle cx="118" cy="48" r="0.9" /></g>
-        <g fill="#e08ab0" opacity="0.13"><circle cx="169" cy="72" r="4.2" /><circle cx="177" cy="65" r="1.3" /></g>
-        <g fill="#d1568c" opacity="0.12"><circle cx="120" cy="90" r="3.6" /><circle cx="128" cy="86" r="1.1" /></g>
-        <g fill="#e08ab0" opacity="0.10"><circle cx="30" cy="88" r="3" /></g>
+        <g fill="#d1568c" opacity="0.11"><circle cx="40" cy="22" r="6.2" /><circle cx="45" cy="16" r="2" /><circle cx="34" cy="28" r="1.4" /><circle cx="48" cy="26" r="1" /></g>
+        <g fill="#e08ab0" opacity="0.09"><circle cx="158" cy="30" r="5" /><circle cx="166" cy="23" r="1.7" /><circle cx="150" cy="37" r="1.1" /></g>
+        <g fill="#d1568c" opacity="0.08"><circle cx="112" cy="52" r="3.2" /><circle cx="118" cy="48" r="0.9" /></g>
+        <g fill="#e08ab0" opacity="0.07"><circle cx="169" cy="72" r="4.2" /><circle cx="177" cy="65" r="1.3" /></g>
+        <g fill="#d1568c" opacity="0.07"><circle cx="120" cy="90" r="3.6" /><circle cx="128" cy="86" r="1.1" /></g>
+        <g fill="#e08ab0" opacity="0.06"><circle cx="30" cy="88" r="3" /></g>
       </g>
     </svg>
   );
