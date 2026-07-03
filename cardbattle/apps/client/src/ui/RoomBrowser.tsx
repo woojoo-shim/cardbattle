@@ -236,33 +236,30 @@ const blinkCss = `
 `;
 
 const wrap: React.CSSProperties = {
-  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-  justifyContent: 'flex-start', gap: 20, fontFamily: mono, color: C.you,
-  padding: '28px 32px',
+  minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'stretch',
+  justifyContent: 'flex-start', fontFamily: mono, color: C.you,
   background: 'radial-gradient(78% 60% at 50% 0%, #130b0e 0%, #070406 58%, #030203 100%)',
 };
 // The whole browser lives inside one curved CRT monitor: a heavy plastic bezel, a phosphor-dark
 // glass, screen-edge curvature vignette and hard scanlines — so it reads as a terminal screen,
 // not a web page. Content sits above the overlays via zIndex.
 const screen: React.CSSProperties = {
-  position: 'relative', width: 'min(1180px, 94vw)', display: 'flex', flexDirection: 'column', gap: 26,
-  padding: '48px 52px 42px', borderRadius: 28, overflow: 'hidden',
+  position: 'relative', flex: 1, minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', gap: 26,
+  padding: '56px clamp(28px, 6vw, 96px) 52px', overflow: 'hidden',
   background: 'radial-gradient(130% 108% at 50% 0%, #123a16 0%, #0a2410 48%, #04120a 100%)',
-  border: '2px solid #3f6b33',
   boxShadow:
-    '0 0 0 12px #0b0c08, 0 0 0 14px #1c1f15, 0 0 0 15px #050603,' + // molded bezel rings
-    'inset 0 0 140px 30px rgba(0,0,0,0.82), inset 0 0 90px rgba(77,255,106,0.14),' + // glass depth + hot phosphor haze
-    '0 46px 100px rgba(0,0,0,0.75), 0 0 90px rgba(77,255,106,0.3)',                // drop + green bloom
+    'inset 0 0 200px 40px rgba(0,0,0,0.82), inset 0 0 120px rgba(77,255,106,0.14),' + // glass depth + hot phosphor haze
+    'inset 0 0 90px rgba(77,255,106,0.3)',                                             // green bloom
 };
 const scanlines: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3, borderRadius: 28,
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3,
   background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.34) 0px, rgba(0,0,0,0.34) 1px, transparent 2px, transparent 4px)',
   mixBlendMode: 'multiply',
 };
 const curve: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4, borderRadius: 28,
-  background: 'radial-gradient(128% 118% at 50% 44%, transparent 54%, rgba(2,10,3,0.8) 100%)',
-  boxShadow: 'inset 0 0 100px 34px rgba(2,10,3,0.86)',
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4,
+  background: 'radial-gradient(128% 118% at 50% 44%, transparent 60%, rgba(2,10,3,0.8) 100%)',
+  boxShadow: 'inset 0 0 140px 44px rgba(2,10,3,0.86)',
 };
 // Fallout-terminal phosphor: a brighter, hotter green than the olive C.you for the boot readout.
 const P = '#4dff6a';
