@@ -113,7 +113,11 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={content} className="cb-gate-in">
         <span style={kicker}>◈&nbsp;&nbsp;심연의 투기장 · 온라인 카드 배틀&nbsp;&nbsp;◈</span>
         <h1 style={titleWrap}>
-          <span style={titleLine}>ABYSSAL</span>
+          <span style={titleStack}>
+            <span style={titleGhost} aria-hidden>ABYSSAL</span>
+            <span style={titleLine}>ABYSSAL</span>
+            <span style={strike} aria-hidden><span style={strikeGem}>◆</span></span>
+          </span>
           <span style={{ ...titleLine, ...titleLine2 }}>ARENA</span>
         </h1>
         <span style={byline}>A CARD BATTLE IN THE BACK ROOM</span>
@@ -165,7 +169,8 @@ function Credits({ onClose }: { onClose: () => void }) {
 
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans, color: C.text,
+  display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontFamily: sans, color: C.text,
+  padding: '0 clamp(32px, 8vw, 130px)',
   // Oxblood back-room haze bleeding down into wet black — the arena mood, carried to the menu.
   background:
     'radial-gradient(58% 40% at 50% 30%, rgba(126,38,62,0.20), transparent 68%),' +
@@ -241,23 +246,40 @@ const vignette: React.CSSProperties = {
 };
 
 const content: React.CSSProperties = {
-  position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
-  padding: '0 20px', textAlign: 'center',
+  position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+  textAlign: 'left',
 };
 const kicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 5, color: C.faint, textTransform: 'uppercase',
   marginBottom: 4,
 };
 const titleWrap: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, margin: '6px 0 2px',
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0, margin: '6px 0 2px',
 };
 const titleLine: React.CSSProperties = {
-  fontFamily: serif, fontWeight: 700, lineHeight: 0.92, letterSpacing: 'clamp(4px, 1.2vw, 12px)',
+  display: 'block', fontFamily: serif, fontWeight: 700, lineHeight: 0.92, letterSpacing: 'clamp(4px, 1.2vw, 12px)',
   fontSize: 'clamp(52px, 12vw, 128px)', color: '#f3eee6',
   textShadow: '0 3px 0 #1a0f10, 0 10px 30px rgba(0,0,0,0.7), 0 0 40px rgba(126,38,62,0.4)',
 };
 const titleLine2: React.CSSProperties = {
   color: '#e7d8c6', letterSpacing: 'clamp(8px, 2.4vw, 26px)', marginTop: '-0.06em',
+};
+// The title struck through like the Buckshot cover: a ghosted duplicate shoved down-right behind
+// the crisp word, with a bright blade-line bisecting both and a gem punched through its centre.
+const titleStack: React.CSSProperties = { position: 'relative', display: 'inline-block' };
+const titleGhost: React.CSSProperties = {
+  ...titleLine, position: 'absolute', left: 'clamp(5px, 0.7vw, 12px)', top: 'clamp(6px, 0.9vw, 16px)',
+  color: 'transparent', WebkitTextStroke: '1px rgba(126,38,62,0.55)', textShadow: 'none', opacity: 0.75,
+};
+const strike: React.CSSProperties = {
+  position: 'absolute', left: '-3%', right: '-3%', top: '52%', height: 'clamp(3px, 0.4vw, 5px)',
+  transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'linear-gradient(90deg, transparent, #f3eee6 7%, #f3eee6 93%, transparent)',
+  boxShadow: '0 0 14px rgba(243,238,230,0.5), 0 2px 0 #1a0f10',
+};
+const strikeGem: React.CSSProperties = {
+  fontSize: 'clamp(14px, 1.8vw, 22px)', color: C.rare, lineHeight: 1, padding: '0 10px',
+  background: '#0d070a', textShadow: '0 0 14px rgba(216,162,60,0.85)',
 };
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
@@ -265,17 +287,17 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginTop: 'clamp(28px, 5vh, 54px)',
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, marginTop: 'clamp(24px, 4.5vh, 48px)',
+  paddingLeft: 28,
 };
 function menuItem(on: boolean, danger: boolean): React.CSSProperties {
   const base = danger ? C.enemy : C.you;
   return {
-    // A centred column: label row on top, sub-caption centred beneath — so the labels line up
-    // dead-centre on the screen regardless of caption width.
-    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-    padding: '6px 18px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
+    // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
+    padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
     color: on ? '#fff' : 'rgba(226,220,214,0.62)',
-    transform: on ? 'translateX(6px)' : 'none',
+    transform: on ? 'translateX(10px)' : 'none',
     textShadow: on ? `0 0 20px ${base}66` : 'none',
     transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
