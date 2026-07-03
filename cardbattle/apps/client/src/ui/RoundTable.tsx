@@ -167,8 +167,11 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 // leather bumper with a lit top curve (bulb catching the padding) and its own drop shadow so the
 // whole table stands proud of the floor like real furniture.
 const feltRail: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  width: '82%', height: '59%', borderRadius: '50%',
+  position: 'absolute', left: '50%', top: `${CY}%`,
+  // Tilted onto the SAME plane as the felt (same perspective + rotateX about the same centre line)
+  // so the padded bumper hoops the baize as one coherent piece of furniture seen from above.
+  transform: 'translate(-50%,-50%) perspective(620px) rotateX(52deg)',
+  width: '82%', height: '76%', borderRadius: '50%',
   background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
   border: '1px solid #4d2e22',
   boxShadow:
@@ -177,11 +180,12 @@ const feltRail: React.CSSProperties = {
     '0 30px 62px rgba(0,0,0,0.6), 0 8px 0 #0a0504', // floor drop + a solid near lip
 };
 const felt: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  // Foreshortened oval (wider than tall) so the round table reads as tilted away into the room's
-  // perspective rather than seen dead top-down — its depth compressed like the floor and walls.
-  // Enlarged to fill the foreground like a desk you're leaning over (Buckshot Roulette framing).
-  width: '74%', height: '52%', borderRadius: '50%', overflow: 'hidden',
+  position: 'absolute', left: '50%', top: `${CY}%`,
+  // A near-round surface actually TILTED back in 3D (rotateX) rather than a pre-squashed flat oval,
+  // so the near edge swells toward the viewer and the far edge recedes — a real desk you look down
+  // onto (Buckshot framing). All children (grid, betting rings, stains) tilt with it as one plane.
+  transform: 'translate(-50%,-50%) perspective(620px) rotateX(52deg)',
+  width: '74%', height: '66%', borderRadius: '50%', overflow: 'hidden',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
   // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
@@ -197,18 +201,17 @@ const feltNap: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.10), transparent 62%)',
 };
-// The painted play-surface grid, laid IN perspective (tilted back with rotateX) so the lines
-// converge toward the far edge — the single strongest cue that you're looking DOWN onto a desk.
-// Clipped to the felt oval by the parent's overflow:hidden and faded at the rim by the mask.
+// The painted play-surface grid. It fills the felt flat and INHERITS the parent's rotateX tilt,
+// so its square cells foreshorten into converging lines on the tilted plane — the strongest cue
+// that you're looking DOWN onto a desk. Faded at the rim by the mask so it melts into the baize.
 const feltGrid: React.CSSProperties = {
-  position: 'absolute', left: '50%', bottom: '-4%', width: '150%', height: '128%',
-  transform: 'translateX(-50%) perspective(440px) rotateX(66deg)', transformOrigin: '50% 100%',
+  position: 'absolute', inset: 0, borderRadius: '50%',
   backgroundImage:
-    'linear-gradient(rgba(188,208,150,0.16) 1px, transparent 1px),' +
+    'linear-gradient(rgba(188,208,150,0.15) 1px, transparent 1px),' +
     'linear-gradient(90deg, rgba(188,208,150,0.13) 1px, transparent 1px)',
-  backgroundSize: '11% 15%',
-  WebkitMaskImage: 'radial-gradient(66% 78% at 50% 62%, #000 34%, transparent 84%)',
-  maskImage: 'radial-gradient(66% 78% at 50% 62%, #000 34%, transparent 84%)',
+  backgroundSize: '12% 12%', backgroundPosition: 'center',
+  WebkitMaskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
+  maskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
 };
 // Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
 // caught from the room — the wear of a table that's seen a lot of bad nights.
