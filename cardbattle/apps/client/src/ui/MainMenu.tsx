@@ -93,13 +93,17 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
           ))}
         </div>
         <div style={sceneHorizon} />
-        <div style={sceneFloor} />
-        <div style={floorSheen} />
-        <div style={floorDrain} aria-hidden>
-          {[20, 37, 54, 71].map((tp) => (
-            <span key={tp} style={{ ...drainGrateBar, top: `${tp}%` }} />
-          ))}
+        {/* The drain lives INSIDE the tilted floor plane, so the parent's rotateX foreshortens it
+            onto the tiles as a real hole in the ground rather than a flat sticker on the wall. */}
+        <div style={sceneFloor}>
+          <div style={floorDrain} aria-hidden>
+            <span style={drainWell} />
+            {[16, 32, 48, 64, 80].map((tp) => (
+              <span key={tp} style={{ ...drainGrateBar, top: `${tp}%` }} />
+            ))}
+          </div>
         </div>
+        <div style={floorSheen} />
         <div style={sceneLight} />
         <span style={sceneBulb} />
         <div style={sceneLampPool} />
@@ -317,21 +321,30 @@ const floorSheen: React.CSSProperties = {
   background: 'linear-gradient(180deg, rgba(240,206,132,0.14) 0%, rgba(240,206,132,0.05) 40%, transparent 78%)',
   filter: 'blur(10px)', mixBlendMode: 'screen',
 };
-// A square gray floor drain lying flat on the tiles just under the wall/floor seam, beneath the
-// bulb. Foreshortened (short height) so it lies on the receding floor rather than standing up,
-// with a dark sunken hole, a thin lit steel rim, and parallel grate bars across the mouth.
+// The square gray metal drain plate. It's a child of the tilted floor plane, so it's a true
+// square here; the parent's rotateX foreshortens it onto the tiles. Cast-iron frame with a lit
+// top edge and a shadow skirt so it reads as set into the floor near the wall.
 const floorDrain: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '58.5%', width: '4.6%', height: '1.7%',
-  transform: 'translateX(-50%)', borderRadius: 1,
-  background: 'radial-gradient(ellipse at 50% 45%, #030302 0%, #0b0a07 66%, #1a1813 100%)',
-  border: '1px solid rgba(120,118,112,0.4)',
-  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(150,150,146,0.18), 0 1px 4px rgba(0,0,0,0.5)',
+  position: 'absolute', left: '50%', top: '5%', width: 92, height: 92,
+  transform: 'translateX(-50%)', borderRadius: 3,
+  background: 'linear-gradient(160deg, #55534d 0%, #35342f 40%, #201f1b 100%)',
+  border: '1px solid rgba(20,19,16,0.9)',
+  boxShadow:
+    'inset 0 2px 0 rgba(150,148,140,0.35), inset 0 -2px 6px rgba(0,0,0,0.7),' +
+    '0 6px 14px rgba(0,0,0,0.6)',
 };
-// One parallel bar of the drain's grate — a thin lit gray strut spanning the mouth.
+// The sunken black mouth inside the plate — the hole the runoff falls into.
+const drainWell: React.CSSProperties = {
+  position: 'absolute', inset: 9, borderRadius: 2,
+  background: 'radial-gradient(ellipse at 50% 45%, #000 0%, #060503 70%, #131109 100%)',
+  boxShadow: 'inset 0 3px 7px rgba(0,0,0,0.95)',
+};
+// One parallel bar of the cast grate spanning the mouth — thin lit steel struts.
 const drainGrateBar: React.CSSProperties = {
-  position: 'absolute', left: '50%', width: '86%', height: 1.5,
-  transform: 'translateX(-50%)', borderRadius: 1,
-  background: 'linear-gradient(90deg, transparent, rgba(140,138,132,0.6) 16%, rgba(140,138,132,0.6) 84%, transparent)',
+  position: 'absolute', left: 9, right: 9, height: 4, borderRadius: 2,
+  transform: 'translateY(-50%)',
+  background: 'linear-gradient(180deg, #6a675f, #34322c)',
+  boxShadow: '0 1px 1px rgba(0,0,0,0.8)',
 };
 // The overhead bulb's light cone falling through the room.
 const sceneLight: React.CSSProperties = {
