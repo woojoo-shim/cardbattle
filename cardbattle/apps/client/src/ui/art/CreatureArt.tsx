@@ -43,25 +43,137 @@ function Goblin() {
   );
 }
 
-/** 2 — Automaton (the bot shape). `tint` colors its glowing parts so each bot differs. */
-function Automaton({ tint = RED }: { tint?: string }) {
+/** Shared metal chassis (shoulders + neck) every bot head sits on, so the machines read as
+ *  busts seated at the table like the creatures do. Drawn first; the head overlaps the neck. */
+function Chassis() {
   return (
     <>
-      <path d="M16 16 L48 16 L52 24 L52 52 L12 52 L12 24 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
-      <path d="M16 16 L32 16 L32 52 L12 52 L12 24 Z" fill="#1f2638" opacity="0.6" />
-      <rect x="20" y="26" width="24" height="12" rx="2" fill="#0a0d14" stroke="#3a4256" strokeWidth="1.2" />
-      <rect x="22" y="29" width="20" height="2" fill={tint} opacity="0.5" />
-      <circle cx="32" cy="32" r="3.5" fill={tint} style={{ filter: 'blur(0.5px)' }} />
-      <circle cx="32" cy="32" r="1.5" fill="#fff" />
-      <rect x="22" y="44" width="20" height="4" rx="1" fill="#161b27" stroke="#3a4256" strokeWidth="0.8" />
-      <line x1="26" y1="44" x2="26" y2="48" stroke="#3a4256" strokeWidth="0.8" />
-      <line x1="32" y1="44" x2="32" y2="48" stroke="#3a4256" strokeWidth="0.8" />
-      <line x1="38" y1="44" x2="38" y2="48" stroke="#3a4256" strokeWidth="0.8" />
-      <line x1="32" y1="8" x2="32" y2="16" stroke="#566180" strokeWidth="1.5" />
-      <circle cx="32" cy="7" r="2.5" fill={tint} />
+      <path d="M7 60 L8 51 Q9 43 20 42 L44 42 Q55 43 56 51 L57 60 Z" fill="#222a3a" stroke="#3a4256" strokeWidth="1.2" />
+      <path d="M7 60 L8 51 Q9 43 20 42 L32 42 L32 60 Z" fill="#1b2130" opacity="0.55" />
+      <rect x="27" y="37" width="10" height="8" rx="1.5" fill="#1a2130" stroke="#3a4256" strokeWidth="0.8" />
+      <circle cx="24" cy="53" r="1.3" fill="#3a4256" /><circle cx="40" cy="53" r="1.3" fill="#3a4256" />
     </>
   );
 }
+
+/** 2 — Bot family. Each is a distinct grimy back-room machine; `tint` lights its glowing eyes. */
+function Bot0({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <rect x="15" y="12" width="34" height="28" rx="5" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <rect x="15" y="12" width="17" height="28" rx="5" fill="#1f2638" opacity="0.5" />
+      <line x1="32" y1="5" x2="32" y2="12" stroke="#566180" strokeWidth="1.5" /><circle cx="32" cy="4" r="2.4" fill={tint} />
+      <rect x="19" y="20" width="26" height="12" rx="2.5" fill="#0a0d14" stroke="#3a4256" strokeWidth="1" />
+      <rect x="21" y="24.5" width="22" height="3.4" rx="1.5" fill={tint} opacity="0.85" />
+      <circle cx="32" cy="26" r="2.1" fill="#fff" />
+      <circle cx="19" cy="16" r="1" fill="#3a4256" /><circle cx="45" cy="16" r="1" fill="#3a4256" />
+    </>
+  );
+}
+/** dome cyclops */
+function Bot1({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <path d="M14 41 L14 30 A18 18 0 0 1 50 30 L50 41 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <path d="M14 30 A18 18 0 0 1 32 12 L32 41 L14 41 Z" fill="#1f2638" opacity="0.5" />
+      <line x1="32" y1="4" x2="32" y2="13" stroke="#566180" strokeWidth="1.5" /><circle cx="32" cy="3" r="2.2" fill={tint} />
+      <circle cx="32" cy="29" r="8" fill="#0a0d14" stroke="#3a4256" strokeWidth="1.2" />
+      <circle cx="32" cy="29" r="5" fill={tint} opacity="0.65" style={{ filter: 'blur(0.6px)' }} />
+      <circle cx="32" cy="29" r="2" fill="#fff" />
+      <rect x="10" y="31" width="4" height="6" rx="1" fill="#232a3a" stroke="#3a4256" strokeWidth="0.8" />
+      <rect x="50" y="31" width="4" height="6" rx="1" fill="#232a3a" stroke="#3a4256" strokeWidth="0.8" />
+    </>
+  );
+}
+/** CRT monitor head */
+function Bot2({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <rect x="13" y="12" width="38" height="30" rx="7" fill="#2a3140" stroke="#566180" strokeWidth="1.5" />
+      <rect x="18" y="16" width="28" height="22" rx="6" fill="#0a1512" stroke="#1f4640" strokeWidth="1" />
+      <path d="M20 18 Q32 15 44 18" stroke="#2a5a50" strokeWidth="0.8" fill="none" opacity="0.6" />
+      <circle cx="26" cy="26" r="2.4" fill={tint} /><circle cx="38" cy="26" r="2.4" fill={tint} />
+      <path d="M26 33 Q32 36 38 33" stroke={tint} strokeWidth="1.4" fill="none" opacity="0.8" />
+      <g stroke={tint} strokeWidth="0.4" opacity="0.22"><line x1="19" y1="22" x2="45" y2="22" /><line x1="19" y1="30" x2="45" y2="30" /></g>
+      <circle cx="49" cy="39" r="1.8" fill="#232a3a" stroke="#3a4256" strokeWidth="0.8" />
+    </>
+  );
+}
+/** riveted goggle bot */
+function Bot3({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <path d="M16 12 L48 12 L50 32 Q32 40 14 32 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <path d="M16 12 L32 12 L32 38 Q22 37 14 32 Z" fill="#1f2638" opacity="0.45" />
+      <circle cx="25" cy="23" r="5" fill="#0a0d14" stroke="#3a4256" strokeWidth="1.2" />
+      <circle cx="39" cy="23" r="5" fill="#0a0d14" stroke="#3a4256" strokeWidth="1.2" />
+      <circle cx="25" cy="23" r="2.2" fill={tint} /><circle cx="39" cy="23" r="2.2" fill={tint} />
+      <path d="M22 32 L42 32 L40 37 Q32 40 24 37 Z" fill="#12161f" stroke="#3a4256" strokeWidth="0.8" />
+      <g stroke="#3a4256" strokeWidth="0.7"><line x1="28" y1="32" x2="28" y2="38" /><line x1="32" y1="33" x2="32" y2="39" /><line x1="36" y1="32" x2="36" y2="38" /></g>
+      <circle cx="19" cy="15" r="1" fill="#3a4256" /><circle cx="45" cy="15" r="1" fill="#3a4256" />
+    </>
+  );
+}
+/** narrow periscope */
+function Bot4({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <rect x="22" y="8" width="20" height="34" rx="4" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <rect x="22" y="8" width="10" height="34" rx="4" fill="#1f2638" opacity="0.5" />
+      <circle cx="32" cy="6" r="2" fill={tint} />
+      <rect x="25" y="19" width="14" height="6" rx="2" fill="#0a0d14" stroke="#3a4256" strokeWidth="1" />
+      <rect x="26.5" y="21" width="11" height="2.4" fill={tint} />
+      <g stroke="#3a4256" strokeWidth="0.8"><line x1="26" y1="30" x2="38" y2="30" /><line x1="26" y1="33" x2="38" y2="33" /><line x1="26" y1="36" x2="38" y2="36" /></g>
+      <rect x="14" y="17" width="8" height="3" rx="1" fill="#232a3a" stroke="#3a4256" strokeWidth="0.6" />
+      <rect x="42" y="17" width="8" height="3" rx="1" fill="#232a3a" stroke="#3a4256" strokeWidth="0.6" />
+    </>
+  );
+}
+/** grille speaker bot */
+function Bot5({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <path d="M18 12 L46 12 L51 40 L13 40 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <path d="M18 12 L32 12 L32 40 L13 40 Z" fill="#1f2638" opacity="0.45" />
+      <line x1="32" y1="6" x2="32" y2="12" stroke="#566180" strokeWidth="1.4" /><circle cx="32" cy="5" r="2" fill={tint} />
+      <rect x="21" y="19" width="7" height="7" rx="1.5" fill="#0a0d14" stroke="#3a4256" strokeWidth="1" />
+      <rect x="36" y="19" width="7" height="7" rx="1.5" fill="#0a0d14" stroke="#3a4256" strokeWidth="1" />
+      <rect x="23" y="21" width="3.2" height="3.2" fill={tint} /><rect x="38" y="21" width="3.2" height="3.2" fill={tint} />
+      <g fill="#12161f">{[32, 35].flatMap((y) => [24, 28, 32, 36, 40].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="0.9" />))}</g>
+    </>
+  );
+}
+/** hex head, angry triangular eyes */
+function Bot6({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <path d="M32 10 L50 20 L50 34 L32 44 L14 34 L14 20 Z" fill="#283044" stroke="#566180" strokeWidth="1.5" />
+      <path d="M32 10 L14 20 L14 34 L32 44 Z" fill="#1f2638" opacity="0.45" />
+      <circle cx="32" cy="17" r="1.5" fill={tint} />
+      <path d="M22 24 L30 26 L22 29 Z" fill={tint} /><path d="M42 24 L34 26 L42 29 Z" fill={tint} />
+      <rect x="26" y="34" width="12" height="4" fill="#12161f" stroke="#3a4256" strokeWidth="0.6" />
+      <g stroke="#3a4256" strokeWidth="0.6"><line x1="30" y1="34" x2="30" y2="38" /><line x1="34" y1="34" x2="34" y2="38" /></g>
+    </>
+  );
+}
+/** cracked display face */
+function Bot7({ tint = RED }: { tint?: string }) {
+  return (
+    <><Chassis />
+      <rect x="14" y="12" width="36" height="30" rx="4" fill="#2a3140" stroke="#566180" strokeWidth="1.5" />
+      <line x1="32" y1="6" x2="32" y2="12" stroke="#566180" strokeWidth="1.5" /><circle cx="32" cy="5" r="2" fill={tint} />
+      <rect x="18" y="16" width="28" height="22" rx="2" fill="#0a0d14" stroke="#3a4256" strokeWidth="1" />
+      <rect x="18" y="16" width="28" height="22" rx="2" fill={tint} opacity="0.12" />
+      <rect x="24" y="22" width="5" height="5" fill={tint} /><rect x="35" y="22" width="5" height="5" fill={tint} />
+      <g fill={tint} opacity="0.8"><rect x="26" y="31" width="3" height="3" /><rect x="30.5" y="31" width="3" height="3" /><rect x="35" y="31" width="3" height="3" /></g>
+      <path d="M30 16 L33 24 L28 30 L34 38" stroke="#0a0d14" strokeWidth="1.2" fill="none" />
+      <path d="M30 16 L33 24 L28 30 L34 38" stroke={tint} strokeWidth="0.4" fill="none" opacity="0.5" />
+    </>
+  );
+}
+
+/** The bot chassis roster — a bot's seat index picks its machine so no two neighbours match. */
+const BOT_UNITS = [Bot0, Bot1, Bot2, Bot3, Bot4, Bot5, Bot6, Bot7];
 
 /** 3 — Dragon */
 function Dragon() {
@@ -163,7 +275,7 @@ function Hero() {
   );
 }
 
-/** Avatar id -> portrait component. 'bot' is the reserved Automaton (only bots use it). */
+/** Avatar id -> portrait component. 'bot' is reserved for the machine roster (BOT_UNITS). */
 const AVATARS: Record<string, () => JSX.Element> = {
   hero: Hero, mage: Mage, goblin: Goblin, dragon: Dragon,
   ogre: Ogre, vampire: Vampire, bat: Bat, ghost: Ghost,
@@ -184,12 +296,14 @@ export const AVATAR_CHOICES: { id: string; name: string }[] = [
 /** Distinct glow colors so each bot at the table reads as its own machine. */
 export const BOT_TINTS = ['#ff3b6b', '#38e8c8', '#ffd84a', '#8b6cff', '#5aa9ff', '#ff8a3b', '#5df08a', '#ff5ad0'];
 
-/** Unified portrait renderer. `bot` avatars render the Automaton tinted by `tint`. */
-export function AvatarArt({ avatar, tint, size = 58 }: { avatar: string; tint?: string; size?: number }) {
+/** Unified portrait renderer. `bot` avatars render one of 8 distinct machines,
+ *  picked by `variant` (usually the seat index) and tinted by `tint`. */
+export function AvatarArt({ avatar, tint, variant = 0, size = 58 }: { avatar: string; tint?: string; variant?: number; size?: number }) {
   const isBot = avatar === 'bot' || !AVATARS[avatar];
+  const Bot = BOT_UNITS[((variant % BOT_UNITS.length) + BOT_UNITS.length) % BOT_UNITS.length];
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
-      {isBot ? <Automaton tint={tint} /> : AVATARS[avatar]()}
+      {isBot ? <Bot tint={tint} /> : AVATARS[avatar]()}
     </svg>
   );
 }

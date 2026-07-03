@@ -136,7 +136,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             >
               {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}><Icon name="shield" size={11} />{p.defense}</span>}
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}><Icon name="warn" size={12} /></span>}
-              <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={56} />
+              <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={56} />
               {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(166,197,63,0.4)' : 'rgba(255,59,107,0.35)'}, transparent 70%)` }} />}
