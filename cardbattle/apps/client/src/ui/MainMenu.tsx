@@ -317,21 +317,21 @@ const floorSheen: React.CSSProperties = {
   background: 'linear-gradient(180deg, rgba(240,206,132,0.14) 0%, rgba(240,206,132,0.05) 40%, transparent 78%)',
   filter: 'blur(10px)', mixBlendMode: 'screen',
 };
-// A sunken floor drain right under the bulb: a dark recessed ellipse rimmed with a lit metal
-// edge, with three crossing bars forming the grate. Sits flat on the floor (foreshortened, wide)
-// so it reads as a hole in the tiles catching the runoff.
+// A square gray floor drain pushed up against the base of the wall (just under the wall/floor
+// seam), directly beneath the bulb. A sunken gray metal grate — recessed dark centre, lit steel
+// rim, three crossing bars — reading as a hole in the tiles catching the runoff.
 const floorDrain: React.CSSProperties = {
-  position: 'absolute', left: '50%', bottom: '11%', width: '9%', height: '3.4%',
-  transform: 'translateX(-50%)', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 42%, #000 0%, #0a0806 58%, #201811 100%)',
-  border: '1px solid rgba(120,110,86,0.35)',
-  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(210,196,150,0.14), 0 2px 8px rgba(0,0,0,0.5)',
+  position: 'absolute', left: '50%', top: '52%', width: '5.5%', height: '4%',
+  transform: 'translateX(-50%)', borderRadius: 2,
+  background: 'linear-gradient(160deg, #4a4844 0%, #2a2926 46%, #17161400 100%), radial-gradient(ellipse at 50% 45%, #050505 0%, #16150f 62%, #34322c 100%)',
+  border: '1px solid rgba(150,148,142,0.5)',
+  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(180,180,176,0.25), 0 2px 8px rgba(0,0,0,0.5)',
 };
-// One bar of the drain's grate — a thin lit strut across the mouth; three are rotated to cross.
+// One bar of the drain's grate — a thin lit gray strut across the mouth; three are rotated to cross.
 const drainGrateBar: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: '82%', height: 2,
+  position: 'absolute', left: '50%', top: '50%', width: '84%', height: 2,
   transform: 'translate(-50%,-50%)', borderRadius: 2,
-  background: 'linear-gradient(90deg, transparent, rgba(150,140,110,0.55) 20%, rgba(150,140,110,0.55) 80%, transparent)',
+  background: 'linear-gradient(90deg, transparent, rgba(170,168,162,0.7) 18%, rgba(170,168,162,0.7) 82%, transparent)',
 };
 // The overhead bulb's light cone falling through the room.
 const sceneLight: React.CSSProperties = {
