@@ -82,11 +82,18 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         <span style={curve} aria-hidden />
 
         <div style={banner}>
-          <div style={welcome}>WELCOME, {name}</div>
-          <div style={subline}>
-            ABYSSAL ARENA &middot; BACK-ROOM TERMINAL &nbsp;&middot;&nbsp;
-            <span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
-            &nbsp;<span style={caret}>█</span>
+          <div style={welcome}>WELCOME, {name.toUpperCase()}</div>
+          <div style={bootLines}>
+            <div>&gt; User authenticated. Access granted.</div>
+            <div>&gt; ABYSSAL ARENA — BACK-ROOM TERMINAL v6</div>
+            <div>
+              &gt; Balance:&nbsp;<span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
+            </div>
+            <div style={loadRow}>
+              &gt; Establishing uplink&nbsp;
+              <span style={loadBar}><span style={loadFill} /></span>
+              &nbsp;<span style={caret}>█</span>
+            </div>
           </div>
         </div>
 
@@ -201,6 +208,12 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
 const blinkCss = `
 @keyframes cb-caret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+@keyframes cb-load {
+  0% { width: 8%; }
+  45% { width: 66%; }
+  70% { width: 82%; }
+  100% { width: 100%; }
+}
 .cb-input:focus {
   border-color: #a6c53f !important;
   background: rgba(166,197,63,0.06) !important;
@@ -234,12 +247,12 @@ const wrap: React.CSSProperties = {
 const screen: React.CSSProperties = {
   position: 'relative', width: 'min(1180px, 94vw)', display: 'flex', flexDirection: 'column', gap: 26,
   padding: '48px 52px 42px', borderRadius: 28, overflow: 'hidden',
-  background: 'radial-gradient(130% 105% at 50% 0%, #0d1608 0%, #070c04 52%, #030602 100%)',
-  border: '2px solid #2b3620',
+  background: 'radial-gradient(130% 108% at 50% 0%, #123a16 0%, #0a2410 48%, #04120a 100%)',
+  border: '2px solid #3f6b33',
   boxShadow:
     '0 0 0 12px #0b0c08, 0 0 0 14px #1c1f15, 0 0 0 15px #050603,' + // molded bezel rings
-    'inset 0 0 140px 30px rgba(0,0,0,0.9), inset 0 0 70px rgba(166,197,63,0.06),' + // glass depth + phosphor haze
-    '0 46px 100px rgba(0,0,0,0.75), 0 0 70px rgba(166,197,63,0.14)',              // drop + green bloom
+    'inset 0 0 140px 30px rgba(0,0,0,0.82), inset 0 0 90px rgba(77,255,106,0.14),' + // glass depth + hot phosphor haze
+    '0 46px 100px rgba(0,0,0,0.75), 0 0 90px rgba(77,255,106,0.3)',                // drop + green bloom
 };
 const scanlines: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3, borderRadius: 28,
@@ -248,22 +261,38 @@ const scanlines: React.CSSProperties = {
 };
 const curve: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4, borderRadius: 28,
-  background: 'radial-gradient(128% 118% at 50% 44%, transparent 52%, rgba(2,4,1,0.82) 100%)',
-  boxShadow: 'inset 0 0 100px 34px rgba(2,4,1,0.9)',
+  background: 'radial-gradient(128% 118% at 50% 44%, transparent 54%, rgba(2,10,3,0.8) 100%)',
+  boxShadow: 'inset 0 0 100px 34px rgba(2,10,3,0.86)',
 };
+// Fallout-terminal phosphor: a brighter, hotter green than the olive C.you for the boot readout.
+const P = '#4dff6a';
 const banner: React.CSSProperties = {
-  width: '100%', fontFamily: mono, color: C.you, letterSpacing: 0.3, textAlign: 'center',
+  width: '100%', fontFamily: mono, color: P, letterSpacing: 0.3, textAlign: 'left',
   position: 'relative', zIndex: 5,
 };
 const welcome: React.CSSProperties = {
-  display: 'inline-block', fontSize: 32, fontWeight: 800, letterSpacing: 5, textTransform: 'uppercase',
-  color: C.you, borderBottom: `2px solid ${C.you}`, paddingBottom: 8,
-  textShadow: '0 0 14px rgba(166,197,63,0.55)',
+  display: 'inline-block', fontSize: 30, fontWeight: 800, letterSpacing: 5, textTransform: 'uppercase',
+  color: P, borderBottom: `2px solid ${P}`, paddingBottom: 8,
+  textShadow: `0 0 16px ${P}, 0 0 6px ${P}`,
 };
-const subline: React.CSSProperties = {
-  marginTop: 12, fontSize: 15, color: C.dim, letterSpacing: 1.5, textTransform: 'uppercase',
+// The `>`-prefixed boot log under the title — left-aligned mono lines, hot phosphor green with a glow.
+const bootLines: React.CSSProperties = {
+  marginTop: 14, fontSize: 15, lineHeight: 1.75, color: P, letterSpacing: 1,
+  textShadow: `0 0 8px rgba(77,255,106,0.5)`,
 };
-const caret: React.CSSProperties = { color: C.you, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
+const loadRow: React.CSSProperties = { display: 'flex', alignItems: 'center', marginTop: 2 };
+// Bracketed loading track à la `[****---------]`; the fill sweeps across on a loop.
+const loadBar: React.CSSProperties = {
+  display: 'inline-block', width: 150, height: 13, verticalAlign: 'middle',
+  border: `1px solid ${P}`, borderRadius: 1, background: 'rgba(0,0,0,0.5)',
+  boxShadow: `inset 0 0 8px rgba(77,255,106,0.25), 0 0 8px rgba(77,255,106,0.3)`, overflow: 'hidden',
+};
+const loadFill: React.CSSProperties = {
+  display: 'block', height: '100%', width: '38%',
+  background: `repeating-linear-gradient(90deg, ${P} 0px, ${P} 6px, rgba(77,255,106,0.35) 6px, rgba(77,255,106,0.35) 9px)`,
+  boxShadow: `0 0 10px ${P}`, animation: 'cb-load 2.4s ease-in-out infinite',
+};
+const caret: React.CSSProperties = { color: P, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
 const cols: React.CSSProperties = { display: 'flex', gap: 26, width: '100%', alignItems: 'stretch', position: 'relative', zIndex: 5 };
 const panel: React.CSSProperties = {
   flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
@@ -272,8 +301,8 @@ const panel: React.CSSProperties = {
 };
 const winBar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '14px 18px', fontFamily: mono, fontSize: 17, fontWeight: 700,
-  color: C.you, textTransform: 'uppercase', letterSpacing: 2.5,
-  background: 'rgba(166,197,63,0.05)', borderBottom: `1px dashed #3c4a2a`,
+  color: '#7dff92', textTransform: 'uppercase', letterSpacing: 2.5, textShadow: '0 0 10px rgba(77,255,106,0.5)',
+  background: 'rgba(77,255,106,0.08)', borderBottom: `1px dashed #4f7a3c`,
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 // Padded body for the host form so every field shares one consistent gutter and rhythm.
