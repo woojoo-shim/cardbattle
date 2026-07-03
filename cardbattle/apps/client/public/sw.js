@@ -1,7 +1,7 @@
 // Minimal service worker — makes the game installable and gives the app shell
 // an offline fallback. It never touches the Colyseus server (different origin),
 // so live multiplayer traffic is untouched.
-const CACHE = 'cardbattle-v4';
+const CACHE = 'cardbattle-v5';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -29,9 +29,20 @@ self.addEventListener('fetch', (event) => {
   // never arrived. Let these hit the network untouched.
   if (url.pathname.startsWith('/api/')) return;
 
-  // App navigation: try the network, fall back to the cached shell when offline.
+  // App navigation: always pull a FRESH index.html, bypassing the browser's HTTP cache
+  // (cache: 'reload'). A plain fetch let a stale index.html — pinned by the browser/CDN cache —
+  // keep pointing at old JS bundles, so shipped UI changes never appeared until a manual clear.
+  // Refresh the offline copy on success; fall back to the cached shell only when truly offline.
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(() => caches.match('/index.html')));
+    event.respondWith(
+      fetch(request, { cache: 'reload' })
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put('/index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('/index.html')),
+    );
     return;
   }
 
