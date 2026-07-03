@@ -170,7 +170,7 @@ const feltRail: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
   // Tilted onto the SAME plane as the felt (same perspective + rotateX about the same centre line)
   // so the padded bumper hoops the baize as one coherent piece of furniture seen from above.
-  transform: 'translate(-50%,-50%) perspective(620px) rotateX(52deg)',
+  transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
   width: '82%', height: '76%', borderRadius: '50%',
   background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
   border: '1px solid #4d2e22',
@@ -184,7 +184,7 @@ const felt: React.CSSProperties = {
   // A near-round surface actually TILTED back in 3D (rotateX) rather than a pre-squashed flat oval,
   // so the near edge swells toward the viewer and the far edge recedes — a real desk you look down
   // onto (Buckshot framing). All children (grid, betting rings, stains) tilt with it as one plane.
-  transform: 'translate(-50%,-50%) perspective(620px) rotateX(52deg)',
+  transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
   width: '74%', height: '66%', borderRadius: '50%', overflow: 'hidden',
   // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
   // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
