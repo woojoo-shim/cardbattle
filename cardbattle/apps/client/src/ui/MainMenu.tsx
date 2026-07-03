@@ -79,10 +79,16 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       {/* the back-room scene: a receding floor plane, a far wall, and the table's lamp pooling
           up from below — depth behind the falling cards, not just a flat wash */}
       <div style={sceneLayer} aria-hidden>
+        <div style={sceneCeiling} />
         <div style={sceneWall} />
-        <div style={sceneFloor} />
+        <div style={wallMirror} />
+        <div style={{ ...wallMirror, ...wallMirrorR }} />
         <div style={sceneHorizon} />
+        <div style={sceneFloor} />
+        <div style={sceneLight} />
+        <span style={sceneBulb} />
         <div style={sceneLampPool} />
+        <div style={sceneGrime} />
       </div>
       {/* strewn cards behind everything */}
       <div style={scatterLayer} aria-hidden>
@@ -178,46 +184,99 @@ const wrap: React.CSSProperties = {
     'linear-gradient(180deg, #140b0e 0%, #0d070a 52%, #060305 100%),' +
     '#060305',
 };
-// The back-room environment behind the cards: a far wall up top, a floor plane receding to a
-// horizon a little above centre, and the table lamp glowing up from the bottom edge.
+// A grimy back-room washroom built from layered CSS, aiming for the Buckshot cover mood: a dark
+// panelled ceiling, a tiled ceramic wall with grouted seams and grime, a couple of dead mirrors,
+// and a dirty checkerboard floor receding into the dark under one jaundiced overhead bulb.
 const sceneLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden',
 };
+// Grit/grain scattered over the whole room so the flat gradients read as worn surfaces.
+const NOISE =
+  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>\")";
+const sceneCeiling: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '13%',
+  backgroundColor: '#0a0806',
+  backgroundImage:
+    'repeating-linear-gradient(90deg, rgba(0,0,0,0.65) 0 2px, transparent 2px 118px),' +
+    'repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 40px)',
+  boxShadow: 'inset 0 -26px 46px rgba(0,0,0,0.75)',
+};
+// Tiled ceramic wall: dirty beige base, dark grout seams both ways, greasy blotches, top sheen.
 const sceneWall: React.CSSProperties = {
-  position: 'absolute', left: 0, right: 0, top: 0, height: '58%',
-  background:
-    'radial-gradient(120% 90% at 50% 100%, rgba(126,38,62,0.16), transparent 70%),' +
-    'linear-gradient(180deg, #0a0508 0%, #100a0d 60%, #150c10 100%)',
+  position: 'absolute', left: 0, right: 0, top: 0, height: '60%',
+  backgroundColor: '#241d16',
+  backgroundImage:
+    'radial-gradient(circle at 22% 30%, rgba(0,0,0,0.45) 0 6%, transparent 18%),' +
+    'radial-gradient(circle at 80% 24%, rgba(0,0,0,0.4) 0 5%, transparent 15%),' +
+    'radial-gradient(circle at 62% 48%, rgba(0,0,0,0.35) 0 7%, transparent 18%),' +
+    'radial-gradient(70% 60% at 50% 34%, rgba(74,64,48,0.55), transparent 72%),' +   // pooled light on tiles
+    'repeating-linear-gradient(90deg, rgba(0,0,0,0.55) 0 2px, transparent 2px 92px),' +  // vertical grout
+    'repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 2px, transparent 2px 74px),' +    // horizontal grout
+    'linear-gradient(180deg, rgba(255,238,206,0.06), transparent 26%)',                  // faint top sheen
+  boxShadow: 'inset 0 -50px 90px rgba(0,0,0,0.66)',
 };
-// The floor: a lighter plane skewed to read as receding away from the viewer.
-const sceneFloor: React.CSSProperties = {
-  position: 'absolute', left: '-20%', right: '-20%', bottom: 0, height: '46%',
-  background:
-    'radial-gradient(80% 120% at 50% 120%, rgba(238,176,78,0.10), transparent 60%),' +
-    'linear-gradient(180deg, #160d10 0%, #0c0709 70%, #060305 100%)',
-  transform: 'perspective(520px) rotateX(58deg)', transformOrigin: 'center top',
-  boxShadow: 'inset 0 60px 80px rgba(0,0,0,0.6)',
+// A dead mirror bolted to the tile: dark glass with a lit top bevel (relief, not a 3D box) so it
+// stands proud of the wall rather than floating.
+const wallMirror: React.CSSProperties = {
+  position: 'absolute', left: '7%', top: '15%', width: '30%', height: '32%', borderRadius: 3,
+  background: 'linear-gradient(158deg, rgba(38,50,48,0.55) 0%, rgba(12,15,15,0.7) 55%, rgba(6,8,8,0.8) 100%)',
+  border: '1px solid rgba(0,0,0,0.7)',
+  boxShadow:
+    'inset 0 2px 0 rgba(190,200,188,0.10), inset 0 0 60px rgba(0,0,0,0.55),' +
+    '0 6px 20px rgba(0,0,0,0.5)',
 };
+const wallMirrorR: React.CSSProperties = { left: 'auto', right: '7%', width: '26%', height: '28%', top: '17%' };
 // A hairline of light where wall meets floor — the room's vanishing seam.
 const sceneHorizon: React.CSSProperties = {
-  position: 'absolute', left: 0, right: 0, top: '54%', height: 2,
-  background: 'linear-gradient(90deg, transparent, rgba(238,176,78,0.28) 30%, rgba(238,176,78,0.3) 70%, transparent)',
+  position: 'absolute', left: 0, right: 0, top: '56%', height: 2,
+  background: 'linear-gradient(90deg, transparent, rgba(238,200,120,0.26) 30%, rgba(238,200,120,0.28) 70%, transparent)',
   filter: 'blur(1px)',
 };
-// The table lamp's pool welling up from the bottom edge.
+// Dirty checkerboard floor skewed into perspective, receding into the dark.
+const sceneFloor: React.CSSProperties = {
+  position: 'absolute', left: '-40%', right: '-40%', bottom: 0, height: '52%',
+  backgroundColor: '#120e0a',
+  backgroundImage:
+    'linear-gradient(45deg, #2b271f 25%, transparent 25%),' +
+    'linear-gradient(-45deg, #2b271f 25%, transparent 25%),' +
+    'linear-gradient(45deg, transparent 75%, #2b271f 75%),' +
+    'linear-gradient(-45deg, transparent 75%, #2b271f 75%)',
+  backgroundSize: '84px 84px',
+  backgroundPosition: '0 0, 0 42px, 42px -42px, -42px 0',
+  transform: 'perspective(560px) rotateX(61deg)', transformOrigin: 'center top',
+  boxShadow: 'inset 0 70px 120px rgba(0,0,0,0.78)',
+};
+// The overhead bulb's light cone falling through the room.
+const sceneLight: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-4%', width: '48%', height: '74%', transform: 'translateX(-50%)',
+  background: 'linear-gradient(180deg, rgba(240,204,128,0.16), rgba(240,204,128,0.02) 70%, transparent)',
+  clipPath: 'polygon(45% 0%, 55% 0%, 80% 100%, 20% 100%)', filter: 'blur(7px)',
+};
+// The bare sodium bulb up top.
+const sceneBulb: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '4%', width: 14, height: 14, borderRadius: '50%',
+  transform: 'translateX(-50%)',
+  background: 'radial-gradient(circle, #fff2cf 0%, #f0b256 55%, rgba(210,140,50,0.2) 100%)',
+  boxShadow: '0 0 26px 8px rgba(240,190,90,0.55)',
+};
+// The bulb's pool welling up from the floor centre.
 const sceneLampPool: React.CSSProperties = {
-  position: 'absolute', left: '50%', bottom: '-8%', width: '70%', height: '46%',
+  position: 'absolute', left: '50%', bottom: '-6%', width: '66%', height: '44%',
   transform: 'translateX(-50%)', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 50%, rgba(238,176,78,0.14), rgba(238,176,78,0.04) 55%, transparent 72%)',
+  background: 'radial-gradient(ellipse at 50% 50%, rgba(240,200,120,0.16), rgba(240,200,120,0.04) 55%, transparent 72%)',
   filter: 'blur(6px)',
 };
+const sceneGrime: React.CSSProperties = {
+  position: 'absolute', inset: 0, backgroundImage: NOISE, backgroundSize: '160px 160px',
+  opacity: 0.13, mixBlendMode: 'overlay',
+};
 const scatterLayer: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.5,
 };
 // Falling cards ride above the vignette (zIndex 1) but below the content (zIndex 2) so the
 // slow drift stays clearly visible against the darkened scene without covering the menu.
 const fallLayer: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.6,
 };
 function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
   return {
