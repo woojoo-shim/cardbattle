@@ -95,6 +95,11 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
         <div style={sceneHorizon} />
         <div style={sceneFloor} />
         <div style={floorSheen} />
+        <div style={floorDrain} aria-hidden>
+          <span style={drainGrateBar} />
+          <span style={{ ...drainGrateBar, transform: 'translate(-50%,-50%) rotate(60deg)' }} />
+          <span style={{ ...drainGrateBar, transform: 'translate(-50%,-50%) rotate(120deg)' }} />
+        </div>
         <div style={sceneLight} />
         <span style={sceneBulb} />
         <div style={sceneLampPool} />
@@ -311,6 +316,22 @@ const floorSheen: React.CSSProperties = {
   position: 'absolute', left: '50%', bottom: 0, width: '30%', height: '48%', transform: 'translateX(-50%)',
   background: 'linear-gradient(180deg, rgba(240,206,132,0.14) 0%, rgba(240,206,132,0.05) 40%, transparent 78%)',
   filter: 'blur(10px)', mixBlendMode: 'screen',
+};
+// A sunken floor drain right under the bulb: a dark recessed ellipse rimmed with a lit metal
+// edge, with three crossing bars forming the grate. Sits flat on the floor (foreshortened, wide)
+// so it reads as a hole in the tiles catching the runoff.
+const floorDrain: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '11%', width: '9%', height: '3.4%',
+  transform: 'translateX(-50%)', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 42%, #000 0%, #0a0806 58%, #201811 100%)',
+  border: '1px solid rgba(120,110,86,0.35)',
+  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(210,196,150,0.14), 0 2px 8px rgba(0,0,0,0.5)',
+};
+// One bar of the drain's grate — a thin lit strut across the mouth; three are rotated to cross.
+const drainGrateBar: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: '82%', height: 2,
+  transform: 'translate(-50%,-50%)', borderRadius: 2,
+  background: 'linear-gradient(90deg, transparent, rgba(150,140,110,0.55) 20%, rgba(150,140,110,0.55) 80%, transparent)',
 };
 // The overhead bulb's light cone falling through the room.
 const sceneLight: React.CSSProperties = {
