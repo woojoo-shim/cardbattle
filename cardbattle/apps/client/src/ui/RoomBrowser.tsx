@@ -264,7 +264,7 @@ const curve: React.CSSProperties = {
 // Fallout-terminal phosphor: a brighter, hotter green than the olive C.you for the boot readout.
 const P = '#4dff6a';
 const banner: React.CSSProperties = {
-  width: '100%', fontFamily: mono, color: P, letterSpacing: 0.3, textAlign: 'left',
+  width: '100%', maxWidth: 1280, margin: '0 auto', fontFamily: mono, color: P, letterSpacing: 0.3, textAlign: 'left',
   position: 'relative', zIndex: 5,
 };
 const welcome: React.CSSProperties = {
@@ -290,9 +290,12 @@ const loadFill: React.CSSProperties = {
   boxShadow: `0 0 10px ${P}`, animation: 'cb-load 2.4s ease-in-out infinite',
 };
 const caret: React.CSSProperties = { color: P, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
-const cols: React.CSSProperties = { display: 'flex', gap: 26, width: '100%', alignItems: 'stretch', position: 'relative', zIndex: 5 };
+const cols: React.CSSProperties = {
+  display: 'flex', gap: 26, width: '100%', maxWidth: 1280, margin: '0 auto',
+  alignItems: 'stretch', position: 'relative', zIndex: 5,
+};
 const panel: React.CSSProperties = {
-  flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
+  flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
   background: 'rgba(4,8,3,0.55)', border: `1px solid rgba(166,197,63,0.16)`,
   boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5)',
 };
