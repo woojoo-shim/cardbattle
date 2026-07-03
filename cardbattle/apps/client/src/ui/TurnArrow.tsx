@@ -100,17 +100,20 @@ const plane: React.CSSProperties = {
   position: 'absolute', left: 0, top: 0, width: 0, height: 0,
   transform: 'scaleY(0.72)', transformOrigin: '0 0',
 };
+// Sized in vw so the rings scale with the table (the felt is 64% of the arena width). The
+// outer ring is set to ~the felt's painted betting circle; the plane's scaleY(0.72) then
+// squashes these into the table's foreshortened ellipse so they overlay it, not float above.
 const glowDisc: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 260, height: 260, borderRadius: '50%',
+  position: 'absolute', left: '50%', top: '50%', width: '30vw', height: '30vw', borderRadius: '50%',
   transform: 'translate(-50%, -50%)', animation: 'cb-arrow-breathe 3.6s ease-in-out infinite',
   transformOrigin: 'center',
 };
 const ring: React.CSSProperties = {
-  position: 'absolute', left: -118, top: -118, width: 236, height: 236, borderRadius: '50%',
+  position: 'absolute', left: '-16.5vw', top: '-16.5vw', width: '33vw', height: '33vw', borderRadius: '50%',
   border: '2px dashed', animation: 'cb-spin 14s linear infinite',
 };
 const ringInner: React.CSSProperties = {
-  position: 'absolute', left: -92, top: -92, width: 184, height: 184, borderRadius: '50%',
+  position: 'absolute', left: '-12.5vw', top: '-12.5vw', width: '25vw', height: '25vw', borderRadius: '50%',
   border: '1px solid', animation: 'cb-spin-rev 22s linear infinite',
 };
 const needle: React.CSSProperties = {
