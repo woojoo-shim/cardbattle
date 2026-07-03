@@ -81,10 +81,20 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={sceneLayer} aria-hidden>
         <div style={sceneCeiling} />
         <div style={sceneWall} />
+        <div style={wallStreaks} />
+        <div style={stallDoor} />
         <div style={wallMirror} />
         <div style={{ ...wallMirror, ...wallMirrorR }} />
+        <div style={counter}>
+          {[15, 37, 59].map((lx) => (
+            <span key={lx} style={{ ...basin, left: `${lx}%` }}>
+              <span style={faucet} />
+            </span>
+          ))}
+        </div>
         <div style={sceneHorizon} />
         <div style={sceneFloor} />
+        <div style={floorSheen} />
         <div style={sceneLight} />
         <span style={sceneBulb} />
         <div style={sceneLampPool} />
@@ -226,6 +236,55 @@ const wallMirror: React.CSSProperties = {
     '0 6px 20px rgba(0,0,0,0.5)',
 };
 const wallMirrorR: React.CSSProperties = { left: 'auto', right: '7%', width: '26%', height: '28%', top: '17%' };
+// Vertical grime runs weeping down the tiles — thin dark drips of varying length, plus a couple
+// of pale mineral streaks, so the wall reads as water-stained rather than a clean gradient.
+const wallStreaks: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '56%', mixBlendMode: 'multiply', opacity: 0.7,
+  backgroundImage:
+    'linear-gradient(180deg, rgba(0,0,0,0.5) 0 40%, transparent 90%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.45) 0 28%, transparent 76%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.4) 0 52%, transparent 92%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.42) 0 34%, transparent 80%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.38) 0 60%, transparent 96%),' +
+    'linear-gradient(180deg, rgba(214,196,150,0.10) 0 46%, transparent 84%)',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '2px 100%, 3px 100%, 2px 100%, 4px 100%, 2px 100%, 3px 100%',
+  backgroundPosition: '19% 0, 27% 0, 44% 0, 66% 0, 73% 0, 58% 0',
+};
+// A closed stall/service door bolted to the right wall: recessed dark panel with a lit top-left
+// bevel (relief), a faint inset panel line, and a small round handle plate.
+const stallDoor: React.CSSProperties = {
+  position: 'absolute', right: '3.5%', top: '10%', width: '13%', height: '46%', borderRadius: 2,
+  background: 'linear-gradient(150deg, #1c1712 0%, #120d0a 48%, #0a0705 100%)',
+  border: '1px solid rgba(0,0,0,0.72)',
+  boxShadow:
+    'inset 0 2px 0 rgba(190,180,150,0.10), inset 2px 0 0 rgba(150,140,110,0.06),' +
+    'inset 0 0 40px rgba(0,0,0,0.6), 0 6px 22px rgba(0,0,0,0.55)',
+  backgroundClip: 'padding-box',
+};
+// The sink counter running along the base of the wall: a dark ledge with a lit front lip
+// (relief) so it stands proud, holding a row of basin ellipses.
+const counter: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: '46%', height: '11%',
+  background: 'linear-gradient(180deg, #2a231a 0%, #1a140e 46%, #0d0906 100%)',
+  borderTop: '1px solid rgba(210,196,160,0.16)',
+  boxShadow: 'inset 0 2px 0 rgba(230,214,170,0.10), 0 10px 26px rgba(0,0,0,0.6)',
+};
+// A shallow washbasin sunk into the counter: dark porcelain ellipse with a lit rear rim and a
+// pooled shadow at the drain — relief, not a 3D bowl.
+const basin: React.CSSProperties = {
+  position: 'absolute', top: '30%', width: '17%', height: '58%', transform: 'translateX(-50%)',
+  borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 38%, #0a0706 0%, #14100b 60%, #221a12 100%)',
+  boxShadow: 'inset 0 3px 5px rgba(0,0,0,0.7), inset 0 -2px 0 rgba(214,196,150,0.12)',
+};
+// A stub faucet rising from the back rim of each basin — a thin lit vertical with a bent neck.
+const faucet: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-34%', width: 3, height: '46%', transform: 'translateX(-50%)',
+  borderRadius: 2,
+  background: 'linear-gradient(180deg, rgba(200,190,160,0.5), rgba(90,84,66,0.5))',
+  boxShadow: '0 0 6px rgba(0,0,0,0.5)',
+};
 // A hairline of light where wall meets floor — the room's vanishing seam.
 const sceneHorizon: React.CSSProperties = {
   position: 'absolute', left: 0, right: 0, top: '56%', height: 2,
@@ -245,6 +304,13 @@ const sceneFloor: React.CSSProperties = {
   backgroundPosition: '0 0, 0 42px, 42px -42px, -42px 0',
   transform: 'perspective(560px) rotateX(61deg)', transformOrigin: 'center top',
   boxShadow: 'inset 0 70px 120px rgba(0,0,0,0.78)',
+};
+// A wet vertical smear of light on the floor directly under the bulb — the damp, greasy sheen
+// that reads the tiles as slick rather than dry. Sits over the checkerboard, below the lamp pool.
+const floorSheen: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: 0, width: '30%', height: '48%', transform: 'translateX(-50%)',
+  background: 'linear-gradient(180deg, rgba(240,206,132,0.14) 0%, rgba(240,206,132,0.05) 40%, transparent 78%)',
+  filter: 'blur(10px)', mixBlendMode: 'screen',
 };
 // The overhead bulb's light cone falling through the room.
 const sceneLight: React.CSSProperties = {
