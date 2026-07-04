@@ -13,7 +13,7 @@ interface Props {
 
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
-  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
+  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName; variant: 'hit' | 'gain'; big?: boolean }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
@@ -144,7 +144,7 @@ export function VfxLayer({ events, players }: Props) {
         const color = ELEM[e.element] ?? ELEM.none;
         // The streak was already launched by the preceding card_played; as it arrives the target
         // recoils and the damage number rises off the face — no flash, just weight.
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `-${e.amount}`, color, delay: IMPACT_DELAY });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big: e.amount >= 8 });
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
@@ -157,11 +157,11 @@ export function VfxLayer({ events, players }: Props) {
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0 });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0, variant: 'gain' });
       } else if (e.type === 'shielded') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield', variant: 'gain' });
       }
     }
 
@@ -266,11 +266,33 @@ function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   } as React.CSSProperties;
 }
 function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
+  const base: React.CSSProperties = {
+    position: 'fixed', left: f.x, top: f.y, color: f.color, whiteSpace: 'nowrap',
+    display: 'flex', alignItems: 'center', lineHeight: 1,
+    fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
+  };
+  if (f.variant === 'hit') {
+    // A struck-in damage number: heavy italic, dark stroke so it reads on any felt, an
+    // element-coloured bloom, and a slam-in that punches big then recoils to rest. Big hits
+    // land larger and hotter for a crit-style emphasis.
+    const size = f.big ? 60 : 42;
+    return {
+      ...base,
+      fontWeight: 900, fontStyle: 'italic', fontSize: size, letterSpacing: '-0.04em',
+      WebkitTextStroke: '1.4px rgba(8,8,7,0.9)',
+      textShadow: [
+        `0 0 ${f.big ? 26 : 16}px ${f.color}`,
+        `0 0 6px ${f.color}`,
+        '0 4px 8px rgba(0,0,0,0.85)',
+      ].join(','),
+      animation: `cb-slam ${f.big ? 1.5 : 1.35}s cubic-bezier(.14,.9,.32,1) ${f.delay}s backwards`,
+    };
+  }
+  // Heal / shield gains: a lighter, buoyant rise.
   return {
-    position: 'fixed', left: f.x, top: f.y, color: f.color,
-    fontFamily: '"Geist Mono", ui-monospace, monospace', fontWeight: 800, fontSize: 30,
-    textShadow: `0 0 10px ${f.color}, 0 2px 4px rgba(0,0,0,0.7)`, whiteSpace: 'nowrap',
-    willChange: 'transform, opacity',
+    ...base, gap: 3,
+    fontWeight: 800, fontSize: 30, letterSpacing: '-0.02em',
+    textShadow: `0 0 10px ${f.color}, 0 2px 5px rgba(0,0,0,0.75)`,
     animation: `cb-rise 1.5s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
   };
 }
