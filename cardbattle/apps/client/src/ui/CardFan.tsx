@@ -108,7 +108,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         else if (isHover) { transform = 'translateY(-22px) scale(1.08)'; z = 5; }
 
         return (
-          <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 55}ms`, zIndex: z }}>
+          <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 260}ms`, zIndex: z }}>
             <button
               className="cb-hand-card"
               disabled={!enabled}
@@ -175,10 +175,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
 const fan: React.CSSProperties = {
   display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%',
   paddingBottom: 18, fontFamily: sans,
+  // 3D depth for the deal-in tumble; pivot low so cards arc up from the "deck" at the bottom.
+  perspective: 1300, perspectiveOrigin: '50% 120%',
 };
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
-const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -6px', display: 'flex', alignItems: 'flex-end' };
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -6px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
   width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
   borderRadius: 12, position: 'relative',

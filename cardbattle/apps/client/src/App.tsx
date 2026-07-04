@@ -157,10 +157,10 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
         <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
 
         <div style={heroFan} className="cb-hero-float" aria-hidden>
-          {HERO_CARDS.map((c) => {
+          {HERO_CARDS.map((c, i) => {
             const t = HERO_TINT[c.rarity] ?? HERO_TINT.common;
             return (
-              <div key={c.id} style={heroCard(c)}>
+              <div key={c.id} className="cb-hero-deal" style={{ ...heroCard(c), animationDelay: `${i * 320}ms` }}>
                 {t.sheen !== 'transparent' && (
                   <div style={{ ...heroFoil, background: `linear-gradient(128deg, transparent 34%, ${t.sheen} 50%, transparent 66%)` }} />
                 )}
@@ -335,6 +335,9 @@ function heroCard(c: (typeof HERO_CARDS)[number]): React.CSSProperties {
   const opacity = depth === 0 ? 1 : depth >= 22 ? 0.7 : 0.88;
   return {
     position: 'absolute', left: '50%', top: '50%', width: 88, height: 122, opacity,
+    // Resting fan slot, exposed as CSS vars so the cb-hero-deal keyframe can settle here after
+    // its tumble. The inline transform is the no-animation fallback (matches the 100% keyframe).
+    ['--tx' as string]: `${c.x}px`, ['--ty' as string]: `${c.y}px`, ['--rot' as string]: `${c.a}deg`, ['--op' as string]: `${opacity}`,
     transform: `translate(-50%, -50%) translate(${c.x}px, ${c.y}px) rotate(${c.a}deg)`,
     // Same woven cardstock material as the hand cards.
     background: [

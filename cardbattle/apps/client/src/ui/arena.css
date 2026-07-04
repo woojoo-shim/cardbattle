@@ -143,15 +143,36 @@
 .cb-rule { animation: cb-rule-sheen 5.5s cubic-bezier(.5,0,.2,1) infinite; }
 
 /* ===== Hand cards ===== */
-/* Each freshly dealt/drawn card rises up out of the deck, overshoots, and settles. Staggered
-   per-card via an inline animation-delay so the opening hand fans out left-to-right. Plays once
-   on mount (cards are keyed by id, so re-renders don't replay — only newly drawn cards animate). */
+/* Each freshly dealt/drawn card is flung out of the deck deep in the table, tumbles up through
+   3D space (the fan owns the perspective), arcs over the top, then settles with a couple of
+   diminishing wobbles — a full ~3s flourish per card. Staggered via an inline animation-delay so
+   the opening hand cascades in one at a time. Plays once on mount (cards are keyed by id, so
+   re-renders don't replay — only newly drawn cards animate). */
 @keyframes cb-hand-deal {
-  0%   { transform: translateY(52px) scale(0.8) rotate(-9deg); opacity: 0; }
-  55%  { opacity: 1; }
-  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+  0%   { transform: translate3d(-140px, 190px, -320px) rotateX(42deg) rotateZ(-52deg) scale(0.4); opacity: 0; }
+  8%   { opacity: 0; }
+  24%  { opacity: 1; }
+  46%  { transform: translate3d(20px, -46px, 90px) rotateX(-10deg) rotateZ(11deg) scale(1.14); opacity: 1; }
+  64%  { transform: translate3d(-6px, 14px, 0) rotateX(0deg) rotateZ(-6deg) scale(0.96); }
+  78%  { transform: translate3d(3px, -7px, 0) rotateZ(3deg) scale(1.02); }
+  90%  { transform: translate3d(-1px, 3px, 0) rotateZ(-1.4deg) scale(0.995); }
+  100% { transform: translate3d(0, 0, 0) rotateZ(0) scale(1); opacity: 1; }
 }
-.cb-hand-deal { animation: cb-hand-deal .52s cubic-bezier(.2,.7,.3,1.25) both; will-change: transform, opacity; }
+.cb-hand-deal { animation: cb-hand-deal 3s cubic-bezier(.16,.72,.24,1) both; will-change: transform, opacity; }
+
+/* The decorative login hero hand deals in the same cinematic way. Each card keeps its final fan
+   slot in CSS vars (--tx/--ty/--rot/--op) so one shared keyframe can settle every card into its
+   own resting spot after a long tumble up out of the deck. */
+@keyframes cb-hero-deal {
+  0%   { transform: translate(-50%,-50%) translate(0px, 210px) rotate(calc(var(--rot) - 34deg)) scale(0.3); opacity: 0; }
+  10%  { opacity: 0; }
+  22%  { opacity: var(--op, 1); }
+  50%  { transform: translate(-50%,-50%) translate(var(--tx), calc(var(--ty) - 34px)) rotate(calc(var(--rot) + 6deg)) scale(1.1); opacity: var(--op, 1); }
+  68%  { transform: translate(-50%,-50%) translate(var(--tx), calc(var(--ty) + 10px)) rotate(calc(var(--rot) - 3deg)) scale(0.97); }
+  84%  { transform: translate(-50%,-50%) translate(var(--tx), calc(var(--ty) - 4px)) rotate(calc(var(--rot) + 1.4deg)) scale(1.008); }
+  100% { transform: translate(-50%,-50%) translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1); opacity: var(--op, 1); }
+}
+.cb-hero-deal { animation: cb-hero-deal 2.9s cubic-bezier(.18,.72,.26,1) both; will-change: transform, opacity; }
 /* A specular glint sweeps diagonally across a playable card while it's hovered. */
 @keyframes cb-hand-sheen { 0% { background-position: 160% 0; } 100% { background-position: -90% 0; } }
 .cb-hand-sheen {
