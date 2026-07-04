@@ -8,7 +8,7 @@ export type IconName =
   | 'swords' | 'swirl' | 'shield' | 'dice' | 'skull' | 'trophy' | 'warn'
   | 'eye' | 'chain' | 'zzz' | 'fire' | 'target' | 'card' | 'burst'
   | 'heart' | 'reverse' | 'crystal' | 'trash' | 'hand' | 'download'
-  | 'petal' | 'frost' | 'star'
+  | 'petal' | 'frost' | 'star' | 'sound' | 'mute'
   | 'arrowRight' | 'arrowSwap' | 'arrowCW' | 'arrowCCW' | 'chevronUp' | 'chevronDown';
 
 interface Props {
@@ -163,6 +163,18 @@ const GLYPHS: Record<IconName, () => JSX.Element> = {
     <>
       <path d="M8 11 V5.5 a1.4 1.4 0 0 1 2.8 0 V11 M10.8 11 V4.5 a1.4 1.4 0 0 1 2.8 0 V11 M13.6 11 V5.5 a1.4 1.4 0 0 1 2.8 0 V13" {...S} strokeWidth={1.6} />
       <path d="M8 11 V9 a1.4 1.4 0 0 0 -2.8 0 v5 a6 6 0 0 0 6 6 h1 a5 5 0 0 0 5 -5 v-2" {...S} strokeWidth={1.6} />
+    </>
+  ),
+  sound: () => (
+    <>
+      <path d="M4 9 h3.5 L12 5 v14 l-4.5 -4 H4 Z" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M15.5 9 a4 4 0 0 1 0 6 M17.8 6.6 a7.5 7.5 0 0 1 0 10.8" {...S} strokeWidth={1.7} />
+    </>
+  ),
+  mute: () => (
+    <>
+      <path d="M4 9 h3.5 L12 5 v14 l-4.5 -4 H4 Z" fill="currentColor" opacity="0.2" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <path d="M16 9.5 L21 14.5 M21 9.5 L16 14.5" {...S} strokeWidth={1.7} />
     </>
   ),
   download: () => (

@@ -13,6 +13,8 @@ import { BrandMark } from './ui/BrandMark.js';
 import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
+import { playSfx } from './audio/sfx.js';
+import { MuteButton } from './ui/MuteButton.js';
 import './ui/arena.css';
 import type { BattleConnection } from './net/client.js';
 
@@ -112,12 +114,14 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       promptInstall().then((r) => { if (r !== 'unavailable') localStorage.setItem('cb_install_asked', '1'); });
     }
     const u = username.trim();
-    if (!u || !password) { setError('아이디와 비밀번호를 입력하세요.'); return; }
+    if (!u || !password) { setError('아이디와 비밀번호를 입력하세요.'); playSfx('back'); return; }
     setError(null);
     setBusy(true);
+    playSfx('select');
     const req = mode === 'login' ? login(u, password) : register(u, password, avatar);
-    req.then(onAuthed).catch((e: unknown) => {
+    req.then((a) => { playSfx('win'); onAuthed(a); }).catch((e: unknown) => {
       setError(e instanceof Error ? e.message : '요청에 실패했습니다.');
+      playSfx('back');
       setBusy(false);
     });
   };
@@ -125,6 +129,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   return (
     <div style={gateWrap}>
       <InstallButton />
+      <div style={gateMute}><MuteButton /></div>
       {/* A single dirty bulb hung over the scene — the room's only light, casting a jaundiced
           shaft down onto the brand and the fanned hand, the way the table is lit in-game. */}
       <div style={bulbCord} aria-hidden />
@@ -148,8 +153,8 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
         </div>
 
         <div style={tabRow}>
-          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); }}>로그인</button>
-          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); }}>회원가입</button>
+          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
+          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
         </div>
 
         {mode === 'register' && (
@@ -162,7 +167,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setAvatar(c.id)}
+                    onClick={() => { setAvatar(c.id); playSfx('hover'); }}
                     title={c.name}
                     aria-label={c.name}
                     aria-pressed={on}
@@ -202,7 +207,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             />
             <button
               type="button"
-              onClick={() => setShowPw((v) => !v)}
+              onClick={() => { setShowPw((v) => !v); playSfx('toggle'); }}
               style={pwToggle}
               aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
               aria-pressed={showPw}
@@ -266,6 +271,9 @@ const lightCone: React.CSSProperties = {
   clipPath: 'polygon(48% 0, 52% 0, 100% 100%, 0 100%)',
   background: 'linear-gradient(180deg, rgba(255,224,150,0.20), rgba(226,164,72,0.06) 46%, transparent 78%)',
   filter: 'blur(7px)', mixBlendMode: 'screen',
+};
+const gateMute: React.CSSProperties = {
+  position: 'fixed', top: 16, left: 16, zIndex: 40,
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',

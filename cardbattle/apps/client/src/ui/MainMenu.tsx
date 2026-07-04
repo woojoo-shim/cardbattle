@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Shop } from './Shop.js';
 import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
+import { playSfx } from '../audio/sfx.js';
+import { MuteButton } from './MuteButton.js';
 import type { Account } from '../net/auth.js';
 
 interface Props {
@@ -67,6 +69,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
   const [creditsOpen, setCreditsOpen] = useState(false);
 
   const act = (k: ItemKey) => {
+    playSfx(k === 'logout' ? 'back' : 'select');
     if (k === 'start') onStart();
     else if (k === 'multi') onMultiplayer();
     else if (k === 'shop') setShopOpen(true);
@@ -129,7 +132,8 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
       {/* account chip, top-right */}
       <div style={topBar}>
-        <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기">
+        <MuteButton />
+        <button style={goldChip} onClick={() => { playSfx('coin'); setShopOpen(true); }} title="상점 열기">
           <Icon name="coin" size={15} />&nbsp;{account.gold}
         </button>
         <span style={nameChip}>{account.display}</span>
@@ -156,7 +160,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
                 key={it.key}
                 style={menuItem(on, danger)}
                 onClick={() => act(it.key)}
-                onMouseEnter={() => setHover(it.key)}
+                onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
                 <span style={labelWrap}>

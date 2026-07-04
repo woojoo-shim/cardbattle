@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
 import { Icon } from './art/Icon.js';
+import { MuteButton } from './MuteButton.js';
 import { C, mono, sans } from './theme.js';
 
 interface Props {
@@ -51,6 +52,7 @@ export function TopBar({ ui, myId }: Props) {
       </div>
 
       <div style={timer}>
+        <MuteButton />
         <span
           style={{
             ...ring,

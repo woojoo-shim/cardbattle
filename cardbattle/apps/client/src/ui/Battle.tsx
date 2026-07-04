@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, requiresTarget, resolveMode } from '@cardbattle/shared';
 import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js';
@@ -13,6 +13,7 @@ import { EmoteLayer } from './EmoteLayer.js';
 import { ManaBar } from './ManaBar.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { Icon } from './art/Icon.js';
+import { soundEvents } from '../audio/sfx.js';
 import { C, mono, sans } from './theme.js';
 import './arena.css';
 
@@ -39,6 +40,10 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 
   // Clear a half-finished target selection whenever the turn passes away from me.
   useEffect(() => { if (!isMyTurn) setPending(null); }, [isMyTurn]);
+
+  // Sound the freshest game events (whooshes, impacts, win/lose) in lockstep with the VFX.
+  const soundCursor = useRef(0);
+  useEffect(() => { soundCursor.current = soundEvents(events, soundCursor.current, myId); }, [events, myId]);
 
   const playCard = (card: CardInstance) => {
     if (!isMyTurn) return;
