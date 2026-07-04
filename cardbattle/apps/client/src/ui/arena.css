@@ -1,5 +1,21 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
+/* End-screen climax: the title punches in with an overshoot, the winner medallion swells up
+   from nothing, and (on victory) a fan of light rays turns slowly behind the winner. */
+@keyframes cb-end-pop {
+  0%   { transform: scale(0.4); opacity: 0; letter-spacing: 40px; filter: blur(8px); }
+  55%  { transform: scale(1.14); opacity: 1; letter-spacing: 6px; filter: blur(0); }
+  100% { transform: scale(1); opacity: 1; letter-spacing: 10px; }
+}
+@keyframes cb-medallion-in {
+  0%   { transform: scale(0.2) rotate(-24deg); opacity: 0; }
+  60%  { transform: scale(1.12) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes cb-rays-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.cb-end-pop { animation: cb-end-pop 0.9s cubic-bezier(.22,.9,.3,1.1) both; }
+.cb-medallion-in { animation: cb-medallion-in 0.8s cubic-bezier(.22,.9,.3,1.2) both; }
+.cb-rays { animation: cb-rays-spin 60s linear infinite; }
 @keyframes cb-spin-rev { to { transform: rotate(-360deg); } }
 /* Turn-compass polish: energy streaming down the needle toward the active seat, a breathing
    glow disc behind the hub, and a slowly turning hub gem. */

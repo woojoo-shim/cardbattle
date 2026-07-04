@@ -13,6 +13,7 @@ import { EmoteLayer } from './EmoteLayer.js';
 import { ManaBar } from './ManaBar.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { Icon } from './art/Icon.js';
+import { AvatarArt } from './art/CreatureArt.js';
 import { soundEvents } from '../audio/sfx.js';
 import { C, mono, sans } from './theme.js';
 import './arena.css';
@@ -66,28 +67,55 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     const winner = ui.players.find((p) => p.id === ui.winnerId);
     const iWon = ui.winnerId === myId;
     return (
-      <div style={endWrap}>
+      <div style={{ ...endWrap, background: iWon ? endBgWin : endBgLose }}>
         <VfxLayer events={events} players={ui.players} />
-        <h1 style={{ ...endTitle, color: iWon ? C.you : C.enemy }}>
-          {iWon ? '승리!' : `${winner?.name ?? '???'} 승리`}
-        </h1>
-        <p style={endSub}>{iWon ? '최후의 생존자가 되었습니다.' : '다음 기회에…'}</p>
-        {reward && !reward.guest && (
-          <div style={rewardPill}>
-            <Icon name="coin" size={18} />
-            <span style={rewardEarned}>+{reward.earned}</span>
-            <span style={rewardLabel}>골드</span>
-            {reward.balance != null && (
-              <span style={rewardBalance}>보유 {reward.balance}</span>
-            )}
+        {iWon && <div style={endRays} className="cb-rays" aria-hidden />}
+        <div style={{ ...endHalo, background: iWon ? haloWin : haloLose }} aria-hidden />
+
+        <div style={endStage}>
+          <div style={medallion} className="cb-medallion-in">
+            <span style={crest} className="cb-hero-float">
+              <Icon name={iWon ? 'trophy' : 'skull'} size={30} color={iWon ? '#ffd66b' : '#cf6a63'} />
+            </span>
+            <div style={{
+              ...avatarDisc,
+              filter: iWon ? 'none' : 'grayscale(0.65) brightness(0.8)',
+              border: iWon ? '3px solid rgba(216,178,76,0.7)' : '3px solid rgba(120,70,70,0.55)',
+              boxShadow: iWon
+                ? '0 0 40px rgba(216,178,76,0.5), inset 0 2px 10px rgba(0,0,0,0.6)'
+                : '0 0 26px rgba(120,50,50,0.4), inset 0 2px 10px rgba(0,0,0,0.6)',
+            }}>
+              <AvatarArt avatar={winner?.avatar ?? 'ghost'} tint={iWon ? '#ffd84a' : '#9a6a6a'} size={92} />
+            </div>
           </div>
-        )}
-        {reward && reward.guest && (
-          <p style={rewardGuest}>게스트는 골드를 얻지 못합니다. 로그인하면 골드가 적립됩니다.</p>
-        )}
-        <button className="cb-enter" style={returnBtn} onClick={onExit}>
-          로비로 돌아가기&nbsp;<Icon name="arrowRight" size={16} />
-        </button>
+
+          <span style={{ ...endKicker, color: iWon ? '#d8b24c' : '#a24a4a' }}>
+            ◈&nbsp;&nbsp;{iWon ? 'LAST ONE STANDING' : 'GAME OVER'}&nbsp;&nbsp;◈
+          </span>
+          <h1 style={{ ...endTitle, color: iWon ? C.you : C.enemy }} className="cb-end-pop">
+            {iWon ? '승리' : '패배'}
+          </h1>
+          <p style={endSub}>
+            {iWon ? '최후의 생존자가 되었습니다.' : `${winner?.name ?? '???'} 이(가) 최후까지 살아남았습니다.`}
+          </p>
+
+          {reward && !reward.guest && (
+            <div style={rewardPill}>
+              <Icon name="coin" size={18} />
+              <span style={rewardEarned}>+{reward.earned}</span>
+              <span style={rewardLabel}>골드</span>
+              {reward.balance != null && (
+                <span style={rewardBalance}>보유 {reward.balance}</span>
+              )}
+            </div>
+          )}
+          {reward && reward.guest && (
+            <p style={rewardGuest}>게스트는 골드를 얻지 못합니다. 로그인하면 골드가 적립됩니다.</p>
+          )}
+          <button className="cb-enter" style={returnBtn} onClick={onExit}>
+            로비로 돌아가기&nbsp;<Icon name="arrowRight" size={16} />
+          </button>
+        </div>
       </div>
     );
   }
@@ -408,12 +436,51 @@ const endTurnBtn: React.CSSProperties = {
   transition: 'transform .15s', zIndex: 16,
 };
 const endWrap: React.CSSProperties = {
+  position: 'relative', overflow: 'hidden',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-  minHeight: '100vh', gap: 12, fontFamily: sans,
-  background: 'radial-gradient(120% 90% at 50% 30%, #191a12 0%, #101110 40%, #080807 100%), #080807',
+  minHeight: '100vh', fontFamily: sans,
 };
-const endTitle: React.CSSProperties = { margin: 0, fontSize: 64, fontWeight: 900, letterSpacing: 4, textShadow: '0 0 50px currentColor' };
-const endSub: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 18 };
+// Victory bathes the room in warm gold; defeat drowns it in cold oxblood ash.
+const endBgWin = 'radial-gradient(120% 90% at 50% 26%, #24210f 0%, #14130c 42%, #080806 100%), #080806';
+const endBgLose = 'radial-gradient(120% 90% at 50% 26%, #1e1012 0%, #130b0d 44%, #070405 100%), #070405';
+// A slow fan of light rays turning behind the winner — victory only.
+const endRays: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '40%', width: '150vmax', height: '150vmax',
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 0, opacity: 0.5,
+  background: 'repeating-conic-gradient(from 0deg at 50% 50%, rgba(216,178,76,0.13) 0deg 7deg, transparent 7deg 20deg)',
+  WebkitMaskImage: 'radial-gradient(circle at 50% 50%, #000 6%, transparent 46%)',
+  maskImage: 'radial-gradient(circle at 50% 50%, #000 6%, transparent 46%)',
+};
+const endHalo: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '40%', width: 560, height: 560,
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 0,
+  borderRadius: '50%', filter: 'blur(30px)',
+};
+const haloWin = 'radial-gradient(circle, rgba(216,178,76,0.28), transparent 62%)';
+const haloLose = 'radial-gradient(circle, rgba(160,60,60,0.22), transparent 62%)';
+const endStage: React.CSSProperties = {
+  position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column',
+  alignItems: 'center', gap: 12, textAlign: 'center', padding: '0 20px',
+};
+// The winner's portrait in a ringed medallion, a floating crest above it.
+const medallion: React.CSSProperties = {
+  position: 'relative', marginBottom: 10,
+};
+const avatarDisc: React.CSSProperties = {
+  width: 120, height: 120, borderRadius: '50%', display: 'grid', placeItems: 'center', overflow: 'hidden',
+  background: 'radial-gradient(circle at 50% 34%, #241a12, #0e0a07)',
+};
+const crest: React.CSSProperties = {
+  position: 'absolute', top: -26, left: '50%', transform: 'translateX(-50%)', zIndex: 3,
+  width: 46, height: 46, borderRadius: '50%', display: 'grid', placeItems: 'center',
+  background: 'radial-gradient(circle, rgba(20,14,10,0.95), rgba(10,7,5,0.95))',
+  border: '1px solid rgba(216,178,76,0.4)', boxShadow: '0 0 20px rgba(216,178,76,0.3)',
+};
+const endKicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 12, letterSpacing: 5, textTransform: 'uppercase', fontWeight: 700,
+};
+const endTitle: React.CSSProperties = { margin: '2px 0 0', fontSize: 76, fontWeight: 900, letterSpacing: 10, textShadow: '0 0 60px currentColor' };
+const endSub: React.CSSProperties = { margin: '4px 0 8px', color: C.dim, fontSize: 18 };
 const rewardPill: React.CSSProperties = {
   marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 8,
   padding: '10px 18px', borderRadius: 999, fontFamily: mono,
