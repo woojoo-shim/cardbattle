@@ -14,6 +14,7 @@ import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
 import { playSfx } from './audio/sfx.js';
+import { startBgm } from './audio/bgm.js';
 import { MuteButton } from './ui/MuteButton.js';
 import './ui/arena.css';
 import type { BattleConnection } from './net/client.js';
@@ -41,6 +42,18 @@ export function App() {
     };
     window.addEventListener('pointerdown', goFullscreen, { once: true });
     return () => window.removeEventListener('pointerdown', goFullscreen);
+  }, []);
+
+  // Kick off the ambient background music on the visitor's first interaction. Browsers only
+  // let audio start from a user gesture, so we wait for the first pointerdown, then let go.
+  useEffect(() => {
+    const kick = () => startBgm();
+    window.addEventListener('pointerdown', kick, { once: true });
+    window.addEventListener('keydown', kick, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', kick);
+      window.removeEventListener('keydown', kick);
+    };
   }, []);
 
   if (account === undefined) return <Centered>불러오는 중…</Centered>;

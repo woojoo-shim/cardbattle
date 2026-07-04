@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from './art/Icon.js';
 import { isMuted, toggleMute } from '../audio/sfx.js';
+import { startBgm } from '../audio/bgm.js';
 import { C, sans } from './theme.js';
 
 /** A small round speaker toggle. Mirrors the shared mute state (persisted in localStorage),
@@ -10,7 +11,7 @@ export function MuteButton() {
   return (
     <button
       type="button"
-      onClick={() => setMuted(toggleMute())}
+      onClick={() => { const m = toggleMute(); setMuted(m); if (!m) startBgm(); }}
       style={btn}
       title={muted ? '소리 켜기' : '소리 끄기'}
       aria-label={muted ? '소리 켜기' : '소리 끄기'}

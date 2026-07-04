@@ -149,6 +149,11 @@ export function soundEvents(
 
 export function isMuted() { return muted; }
 
+/** Shared context + master gain for sibling audio modules (background music) so everything
+ * runs on one AudioContext and obeys the same mute switch. */
+export function ensureAudio(): AudioContext | null { return ensure(); }
+export function getMaster(): GainNode | null { return master; }
+
 /** Flip the master mute and persist it. Returns the new muted state. */
 export function toggleMute(): boolean {
   muted = !muted;
