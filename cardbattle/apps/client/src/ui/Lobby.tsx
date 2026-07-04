@@ -3,6 +3,7 @@ import type { UiState } from '../state/useRoom.js';
 import { MIN_PLAYERS, MAX_PLAYERS, GAME_MODES, type GameModeId } from '@cardbattle/shared';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 import { Icon, MODE_ICON } from './art/Icon.js';
+import { playSfx } from '../audio/sfx.js';
 import { C, mono, sans } from './theme.js';
 
 interface Props {
@@ -19,7 +20,7 @@ const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
 export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Props) {
   const [ready, setReady] = useState(false);
-  const toggle = () => { const next = !ready; setReady(next); onReady(next); };
+  const toggle = () => { const next = !ready; setReady(next); playSfx(next ? 'select' : 'back'); onReady(next); };
   const n = ui.players.length;
   const gm = GAME_MODES[(ui.mode as GameModeId)] ?? GAME_MODES.standard;
 
@@ -28,7 +29,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Prop
       <div style={vignette} aria-hidden />
 
       {onExit && (
-        <button style={backBtn} onClick={onExit} title="방을 나가고 목록으로">
+        <button style={backBtn} onClick={() => { playSfx('back'); onExit(); }} title="방을 나가고 목록으로">
           ←&nbsp;나가기
         </button>
       )}
@@ -70,7 +71,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Prop
                   <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ color: C.you, fontSize: 13 }}>좌석 {p.seat + 1}</span>
                     {isBot && (
-                      <button style={kickBtn} onClick={() => onRemoveBot(p.id)} title="봇 내보내기"><Icon name="close" size={12} /></button>
+                      <button style={kickBtn} onClick={() => { playSfx('back'); onRemoveBot(p.id); }} title="봇 내보내기"><Icon name="close" size={12} /></button>
                     )}
                   </span>
                 </li>
@@ -79,7 +80,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Prop
           </ul>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 4 }}>
-            <button onClick={onAddBot} disabled={n >= MAX_PLAYERS} style={botBtn}>
+            <button onClick={() => { playSfx('select'); onAddBot(); }} disabled={n >= MAX_PLAYERS} style={botBtn}>
               + 봇 추가
             </button>
             <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>

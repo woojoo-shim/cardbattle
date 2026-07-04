@@ -4,6 +4,7 @@ import { fetchMe, type Account } from '../net/auth.js';
 import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattle/shared';
 import { Shop } from './Shop.js';
 import { Icon, MODE_ICON } from './art/Icon.js';
+import { playSfx } from '../audio/sfx.js';
 import { C, mono } from './theme.js';
 
 interface Props {
@@ -48,13 +49,14 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
     .sort((a, b) => (a.metadata?.title ?? '').localeCompare(b.metadata?.title ?? ''));
 
   // Collapsing the special-mode picker snaps the room back to the standard ruleset.
-  const toggleModes = () => setShowModes((v) => { if (v) setMode(DEFAULT_MODE); return !v; });
-  const create = () => onPick(() => createRoom(name, title.trim(), avatar, mode, isPrivate));
-  const join = (roomId: string) => onPick(() => joinRoomById(roomId, name, avatar));
-  const quick = () => onPick(() => quickPlay(name, avatar));
+  const toggleModes = () => { playSfx('toggle'); setShowModes((v) => { if (v) setMode(DEFAULT_MODE); return !v; }); };
+  const create = () => { playSfx('select'); onPick(() => createRoom(name, title.trim(), avatar, mode, isPrivate)); };
+  const join = (roomId: string) => { playSfx('select'); onPick(() => joinRoomById(roomId, name, avatar)); };
+  const quick = () => { playSfx('select'); onPick(() => quickPlay(name, avatar)); };
   const joinByCode = async () => {
     const c = code.trim().toUpperCase();
     if (!c) return;
+    playSfx('select');
     setErr('');
     // Ask the server for the room right now — works for private rooms and survives a stale
     // or disconnected lobby list (which is why the old local-list lookup could miss it).
@@ -65,7 +67,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
       setErr('서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.');
       return;
     }
-    if (!roomId) { setErr(`'${c}' 방을 찾을 수 없습니다.`); return; }
+    if (!roomId) { playSfx('back'); setErr(`'${c}' 방을 찾을 수 없습니다.`); return; }
     join(roomId);
   };
 
@@ -73,9 +75,9 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
     <div style={wrap}>
       <style>{blinkCss}</style>
       <div style={topBar}>
-        {onBack && <button style={logout} onClick={onBack}>← EXIT</button>}
-        <button style={goldChip} onClick={() => setShopOpen(true)} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;SHOP</button>
-        {onLogout && <button style={logout} onClick={onLogout}>LOGOUT</button>}
+        {onBack && <button style={logout} onClick={() => { playSfx('back'); onBack(); }}>← EXIT</button>}
+        <button style={goldChip} onClick={() => { playSfx('coin'); setShopOpen(true); }} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;SHOP</button>
+        {onLogout && <button style={logout} onClick={() => { playSfx('back'); onLogout(); }}>LOGOUT</button>}
       </div>
       <div style={screen}>
         <span style={scanlines} aria-hidden />
@@ -141,10 +143,10 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
             <label style={cap}><span style={capDot}>&#9670;</span>&nbsp;공개 설정 <span style={capHint}>VISIBILITY</span></label>
             <div style={visRow}>
-              <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(false)}>
+              <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
                 <Icon name="globe" size={15} />&nbsp;PUBLIC
               </button>
-              <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => setIsPrivate(true)}>
+              <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
                 <Icon name="lock" size={15} />&nbsp;PRIVATE
               </button>
             </div>
@@ -163,7 +165,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                     <button
                       key={m.id}
                       style={{ ...modeCard, ...(on ? modeCardOn : null) }}
-                      onClick={() => setMode(m.id)}
+                      onClick={() => { playSfx('select'); setMode(m.id); }}
                       title={m.desc}
                     >
                       <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>

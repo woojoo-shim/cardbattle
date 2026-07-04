@@ -4,6 +4,7 @@ import { CARD_DEFS, COSMETIC_BY_ID } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon } from './art/Icon.js';
+import { playSfx } from '../audio/sfx.js';
 
 interface Props {
   hand: CardInstance[];
@@ -108,12 +109,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
           <button
             key={c.id}
             disabled={!enabled}
-            onMouseEnter={() => setHover(c.id)}
+            onMouseEnter={() => { setHover(c.id); if (playable) playSfx('hover'); }}
             onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
             onClick={() => {
               if (!enabled) return;
               // On touch, the first tap only previews the card; the second tap commits.
-              if (IS_TOUCH && preview !== c.id) { setPreview(c.id); return; }
+              if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
               if (!affordable) return; // can't pay for it — reads fine, just won't play
               setPreview(null);
               onPlay(c);
