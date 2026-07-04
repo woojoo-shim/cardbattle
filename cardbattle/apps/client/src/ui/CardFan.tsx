@@ -100,6 +100,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
           ? { style: shieldVal, label: `+${value}` }
           : { style: healVal, label: `+${value}` };
 
+        const tint = RARITY_TINT[def.rarity] ?? RARITY_TINT.common;
+
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
         if (isPending) { transform = 'translateY(-30px) scale(1.1)'; z = 6; }
@@ -139,6 +141,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
             }}
           >
             {hasCos && <div style={cosmeticRing(cos!.border)} />}
+            {tint.sheen !== 'transparent' && (
+              <div
+                style={{ ...foilSheen, background: `linear-gradient(128deg, transparent 34%, ${tint.sheen} 50%, transparent 66%)` }}
+                aria-hidden
+              />
+            )}
             {(isHover || isPending) && (
               <div style={tip}>
                 <div style={tipName}>{def.name}</div>
@@ -147,8 +155,13 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               </div>
             )}
             <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
-            <CardArt id={def.id} size="clamp(48px, 5vw, 72px)" />
-            <div style={cname}>{def.name}</div>
+            <div style={artWindow}>
+              <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
+              <CardArt id={def.id} size="clamp(46px, 4.8vw, 68px)" />
+            </div>
+            <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
+              <div style={cname}>{def.name}</div>
+            </div>
             <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
           </button>
         );
@@ -164,13 +177,42 @@ const fan: React.CSSProperties = {
 const card: React.CSSProperties = {
   width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
   borderRadius: 12, margin: '0 -6px', position: 'relative',
-  background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${C.border}`,
+  background: `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
+  border: `1px solid ${C.border}`,
   color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'space-between', padding: 'clamp(12px, 1.2vw, 18px) clamp(8px, 0.8vw, 12px)',
+  justifyContent: 'flex-start', gap: 'clamp(4px, 0.5vw, 7px)',
+  padding: 'clamp(9px, 0.95vw, 14px) clamp(8px, 0.8vw, 12px) clamp(7px, 0.7vw, 11px)',
   transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease, border-color .24s ease',
   transformOrigin: 'bottom center', willChange: 'transform',
 };
-const cname: React.CSSProperties = { fontSize: 'clamp(13px, 1.25vw, 17px)', fontWeight: 700 };
+// Per-rarity accents: a glow behind the art window, an optional foil sheen streak, and a
+// nameplate tint. Keeps the grimy palette but signals card power at a glance.
+const RARITY_TINT: Record<string, { glow: string; sheen: string; plate: string }> = {
+  common: { glow: 'rgba(120,122,96,0.20)', sheen: 'transparent', plate: 'rgba(53,54,45,0.5)' },
+  rare: { glow: 'rgba(111,160,140,0.34)', sheen: 'transparent', plate: 'rgba(60,86,76,0.45)' },
+  epic: { glow: 'rgba(216,162,60,0.36)', sheen: 'rgba(216,162,60,0.11)', plate: 'rgba(90,68,26,0.48)' },
+  legendary: { glow: 'rgba(216,162,60,0.5)', sheen: 'rgba(255,212,120,0.17)', plate: 'rgba(110,82,30,0.52)' },
+};
+// Recessed art frame — an inset dark well with a rarity glow so the illustration reads as
+// mounted, giving the flat card real depth.
+const artWindow: React.CSSProperties = {
+  position: 'relative', width: '84%', aspectRatio: '1', marginTop: 2, borderRadius: 10,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  background: 'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+  border: `1px solid ${C.border}`,
+  boxShadow: 'inset 0 2px 9px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.03)',
+};
+const artGlow: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 10, pointerEvents: 'none' };
+// Diagonal light streak for epic/legendary — a subtle foil shimmer.
+const foilSheen: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: 12, pointerEvents: 'none', zIndex: 2,
+  mixBlendMode: 'screen',
+};
+const nameplate: React.CSSProperties = {
+  width: '100%', marginTop: 'auto', padding: '3px 2px 2px', textAlign: 'center',
+  borderTop: `1px solid ${C.border}`,
+};
+const cname: React.CSSProperties = { fontSize: 'clamp(12px, 1.15vw, 16px)', fontWeight: 700, lineHeight: 1.1 };
 const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
 const manaValPill: React.CSSProperties = { color: '#bfe0ff', background: 'rgba(90,160,255,0.18)', border: '1px solid #2a4a80' };
 // Mana cost, top-left. Turns red when the player can't currently afford it (on their turn).
