@@ -4,7 +4,7 @@ import { C } from './theme.js';
 // The felt is tilted rotateX(62°); its vertical extent projects to ~cos(62°) on screen. The
 // needle lies ON that plane, so we un-foreshorten the screen delta by this factor to find the
 // in-plane angle that will *project* to point at a seat, and tilt the needle by the same 62°.
-const TILT_DEG = 72;
+const TILT_DEG = 80;
 const COS_TILT = Math.cos((TILT_DEG * Math.PI) / 180);
 
 interface Props {
@@ -109,7 +109,7 @@ const wrap: React.CSSProperties = {
 // instead of standing up as flat circles floating over the room.
 const plane: React.CSSProperties = {
   position: 'absolute', left: 0, top: 0, width: 0, height: 0,
-  transform: 'perspective(620px) rotateX(72deg)', transformOrigin: '0 0',
+  transform: 'perspective(620px) rotateX(80deg)', transformOrigin: '0 0',
 };
 // Circle diameters in vw; the plane's rotateX(62°) then squashes them to ~cos(62°) tall so they
 // sit inside the felt's painted betting circle rather than spilling onto the walls.
