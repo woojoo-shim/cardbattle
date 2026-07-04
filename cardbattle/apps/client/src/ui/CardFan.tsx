@@ -177,7 +177,14 @@ const fan: React.CSSProperties = {
 const card: React.CSSProperties = {
   width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
   borderRadius: 12, margin: '0 -6px', position: 'relative',
-  background: `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
+  // Layered "cardstock" material: a lit embossed top edge, a fine woven cross-hatch grain,
+  // then the rarity-neutral body. Pure CSS — no image, no extra DOM per card.
+  background: [
+    'linear-gradient(180deg, rgba(255,255,255,0.055), transparent 22%)',
+    'repeating-linear-gradient(45deg, rgba(255,255,255,0.014) 0 1.5px, transparent 1.5px 3.5px)',
+    'repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0 1.5px, transparent 1.5px 3.5px)',
+    `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
+  ].join(','),
   border: `1px solid ${C.border}`,
   color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
   justifyContent: 'flex-start', gap: 'clamp(4px, 0.5vw, 7px)',
@@ -198,7 +205,10 @@ const RARITY_TINT: Record<string, { glow: string; sheen: string; plate: string }
 const artWindow: React.CSSProperties = {
   position: 'relative', width: '84%', aspectRatio: '1', marginTop: 2, borderRadius: 10,
   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-  background: 'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+  background: [
+    'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px)',
+    'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+  ].join(','),
   border: `1px solid ${C.border}`,
   boxShadow: 'inset 0 2px 9px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.03)',
 };
