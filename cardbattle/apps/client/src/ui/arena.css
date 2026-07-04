@@ -152,6 +152,17 @@
 }
 .cb-enter:active { transform: translateY(0); }
 
+/* The hung bulb never sits perfectly still — a slow amber breathe with the odd dirty flick,
+   so the whole gate feels lit by one failing lamp rather than a static gradient. */
+@keyframes cb-bulb-flicker {
+  0%, 100% { opacity: 1;    box-shadow: 0 0 18px 4px rgba(226,164,72,0.5), 0 0 46px 12px rgba(216,162,60,0.22); }
+  46%      { opacity: 0.94; }
+  48%      { opacity: 0.72; box-shadow: 0 0 12px 3px rgba(226,164,72,0.34), 0 0 30px 8px rgba(216,162,60,0.14); }
+  50%      { opacity: 0.98; }
+  72%      { opacity: 0.9;  box-shadow: 0 0 20px 5px rgba(226,164,72,0.55), 0 0 52px 14px rgba(216,162,60,0.26); }
+}
+.cb-bulb { animation: cb-bulb-flicker 6.5s ease-in-out infinite; will-change: opacity; }
+
 /* Main-menu ambient: face-down cards drifting down through the back room behind the title.
    left% is set inline; translate(-50%) keeps that the card's centre. --r0/--r1 spin it as it
    falls, --o is its (dim) peak opacity. */

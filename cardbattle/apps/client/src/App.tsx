@@ -125,6 +125,11 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   return (
     <div style={gateWrap}>
       <InstallButton />
+      {/* A single dirty bulb hung over the scene — the room's only light, casting a jaundiced
+          shaft down onto the brand and the fanned hand, the way the table is lit in-game. */}
+      <div style={bulbCord} aria-hidden />
+      <div style={lightCone} aria-hidden />
+      <div style={bulb} className="cb-bulb" aria-hidden />
       <div style={gateGlow} aria-hidden />
       <div style={gateVignette} aria-hidden />
 
@@ -240,6 +245,27 @@ const gateGlow: React.CSSProperties = {
   transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
   background: 'radial-gradient(ellipse at center, rgba(216,162,60,0.14), transparent 68%)',
   filter: 'blur(6px)',
+};
+// The bulb's flex, cord and volumetric shaft — one hanging lamp lighting the whole gate.
+const bulbCord: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: 0, width: 2, height: 'clamp(40px, 9vh, 78px)',
+  transform: 'translateX(-50%)', pointerEvents: 'none',
+  background: 'linear-gradient(180deg, #000, #241a12)',
+};
+const bulb: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: 'clamp(36px, 8.4vh, 72px)', width: 15, height: 19,
+  transform: 'translateX(-50%)', pointerEvents: 'none',
+  borderRadius: '50% 50% 50% 50% / 62% 62% 40% 40%',
+  background: 'radial-gradient(circle at 50% 38%, #ffe6a6, #e2a448 52%, #6e4410 100%)',
+  boxShadow: '0 0 18px 4px rgba(226,164,72,0.5), 0 0 46px 12px rgba(216,162,60,0.22)',
+};
+const lightCone: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: 'clamp(48px, 10vh, 86px)',
+  width: 'min(560px, 96vw)', height: 'min(560px, 78vh)',
+  transform: 'translateX(-50%)', pointerEvents: 'none',
+  clipPath: 'polygon(48% 0, 52% 0, 100% 100%, 0 100%)',
+  background: 'linear-gradient(180deg, rgba(255,224,150,0.20), rgba(226,164,72,0.06) 46%, transparent 78%)',
+  filter: 'blur(7px)', mixBlendMode: 'screen',
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
