@@ -108,62 +108,64 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         else if (isHover) { transform = 'translateY(-22px) scale(1.08)'; z = 5; }
 
         return (
-          <button
-            key={c.id}
-            disabled={!enabled}
-            onMouseEnter={() => { setHover(c.id); if (playable) playSfx('hover'); }}
-            onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
-            onClick={() => {
-              if (!enabled) return;
-              // On touch, the first tap only previews the card; the second tap commits.
-              if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
-              if (!affordable) return; // can't pay for it — reads fine, just won't play
-              setPreview(null);
-              onPlay(c);
-            }}
-            style={{
-              ...card,
-              transform,
-              zIndex: z,
-              cursor: !enabled ? 'default' : affordable ? 'pointer' : 'not-allowed',
-              opacity: !enabled ? 0.5 : affordable ? 1 : 0.42,
-              filter: playable ? 'none' : 'grayscale(0.4)',
-              borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
-              boxShadow: isPending
-                ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(166,197,63,0.3)`
-                : hasCos && isHover
-                ? `0 0 22px ${cos!.glow}, 0 26px 44px rgba(0,0,0,0.6)`
-                : hasCos
-                ? `0 0 14px ${cos!.glow}, 0 14px 26px rgba(0,0,0,0.55)`
-                : isHover
-                ? '0 26px 44px rgba(0,0,0,0.6)'
-                : '0 14px 26px rgba(0,0,0,0.55)',
-            }}
-          >
-            {hasCos && <div style={cosmeticRing(cos!.border)} />}
-            {tint.sheen !== 'transparent' && (
-              <div
-                style={{ ...foilSheen, background: `linear-gradient(128deg, transparent 34%, ${tint.sheen} 50%, transparent 66%)` }}
-                aria-hidden
-              />
-            )}
-            {(isHover || isPending) && (
-              <div style={tip}>
-                <div style={tipName}>{def.name}</div>
-                <div style={tipDesc}>{def.desc}</div>
-                {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
+          <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 55}ms`, zIndex: z }}>
+            <button
+              className="cb-hand-card"
+              disabled={!enabled}
+              onMouseEnter={() => { setHover(c.id); if (playable) playSfx('hover'); }}
+              onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
+              onClick={() => {
+                if (!enabled) return;
+                // On touch, the first tap only previews the card; the second tap commits.
+                if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
+                if (!affordable) return; // can't pay for it — reads fine, just won't play
+                setPreview(null);
+                onPlay(c);
+              }}
+              style={{
+                ...card,
+                transform,
+                cursor: !enabled ? 'default' : affordable ? 'pointer' : 'not-allowed',
+                opacity: !enabled ? 0.5 : affordable ? 1 : 0.42,
+                filter: playable ? 'none' : 'grayscale(0.4)',
+                borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
+                boxShadow: isPending
+                  ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(166,197,63,0.3)`
+                  : hasCos && isHover
+                  ? `0 0 22px ${cos!.glow}, 0 26px 44px rgba(0,0,0,0.6)`
+                  : hasCos
+                  ? `0 0 14px ${cos!.glow}, 0 14px 26px rgba(0,0,0,0.55)`
+                  : isHover
+                  ? '0 26px 44px rgba(0,0,0,0.6)'
+                  : '0 14px 26px rgba(0,0,0,0.55)',
+              }}
+            >
+              {playable && <i className="cb-hand-sheen" aria-hidden />}
+              {hasCos && <div style={cosmeticRing(cos!.border)} />}
+              {tint.sheen !== 'transparent' && (
+                <div
+                  style={{ ...foilSheen, background: `linear-gradient(128deg, transparent 34%, ${tint.sheen} 50%, transparent 66%)` }}
+                  aria-hidden
+                />
+              )}
+              {(isHover || isPending) && (
+                <div style={tip}>
+                  <div style={tipName}>{def.name}</div>
+                  <div style={tipDesc}>{def.desc}</div>
+                  {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
+                </div>
+              )}
+              <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
+              <div style={artWindow}>
+                <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
+                <CardArt id={def.id} size="clamp(46px, 4.8vw, 68px)" />
               </div>
-            )}
-            <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
-            <div style={artWindow}>
-              <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-              <CardArt id={def.id} size="clamp(46px, 4.8vw, 68px)" />
-            </div>
-            <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
-              <div style={cname}>{def.name}</div>
-            </div>
-            <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
-          </button>
+              <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
+                <div style={cname}>{def.name}</div>
+              </div>
+              <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
+            </button>
+          </div>
         );
       })}
     </div>
@@ -174,9 +176,12 @@ const fan: React.CSSProperties = {
   display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%',
   paddingBottom: 18, fontFamily: sans,
 };
+// The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
+// rotation and hover lift, so the entrance animation never fights the hover transform.
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -6px', display: 'flex', alignItems: 'flex-end' };
 const card: React.CSSProperties = {
   width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
-  borderRadius: 12, margin: '0 -6px', position: 'relative',
+  borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a lit embossed top edge, a fine woven cross-hatch grain,
   // then the rarity-neutral body. Pure CSS — no image, no extra DOM per card.
   background: [

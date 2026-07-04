@@ -141,6 +141,26 @@
 .cb-gate-in { animation: cb-gate-in 0.6s cubic-bezier(.22,.61,.36,1) both; }
 .cb-hero-float { animation: cb-hero-float 7s ease-in-out infinite; will-change: transform; }
 .cb-rule { animation: cb-rule-sheen 5.5s cubic-bezier(.5,0,.2,1) infinite; }
+
+/* ===== Hand cards ===== */
+/* Each freshly dealt/drawn card rises up out of the deck, overshoots, and settles. Staggered
+   per-card via an inline animation-delay so the opening hand fans out left-to-right. Plays once
+   on mount (cards are keyed by id, so re-renders don't replay — only newly drawn cards animate). */
+@keyframes cb-hand-deal {
+  0%   { transform: translateY(52px) scale(0.8) rotate(-9deg); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+.cb-hand-deal { animation: cb-hand-deal .52s cubic-bezier(.2,.7,.3,1.25) both; will-change: transform, opacity; }
+/* A specular glint sweeps diagonally across a playable card while it's hovered. */
+@keyframes cb-hand-sheen { 0% { background-position: 160% 0; } 100% { background-position: -90% 0; } }
+.cb-hand-sheen {
+  position: absolute; inset: 0; border-radius: 12px; pointer-events: none; z-index: 3;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.17) 50%, transparent 60%);
+  background-size: 250% 100%; background-position: 160% 0; opacity: 0;
+  transition: opacity .18s ease;
+}
+.cb-hand-card:hover .cb-hand-sheen { opacity: 1; animation: cb-hand-sheen .62s ease-out; }
 .cb-field { transition: border-color .25s ease, box-shadow .25s ease; }
 .cb-field:focus-within {
   border-color: #a6c53f;
