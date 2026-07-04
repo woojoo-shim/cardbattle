@@ -98,6 +98,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [avatar, setAvatar] = useState(AVATAR_CHOICES[0].id);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -182,16 +183,29 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             onKeyDown={(e) => e.key === 'Enter' && go()}
             style={authInput}
           />
-          <input
-            value={password}
-            type="password"
-            maxLength={64}
-            placeholder="비밀번호"
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && go()}
-            style={authInput}
-          />
+          <div style={pwWrap}>
+            <input
+              className="cb-nick"
+              value={password}
+              type={showPw ? 'text' : 'password'}
+              maxLength={64}
+              placeholder="비밀번호"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && go()}
+              style={{ ...authInput, paddingRight: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              style={pwToggle}
+              aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
+              aria-pressed={showPw}
+              tabIndex={-1}
+            >
+              <Icon name="eye" size={18} color={showPw ? C.you : C.faint} />
+            </button>
+          </div>
           <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
             {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
           </button>
@@ -314,6 +328,13 @@ const authFields: React.CSSProperties = {
 const authInput: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
   background: 'rgba(0,0,0,0.32)', border: `1px solid ${C.border}`, borderRadius: 10, outline: 'none',
+};
+// Password field wraps the input so the reveal toggle can sit inside its right edge.
+const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
+const pwToggle: React.CSSProperties = {
+  position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+  width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer',
+  border: 'none', background: 'transparent', borderRadius: 8, padding: 0,
 };
 const enter: React.CSSProperties = {
   width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
