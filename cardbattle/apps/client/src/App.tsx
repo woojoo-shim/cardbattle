@@ -144,12 +144,20 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
         <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
 
         <div style={heroFan} className="cb-hero-float" aria-hidden>
-          {HERO_CARDS.map((c) => (
-            <div key={c.id} style={heroCard(c)}>
-              <div style={heroSheen} />
-              <CardArt id={c.id} size={54} />
-            </div>
-          ))}
+          {HERO_CARDS.map((c) => {
+            const t = HERO_TINT[c.rarity] ?? HERO_TINT.common;
+            return (
+              <div key={c.id} style={heroCard(c)}>
+                {t.sheen !== 'transparent' && (
+                  <div style={{ ...heroFoil, background: `linear-gradient(128deg, transparent 34%, ${t.sheen} 50%, transparent 66%)` }} />
+                )}
+                <div style={heroArtWindow}>
+                  <div style={{ ...heroArtGlow, background: `radial-gradient(circle at 50% 44%, ${t.glow}, transparent 68%)` }} />
+                  <CardArt id={c.id} size={46} />
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div style={tabRow}>
@@ -302,22 +310,46 @@ const heroFan: React.CSSProperties = {
   position: 'relative', width: 'min(440px, 92vw)', height: 168, margin: '30px 0 34px',
   pointerEvents: 'none', filter: 'drop-shadow(0 22px 44px rgba(0,0,0,0.55))',
 };
+// Per-rarity accents mirroring the in-battle hand — glow behind the art, foil sheen on epic+.
+const HERO_TINT: Record<string, { glow: string; sheen: string }> = {
+  common: { glow: 'rgba(120,122,96,0.20)', sheen: 'transparent' },
+  rare: { glow: 'rgba(111,160,140,0.34)', sheen: 'transparent' },
+  epic: { glow: 'rgba(216,162,60,0.36)', sheen: 'rgba(216,162,60,0.11)' },
+  legendary: { glow: 'rgba(216,162,60,0.5)', sheen: 'rgba(255,212,120,0.17)' },
+};
 function heroCard(c: (typeof HERO_CARDS)[number]): React.CSSProperties {
   const depth = Math.abs(c.a);
-  const opacity = depth === 0 ? 1 : depth >= 22 ? 0.66 : 0.85;
+  const opacity = depth === 0 ? 1 : depth >= 22 ? 0.7 : 0.88;
   return {
     position: 'absolute', left: '50%', top: '50%', width: 88, height: 122, opacity,
     transform: `translate(-50%, -50%) translate(${c.x}px, ${c.y}px) rotate(${c.a}deg)`,
-    background: 'linear-gradient(180deg, #1c2233, #0d121c)',
+    // Same woven cardstock material as the hand cards.
+    background: [
+      'linear-gradient(180deg, rgba(255,255,255,0.055), transparent 22%)',
+      'repeating-linear-gradient(45deg, rgba(255,255,255,0.014) 0 1.5px, transparent 1.5px 3.5px)',
+      'repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0 1.5px, transparent 1.5px 3.5px)',
+      `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
+    ].join(','),
     border: `1px solid ${RARITY_BORDER[c.rarity]}`, borderRadius: 12,
     display: 'grid', placeItems: 'center', overflow: 'hidden',
     boxShadow: `0 12px 26px rgba(0,0,0,0.5), inset 0 0 22px ${RARITY_BORDER[c.rarity]}22`,
   };
 }
-const heroSheen: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'linear-gradient(150deg, rgba(255,255,255,0.10), transparent 42%)',
+const heroFoil: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: 12, pointerEvents: 'none', zIndex: 2, mixBlendMode: 'screen',
 };
+// Recessed art well matching the hand cards.
+const heroArtWindow: React.CSSProperties = {
+  position: 'relative', width: 66, height: 66, borderRadius: 10,
+  display: 'grid', placeItems: 'center', overflow: 'hidden',
+  background: [
+    'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px)',
+    'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+  ].join(','),
+  border: `1px solid ${C.border}`,
+  boxShadow: 'inset 0 2px 9px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.03)',
+};
+const heroArtGlow: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 10, pointerEvents: 'none' };
 
 const pickLabel: React.CSSProperties = {
   fontFamily: mono, fontSize: 10, letterSpacing: 3, color: C.faint, textTransform: 'uppercase',
