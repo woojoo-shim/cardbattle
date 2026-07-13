@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CardInstance } from '@cardbattle/shared';
-import { CARD_DEFS, COSMETIC_BY_ID } from '@cardbattle/shared';
+import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon } from './art/Icon.js';
@@ -148,13 +148,29 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                   aria-hidden
                 />
               )}
-              {(isHover || isPending) && (
-                <div style={tip}>
-                  <div style={tipName}>{def.name}</div>
-                  <div style={tipDesc}>{def.desc}</div>
-                  {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
-                </div>
-              )}
+              {(isHover || isPending) && (() => {
+                const rm = RARITY_META[def.rarity] ?? RARITY_META.common;
+                const em = ELEM_META[def.element] ?? ELEM_META.none;
+                const needsTarget = requiresTarget(def);
+                return (
+                  <div style={{ ...tip, borderColor: rm.color, boxShadow: `0 16px 36px rgba(0,0,0,0.6), 0 0 20px ${rm.color}33` }}>
+                    <span style={{ ...tipTopEdge, background: `linear-gradient(90deg, transparent, ${rm.color}, transparent)` }} aria-hidden />
+                    <div style={tipHead}>
+                      <div style={{ ...tipName, color: rm.color }}>{def.name}</div>
+                      <div style={{ ...tipRarity, color: rm.color, borderColor: `${rm.color}66` }}>{rm.label}</div>
+                    </div>
+                    <div style={tipMeta}>
+                      <span style={{ ...tipChip, ...tipCostChip }}>◈ {def.cost}</span>
+                      {def.element !== 'none' && (
+                        <span style={{ ...tipChip, color: em.color, borderColor: `${em.color}55`, background: `${em.color}18` }}>{em.label}</span>
+                      )}
+                      {needsTarget && <span style={{ ...tipChip, ...tipTargetChip }}>대상 지정</span>}
+                    </div>
+                    <div style={tipDesc}>{def.desc}</div>
+                    {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
+                  </div>
+                );
+              })()}
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
@@ -253,16 +269,51 @@ const shatterVal: React.CSSProperties = { color: '#d6f5b8', background: 'rgba(15
 const skipVal: React.CSSProperties = { color: '#bfe6ff', background: 'rgba(95,208,255,0.16)', border: '1px solid #2a5a78' };
 const gambleVal: React.CSSProperties = { color: '#ffe39a', background: 'rgba(255,216,74,0.16)', border: '1px solid #6a5a22' };
 const sacrificeVal: React.CSSProperties = { color: '#ffc6a0', background: 'rgba(255,122,60,0.16)', border: '1px solid #6a3a22' };
-const tip: React.CSSProperties = {
-  position: 'absolute', bottom: '102%', left: '50%', transform: 'translateX(-50%)',
-  width: 'clamp(150px, 15vw, 200px)', padding: '9px 11px', borderRadius: 10, zIndex: 20,
-  background: 'linear-gradient(180deg, rgba(24,28,40,0.98), rgba(14,16,24,0.98))',
-  border: `1px solid ${C.border}`, boxShadow: '0 16px 36px rgba(0,0,0,0.6)',
-  pointerEvents: 'none', textAlign: 'left',
+// Korean label + accent colour per element / rarity, so the detail panel can chip them.
+const ELEM_META: Record<string, { label: string; color: string }> = {
+  physical: { label: '물리', color: '#ff7d9c' },
+  fire: { label: '화염', color: '#ff8a4c' },
+  ice: { label: '냉기', color: '#5fd0ff' },
+  lightning: { label: '전격', color: '#ffd84a' },
+  poison: { label: '맹독', color: '#9be85a' },
+  holy: { label: '신성', color: '#ffe9a8' },
+  none: { label: '무속성', color: '#9aa0aa' },
 };
-const tipName: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.you, letterSpacing: 1, marginBottom: 4 };
-const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.45, color: C.text, whiteSpace: 'normal' };
+const RARITY_META: Record<string, { label: string; color: string }> = {
+  common: { label: '일반', color: '#a6ac96' },
+  rare: { label: '희귀', color: '#79c2a6' },
+  epic: { label: '영웅', color: '#e0ab48' },
+  legendary: { label: '전설', color: '#ffd478' },
+};
+// Card-detail panel: a rarity-framed card, a stat row (cost / element / target), then the text.
+const tip: React.CSSProperties = {
+  position: 'absolute', bottom: '108%', left: '50%', transform: 'translateX(-50%)',
+  width: 'clamp(168px, 16vw, 216px)', padding: '11px 12px 10px', borderRadius: 11, zIndex: 20,
+  background: 'linear-gradient(180deg, rgba(26,30,42,0.985), rgba(12,14,22,0.985))',
+  border: '1px solid', pointerEvents: 'none', textAlign: 'left', overflow: 'hidden',
+};
+// A thin rarity-tinted light seam along the top rim of the panel.
+const tipTopEdge: React.CSSProperties = { position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, opacity: 0.9 };
+const tipHead: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 7,
+};
+const tipName: React.CSSProperties = { fontFamily: sans, fontSize: 14.5, fontWeight: 800, letterSpacing: 0.4, lineHeight: 1.15 };
+const tipRarity: React.CSSProperties = {
+  flexShrink: 0, fontFamily: mono, fontSize: 9.5, fontWeight: 800, letterSpacing: 1,
+  padding: '1px 6px', borderRadius: 5, border: '1px solid',
+};
+const tipMeta: React.CSSProperties = {
+  display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8,
+  paddingBottom: 8, borderBottom: `1px solid ${C.border}`,
+};
+const tipChip: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3,
+  padding: '2px 7px', borderRadius: 6, border: '1px solid transparent',
+};
+const tipCostChip: React.CSSProperties = { color: '#cfe6ff', background: 'rgba(60,110,200,0.16)', borderColor: '#3a6bb055' };
+const tipTargetChip: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,80,120,0.14)', borderColor: '#b0466a55' };
+const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
 const tipHint: React.CSSProperties = {
-  marginTop: 6, paddingTop: 5, borderTop: `1px solid ${C.border}`,
+  marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`,
   fontSize: 11, fontWeight: 700, color: C.you, textAlign: 'center', letterSpacing: 0.3,
 };
