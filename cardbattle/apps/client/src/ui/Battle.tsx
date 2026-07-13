@@ -75,6 +75,14 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   if (ui.phase === 'ended') {
     const winner = ui.players.find((p) => p.id === ui.winnerId);
     const iWon = ui.winnerId === myId;
+    // Placement from the elimination order in the event stream: the winner is 1st, the last
+    // player knocked out is the runner-up, and so on back to whoever fell first. In an FFA,
+    // "8명 중 3위" is a far kinder verdict than a bare 패배 — it tells you how close you came.
+    const total = ui.players.length;
+    const elimOrder = events.flatMap((e) => (e.type === 'player_eliminated' ? [e.playerId] : []));
+    const placement = iWon ? 1 : (() => { const ei = elimOrder.indexOf(myId); return ei < 0 ? null : total - ei; })();
+    const showPlace = !iWon && placement != null && total >= 3;
+    const placeColor = placement === 2 ? '#dbe2ea' : placement === 3 ? '#cf9155' : C.dim;
     return (
       <div style={{ ...endWrap, background: iWon ? endBgWin : endBgLose }}>
         <VfxLayer events={events} players={ui.players} />
@@ -104,6 +112,12 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           <h1 style={{ ...endTitle, color: iWon ? C.you : C.enemy }} className="cb-end-pop">
             {iWon ? '승리' : '패배'}
           </h1>
+          {showPlace && (
+            <div style={{ ...placePill, borderColor: placeColor, boxShadow: `0 0 24px ${placeColor}33` }} className="cb-medallion-in">
+              <span style={{ ...placeRank, color: placeColor }}>{placement}<span style={placeOrd}>위</span></span>
+              <span style={placeOf}>{total}명 중</span>
+            </div>
+          )}
           <p style={endSub}>
             {iWon ? '최후의 생존자가 되었습니다.' : `${winner?.name ?? '???'} 이(가) 최후까지 살아남았습니다.`}
           </p>
@@ -522,6 +536,16 @@ const endKicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 12, letterSpacing: 5, textTransform: 'uppercase', fontWeight: 700,
 };
 const endTitle: React.CSSProperties = { margin: '2px 0 0', fontSize: 76, fontWeight: 900, letterSpacing: 10, textShadow: '0 0 60px currentColor' };
+// Placement medal for FFA losers — a ranked verdict (2위 silver, 3위 bronze, else dim) so a
+// hard-fought near-win reads as an accomplishment rather than a flat defeat.
+const placePill: React.CSSProperties = {
+  marginTop: 8, display: 'inline-flex', alignItems: 'baseline', gap: 10,
+  padding: '8px 20px', borderRadius: 999, border: '1px solid',
+  background: 'rgba(255,255,255,0.03)',
+};
+const placeRank: React.CSSProperties = { fontFamily: mono, fontSize: 30, fontWeight: 900, letterSpacing: 0.5 };
+const placeOrd: React.CSSProperties = { fontSize: 16, fontWeight: 800, marginLeft: 2 };
+const placeOf: React.CSSProperties = { fontSize: 13, color: C.dim, fontFamily: mono };
 const endSub: React.CSSProperties = { margin: '4px 0 8px', color: C.dim, fontSize: 18 };
 const rewardPill: React.CSSProperties = {
   marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 8,
