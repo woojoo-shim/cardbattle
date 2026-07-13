@@ -7,8 +7,7 @@ import { MainMenu } from './ui/MainMenu.js';
 import { Splash } from './ui/Splash.js';
 import { quickPlay } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
-import { C, RARITY_BORDER, mono, sans } from './ui/theme.js';
-import { CardArt } from './ui/art/CardArt.js';
+import { C, mono, sans } from './ui/theme.js';
 import { BrandMark } from './ui/BrandMark.js';
 import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
@@ -100,15 +99,6 @@ function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: (
   return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} />;
 }
 
-/** A fanned hand of real game cards, dealt across the void behind the title. */
-const HERO_CARDS = [
-  { id: 'reverse',   rarity: 'rare',      a: -22, x: -168, y: 34 },
-  { id: 'bomb',      rarity: 'epic',      a: -11, x: -88,  y: 9 },
-  { id: 'snipe',     rarity: 'legendary', a: 0,   x: 0,    y: 0 },
-  { id: 'greatheal', rarity: 'rare',      a: 11,  x: 88,   y: 9 },
-  { id: 'sword',     rarity: 'common',    a: 22,  x: 168,  y: 34 },
-] as const;
-
 // Hand-scattered embers so the drift never looks like a repeating grid — varied column, size,
 // start offset and speed. Concentrated toward the centre where the lamp shaft falls.
 const EMBERS = [
@@ -170,147 +160,97 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       </div>
       <div style={gateVignette} aria-hidden />
 
-      <div className="cb-gate-split">
-        {/* LEFT — the summoning portal: the crest glowing inside counter-rotating arcane sigils,
-            with the fanned hand dealing in beneath it. */}
-        <div style={heroCol}>
-          <div style={lightShaft} className="cb-shaft" aria-hidden />
-          <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
-          <div style={portalWrap}>
-            <div style={portalGlow} aria-hidden />
-            <SigilRing />
-            <div style={{ position: 'relative', zIndex: 2 }}><BrandMark size={104} /></div>
-          </div>
-          <div style={heroFan} className="cb-hero-float" aria-hidden>
-            {HERO_CARDS.map((c, i) => {
-              const t = HERO_TINT[c.rarity] ?? HERO_TINT.common;
-              return (
-                <div key={c.id} className="cb-hero-deal" style={{ ...heroCard(c), animationDelay: `${i * 320}ms` }}>
-                  {t.sheen !== 'transparent' && (
-                    <div style={{ ...heroFoil, background: `linear-gradient(128deg, transparent 34%, ${t.sheen} 50%, transparent 66%)` }} />
-                  )}
-                  <div style={heroArtWindow}>
-                    <div style={{ ...heroArtGlow, background: `radial-gradient(circle at 50% 44%, ${t.glow}, transparent 68%)` }} />
-                    <CardArt id={c.id} size={46} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <p style={tagline}>여덟이 앉고, 하나가 살아남는다</p>
+      {/* The whole login lives inside ONE object: a premium admission ticket to the arena. */}
+      <div style={ticketShell} className="cb-gate-in">
+        <div style={ticketAura} aria-hidden />
+        <span style={ticketFrame} aria-hidden />
+
+        {/* TOP STUB — the punched admission line */}
+        <div style={stubTop}>
+          <span style={admitTag}><span style={admitDot} aria-hidden />ADMIT&nbsp;ONE</span>
+          <span style={serial}>No.&nbsp;008&nbsp;·&nbsp;FFA</span>
+        </div>
+        <div style={perf} aria-hidden />
+
+        {/* HEADER — crest seal + title */}
+        <div style={crestMedallion}><BrandMark size={62} markOnly /></div>
+        <h1 style={ticketTitle}>심연의 투기장</h1>
+        <span style={ticketSub}>ABYSSAL&nbsp;ARENA</span>
+
+        <div style={tabRow}>
+          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
+          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
         </div>
 
-        {/* RIGHT — the admission console: a corner-bracketed panel holding the entry form. */}
-        <div style={panelCol}>
-          <div style={consolePanel} className="cb-gate-in">
-            <span style={cornerTL} aria-hidden /><span style={cornerTR} aria-hidden />
-            <span style={cornerBL} aria-hidden /><span style={cornerBR} aria-hidden />
-
-            <div style={consoleHead}>
-              <span style={consoleTitle}>입&nbsp;장</span>
-              <span style={consoleSub}>ENTER&nbsp;THE&nbsp;ARENA</span>
+        {mode === 'register' && (
+          <>
+            <span style={pickLabel}>캐릭터 선택</span>
+            <div style={pickRow}>
+              {AVATAR_CHOICES.map((c) => {
+                const on = c.id === avatar;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { setAvatar(c.id); playSfx('hover'); }}
+                    title={c.name}
+                    aria-label={c.name}
+                    aria-pressed={on}
+                    style={pickCell(on)}
+                  >
+                    <AvatarArt avatar={c.id} size={40} />
+                  </button>
+                );
+              })}
             </div>
-            <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
+          </>
+        )}
 
-            <div style={tabRow}>
-              <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
-              <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
-            </div>
-
-            {mode === 'register' && (
-              <>
-                <span style={pickLabel}>캐릭터 선택</span>
-                <div style={pickRow}>
-                  {AVATAR_CHOICES.map((c) => {
-                    const on = c.id === avatar;
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => { setAvatar(c.id); playSfx('hover'); }}
-                        title={c.name}
-                        aria-label={c.name}
-                        aria-pressed={on}
-                        style={pickCell(on)}
-                      >
-                        <AvatarArt avatar={c.id} size={40} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
-            <div style={authFields} className="cb-field">
-              <input
-                className="cb-nick"
-                autoFocus
-                value={username}
-                maxLength={16}
-                placeholder="아이디"
-                autoComplete="username"
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && go()}
-                style={authInput}
-              />
-              <div style={pwWrap}>
-                <input
-                  className="cb-nick"
-                  value={password}
-                  type={showPw ? 'text' : 'password'}
-                  maxLength={64}
-                  placeholder="비밀번호"
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && go()}
-                  style={{ ...authInput, paddingRight: 44 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => { setShowPw((v) => !v); playSfx('toggle'); }}
-                  style={pwToggle}
-                  aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
-                  aria-pressed={showPw}
-                  tabIndex={-1}
-                >
-                  <Icon name="eye" size={18} color={showPw ? FROST.cyan : FROST.faint} />
-                </button>
-              </div>
-              <button className="cb-enter cb-frost" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
-                {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
-              </button>
-            </div>
-            {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+        <div style={authFields} className="cb-field">
+          <input
+            className="cb-nick"
+            autoFocus
+            value={username}
+            maxLength={16}
+            placeholder="아이디"
+            autoComplete="username"
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && go()}
+            style={authInput}
+          />
+          <div style={pwWrap}>
+            <input
+              className="cb-nick"
+              value={password}
+              type={showPw ? 'text' : 'password'}
+              maxLength={64}
+              placeholder="비밀번호"
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && go()}
+              style={{ ...authInput, paddingRight: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => { setShowPw((v) => !v); playSfx('toggle'); }}
+              style={pwToggle}
+              aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
+              aria-pressed={showPw}
+              tabIndex={-1}
+            >
+              <Icon name="eye" size={18} color={showPw ? TICKET.accent : TICKET.faint} />
+            </button>
           </div>
+          <button className="cb-enter cb-ticket" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
+            {busy ? '…' : mode === 'login' ? '입장하기' : '가입하기'}&nbsp;<Icon name="arrowRight" size={16} />
+          </button>
         </div>
+        {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+
+        {/* BOTTOM STUB — the flavour tear-off */}
+        <div style={perf} aria-hidden />
+        <span style={stubTagline}>여덟이 앉고, 하나가 살아남는다</span>
       </div>
-    </div>
-  );
-}
-
-/** Counter-rotating arcane sigil rings that halo the brand crest — the summoning portal.
- * Three stacked SVG layers spin at different rates/directions; purely decorative. */
-function SigilRing() {
-  const nodes = Array.from({ length: 12 }, (_, i) => {
-    const a = (i / 12) * Math.PI * 2;
-    return { x: 100 + Math.cos(a) * 56, y: 100 + Math.sin(a) * 56, big: i % 3 === 0 };
-  });
-  return (
-    <div style={sigilBox} aria-hidden>
-      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 64s linear infinite' }}>
-        <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(150,210,255,0.5)" strokeWidth="0.6" strokeDasharray="1 7" />
-        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(150,210,255,0.16)" strokeWidth="0.6" />
-      </svg>
-      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin-rev 46s linear infinite' }}>
-        <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(111,224,255,0.42)" strokeWidth="1" strokeDasharray="10 13" strokeLinecap="round" />
-      </svg>
-      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 92s linear infinite' }}>
-        <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(120,170,210,0.32)" strokeWidth="0.6" />
-        {nodes.map((n, i) => (
-          <circle key={i} cx={n.x} cy={n.y} r={n.big ? 2 : 1}
-            fill={n.big ? 'rgba(150,225,255,0.8)' : 'rgba(111,224,255,0.5)'} />
-        ))}
-      </svg>
     </div>
   );
 }
@@ -324,26 +264,26 @@ const center: React.CSSProperties = {
   minHeight: '100vh', gap: 16, color: C.dim, fontFamily: sans, background: C.void,
 };
 
-// Frost-arcane palette — a cold, moonlit-glass mood scoped to the login gate only.
-// A deliberate departure from the app's grimy oxblood: midnight navy, cyan and silver.
-const FROST = {
-  text: '#e8f2ff',
-  dim: '#9fb6d4',
-  faint: '#5f7899',
-  cyan: '#6fe0ff',
-  ice: '#a9d8ff',
-  border: 'rgba(130,180,230,0.22)',
-  borderHi: 'rgba(150,210,255,0.55)',
+// Admission-ticket palette — warm brass, obsidian and parchment. Scoped to the login gate.
+// A speakeasy pass to the back room: gold foil on charred card stock.
+const TICKET = {
+  text: '#f3ead6',
+  dim: '#b0a184',
+  faint: '#7c7059',
+  brass: '#d8b45a',
+  accent: '#e6ad3e',
+  edge: 'rgba(216,180,90,0.28)',
+  edgeHi: 'rgba(216,180,90,0.55)',
 };
 
 const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
   background:
-    'radial-gradient(60% 42% at 50% 22%, rgba(80,180,240,0.15), transparent 66%),' +
-    'radial-gradient(80% 55% at 50% 120%, rgba(90,140,255,0.10), transparent 62%),' +
-    'linear-gradient(180deg, #0c1424 0%, #0a1120 52%, #060a14 100%),' +
-    '#060a14',
+    'radial-gradient(56% 40% at 50% 14%, rgba(224,165,60,0.12), transparent 64%),' +
+    'radial-gradient(90% 60% at 50% 120%, rgba(120,30,26,0.10), transparent 60%),' +
+    'linear-gradient(180deg, #14100c 0%, #0d0a08 54%, #070605 100%),' +
+    '#070605',
 };
 // Full-height field the embers drift up through; sits behind the gate content (z below it).
 const emberField: React.CSSProperties = {
@@ -354,142 +294,67 @@ const gateMute: React.CSSProperties = {
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,7,14,0.94) 100%)',
+  background: 'radial-gradient(125% 115% at 50% 40%, transparent 55%, rgba(4,3,2,0.94) 100%)',
 };
 
-// LEFT portal column — crest, sigil, hero hand, tagline stacked and centred.
-const heroCol: React.CSSProperties = {
-  position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-};
-// A volumetric shaft of light descends from above onto the summoning portal — a cinematic
-// key light that gives the crest a lit-from-heaven, store-hero drama. Screen-blended cone.
-const lightShaft: React.CSSProperties = {
-  position: 'absolute', top: -8, left: '50%', zIndex: 0, pointerEvents: 'none',
-  width: 'clamp(150px, 22vh, 214px)', height: 'clamp(210px, 32vh, 300px)',
-  background: 'linear-gradient(180deg, rgba(150,225,255,0.32), rgba(120,190,255,0.11) 46%, transparent 82%)',
-  clipPath: 'polygon(40% 0, 60% 0, 100% 100%, 0 100%)',
-  filter: 'blur(7px)', mixBlendMode: 'screen', transformOrigin: '50% 0',
-};
-// Square stage holding the rotating sigil rings + the crest floating at their centre.
-const portalWrap: React.CSSProperties = {
-  position: 'relative', width: 'clamp(232px, 32vh, 300px)', height: 'clamp(232px, 32vh, 300px)',
-  display: 'grid', placeItems: 'center', margin: '4px 0 2px',
-};
-const portalGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: '128%', height: '128%',
-  transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
-  background: 'radial-gradient(circle at 50% 46%, rgba(111,224,255,0.22), rgba(90,140,255,0.10) 42%, transparent 70%)',
-  filter: 'blur(9px)',
-};
-const sigilBox: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: '112%', height: '112%',
-  transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1,
-};
-const sigilLayer: React.CSSProperties = {
-  position: 'absolute', inset: 0, width: '100%', height: '100%', willChange: 'transform',
-};
-const tagline: React.CSSProperties = {
-  margin: '14px 0 0', fontFamily: mono, fontSize: 12, letterSpacing: 3, color: FROST.dim, textAlign: 'center',
-};
-
-// RIGHT admission-console column.
-const panelCol: React.CSSProperties = {
-  display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%',
-};
-const consolePanel: React.CSSProperties = {
-  position: 'relative', width: 'min(380px, 92vw)', padding: '26px 24px 22px',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(22,34,56,0.80), rgba(12,20,36,0.85))',
-  border: `1px solid ${FROST.border}`,
-  boxShadow: '0 34px 74px rgba(0,4,16,0.6), inset 0 1px 0 rgba(150,210,255,0.08)',
-  backdropFilter: 'blur(10px)',
-};
-// L-shaped brackets clamping the four corners of the console — engraved fixture look.
-function corner(v: 'top' | 'bottom', h: 'left' | 'right'): React.CSSProperties {
-  return {
-    position: 'absolute', [v]: 8, [h]: 8, width: 13, height: 13, pointerEvents: 'none',
-    [`border${v[0].toUpperCase()}${v.slice(1)}`]: `1.5px solid ${FROST.borderHi}`,
-    [`border${h[0].toUpperCase()}${h.slice(1)}`]: `1.5px solid ${FROST.borderHi}`,
-    opacity: 0.8,
-  } as React.CSSProperties;
-}
-const cornerTL = corner('top', 'left');
-const cornerTR = corner('top', 'right');
-const cornerBL = corner('bottom', 'left');
-const cornerBR = corner('bottom', 'right');
-const consoleHead: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, marginBottom: 6,
-};
-const consoleTitle: React.CSSProperties = {
-  fontFamily: sans, fontSize: 22, fontWeight: 900, letterSpacing: 6, color: FROST.text,
-  textShadow: '0 2px 14px rgba(0,10,26,0.7), 0 0 20px rgba(111,224,255,0.28)',
-};
-const consoleSub: React.CSSProperties = {
-  fontFamily: mono, fontSize: 9.5, letterSpacing: 5, color: FROST.faint, textTransform: 'uppercase',
-};
-const kicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, letterSpacing: 6, color: FROST.faint, textTransform: 'uppercase',
-  marginBottom: 4,
-};
-const ruleWrap: React.CSSProperties = {
-  margin: '12px 0 16px', width: 'min(240px, 78%)', height: 2, borderRadius: 2, overflow: 'hidden',
-};
-const rule: React.CSSProperties = {
-  display: 'block', width: '100%', height: '100%',
-  background: 'linear-gradient(90deg, transparent, #6fe0ff 32%, #a9d8ff 68%, transparent)',
-  backgroundSize: '220% 100%',
-};
-
-const heroFan: React.CSSProperties = {
-  position: 'relative', width: 'min(420px, 88vw)', height: 168, margin: '10px 0 4px',
-  pointerEvents: 'none', filter: 'drop-shadow(0 22px 44px rgba(0,0,0,0.55))',
-};
-// Per-rarity accents mirroring the in-battle hand — glow behind the art, foil sheen on epic+.
-const HERO_TINT: Record<string, { glow: string; sheen: string }> = {
-  common: { glow: 'rgba(120,160,200,0.20)', sheen: 'transparent' },
-  rare: { glow: 'rgba(111,224,255,0.30)', sheen: 'transparent' },
-  epic: { glow: 'rgba(120,190,255,0.34)', sheen: 'rgba(150,210,255,0.12)' },
-  legendary: { glow: 'rgba(150,225,255,0.5)', sheen: 'rgba(200,235,255,0.18)' },
-};
-function heroCard(c: (typeof HERO_CARDS)[number]): React.CSSProperties {
-  const depth = Math.abs(c.a);
-  const opacity = depth === 0 ? 1 : depth >= 22 ? 0.7 : 0.88;
-  return {
-    position: 'absolute', left: '50%', top: '50%', width: 88, height: 122, opacity,
-    // Resting fan slot, exposed as CSS vars so the cb-hero-deal keyframe can settle here after
-    // its tumble. The inline transform is the no-animation fallback (matches the 100% keyframe).
-    ['--tx' as string]: `${c.x}px`, ['--ty' as string]: `${c.y}px`, ['--rot' as string]: `${c.a}deg`, ['--op' as string]: `${opacity}`,
-    transform: `translate(-50%, -50%) translate(${c.x}px, ${c.y}px) rotate(${c.a}deg)`,
-    // Same woven cardstock material as the hand cards.
-    background: [
-      'linear-gradient(180deg, rgba(255,255,255,0.055), transparent 22%)',
-      'repeating-linear-gradient(45deg, rgba(255,255,255,0.014) 0 1.5px, transparent 1.5px 3.5px)',
-      'repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0 1.5px, transparent 1.5px 3.5px)',
-      `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
-    ].join(','),
-    border: `1px solid ${RARITY_BORDER[c.rarity]}`, borderRadius: 12,
-    display: 'grid', placeItems: 'center', overflow: 'hidden',
-    boxShadow: `0 12px 26px rgba(0,0,0,0.5), inset 0 0 22px ${RARITY_BORDER[c.rarity]}22`,
-  };
-}
-const heroFoil: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: 12, pointerEvents: 'none', zIndex: 2, mixBlendMode: 'screen',
-};
-// Recessed art well matching the hand cards.
-const heroArtWindow: React.CSSProperties = {
-  position: 'relative', width: 66, height: 66, borderRadius: 10,
-  display: 'grid', placeItems: 'center', overflow: 'hidden',
+// The single admission-ticket card that holds the whole login.
+const ticketShell: React.CSSProperties = {
+  position: 'relative', zIndex: 2, width: 'min(384px, 92vw)', padding: '18px 26px 20px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 18,
   background: [
-    'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px)',
-    'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+    'linear-gradient(180deg, rgba(32,25,16,0.92), rgba(14,11,8,0.96))',
+    'repeating-linear-gradient(45deg, rgba(255,240,210,0.012) 0 2px, transparent 2px 5px)',
   ].join(','),
-  border: `1px solid ${C.border}`,
-  boxShadow: 'inset 0 2px 9px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.03)',
+  border: `1px solid ${TICKET.edge}`,
+  boxShadow: '0 42px 92px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,240,210,0.08)',
+  backdropFilter: 'blur(8px)',
 };
-const heroArtGlow: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 10, pointerEvents: 'none' };
+// A soft brass halo bleeding out from behind the ticket (negative z so it sits behind the body).
+const ticketAura: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '46%', width: '118%', height: '118%',
+  transform: 'translate(-50%, -50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: -1,
+  background: 'radial-gradient(circle, rgba(224,165,60,0.16), transparent 66%)',
+  filter: 'blur(26px)',
+};
+// An engraved inner hairline that frames the ticket a few px inside its edge.
+const ticketFrame: React.CSSProperties = {
+  position: 'absolute', inset: 7, borderRadius: 12, pointerEvents: 'none',
+  border: `1px solid ${TICKET.edge}`, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.4)',
+};
+// Top control stub — the ADMIT ONE / serial line.
+const stubTop: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%',
+  fontFamily: mono, fontSize: 9.5, letterSpacing: 3, color: TICKET.faint, textTransform: 'uppercase',
+};
+const admitTag: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, color: TICKET.dim };
+const admitDot: React.CSSProperties = {
+  width: 5, height: 5, borderRadius: '50%', background: TICKET.accent, boxShadow: `0 0 6px ${TICKET.accent}`,
+};
+const serial: React.CSSProperties = { letterSpacing: 2 };
+// A punched perforation line between stub and body.
+const perf: React.CSSProperties = {
+  width: '100%', margin: '13px 0', borderTop: `1.5px dashed ${TICKET.edge}`,
+};
+// The crest sits inside a wax-seal medallion.
+const crestMedallion: React.CSSProperties = {
+  display: 'grid', placeItems: 'center', width: 92, height: 92, borderRadius: '50%', margin: '2px 0 8px',
+  background: 'radial-gradient(circle at 50% 42%, rgba(224,165,60,0.16), rgba(12,10,8,0.4) 66%, transparent)',
+  boxShadow: `inset 0 0 0 1px ${TICKET.edge}, 0 0 22px rgba(224,165,60,0.16)`,
+};
+const ticketTitle: React.CSSProperties = {
+  margin: 0, fontFamily: sans, fontSize: 26, fontWeight: 900, letterSpacing: 2, color: TICKET.text, textAlign: 'center',
+  textShadow: '0 2px 16px rgba(0,0,0,0.6), 0 0 22px rgba(224,165,60,0.2)',
+};
+const ticketSub: React.CSSProperties = {
+  marginTop: 5, marginBottom: 18, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.brass,
+  textTransform: 'uppercase', opacity: 0.85,
+};
+const stubTagline: React.CSSProperties = {
+  fontFamily: mono, fontSize: 11, letterSpacing: 3, color: TICKET.dim, textAlign: 'center',
+};
 
 const pickLabel: React.CSSProperties = {
-  fontFamily: mono, fontSize: 10, letterSpacing: 3, color: C.faint, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 10, letterSpacing: 3, color: TICKET.faint, textTransform: 'uppercase',
   marginBottom: 10,
 };
 const pickRow: React.CSSProperties = {
@@ -500,36 +365,36 @@ function pickCell(on: boolean): React.CSSProperties {
   return {
     width: 52, height: 52, padding: 0, cursor: 'pointer', borderRadius: 12,
     display: 'grid', placeItems: 'center',
-    background: on ? 'linear-gradient(160deg, rgba(111,224,255,0.18), rgba(120,190,255,0.10))' : 'rgba(16,26,44,0.6)',
-    border: `1px solid ${on ? FROST.cyan : FROST.border}`,
-    boxShadow: on ? `0 0 0 1px ${FROST.cyan}, 0 0 16px rgba(111,224,255,0.4)` : 'inset 0 1px 0 rgba(150,210,255,0.05)',
+    background: on ? 'linear-gradient(160deg, rgba(224,165,60,0.20), rgba(180,120,40,0.10))' : 'rgba(18,14,10,0.6)',
+    border: `1px solid ${on ? TICKET.brass : TICKET.edge}`,
+    boxShadow: on ? `0 0 0 1px ${TICKET.brass}, 0 0 16px rgba(224,165,60,0.4)` : 'inset 0 1px 0 rgba(255,240,210,0.05)',
     transition: 'border-color .2s, box-shadow .2s, background .2s',
   };
 }
 // Segmented 로그인 / 회원가입 toggle.
 const tabRow: React.CSSProperties = {
   display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 12,
-  background: 'rgba(14,22,38,0.75)', border: `1px solid ${FROST.border}`,
+  background: 'rgba(10,8,6,0.7)', border: `1px solid ${TICKET.edge}`,
 };
 function tab(on: boolean): React.CSSProperties {
   return {
     padding: '9px 22px', fontSize: 14, fontWeight: 800, letterSpacing: 0.5, cursor: 'pointer',
     border: 'none', borderRadius: 9, fontFamily: sans,
-    color: on ? '#06121c' : FROST.dim,
-    background: on ? 'linear-gradient(100deg, #9fe9ff, #5fc8ee 58%, #3fa9d6)' : 'transparent',
-    boxShadow: on ? '0 6px 16px rgba(0,8,20,0.5)' : 'none',
+    color: on ? '#1a1206' : TICKET.dim,
+    background: on ? 'linear-gradient(100deg, #f0cf7a, #d8b45a 58%, #b8923c)' : 'transparent',
+    boxShadow: on ? '0 6px 16px rgba(40,24,4,0.5)' : 'none',
     transition: 'color .2s, background .2s',
   };
 }
 // A recessed well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: 10,
-  borderRadius: 12, background: 'rgba(4,8,16,0.4)', border: `1px solid ${FROST.border}`,
-  boxShadow: 'inset 0 2px 10px rgba(0,4,12,0.55), inset 0 1px 0 rgba(150,210,255,0.05)',
+  borderRadius: 12, background: 'rgba(4,3,2,0.4)', border: `1px solid ${TICKET.edge}`,
+  boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,240,210,0.05)',
 };
 const authInput: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: FROST.text, fontFamily: sans,
-  background: 'rgba(6,12,22,0.5)', border: `1px solid ${FROST.border}`, borderRadius: 10, outline: 'none',
+  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: TICKET.text, fontFamily: sans,
+  background: 'rgba(8,6,4,0.5)', border: `1px solid ${TICKET.edge}`, borderRadius: 10, outline: 'none',
 };
 // Password field wraps the input so the reveal toggle can sit inside its right edge.
 const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
@@ -540,12 +405,12 @@ const pwToggle: React.CSSProperties = {
 };
 const enter: React.CSSProperties = {
   width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
-  color: '#06121c', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #9fe9ff, #5fc8ee 58%, #3fa9d6)',
-  boxShadow: '0 6px 18px rgba(0,10,24,0.55)',
+  color: '#1a1206', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #f2d488, #dcb457 56%, #bc9438)',
+  boxShadow: '0 6px 18px rgba(50,30,4,0.5)',
 };
 const hint: React.CSSProperties = {
-  margin: '16px 0 0', fontSize: 12.5, color: FROST.faint, fontFamily: sans, letterSpacing: 0.2,
+  margin: '16px 0 6px', fontSize: 12.5, color: TICKET.faint, fontFamily: sans, letterSpacing: 0.2,
 };
 const errText: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.enemy, fontFamily: sans, letterSpacing: 0.2,
