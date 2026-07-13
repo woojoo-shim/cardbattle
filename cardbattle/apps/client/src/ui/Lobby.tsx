@@ -35,7 +35,15 @@ const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
 export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofillDeadline }: Props) {
   const [ready, setReady] = useState(false);
+  const [copied, setCopied] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); playSfx(next ? 'select' : 'back'); onReady(next); };
+  // Copy a full invite URL (origin + ?join=CODE) so a friend just clicks it to land in this room.
+  const copyInvite = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/?join=${ui.code}`);
+      playSfx('coin'); setCopied(true); window.setTimeout(() => setCopied(false), 1800);
+    } catch { playSfx('back'); }
+  };
   const n = ui.players.length;
   const gm = GAME_MODES[(ui.mode as GameModeId)] ?? GAME_MODES.standard;
   const fillLeft = useCountdown(autofillDeadline);
@@ -62,10 +70,15 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
           </div>
 
           {ui.code && (
-            <div style={codeBadge}>
-              <span style={codeLabel}>방 코드</span>
-              <span style={codeValue}>{ui.code}</span>
-              <span style={codeShare}>친구에게 공유하세요</span>
+            <div style={inviteBox}>
+              <div style={codeBadge}>
+                <span style={codeLabel}>방 코드</span>
+                <span style={codeValue}>{ui.code}</span>
+              </div>
+              <button style={inviteBtn} className="cb-seat-add" onClick={copyInvite}>
+                <Icon name={copied ? 'check' : 'chain'} size={15} />
+                &nbsp;{copied ? '초대 링크가 복사됐어요' : '초대 링크 복사'}
+              </button>
             </div>
           )}
 
@@ -175,8 +188,11 @@ const modeBadge: React.CSSProperties = {
 const modeBadgeIcon: React.CSSProperties = { fontSize: 18 };
 const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#e0b24d', letterSpacing: 1 };
 const modeBadgeTag: React.CSSProperties = { fontSize: 12, color: C.dim };
+const inviteBox: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8, width: '100%',
+};
 const codeBadge: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
   background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
   boxShadow: '0 0 24px rgba(216,162,60,0.2)',
 };
@@ -185,7 +201,13 @@ const codeValue: React.CSSProperties = {
   fontFamily: mono, fontSize: 26, fontWeight: 900, letterSpacing: 8,
   color: C.rare, textShadow: '0 0 16px rgba(216,162,60,0.5)',
 };
-const codeShare: React.CSSProperties = { fontSize: 12, color: C.faint };
+// Share-by-link button — dashed brass, warms on hover (reuses .cb-seat-add), copies the invite URL.
+const inviteBtn: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%',
+  padding: '11px 18px', fontSize: 14, fontWeight: 700, letterSpacing: 0.4, cursor: 'pointer',
+  fontFamily: sans, color: C.rare, borderRadius: 12,
+  border: '1px dashed rgba(216,162,60,0.45)', background: 'rgba(216,162,60,0.06)',
+};
 // The seating chart: a 2-column grid of every chair, filled portraits and open (dashed) invitations.
 const seatGrid: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%',

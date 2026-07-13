@@ -5,7 +5,7 @@ import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
 import { MainMenu } from './ui/MainMenu.js';
 import { Splash } from './ui/Splash.js';
-import { quickPlay, reconnect } from './net/client.js';
+import { quickPlay, reconnect, findRoomByCode, joinRoomById } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, mono, sans } from './ui/theme.js';
 import { BrandMark } from './ui/BrandMark.js';
@@ -30,6 +30,8 @@ export function App() {
   const [splashDone, setSplashDone] = useState(false);
   // One-shot: after a page refresh, if a live-game seat is still within its grace window, rejoin it.
   const [resumeChecked, setResumeChecked] = useState(false);
+  // One-shot: honour an invite link (?join=CODE) once we're signed in.
+  const [joinChecked, setJoinChecked] = useState(false);
 
   useEffect(() => {
     if (account === undefined) fetchMe().then((a) => setAccount(a));
@@ -43,6 +45,24 @@ export function App() {
     const token = readResumeToken();
     if (token) { setSplashDone(true); setConnect(() => () => reconnect(token)); }
   }, [account, resumeChecked]);
+
+  // Invite links carry a room code in the URL (`?join=ABCD`). Once signed in, resolve the code to
+  // a live room and drop straight in — skipping the menu — so a shared link lands friends in the
+  // same room. The param is stripped afterwards so a mid-game refresh leans on the resume token,
+  // not a re-join loop. A live-game rejoin (resume) always wins over a stale invite link.
+  useEffect(() => {
+    if (joinChecked || !account || connect) return;
+    setJoinChecked(true);
+    const code = new URLSearchParams(window.location.search).get('join');
+    if (!code) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('join');
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+    setSplashDone(true);
+    findRoomByCode(code)
+      .then((roomId) => { if (roomId) setConnect(() => () => joinRoomById(roomId, account.display, account.avatar)); })
+      .catch(() => {});
+  }, [account, joinChecked, connect]);
 
   // Go fullscreen on the visitor's first interaction — the browser only grants the Fullscreen
   // API from a user gesture, so we can't request it on load. Fire once, then let go.
