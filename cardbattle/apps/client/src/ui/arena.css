@@ -126,6 +126,12 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* Newest combat-log line slides in from the left and fades up as it's appended. */
+@keyframes cb-log-line {
+  0%   { transform: translateX(-14px); opacity: 0; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
+.cb-log-line { animation: cb-log-line 0.34s ease-out both; }
 /* A freshly-regenerated mana gem pops in — overshoots big then settles, so filling mana feels earned. */
 @keyframes cb-mana-pop {
   0%   { transform: scale(0.2) rotate(-30deg); opacity: 0.2; }

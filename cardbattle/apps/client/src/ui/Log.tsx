@@ -46,16 +46,25 @@ const TONE: Record<Tone, string> = {
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */
 export function Log({ events, ui }: Props) {
-  const lines = events.map((e) => line(ui, e)).filter((l): l is Line => l !== null).slice(-6);
+  // Keep each surviving line's source index as its key so only a genuinely NEW line
+  // remounts and plays the slide-in — older lines just shift up without re-animating.
+  const lines = events
+    .map((e, idx) => ({ l: line(ui, e), idx }))
+    .filter((x): x is { l: Line; idx: number } => x.l !== null)
+    .slice(-6);
   if (lines.length === 0) return null;
   return (
     <div style={box}>
       <h4 style={head}>전투 기록</h4>
-      {lines.map((l, i) => (
-        <div key={i} style={{ ...row, color: TONE[l.tone], borderTop: i === 0 ? 'none' : `1px solid #1b1f2c` }}>
-          <Icon name={l.icon} size={13} style={{ marginRight: 5 }} />{l.text}
-        </div>
-      ))}
+      {lines.map(({ l, idx }, i) => {
+        const color = TONE[l.tone];
+        return (
+          <div key={idx} className="cb-log-line" style={{ ...row, color, borderTop: i === 0 ? 'none' : `1px solid #1b1f2c` }}>
+            <span style={{ ...tick, background: color }} />
+            <Icon name={l.icon} size={13} style={{ marginRight: 5 }} />{l.text}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -74,5 +83,10 @@ const head: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 2, margin: '0 0 8px',
 };
 const row: React.CSSProperties = {
-  fontSize: 12, padding: '3px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+  position: 'relative', display: 'flex', alignItems: 'center', fontSize: 12, padding: '3px 0 3px 8px',
+  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+};
+// A slim tone-colored tab on the row's left edge — lets you scan the record by event type at a glance.
+const tick: React.CSSProperties = {
+  position: 'absolute', left: 0, top: 4, bottom: 4, width: 2.5, borderRadius: 2, opacity: 0.7,
 };
