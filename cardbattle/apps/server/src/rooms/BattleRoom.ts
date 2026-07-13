@@ -3,7 +3,7 @@ import {
   initGame, startGame, reduce, endTurn, spawnPlayer,
   CARD_DEFS, requiresTarget, resolveMode,
   type GameState, type Action, type GameEvent, type PlayerState, type GameModeId,
-  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, MANA_MAX,
+  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS, MANA_MAX,
   BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
@@ -40,6 +40,11 @@ export class BattleRoom extends Room<BattleState> {
   private botCounter = 0;
   private unlisted = false; // a private room: hidden from the browser, joinable only by code
   private turnTimer?: ReturnType<typeof setTimeout>;
+  // Public-lobby auto-fill countdown: when the present humans are all ready but the room is
+  // short of players, this timer fires to top up with bots and begin. `fillDeadline` is the
+  // wall-clock time it lands, echoed to clients so they can render a live countdown.
+  private fillTimer?: ReturnType<typeof setTimeout>;
+  private fillDeadline = 0;
   private cardCounter = 0;
   // sessionId → account username, for awarding gold to logged-in humans when the match ends.
   private accounts = new Map<string, string>();
@@ -69,6 +74,7 @@ export class BattleRoom extends Room<BattleState> {
       if (this.gs.phase !== 'lobby') return;
       this.ready.set(client.sessionId, !!msg.ready);
       if (this.allReady()) this.begin();
+      else this.evaluateAutofill();
     });
 
     this.onMessage('action', (client, msg: Action) => {
@@ -84,6 +90,7 @@ export class BattleRoom extends Room<BattleState> {
       this.ready.set(id, true); // bots are always ready
       this.publish();
       if (this.allReady()) this.begin();
+      else this.evaluateAutofill();
     });
 
     // Quick-emote: a seated player broadcasts a preset reaction to the whole table.
@@ -112,6 +119,7 @@ export class BattleRoom extends Room<BattleState> {
       this.bots.delete(botId);
       this.ready.delete(botId);
       this.publish();
+      this.evaluateAutofill();
     });
   }
 
@@ -138,6 +146,7 @@ export class BattleRoom extends Room<BattleState> {
     this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, client.sessionId, name, sanitizeAvatar(avatar)));
     this.ready.set(client.sessionId, false);
     this.publish();
+    this.evaluateAutofill(); // a new arrival un-readies the room; recheck the fill countdown
   }
 
   /** Publish this room's summary to the real-time lobby browser (title, code, headcount). */
@@ -157,7 +166,50 @@ export class BattleRoom extends Room<BattleState> {
     return n >= MIN_PLAYERS && this.gs.players.every((p) => this.ready.get(p.id));
   }
 
+  /** True when at least one human is seated and every human has readied up. Bots are always
+   *  ready, so this is the "the people are set, we're only short of bodies" signal. */
+  private humansReady(): boolean {
+    const humans = this.gs.players.filter((p) => !this.bots.has(p.id));
+    return humans.length >= 1 && humans.every((p) => this.ready.get(p.id));
+  }
+
+  /** Keep the public-lobby auto-fill countdown in sync with the room. Arms a countdown when the
+   *  humans are all ready but the room is short of MIN_PLAYERS; cancels it the moment that's no
+   *  longer true (someone un-readies, a human joins, enough players gather). Private rooms opt out. */
+  private evaluateAutofill(): void {
+    if (this.gs.phase !== 'lobby' || this.unlisted) { this.cancelAutofill(); return; }
+    const wants = this.humansReady() && this.gs.players.length < MIN_PLAYERS;
+    if (!wants) { this.cancelAutofill(); return; }
+    if (this.fillTimer) return; // already counting down
+    this.fillDeadline = Date.now() + AUTOFILL_SECONDS * 1000;
+    this.broadcast('autofill', { deadline: this.fillDeadline });
+    this.fillTimer = setTimeout(() => this.runAutofill(), AUTOFILL_SECONDS * 1000);
+  }
+
+  private cancelAutofill(): void {
+    if (!this.fillTimer) return;
+    clearTimeout(this.fillTimer);
+    this.fillTimer = undefined;
+    this.fillDeadline = 0;
+    this.broadcast('autofill', { deadline: 0 }); // 0 tells clients to hide the countdown
+  }
+
+  /** Countdown elapsed: top the room up to MIN_PLAYERS with bots, then start the match. */
+  private runAutofill(): void {
+    this.fillTimer = undefined;
+    this.fillDeadline = 0;
+    if (this.gs.phase !== 'lobby' || !this.humansReady()) return; // conditions changed under us
+    while (this.gs.players.length < MIN_PLAYERS) {
+      const id = `bot-${this.botCounter++}`;
+      this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, id, `봇 ${this.botCounter}`, BOT_AVATAR));
+      this.bots.add(id);
+      this.ready.set(id, true);
+    }
+    this.begin();
+  }
+
   private begin(): void {
+    this.cancelAutofill();
     // Once the match starts the room leaves the lobby for good. Lock it so the matchmaker
     // routes new joiners to a fresh lobby room instead of this (started/ended) one, which
     // onJoin would reject — surfacing as "연결 실패" on the client. Reconnection bypasses lock.
@@ -354,6 +406,7 @@ export class BattleRoom extends Room<BattleState> {
       this.ready.delete(client.sessionId);
       this.cosmetics.delete(client.sessionId);
       this.publish();
+      this.evaluateAutofill();
       return;
     }
     const p = this.gs.players.find((pp) => pp.id === client.sessionId);
@@ -374,5 +427,5 @@ export class BattleRoom extends Room<BattleState> {
     }
   }
 
-  onDispose(): void { this.clearTimer(); }
+  onDispose(): void { this.clearTimer(); if (this.fillTimer) clearTimeout(this.fillTimer); }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { UiState } from '../state/useRoom.js';
 import { MIN_PLAYERS, MAX_PLAYERS, GAME_MODES, type GameModeId } from '@cardbattle/shared';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
@@ -13,16 +13,32 @@ interface Props {
   onAddBot: () => void;
   onRemoveBot: (botId?: string) => void;
   onExit?: () => void;
+  /** Wall-clock ms the public-lobby bot auto-fill lands; 0 hides the countdown. */
+  autofillDeadline?: number;
+}
+
+/** Live seconds remaining until an auto-fill deadline (0 once elapsed / when disabled). */
+function useCountdown(deadline?: number): number {
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!deadline) { setLeft(0); return; }
+    const tick = () => setLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    tick();
+    const t = setInterval(tick, 250);
+    return () => clearInterval(t);
+  }, [deadline]);
+  return left;
 }
 
 // The display serif shared with the main menu — the engraved "back-room sign" look.
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
-export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Props) {
+export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofillDeadline }: Props) {
   const [ready, setReady] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); playSfx(next ? 'select' : 'back'); onReady(next); };
   const n = ui.players.length;
   const gm = GAME_MODES[(ui.mode as GameModeId)] ?? GAME_MODES.standard;
+  const fillLeft = useCountdown(autofillDeadline);
 
   return (
     <div style={wrap}>
@@ -78,6 +94,13 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit }: Prop
               );
             })}
           </ul>
+
+          {fillLeft > 0 && (
+            <div style={fillBanner} className="cb-fill-pulse">
+              <span style={fillDot} />
+              상대를 찾는 중… <b style={fillCount}>{fillLeft}초</b> 후 봇과 함께 시작합니다
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 4 }}>
             <button onClick={() => { playSfx('select'); onAddBot(); }} disabled={n >= MAX_PLAYERS} style={botBtn}>
@@ -179,6 +202,16 @@ const kickBtn: React.CSSProperties = {
   fontSize: 12, fontWeight: 800, color: '#ff9a9a', cursor: 'pointer', lineHeight: 1,
   border: '1px solid rgba(255,120,120,0.35)', borderRadius: 7, background: 'rgba(255,80,80,0.1)',
 };
+const fillBanner: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 10,
+  fontSize: 13, color: '#f4ead1', width: '100%', justifyContent: 'center',
+  background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
+};
+const fillDot: React.CSSProperties = {
+  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+  background: '#e6ad3e', boxShadow: '0 0 8px 1px rgba(230,173,62,0.7)',
+};
+const fillCount: React.CSSProperties = { color: C.rare, fontFamily: mono, fontWeight: 900, fontSize: 15 };
 const hint: React.CSSProperties = { margin: '2px 0 0', color: C.faint, fontSize: 13 };
 const backBtn: React.CSSProperties = {
   position: 'fixed', top: 16, left: 16, zIndex: 40,

@@ -65,6 +65,8 @@ export interface UseRoom {
   error: RoomError | null;
   emotes: LiveEmote[];
   reward: Reward | null;
+  /** Wall-clock time (ms) the public-lobby bot auto-fill lands, or 0 when no countdown is running. */
+  autofillDeadline: number;
   send: (action: Action) => void;
   setReady: (ready: boolean) => void;
   addBot: () => void;
@@ -121,6 +123,7 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const [error, setError] = useState<RoomError | null>(null);
   const [emotes, setEmotes] = useState<LiveEmote[]>([]);
   const [reward, setReward] = useState<Reward | null>(null);
+  const [autofillDeadline, setAutofillDeadline] = useState(0);
   const connRef = useRef<BattleConnection | null>(null);
   const emoteKey = useRef(0);
 
@@ -141,6 +144,7 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
           setEvents((prev) => [...prev, ...evts]));
         c.room.onMessage('error', (err: RoomError) => setError(err));
         c.room.onMessage('reward', (r: Reward) => setReward(r));
+        c.room.onMessage('autofill', (m: { deadline: number }) => setAutofillDeadline(m?.deadline ?? 0));
         c.room.onMessage('emote', (m: { playerId: string; id: string }) => {
           // One bubble per player at a time: replace any existing bubble for this seat,
           // then auto-dismiss this one after it has been on screen a few seconds.
@@ -164,5 +168,5 @@ export function useRoom(connect: () => Promise<BattleConnection>): UseRoom {
   const removeBot = (botId?: string) => connRef.current?.room.send('removeBot', botId ? { botId } : {});
   const sendEmote = (id: string) => connRef.current?.room.send('emote', { id });
 
-  return { conn, ui, hand, events, error, emotes, reward, send, setReady, addBot, removeBot, sendEmote };
+  return { conn, ui, hand, events, error, emotes, reward, autofillDeadline, send, setReady, addBot, removeBot, sendEmote };
 }

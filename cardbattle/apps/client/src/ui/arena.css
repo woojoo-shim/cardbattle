@@ -1,5 +1,8 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
+/* Auto-fill countdown banner: a slow amber breathe so it reads as "searching…", not urgent. */
+@keyframes cb-fill-pulse { 50% { box-shadow: 0 0 22px rgba(216, 162, 60, 0.28); border-color: rgba(216, 162, 60, 0.6); } }
+.cb-fill-pulse { animation: cb-fill-pulse 1.8s ease-in-out infinite; }
 /* End-screen climax: the title punches in with an overshoot, the winner medallion swells up
    from nothing, and (on victory) a fan of light rays turns slowly behind the winner. */
 @keyframes cb-end-pop {

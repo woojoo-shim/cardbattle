@@ -24,6 +24,12 @@ export function manaRegen(round: number): number {
 }
 export const RECONNECT_SECONDS = 30;
 
+// Public-lobby auto-fill: once every present human in a PUBLIC room is ready but the room
+// is short of players, a countdown runs; on expiry the room tops up with bots and starts —
+// so a solo "빠른 대전" never sits in an empty lobby forever. Private (friend) rooms don't
+// auto-fill; there you wait for the specific friend and add bots by hand.
+export const AUTOFILL_SECONDS = 15;
+
 // Character avatars. Humans pick one of HUMAN_AVATARS; the robotic BOT_AVATAR is reserved
 // for bots and can't be chosen by a player (the server sanitises any tampered choice).
 export const HUMAN_AVATARS = ['hero', 'mage', 'goblin', 'dragon', 'ogre', 'vampire', 'bat', 'ghost'] as const;
