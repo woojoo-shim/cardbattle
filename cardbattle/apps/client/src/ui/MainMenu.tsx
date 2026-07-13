@@ -145,7 +145,10 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
           <span style={titleStack}>
             <span style={titleGhost} aria-hidden>ABYSSAL</span>
             <span style={titleLine}>ABYSSAL</span>
-            <span style={strike} aria-hidden><span style={strikeGem}>◆</span></span>
+            <span style={strike} aria-hidden>
+              <span className="cb-blade-shine" style={bladeShine} />
+              <span className="cb-gem-pulse" style={strikeGem}>◆</span>
+            </span>
           </span>
           <span style={{ ...titleLine, ...titleLine2 }}>ARENA</span>
         </h1>
@@ -440,8 +443,13 @@ const strike: React.CSSProperties = {
   background: 'linear-gradient(90deg, transparent, #f3eee6 7%, #f3eee6 93%, transparent)',
   boxShadow: '0 0 14px rgba(243,238,230,0.5), 0 2px 0 #1a0f10',
 };
+const bladeShine: React.CSSProperties = {
+  position: 'absolute', top: 0, bottom: 0, left: 0, width: '30%',
+  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
+  filter: 'blur(0.6px)', pointerEvents: 'none',
+};
 const strikeGem: React.CSSProperties = {
-  fontSize: 'clamp(14px, 1.8vw, 22px)', color: C.rare, lineHeight: 1, padding: '0 10px',
+  position: 'relative', fontSize: 'clamp(14px, 1.8vw, 22px)', color: C.rare, lineHeight: 1, padding: '0 10px',
   background: '#0d070a', textShadow: '0 0 14px rgba(216,162,60,0.85)',
 };
 const byline: React.CSSProperties = {
