@@ -119,6 +119,20 @@
   22%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot, 90deg)); opacity: 0; }
 }
+/* Impact when an attack lands: a white-hot flash ringed by an element-tinted shockwave that
+   expands and thins out, synced to the streak's arrival — the hit now detonates on the face
+   instead of the comet quietly fading. Big hits (cb-impact-big) punch a wider, hotter ring. */
+@keyframes cb-impact {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  18%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+}
+/* Hot motes thrown off the point of impact, streaking outward along --dx/--dy then burning out. */
+@keyframes cb-spark {
+  0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0; }
+  16%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.35); opacity: 0; }
+}
 /* Peek reveal toast popping into view. */
 @keyframes revealPop {
   0%   { transform: scale(0.8) translateY(10px); opacity: 0; }

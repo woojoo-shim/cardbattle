@@ -17,6 +17,8 @@ type Fx =
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
+  | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
+  | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -143,8 +145,18 @@ export function VfxLayer({ events, players }: Props) {
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
         // The streak was already launched by the preceding card_played; as it arrives the target
-        // recoils and the damage number rises off the face — no flash, just weight.
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big: e.amount >= 8 });
+        // recoils and the damage number rises off the face. The hit now DETONATES on impact: a
+        // white-hot flash ringed by a shockwave, plus a spray of sparks — all delayed to land in
+        // lockstep with the comet and the slam number.
+        const big = e.amount >= 8;
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big });
+        add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY, big });
+        const sparks = big ? 10 : 6;
+        for (let i = 0; i < sparks; i++) {
+          const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.6;
+          const dist = 28 + Math.random() * (big ? 46 : 26);
+          add.push({ id: nextId.current++, kind: 'spark', x: tgt.x, y: tgt.y, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay: IMPACT_DELAY });
+        }
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
@@ -192,6 +204,10 @@ export function VfxLayer({ events, players }: Props) {
             </span>
           ) : f.kind === 'streak' ? (
             <span key={f.id} style={streakStyle(f)} />
+          ) : f.kind === 'impact' ? (
+            <span key={f.id} style={impactStyle(f)} />
+          ) : f.kind === 'spark' ? (
+            <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -244,6 +260,30 @@ function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
     animation: 'cb-streak .46s cubic-bezier(.4,0,.3,1) forwards',
+  } as React.CSSProperties;
+}
+/** The detonation an attack makes on arrival: a bright core radial ringed by an element-tinted
+ *  shockwave circle, scaled up and thinned out. One element carries both — the background is the
+ *  flash, the border is the ring, and both grow together under the transform scale. */
+function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
+  const size = f.big ? 118 : 82;
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
+    border: `2px solid ${f.color}`,
+    background: `radial-gradient(circle, rgba(255,255,255,0.92), ${f.color}66 38%, transparent 66%)`,
+    boxShadow: `0 0 26px ${f.color}, inset 0 0 22px ${f.color}`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
+    animation: `cb-impact ${f.big ? 0.64 : 0.52}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
+  };
+}
+/** A single hot mote flung off the impact point, streaking outward then burning out. */
+function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 5, height: 5, borderRadius: '50%',
+    background: '#fff', boxShadow: `0 0 9px 2px ${f.color}`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+    animation: `cb-spark 0.5s cubic-bezier(.2,.7,.35,1) ${f.delay}s backwards`,
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
