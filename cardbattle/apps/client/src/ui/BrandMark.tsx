@@ -31,7 +31,7 @@ export function BrandMark({ size = 116, markOnly = false }: Props) {
 
 function Crest({ size }: { size: number }) {
   return (
-    <svg viewBox="0 0 128 148" width={size} height={size * (148 / 128)} aria-hidden style={{ display: 'block' }}>
+    <svg viewBox="0 0 128 148" width={size} height={size * (148 / 128)} aria-hidden className="cb-crest-glow" style={{ display: 'block' }}>
       <defs>
         <linearGradient id="cbRing" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#d8a23c" />
@@ -54,8 +54,8 @@ function Crest({ size }: { size: number }) {
         </linearGradient>
       </defs>
 
-      {/* halo behind the crest */}
-      <ellipse cx="64" cy="62" rx="52" ry="52" fill="#5b8cff" opacity="0.14" />
+      {/* halo behind the crest — slowly breathes so the badge never feels frozen */}
+      <ellipse className="cb-crest-halo" cx="64" cy="62" rx="52" ry="52" fill="#5b8cff" opacity="0.14" />
 
       {/* badge body */}
       <path d={BADGE} fill="url(#cbAbyss)" stroke="url(#cbRing)" strokeWidth="3.2" strokeLinejoin="round" />
@@ -77,7 +77,7 @@ function Crest({ size }: { size: number }) {
       {/* rune gem over the cross */}
       <polygon points="64,46 73,63 64,82 55,63" fill="url(#cbGem)" stroke="#eafff9" strokeWidth="1" strokeLinejoin="round" />
       <polygon points="64,46 73,63 64,63 55,63" fill="#eafff9" opacity="0.55" />
-      <circle cx="64" cy="61" r="2.6" fill="#ffffff" opacity="0.95" />
+      <circle className="cb-crest-spark" cx="64" cy="61" r="2.6" fill="#ffffff" opacity="0.95" />
 
       {/* bottom point highlight */}
       <circle cx="64" cy="132" r="2.4" fill="url(#cbRing)" />

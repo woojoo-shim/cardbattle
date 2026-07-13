@@ -126,6 +126,24 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* The brand crest breathes a soft neon glow so the badge feels lit, not printed. */
+@keyframes cb-crest-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(124,240,220,0.25)) drop-shadow(0 0 10px rgba(166,197,63,0.14)); }
+  50%      { filter: drop-shadow(0 0 9px rgba(124,240,220,0.5))  drop-shadow(0 0 20px rgba(166,197,63,0.28)); }
+}
+.cb-crest-glow { animation: cb-crest-glow 4.5s ease-in-out infinite; }
+/* The halo ring behind the crest swells and fades on a slow, offset cycle. */
+@keyframes cb-crest-halo {
+  0%, 100% { opacity: 0.12; }
+  50%      { opacity: 0.24; }
+}
+.cb-crest-halo { animation: cb-crest-halo 5.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+/* The rune gem's core twinkles — a quick bright flash on a long idle beat. */
+@keyframes cb-crest-spark {
+  0%, 70%, 100% { opacity: 0.6; }
+  82%           { opacity: 1; }
+}
+.cb-crest-spark { animation: cb-crest-spark 3.8s ease-in-out infinite; }
 /* Atmospheric embers/dust rising through the login lamp shaft — each drifts up, sways, and fades. */
 @keyframes cb-ember {
   0%   { transform: translateY(0) translateX(0)     scale(1);   opacity: 0; }
