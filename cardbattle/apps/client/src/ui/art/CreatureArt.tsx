@@ -303,7 +303,27 @@ export function AvatarArt({ avatar, tint, variant = 0, size = 58 }: { avatar: st
   const Bot = BOT_UNITS[((variant % BOT_UNITS.length) + BOT_UNITS.length) % BOT_UNITS.length];
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
-      {isBot ? <Bot tint={tint} /> : AVATARS[avatar]()}
+      <defs>
+        <radialGradient id="av-mood" cx="0.5" cy="0.36" r="0.7">
+          <stop offset="0.58" stopColor="#04060a" stopOpacity="0" />
+          <stop offset="1" stopColor="#03050a" stopOpacity="0.55" />
+        </radialGradient>
+        <radialGradient id="av-floor" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#000" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="av-toplight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.11" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <filter id="av-shadow" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="1.4" stdDeviation="1.6" floodColor="#000" floodOpacity="0.55" />
+        </filter>
+      </defs>
+      <rect x="0" y="0" width="64" height="64" fill="url(#av-mood)" />
+      <ellipse cx="32" cy="59" rx="18" ry="4" fill="url(#av-floor)" />
+      <g filter="url(#av-shadow)">{isBot ? <Bot tint={tint} /> : AVATARS[avatar]()}</g>
+      <rect x="0" y="0" width="64" height="28" fill="url(#av-toplight)" style={{ mixBlendMode: 'screen' }} />
     </svg>
   );
 }
