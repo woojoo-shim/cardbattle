@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { mono } from './theme.js';
 
 interface Props {
@@ -11,6 +12,10 @@ interface Props {
  *  it never grows sideways into the card fan on iPad — it stacks into more rows instead. */
 export function ManaBar({ mana, max, lit }: Props) {
   const cur = Math.max(0, Math.min(mana, max));
+  // Gems that were empty last render and are filled now "pop" in — the satisfying regen tick.
+  const prev = useRef(cur);
+  const gainedFrom = cur > prev.current ? prev.current : cur; // indices [gainedFrom, cur) just lit up
+  useEffect(() => { prev.current = cur; });
   return (
     <div style={wrap}>
       <div style={readout}>
@@ -20,20 +25,20 @@ export function ManaBar({ mana, max, lit }: Props) {
       </div>
       <div style={crystals}>
         {Array.from({ length: max }).map((_, i) => (
-          <Gem key={i} on={i < cur} lit={lit} />
+          <Gem key={i} on={i < cur} lit={lit} fresh={i >= gainedFrom && i < cur} />
         ))}
       </div>
     </div>
   );
 }
 
-function Gem({ on, lit }: { on: boolean; lit: boolean }) {
+function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) {
   const base = on ? '#2f7fe0' : '#111a2c';
   const outline = on ? '#bfe0ff' : '#2b3d5c';
   return (
     <svg
       viewBox="0 0 24 24" width="15" height="15" aria-hidden
-      style={{ display: 'block', filter: on ? `drop-shadow(0 0 ${lit ? 4 : 2}px rgba(90,160,255,0.9))` : undefined }}
+      style={{ display: 'block', filter: on ? `drop-shadow(0 0 ${lit ? 4 : 2}px rgba(90,160,255,0.9))` : undefined, animation: fresh ? 'cb-mana-pop 0.5s cubic-bezier(.2,1.5,.4,1) both' : undefined }}
     >
       <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill={base} stroke={outline} strokeWidth="1.3" strokeLinejoin="round" />
       {on && (

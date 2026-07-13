@@ -126,6 +126,12 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* A freshly-regenerated mana gem pops in — overshoots big then settles, so filling mana feels earned. */
+@keyframes cb-mana-pop {
+  0%   { transform: scale(0.2) rotate(-30deg); opacity: 0.2; }
+  55%  { transform: scale(1.5) rotate(6deg);   opacity: 1; }
+  100% { transform: scale(1)   rotate(0);      opacity: 1; }
+}
 /* Critically-wounded HP bar: a slow red throb so a near-dead seat reads as in danger at a glance. */
 @keyframes cb-hp-crit {
   0%, 100% { filter: brightness(1)   drop-shadow(0 0 2px rgba(255,60,60,0.5)); }
