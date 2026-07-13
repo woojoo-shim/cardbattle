@@ -273,10 +273,10 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
                   aria-pressed={showPw}
                   tabIndex={-1}
                 >
-                  <Icon name="eye" size={18} color={showPw ? C.you : C.faint} />
+                  <Icon name="eye" size={18} color={showPw ? FROST.cyan : FROST.faint} />
                 </button>
               </div>
-              <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
+              <button className="cb-enter cb-frost" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
                 {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
               </button>
             </div>
@@ -298,17 +298,17 @@ function SigilRing() {
   return (
     <div style={sigilBox} aria-hidden>
       <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 64s linear infinite' }}>
-        <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(216,162,60,0.5)" strokeWidth="0.6" strokeDasharray="1 7" />
-        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(216,162,60,0.16)" strokeWidth="0.6" />
+        <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(150,210,255,0.5)" strokeWidth="0.6" strokeDasharray="1 7" />
+        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(150,210,255,0.16)" strokeWidth="0.6" />
       </svg>
       <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin-rev 46s linear infinite' }}>
-        <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(166,197,63,0.42)" strokeWidth="1" strokeDasharray="10 13" strokeLinecap="round" />
+        <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(111,224,255,0.42)" strokeWidth="1" strokeDasharray="10 13" strokeLinecap="round" />
       </svg>
       <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 92s linear infinite' }}>
-        <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(111,160,140,0.3)" strokeWidth="0.6" />
+        <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(120,170,210,0.32)" strokeWidth="0.6" />
         {nodes.map((n, i) => (
           <circle key={i} cx={n.x} cy={n.y} r={n.big ? 2 : 1}
-            fill={n.big ? 'rgba(216,162,60,0.75)' : 'rgba(166,197,63,0.5)'} />
+            fill={n.big ? 'rgba(150,225,255,0.8)' : 'rgba(111,224,255,0.5)'} />
         ))}
       </svg>
     </div>
@@ -324,14 +324,26 @@ const center: React.CSSProperties = {
   minHeight: '100vh', gap: 16, color: C.dim, fontFamily: sans, background: C.void,
 };
 
+// Frost-arcane palette — a cold, moonlit-glass mood scoped to the login gate only.
+// A deliberate departure from the app's grimy oxblood: midnight navy, cyan and silver.
+const FROST = {
+  text: '#e8f2ff',
+  dim: '#9fb6d4',
+  faint: '#5f7899',
+  cyan: '#6fe0ff',
+  ice: '#a9d8ff',
+  border: 'rgba(130,180,230,0.22)',
+  borderHi: 'rgba(150,210,255,0.55)',
+};
+
 const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
   background:
-    'radial-gradient(58% 40% at 50% 26%, rgba(126,38,62,0.18), transparent 68%),' +
-    'radial-gradient(72% 52% at 50% 116%, rgba(216,162,60,0.10), transparent 60%),' +
-    'linear-gradient(180deg, #140b0e 0%, #0c0709 54%, #060305 100%),' +
-    '#060305',
+    'radial-gradient(60% 42% at 50% 22%, rgba(80,180,240,0.15), transparent 66%),' +
+    'radial-gradient(80% 55% at 50% 120%, rgba(90,140,255,0.10), transparent 62%),' +
+    'linear-gradient(180deg, #0c1424 0%, #0a1120 52%, #060a14 100%),' +
+    '#060a14',
 };
 // Full-height field the embers drift up through; sits behind the gate content (z below it).
 const emberField: React.CSSProperties = {
@@ -342,7 +354,7 @@ const gateMute: React.CSSProperties = {
 };
 const gateVignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,3,5,0.92) 100%)',
+  background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,7,14,0.94) 100%)',
 };
 
 // LEFT portal column — crest, sigil, hero hand, tagline stacked and centred.
@@ -354,7 +366,7 @@ const heroCol: React.CSSProperties = {
 const lightShaft: React.CSSProperties = {
   position: 'absolute', top: -8, left: '50%', zIndex: 0, pointerEvents: 'none',
   width: 'clamp(150px, 22vh, 214px)', height: 'clamp(210px, 32vh, 300px)',
-  background: 'linear-gradient(180deg, rgba(216,162,60,0.34), rgba(216,162,60,0.11) 46%, transparent 82%)',
+  background: 'linear-gradient(180deg, rgba(150,225,255,0.32), rgba(120,190,255,0.11) 46%, transparent 82%)',
   clipPath: 'polygon(40% 0, 60% 0, 100% 100%, 0 100%)',
   filter: 'blur(7px)', mixBlendMode: 'screen', transformOrigin: '50% 0',
 };
@@ -366,7 +378,7 @@ const portalWrap: React.CSSProperties = {
 const portalGlow: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: '128%', height: '128%',
   transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
-  background: 'radial-gradient(circle at 50% 46%, rgba(216,162,60,0.22), rgba(166,197,63,0.08) 42%, transparent 70%)',
+  background: 'radial-gradient(circle at 50% 46%, rgba(111,224,255,0.22), rgba(90,140,255,0.10) 42%, transparent 70%)',
   filter: 'blur(9px)',
 };
 const sigilBox: React.CSSProperties = {
@@ -377,7 +389,7 @@ const sigilLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, width: '100%', height: '100%', willChange: 'transform',
 };
 const tagline: React.CSSProperties = {
-  margin: '14px 0 0', fontFamily: mono, fontSize: 12, letterSpacing: 3, color: C.dim, textAlign: 'center',
+  margin: '14px 0 0', fontFamily: mono, fontSize: 12, letterSpacing: 3, color: FROST.dim, textAlign: 'center',
 };
 
 // RIGHT admission-console column.
@@ -387,17 +399,17 @@ const panelCol: React.CSSProperties = {
 const consolePanel: React.CSSProperties = {
   position: 'relative', width: 'min(380px, 92vw)', padding: '26px 24px 22px',
   display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(28,30,25,0.82), rgba(16,17,15,0.86))',
-  border: `1px solid ${C.border}`,
-  boxShadow: '0 34px 74px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.045)',
+  background: 'linear-gradient(180deg, rgba(22,34,56,0.80), rgba(12,20,36,0.85))',
+  border: `1px solid ${FROST.border}`,
+  boxShadow: '0 34px 74px rgba(0,4,16,0.6), inset 0 1px 0 rgba(150,210,255,0.08)',
   backdropFilter: 'blur(10px)',
 };
 // L-shaped brackets clamping the four corners of the console — engraved fixture look.
 function corner(v: 'top' | 'bottom', h: 'left' | 'right'): React.CSSProperties {
   return {
     position: 'absolute', [v]: 8, [h]: 8, width: 13, height: 13, pointerEvents: 'none',
-    [`border${v[0].toUpperCase()}${v.slice(1)}`]: `1.5px solid ${C.borderHi}`,
-    [`border${h[0].toUpperCase()}${h.slice(1)}`]: `1.5px solid ${C.borderHi}`,
+    [`border${v[0].toUpperCase()}${v.slice(1)}`]: `1.5px solid ${FROST.borderHi}`,
+    [`border${h[0].toUpperCase()}${h.slice(1)}`]: `1.5px solid ${FROST.borderHi}`,
     opacity: 0.8,
   } as React.CSSProperties;
 }
@@ -409,14 +421,14 @@ const consoleHead: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, marginBottom: 6,
 };
 const consoleTitle: React.CSSProperties = {
-  fontFamily: sans, fontSize: 22, fontWeight: 900, letterSpacing: 6, color: C.text,
-  textShadow: '0 2px 12px rgba(0,0,0,0.6)',
+  fontFamily: sans, fontSize: 22, fontWeight: 900, letterSpacing: 6, color: FROST.text,
+  textShadow: '0 2px 14px rgba(0,10,26,0.7), 0 0 20px rgba(111,224,255,0.28)',
 };
 const consoleSub: React.CSSProperties = {
-  fontFamily: mono, fontSize: 9.5, letterSpacing: 5, color: C.faint, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 9.5, letterSpacing: 5, color: FROST.faint, textTransform: 'uppercase',
 };
 const kicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, letterSpacing: 6, color: C.faint, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 11, letterSpacing: 6, color: FROST.faint, textTransform: 'uppercase',
   marginBottom: 4,
 };
 const ruleWrap: React.CSSProperties = {
@@ -424,7 +436,7 @@ const ruleWrap: React.CSSProperties = {
 };
 const rule: React.CSSProperties = {
   display: 'block', width: '100%', height: '100%',
-  background: 'linear-gradient(90deg, transparent, #a6c53f 32%, #d8a23c 68%, transparent)',
+  background: 'linear-gradient(90deg, transparent, #6fe0ff 32%, #a9d8ff 68%, transparent)',
   backgroundSize: '220% 100%',
 };
 
@@ -434,10 +446,10 @@ const heroFan: React.CSSProperties = {
 };
 // Per-rarity accents mirroring the in-battle hand — glow behind the art, foil sheen on epic+.
 const HERO_TINT: Record<string, { glow: string; sheen: string }> = {
-  common: { glow: 'rgba(120,122,96,0.20)', sheen: 'transparent' },
-  rare: { glow: 'rgba(111,160,140,0.34)', sheen: 'transparent' },
-  epic: { glow: 'rgba(216,162,60,0.36)', sheen: 'rgba(216,162,60,0.11)' },
-  legendary: { glow: 'rgba(216,162,60,0.5)', sheen: 'rgba(255,212,120,0.17)' },
+  common: { glow: 'rgba(120,160,200,0.20)', sheen: 'transparent' },
+  rare: { glow: 'rgba(111,224,255,0.30)', sheen: 'transparent' },
+  epic: { glow: 'rgba(120,190,255,0.34)', sheen: 'rgba(150,210,255,0.12)' },
+  legendary: { glow: 'rgba(150,225,255,0.5)', sheen: 'rgba(200,235,255,0.18)' },
 };
 function heroCard(c: (typeof HERO_CARDS)[number]): React.CSSProperties {
   const depth = Math.abs(c.a);
@@ -488,36 +500,36 @@ function pickCell(on: boolean): React.CSSProperties {
   return {
     width: 52, height: 52, padding: 0, cursor: 'pointer', borderRadius: 12,
     display: 'grid', placeItems: 'center',
-    background: on ? 'linear-gradient(160deg, rgba(166,197,63,0.16), rgba(216,162,60,0.10))' : 'rgba(24,26,22,0.6)',
-    border: `1px solid ${on ? C.you : C.border}`,
-    boxShadow: on ? `0 0 0 1px ${C.you}, 0 0 16px rgba(166,197,63,0.35)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+    background: on ? 'linear-gradient(160deg, rgba(111,224,255,0.18), rgba(120,190,255,0.10))' : 'rgba(16,26,44,0.6)',
+    border: `1px solid ${on ? FROST.cyan : FROST.border}`,
+    boxShadow: on ? `0 0 0 1px ${FROST.cyan}, 0 0 16px rgba(111,224,255,0.4)` : 'inset 0 1px 0 rgba(150,210,255,0.05)',
     transition: 'border-color .2s, box-shadow .2s, background .2s',
   };
 }
 // Segmented 로그인 / 회원가입 toggle.
 const tabRow: React.CSSProperties = {
   display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 12,
-  background: 'rgba(22,24,20,0.72)', border: `1px solid ${C.border}`,
+  background: 'rgba(14,22,38,0.75)', border: `1px solid ${FROST.border}`,
 };
 function tab(on: boolean): React.CSSProperties {
   return {
     padding: '9px 22px', fontSize: 14, fontWeight: 800, letterSpacing: 0.5, cursor: 'pointer',
     border: 'none', borderRadius: 9, fontFamily: sans,
-    color: on ? '#141608' : C.dim,
-    background: on ? 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)' : 'transparent',
-    boxShadow: on ? '0 6px 16px rgba(0,0,0,0.45)' : 'none',
+    color: on ? '#06121c' : FROST.dim,
+    background: on ? 'linear-gradient(100deg, #9fe9ff, #5fc8ee 58%, #3fa9d6)' : 'transparent',
+    boxShadow: on ? '0 6px 16px rgba(0,8,20,0.5)' : 'none',
     transition: 'color .2s, background .2s',
   };
 }
 // A recessed well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: 10,
-  borderRadius: 12, background: 'rgba(0,0,0,0.26)', border: `1px solid ${C.border}`,
-  boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)',
+  borderRadius: 12, background: 'rgba(4,8,16,0.4)', border: `1px solid ${FROST.border}`,
+  boxShadow: 'inset 0 2px 10px rgba(0,4,12,0.55), inset 0 1px 0 rgba(150,210,255,0.05)',
 };
 const authInput: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
-  background: 'rgba(0,0,0,0.32)', border: `1px solid ${C.border}`, borderRadius: 10, outline: 'none',
+  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: FROST.text, fontFamily: sans,
+  background: 'rgba(6,12,22,0.5)', border: `1px solid ${FROST.border}`, borderRadius: 10, outline: 'none',
 };
 // Password field wraps the input so the reveal toggle can sit inside its right edge.
 const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
@@ -528,12 +540,12 @@ const pwToggle: React.CSSProperties = {
 };
 const enter: React.CSSProperties = {
   width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
-  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
-  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+  color: '#06121c', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #9fe9ff, #5fc8ee 58%, #3fa9d6)',
+  boxShadow: '0 6px 18px rgba(0,10,24,0.55)',
 };
 const hint: React.CSSProperties = {
-  margin: '16px 0 0', fontSize: 12.5, color: C.faint, fontFamily: sans, letterSpacing: 0.2,
+  margin: '16px 0 0', fontSize: 12.5, color: FROST.faint, fontFamily: sans, letterSpacing: 0.2,
 };
 const errText: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.enemy, fontFamily: sans, letterSpacing: 0.2,
