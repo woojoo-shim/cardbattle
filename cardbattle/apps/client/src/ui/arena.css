@@ -244,6 +244,13 @@
 }
 .cb-gem-pulse { animation: cb-gem-pulse 3.4s ease-in-out infinite; }
 
+/* The portal's key light breathes and sways faintly, as if the shaft were alive. */
+@keyframes cb-shaft {
+  0%, 100% { opacity: 0.5;  transform: translateX(-50%) scaleX(0.95) skewX(-1.5deg); }
+  50%      { opacity: 0.92; transform: translateX(-50%) scaleX(1.05) skewX(1.5deg); }
+}
+.cb-shaft { animation: cb-shaft 9s ease-in-out infinite; will-change: transform, opacity; }
+
 /* The two-column entry gate: portal showcase + admission console. Mobile-first single column;
    splits into side-by-side columns once there's room. Media queries live here because the
    grid-template switch can't be expressed with inline styles. */

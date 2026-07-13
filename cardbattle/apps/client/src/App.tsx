@@ -174,6 +174,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
         {/* LEFT — the summoning portal: the crest glowing inside counter-rotating arcane sigils,
             with the fanned hand dealing in beneath it. */}
         <div style={heroCol}>
+          <div style={lightShaft} className="cb-shaft" aria-hidden />
           <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
           <div style={portalWrap}>
             <div style={portalGlow} aria-hidden />
@@ -346,7 +347,16 @@ const gateVignette: React.CSSProperties = {
 
 // LEFT portal column — crest, sigil, hero hand, tagline stacked and centred.
 const heroCol: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+  position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+};
+// A volumetric shaft of light descends from above onto the summoning portal — a cinematic
+// key light that gives the crest a lit-from-heaven, store-hero drama. Screen-blended cone.
+const lightShaft: React.CSSProperties = {
+  position: 'absolute', top: -8, left: '50%', zIndex: 0, pointerEvents: 'none',
+  width: 'clamp(150px, 22vh, 214px)', height: 'clamp(210px, 32vh, 300px)',
+  background: 'linear-gradient(180deg, rgba(216,162,60,0.34), rgba(216,162,60,0.11) 46%, transparent 82%)',
+  clipPath: 'polygon(40% 0, 60% 0, 100% 100%, 0 100%)',
+  filter: 'blur(7px)', mixBlendMode: 'screen', transformOrigin: '50% 0',
 };
 // Square stage holding the rotating sigil rings + the crest floating at their centre.
 const portalWrap: React.CSSProperties = {
