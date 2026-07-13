@@ -3,6 +3,14 @@
 /* Auto-fill countdown banner: a slow amber breathe so it reads as "searching…", not urgent. */
 @keyframes cb-fill-pulse { 50% { box-shadow: 0 0 22px rgba(216, 162, 60, 0.28); border-color: rgba(216, 162, 60, 0.6); } }
 .cb-fill-pulse { animation: cb-fill-pulse 1.8s ease-in-out infinite; }
+/* Lobby open-chair hover — a dashed empty seat lifts and warms to brass when you reach to fill it. */
+.cb-seat-add { transition: border-color .16s, background .16s, transform .16s, box-shadow .16s; }
+.cb-seat-add:hover {
+  border-color: rgba(216, 162, 60, 0.85);
+  background: rgba(216, 162, 60, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(216, 162, 60, 0.18);
+}
 /* "당신의 턴" onset telegraph — fires once the instant the turn lands on me, so a player can
    never miss their cue in a crowded 8-way table. The whole layer fades up then out; the words
    punch in from a blurred spread and settle; a light bar sweeps across; the screen edge blooms

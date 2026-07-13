@@ -56,7 +56,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
 
         <div style={panel}>
           <div style={modeBadge} title={gm.desc}>
-            <span style={modeBadgeIcon}><Icon name={MODE_ICON[gm.id]} size={18} color="#5af0d3" /></span>
+            <span style={modeBadgeIcon}><Icon name={MODE_ICON[gm.id]} size={18} color="#e6ad3e" /></span>
             <span style={modeBadgeName}>{gm.name}</span>
             <span style={modeBadgeTag}>{gm.tagline}</span>
           </div>
@@ -73,27 +73,45 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
             {n}/{MAX_PLAYERS} 플레이어 · 최소 {MIN_PLAYERS}명 필요
           </p>
 
-          <ul style={list}>
-            {ui.players.map((p) => {
-              const isBot = p.id.startsWith('bot-');
-              return (
-                <li key={p.id} style={{ ...row, ...(p.id === myId ? rowMe : null) }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: p.connected ? 1 : 0.4 }}>
-                    <span style={thumb}>
-                      <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={30} />
+          {/* The roster is the arena seating chart: every one of the MAX_PLAYERS chairs is shown, so an
+              empty chair is a visible, clickable invitation to seat a bot — the bot-add lives IN the grid. */}
+          <div style={seatGrid}>
+            {Array.from({ length: MAX_PLAYERS }, (_, i) => ui.players.find((p) => p.seat === i) ?? null).map((p, i) => {
+              if (!p) {
+                return (
+                  <button
+                    key={`seat-${i}`}
+                    className="cb-seat-add"
+                    style={emptySeat}
+                    onClick={() => { playSfx('select'); onAddBot(); }}
+                    title="이 자리를 봇으로 채우기"
+                  >
+                    <span style={emptyPlus}>+</span>
+                    <span style={emptyText}>
+                      <span style={emptyLabel}>봇 추가</span>
+                      <span style={seatTag}>좌석 {i + 1}</span>
                     </span>
-                    {p.name}{p.id === myId ? ' (나)' : ''}
+                  </button>
+                );
+              }
+              const isBot = p.id.startsWith('bot-');
+              const isMe = p.id === myId;
+              return (
+                <div key={p.id} style={{ ...seatCell, ...(isMe ? seatMe : null), opacity: p.connected ? 1 : 0.45 }}>
+                  <span style={seatThumb}>
+                    <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} size={38} />
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ color: C.you, fontSize: 13 }}>좌석 {p.seat + 1}</span>
-                    {isBot && (
-                      <button style={kickBtn} onClick={() => { playSfx('back'); onRemoveBot(p.id); }} title="봇 내보내기"><Icon name="close" size={12} /></button>
-                    )}
+                  <span style={seatText}>
+                    <span style={seatName}>{p.name}{isMe ? ' (나)' : ''}</span>
+                    <span style={seatTag}>{isBot ? 'BOT · ' : ''}좌석 {p.seat + 1}</span>
                   </span>
-                </li>
+                  {isBot && (
+                    <button style={kickBtn} onClick={() => { playSfx('back'); onRemoveBot(p.id); }} title="봇 내보내기"><Icon name="close" size={11} /></button>
+                  )}
+                </div>
               );
             })}
-          </ul>
+          </div>
 
           {fillLeft > 0 && (
             <div style={fillBanner} className="cb-fill-pulse">
@@ -102,17 +120,12 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 4 }}>
-            <button onClick={() => { playSfx('select'); onAddBot(); }} disabled={n >= MAX_PLAYERS} style={botBtn}>
-              + 봇 추가
-            </button>
-            <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
-              {ready ? <>준비 완료&nbsp;<Icon name="check" size={16} /></> : '준비하기'}
-            </button>
-          </div>
+          <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
+            {ready ? <>준비 완료&nbsp;<Icon name="check" size={16} /></> : '준비하기'}
+          </button>
         </div>
 
-        <p style={hint}>봇을 추가하면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!</p>
+        <p style={hint}>빈 자리를 눌러 봇을 채우면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!</p>
       </div>
     </div>
   );
@@ -157,10 +170,10 @@ const panel: React.CSSProperties = {
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 999,
-  background: 'rgba(166,197,63,0.08)', border: '1px solid rgba(166,197,63,0.32)',
+  background: 'rgba(216,162,60,0.08)', border: '1px solid rgba(216,162,60,0.3)',
 };
 const modeBadgeIcon: React.CSSProperties = { fontSize: 18 };
-const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#c3e04d', letterSpacing: 1 };
+const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#e0b24d', letterSpacing: 1 };
 const modeBadgeTag: React.CSSProperties = { fontSize: 12, color: C.dim };
 const codeBadge: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
@@ -173,34 +186,51 @@ const codeValue: React.CSSProperties = {
   color: C.rare, textShadow: '0 0 16px rgba(216,162,60,0.5)',
 };
 const codeShare: React.CSSProperties = { fontSize: 12, color: C.faint };
-const list: React.CSSProperties = {
-  listStyle: 'none', padding: 0, margin: 0, width: '100%', display: 'flex',
-  flexDirection: 'column', gap: 8,
+// The seating chart: a 2-column grid of every chair, filled portraits and open (dashed) invitations.
+const seatGrid: React.CSSProperties = {
+  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%',
 };
-const row: React.CSSProperties = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px',
-  background: 'rgba(0,0,0,0.28)', borderRadius: 10, border: `1px solid ${C.border}`,
+const seatCell: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
+  borderRadius: 11, textAlign: 'left',
+  background: 'linear-gradient(160deg, rgba(32,21,12,0.66), rgba(15,10,7,0.66))',
+  border: `1px solid ${C.border}`,
 };
-const rowMe: React.CSSProperties = { borderColor: C.magic, boxShadow: '0 0 16px rgba(111,160,140,0.35)' };
-const thumb: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: 9, display: 'grid', placeItems: 'center', flexShrink: 0,
-  background: 'linear-gradient(160deg,#211a12,#100b08)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
+const seatMe: React.CSSProperties = { borderColor: C.magic, boxShadow: '0 0 16px rgba(111,160,140,0.32)' };
+const seatThumb: React.CSSProperties = {
+  width: 40, height: 40, borderRadius: 9, display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden',
+  background: 'linear-gradient(160deg,#211a12,#100b08)', border: '1px solid rgba(255,255,255,0.1)',
 };
+const seatText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 };
+const seatName: React.CSSProperties = {
+  fontSize: 14, fontWeight: 700, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+};
+const seatTag: React.CSSProperties = { fontFamily: mono, fontSize: 11, letterSpacing: 0.5, color: C.faint };
+// An open chair — dashed brass frame, ghost "+" thumb, tap to seat a bot.
+const emptySeat: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
+  borderRadius: 11, textAlign: 'left', cursor: 'pointer', fontFamily: sans,
+  border: '1px dashed rgba(216,162,60,0.38)', background: 'rgba(216,162,60,0.03)',
+};
+const emptyPlus: React.CSSProperties = {
+  width: 40, height: 40, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 9,
+  fontSize: 24, fontWeight: 300, lineHeight: 1, color: C.rare,
+  border: '1px dashed rgba(216,162,60,0.4)', background: 'rgba(216,162,60,0.05)',
+};
+const emptyText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 };
+const emptyLabel: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: C.rare, letterSpacing: 0.3 };
 const btn: React.CSSProperties = {
-  padding: '13px 34px', fontSize: 17, fontWeight: 800, color: '#141608', cursor: 'pointer',
+  width: '100%', marginTop: 2, padding: '14px 34px', fontSize: 17, fontWeight: 800, color: '#2a1a06', cursor: 'pointer',
   border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
+  background: 'linear-gradient(100deg, #ffd77a, #e0a83e 58%, #c9922f)',
   boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
-const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#74902a,#b6d24a)', color: '#141608', boxShadow: '0 8px 24px rgba(166,197,63,0.35)' };
-const botBtn: React.CSSProperties = {
-  padding: '13px 22px', fontSize: 15, fontWeight: 700, color: C.text, cursor: 'pointer',
-  border: `1px solid ${C.borderHi}`, borderRadius: 12, background: 'rgba(255,255,255,0.05)', fontFamily: sans,
-};
+const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#c9922f,#ffd77a)', color: '#2a1a06', boxShadow: '0 8px 24px rgba(216,162,60,0.4)' };
 const kickBtn: React.CSSProperties = {
-  width: 24, height: 24, display: 'grid', placeItems: 'center', flexShrink: 0,
+  marginLeft: 'auto', width: 22, height: 22, display: 'grid', placeItems: 'center', flexShrink: 0,
   fontSize: 12, fontWeight: 800, color: '#ff9a9a', cursor: 'pointer', lineHeight: 1,
-  border: '1px solid rgba(255,120,120,0.35)', borderRadius: 7, background: 'rgba(255,80,80,0.1)',
+  border: '1px solid rgba(255,120,120,0.35)', borderRadius: 6, background: 'rgba(255,80,80,0.12)',
 };
 const fillBanner: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 10,
