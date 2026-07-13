@@ -781,7 +781,34 @@ export function CardArt({ id, size = 44 }: Props) {
   const dim = typeof size === 'number' ? `${size}px` : size;
   return (
     <svg viewBox="0 0 64 64" aria-hidden style={{ display: 'block', width: dim, height: dim }}>
-      <Art />
+      <defs>
+        {/* Shared atmosphere applied to every illustration — no per-card work. Depth comes from a
+            soft dark corner vignette, a contact shadow under the subject, a drop shadow so the
+            piece stands proud, and a cool top-down light wash (lit from the lamp above). */}
+        <radialGradient id="ca-mood" cx="0.5" cy="0.4" r="0.66">
+          <stop offset="0.62" stopColor="#05070a" stopOpacity="0" />
+          <stop offset="1" stopColor="#04060a" stopOpacity="0.5" />
+        </radialGradient>
+        <radialGradient id="ca-floor" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#000" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#000" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="ca-toplight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.1" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <filter id="ca-shadow" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="1.3" stdDeviation="1.5" floodColor="#000" floodOpacity="0.5" />
+        </filter>
+      </defs>
+      {/* backdrop vignette pulls the subject out of the dark */}
+      <rect x="0" y="0" width="64" height="64" fill="url(#ca-mood)" />
+      {/* grounding contact shadow so nothing floats */}
+      <ellipse cx="32" cy="57" rx="17" ry="4" fill="url(#ca-floor)" />
+      {/* the illustration, given a soft cast shadow to sit in space */}
+      <g filter="url(#ca-shadow)"><Art /></g>
+      {/* faint overhead light wash across the top half */}
+      <rect x="0" y="0" width="64" height="30" fill="url(#ca-toplight)" style={{ mixBlendMode: 'screen' }} />
     </svg>
   );
 }
