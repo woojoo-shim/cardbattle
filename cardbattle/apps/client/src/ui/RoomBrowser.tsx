@@ -218,13 +218,13 @@ const blinkCss = `
   100% { width: 100%; }
 }
 .cb-input:focus {
-  border-color: #a6c53f !important;
-  background: rgba(166,197,63,0.06) !important;
-  box-shadow: inset 0 0 0 1px rgba(166,197,63,0.4), 0 0 18px rgba(166,197,63,0.22) !important;
+  border-color: #e0aa46 !important;
+  background: rgba(224,170,70,0.06) !important;
+  box-shadow: inset 0 0 0 1px rgba(224,170,70,0.4), 0 0 18px rgba(224,170,70,0.22) !important;
 }
-.cb-input::placeholder { color: rgba(166,197,63,0.28); }
+.cb-input::placeholder { color: rgba(224,170,70,0.28); }
 .cb-exec { position: relative; overflow: hidden; transition: box-shadow .14s, transform .08s; }
-.cb-exec:hover { box-shadow: 0 0 30px rgba(166,197,63,0.5); }
+.cb-exec:hover { box-shadow: 0 0 30px rgba(224,170,70,0.5); }
 .cb-exec:active { transform: translateY(1px); }
 .cb-exec::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -234,7 +234,7 @@ const blinkCss = `
 .cb-exec:hover::after { transform: translateX(120%); }
 .cb-sep::before, .cb-sep::after {
   content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(166,197,63,0.24), transparent);
+  background: linear-gradient(90deg, transparent, rgba(224,170,70,0.24), transparent);
 }
 @keyframes cb-blink { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.15; } }
 .cb-blink { animation: cb-blink 1.3s steps(1,end) infinite; }
@@ -244,21 +244,24 @@ const blinkCss = `
 .cb-panel::after {
   content: ''; position: absolute; inset: 5px; pointer-events: none; z-index: 6; opacity: 0.6;
   background:
-    linear-gradient(#4dff6a 0 0) 0 0 / 15px 2px no-repeat,
-    linear-gradient(#4dff6a 0 0) 0 0 / 2px 15px no-repeat,
-    linear-gradient(#4dff6a 0 0) 100% 0 / 15px 2px no-repeat,
-    linear-gradient(#4dff6a 0 0) 100% 0 / 2px 15px no-repeat,
-    linear-gradient(#4dff6a 0 0) 0 100% / 15px 2px no-repeat,
-    linear-gradient(#4dff6a 0 0) 0 100% / 2px 15px no-repeat,
-    linear-gradient(#4dff6a 0 0) 100% 100% / 15px 2px no-repeat,
-    linear-gradient(#4dff6a 0 0) 100% 100% / 2px 15px no-repeat;
-  filter: drop-shadow(0 0 4px rgba(77,255,106,0.5));
+    linear-gradient(#ffb43a 0 0) 0 0 / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 0 / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 0 / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 0 / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 100% / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 100% / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 100% / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 100% / 2px 15px no-repeat;
+  filter: drop-shadow(0 0 4px rgba(255,178,54,0.5));
 }
 `;
 
+// Amber phosphor text tone — replaces the theme's sickly-green AY throughout this terminal so
+// the whole browser reads as a warm amber CRT, cohering with the oxblood/brass world.
+const AY = '#f0d18a';
 const wrap: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-  justifyContent: 'flex-start', fontFamily: mono, color: C.you,
+  justifyContent: 'flex-start', fontFamily: mono, color: AY,
   background: 'radial-gradient(78% 60% at 50% 0%, #130b0e 0%, #070406 58%, #030203 100%)',
 };
 // The whole browser lives inside one curved CRT monitor: a heavy plastic bezel, a phosphor-dark
@@ -267,10 +270,10 @@ const wrap: React.CSSProperties = {
 const screen: React.CSSProperties = {
   position: 'relative', flex: 1, minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', gap: 26,
   padding: '56px clamp(28px, 6vw, 96px) 52px', overflow: 'hidden',
-  background: 'radial-gradient(130% 108% at 50% 0%, #123a16 0%, #0a2410 48%, #04120a 100%)',
+  background: 'radial-gradient(130% 108% at 50% 0%, #2e1c0a 0%, #1c1006 48%, #0a0603 100%)',
   boxShadow:
-    'inset 0 0 200px 40px rgba(0,0,0,0.82), inset 0 0 120px rgba(77,255,106,0.14),' + // glass depth + hot phosphor haze
-    'inset 0 0 90px rgba(77,255,106,0.3)',                                             // green bloom
+    'inset 0 0 200px 40px rgba(0,0,0,0.82), inset 0 0 120px rgba(255,178,54,0.14),' + // glass depth + hot phosphor haze
+    'inset 0 0 90px rgba(255,178,54,0.3)',                                             // amber bloom
 };
 const scanlines: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3,
@@ -279,11 +282,11 @@ const scanlines: React.CSSProperties = {
 };
 const curve: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4,
-  background: 'radial-gradient(128% 118% at 50% 44%, transparent 60%, rgba(2,10,3,0.8) 100%)',
-  boxShadow: 'inset 0 0 140px 44px rgba(2,10,3,0.86)',
+  background: 'radial-gradient(128% 118% at 50% 44%, transparent 60%, rgba(8,4,1,0.8) 100%)',
+  boxShadow: 'inset 0 0 140px 44px rgba(8,4,1,0.86)',
 };
-// Fallout-terminal phosphor: a brighter, hotter green than the olive C.you for the boot readout.
-const P = '#4dff6a';
+// Fallout-terminal phosphor: a brighter, hotter amber than the body text for the boot readout.
+const P = '#ffb43a';
 const banner: React.CSSProperties = {
   width: '100%', maxWidth: 1280, margin: '0 auto', fontFamily: mono, color: P, letterSpacing: 0.3, textAlign: 'left',
   position: 'relative', zIndex: 5,
@@ -296,18 +299,18 @@ const welcome: React.CSSProperties = {
 // The `>`-prefixed boot log under the title — left-aligned mono lines, hot phosphor green with a glow.
 const bootLines: React.CSSProperties = {
   marginTop: 14, fontSize: 15, lineHeight: 1.75, color: P, letterSpacing: 1,
-  textShadow: `0 0 8px rgba(77,255,106,0.5)`,
+  textShadow: `0 0 8px rgba(255,178,54,0.5)`,
 };
 const loadRow: React.CSSProperties = { display: 'flex', alignItems: 'center', marginTop: 2 };
 // Bracketed loading track à la `[****---------]`; the fill sweeps across on a loop.
 const loadBar: React.CSSProperties = {
   display: 'inline-block', width: 150, height: 13, verticalAlign: 'middle',
   border: `1px solid ${P}`, borderRadius: 1, background: 'rgba(0,0,0,0.5)',
-  boxShadow: `inset 0 0 8px rgba(77,255,106,0.25), 0 0 8px rgba(77,255,106,0.3)`, overflow: 'hidden',
+  boxShadow: `inset 0 0 8px rgba(255,178,54,0.25), 0 0 8px rgba(255,178,54,0.3)`, overflow: 'hidden',
 };
 const loadFill: React.CSSProperties = {
   display: 'block', height: '100%', width: '38%',
-  background: `repeating-linear-gradient(90deg, ${P} 0px, ${P} 6px, rgba(77,255,106,0.35) 6px, rgba(77,255,106,0.35) 9px)`,
+  background: `repeating-linear-gradient(90deg, ${P} 0px, ${P} 6px, rgba(255,178,54,0.35) 6px, rgba(255,178,54,0.35) 9px)`,
   boxShadow: `0 0 10px ${P}`, animation: 'cb-load 2.4s ease-in-out infinite',
 };
 const caret: React.CSSProperties = { color: P, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
@@ -318,29 +321,29 @@ const cols: React.CSSProperties = {
 const panel: React.CSSProperties = {
   position: 'relative',
   flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
-  background: 'rgba(4,8,3,0.55)', border: `1px solid rgba(166,197,63,0.16)`,
+  background: 'rgba(9,5,2,0.55)', border: `1px solid rgba(224,170,70,0.16)`,
   boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5)',
 };
 const winBar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '14px 18px', fontFamily: mono, fontSize: 17, fontWeight: 700,
-  color: '#7dff92', textTransform: 'uppercase', letterSpacing: 2.5, textShadow: '0 0 10px rgba(77,255,106,0.5)',
-  background: 'rgba(77,255,106,0.08)', borderBottom: `1px dashed #4f7a3c`,
+  color: '#ffce7a', textTransform: 'uppercase', letterSpacing: 2.5, textShadow: '0 0 10px rgba(255,178,54,0.5)',
+  background: 'rgba(255,178,54,0.08)', borderBottom: `1px dashed #7a5a2c`,
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 // A live "● READY" status pinned to the right of the host panel's title bar.
 const winStat: React.CSSProperties = {
   marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7,
-  fontFamily: mono, fontSize: 13, letterSpacing: 2, color: '#7dff92',
+  fontFamily: mono, fontSize: 13, letterSpacing: 2, color: '#ffce7a',
 };
 const winStatDot: React.CSSProperties = {
-  width: 8, height: 8, borderRadius: '50%', background: '#4dff6a', boxShadow: '0 0 8px #4dff6a, 0 0 3px #4dff6a',
+  width: 8, height: 8, borderRadius: '50%', background: '#ffb43a', boxShadow: '0 0 8px #ffb43a, 0 0 3px #ffb43a',
 };
 // Padded body for the host form so every field shares one consistent gutter and rhythm.
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
 // Field caption: a lit ◆ marker, the Korean label, and a dim English tag on the right.
 const cap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', fontFamily: mono, fontSize: 14, fontWeight: 700,
-  letterSpacing: 0.5, color: C.you, marginTop: 4,
+  letterSpacing: 0.5, color: AY, marginTop: 4,
 };
 const capDot: React.CSSProperties = { color: C.rare, fontSize: 11, textShadow: '0 0 8px rgba(216,162,60,0.6)' };
 const capHint: React.CSSProperties = { marginLeft: 'auto', fontSize: 11, letterSpacing: 2, color: C.faint, fontWeight: 600 };
@@ -350,11 +353,11 @@ const empty: React.CSSProperties = { color: C.faint, fontSize: 16, fontFamily: m
 const roomRow: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 16,
   padding: '14px 16px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
-  background: 'rgba(166,197,63,0.03)', border: `1px solid ${C.border}`, color: C.text, fontFamily: mono,
+  background: 'rgba(224,170,70,0.03)', border: `1px solid ${C.border}`, color: C.text, fontFamily: mono,
 };
 const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 17, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono };
 const rMode: React.CSSProperties = { fontSize: 19, flexShrink: 0 };
-const rArrow: React.CSSProperties = { color: C.you, marginRight: 2 };
+const rArrow: React.CSSProperties = { color: AY, marginRight: 2 };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
   flex: 1, padding: '14px 14px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
@@ -367,10 +370,10 @@ const visBtnOn: React.CSSProperties = {
 const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: C.faint, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
 const modeToggle: React.CSSProperties = {
   marginTop: 4, padding: '14px 16px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 4, border: `1px dashed ${C.borderHi}`, background: 'rgba(166,197,63,0.02)', fontFamily: mono,
+  borderRadius: 4, border: `1px dashed ${C.borderHi}`, background: 'rgba(224,170,70,0.02)', fontFamily: mono,
   transition: 'border-color .12s, color .12s, background .12s',
 };
-const modeToggleOn: React.CSSProperties = { color: C.you, border: `1px solid rgba(166,197,63,0.5)`, background: 'rgba(166,197,63,0.06)' };
+const modeToggleOn: React.CSSProperties = { color: AY, border: `1px solid rgba(224,170,70,0.5)`, background: 'rgba(224,170,70,0.06)' };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
@@ -378,30 +381,30 @@ const modeCard: React.CSSProperties = {
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const modeCardOn: React.CSSProperties = {
-  border: '1px solid #c3e04d', background: 'rgba(166,197,63,0.1)', boxShadow: '0 0 16px rgba(166,197,63,0.24)',
+  border: '1px solid #e0b24d', background: 'rgba(224,170,70,0.1)', boxShadow: '0 0 16px rgba(224,170,70,0.24)',
 };
 const modeIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
 const modeName: React.CSSProperties = { fontWeight: 700, fontSize: 16, fontFamily: mono };
 const modeTag: React.CSSProperties = { fontSize: 13, color: C.dim, lineHeight: 1.3, fontFamily: mono };
 const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.rare, letterSpacing: 1 };
 const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.dim };
-const rGo: React.CSSProperties = { fontSize: 15, color: C.you, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
+const rGo: React.CSSProperties = { fontSize: 15, color: AY, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
 const field: React.CSSProperties = {
-  padding: '14px 16px', fontSize: 17, color: C.you, outline: 'none', letterSpacing: 0.5,
+  padding: '14px 16px', fontSize: 17, color: AY, outline: 'none', letterSpacing: 0.5,
   background: 'rgba(0,0,0,0.4)', border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: mono,
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  marginTop: 6, padding: '17px 20px', fontSize: 18, fontWeight: 800, color: '#0a0d04', cursor: 'pointer', letterSpacing: 1,
-  border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#d3ef5f,#8fa832)', fontFamily: mono,
-  boxShadow: '0 0 22px rgba(166,197,63,0.3), inset 0 1px 0 rgba(255,255,255,0.4)',
+  marginTop: 6, padding: '17px 20px', fontSize: 18, fontWeight: 800, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
+  border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#ffd77a,#c9922f)', fontFamily: mono,
+  boxShadow: '0 0 22px rgba(224,170,70,0.3), inset 0 1px 0 rgba(255,255,255,0.4)',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 const ghost: React.CSSProperties = {
-  padding: '15px 20px', fontSize: 16, fontWeight: 700, color: C.you, cursor: 'pointer', letterSpacing: 0.5,
-  border: `1px solid ${C.borderHi}`, borderRadius: 4, background: 'rgba(166,197,63,0.04)', fontFamily: mono,
+  padding: '15px 20px', fontSize: 16, fontWeight: 700, color: AY, cursor: 'pointer', letterSpacing: 0.5,
+  border: `1px solid ${C.borderHi}`, borderRadius: 4, background: 'rgba(224,170,70,0.04)', fontFamily: mono,
 };
 const sep: React.CSSProperties = {
   textAlign: 'center', color: C.faint, fontSize: 12, margin: '8px 0 2px', fontFamily: mono,
