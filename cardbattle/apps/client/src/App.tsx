@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useRoom } from './state/useRoom.js';
+import { useRoom, readResumeToken } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
 import { MainMenu } from './ui/MainMenu.js';
 import { Splash } from './ui/Splash.js';
-import { quickPlay } from './net/client.js';
+import { quickPlay, reconnect } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, mono, sans } from './ui/theme.js';
 import { BrandMark } from './ui/BrandMark.js';
@@ -28,10 +28,21 @@ export function App() {
   const [view, setView] = useState<'menu' | 'browser'>('menu');
   // The brand intro plays once per session, right before the menu first appears.
   const [splashDone, setSplashDone] = useState(false);
+  // One-shot: after a page refresh, if a live-game seat is still within its grace window, rejoin it.
+  const [resumeChecked, setResumeChecked] = useState(false);
 
   useEffect(() => {
     if (account === undefined) fetchMe().then((a) => setAccount(a));
   }, [account]);
+
+  // On the first load with a signed-in account, transparently rejoin a dropped game if the
+  // reconnection token is still fresh — a refresh mid-match drops you right back in your seat.
+  useEffect(() => {
+    if (resumeChecked || !account) return;
+    setResumeChecked(true);
+    const token = readResumeToken();
+    if (token) { setSplashDone(true); setConnect(() => () => reconnect(token)); }
+  }, [account, resumeChecked]);
 
   // Go fullscreen on the visitor's first interaction — the browser only grants the Fullscreen
   // API from a user gesture, so we can't request it on load. Fire once, then let go.
@@ -87,16 +98,38 @@ export function App() {
 }
 
 function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: () => void; borderCosmetic?: string }) {
-  const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote, reward, autofillDeadline } = useRoom(connect);
+  const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote, reward, autofillDeadline, status } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
   if (!ui) {
     return <Centered>{error ? `연결 실패: ${error.message}` : '연결 중…'}</Centered>;
   }
-  if (ui.phase === 'lobby') {
-    return <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} onExit={onExit} autofillDeadline={autofillDeadline} />;
-  }
-  return <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} />;
+  return (
+    <>
+      {ui.phase === 'lobby'
+        ? <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} onExit={onExit} autofillDeadline={autofillDeadline} />
+        : <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} />}
+      {status !== 'live' && <ConnOverlay status={status} onExit={onExit} />}
+    </>
+  );
+}
+
+// Covers the table when the socket drops: a soft "재접속 중" veil while the token is retried, then
+// a firm "연결이 끊겼습니다" with an escape hatch once the grace window has lapsed.
+function ConnOverlay({ status, onExit }: { status: 'reconnecting' | 'lost'; onExit: () => void }) {
+  const lost = status === 'lost';
+  return (
+    <div style={connOverlay}>
+      <div style={connCard}>
+        {!lost && <div style={connSpinner} aria-hidden />}
+        <span style={connTitle}>{lost ? '연결이 끊겼습니다' : '재접속 중…'}</span>
+        <span style={connSub}>
+          {lost ? '대전으로 돌아갈 수 없습니다. 목록으로 나가 주세요.' : '자리를 지키고 있습니다. 잠시만 기다려 주세요.'}
+        </span>
+        {lost && <button style={connBtn} onClick={() => { playSfx('back'); onExit(); }}>목록으로</button>}
+      </div>
+    </div>
+  );
 }
 
 // Hand-scattered embers so the drift never looks like a repeating grid — varied column, size,
@@ -262,6 +295,29 @@ function Centered({ children }: { children: React.ReactNode }) {
 const center: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   minHeight: '100vh', gap: 16, color: C.dim, fontFamily: sans, background: C.void,
+};
+
+const connOverlay: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center',
+  background: 'rgba(4,3,5,0.66)', backdropFilter: 'blur(4px)',
+};
+const connCard: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '30px 38px',
+  borderRadius: 16, width: 'min(360px, 90vw)', textAlign: 'center',
+  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
+  boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
+};
+const connSpinner: React.CSSProperties = {
+  width: 34, height: 34, borderRadius: '50%',
+  border: '3px solid rgba(216,162,60,0.2)', borderTopColor: '#e6ad3e',
+  animation: 'cb-spin 0.8s linear infinite',
+};
+const connTitle: React.CSSProperties = { fontSize: 18, fontWeight: 800, color: '#f3eee6', letterSpacing: 1 };
+const connSub: React.CSSProperties = { fontSize: 13, color: C.dim, lineHeight: 1.5 };
+const connBtn: React.CSSProperties = {
+  marginTop: 6, padding: '10px 26px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer',
+  border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };
 
 // Admission-ticket palette — warm brass, obsidian and parchment. Scoped to the login gate.

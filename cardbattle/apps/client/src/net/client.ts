@@ -12,6 +12,8 @@ const endpoint = import.meta.env.DEV
 export interface BattleConnection {
   room: Room;
   sessionId: string;
+  /** Opaque token that lets a dropped client rejoin the SAME seat within the server grace window. */
+  reconnectionToken: string;
 }
 
 /** A battle room as advertised in the lobby browser (mirrors Colyseus IRoomCache). */
@@ -22,7 +24,14 @@ export interface RoomInfo {
   metadata: { title?: string; code?: string; mode?: GameModeId; players?: number; started?: boolean; unlisted?: boolean };
 }
 
-const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId });
+const wrap = (room: Room): BattleConnection => ({ room, sessionId: room.sessionId, reconnectionToken: room.reconnectionToken });
+
+/** Rejoin a room after a dropped socket, reusing the reconnection token so the server restores
+ *  the same seat (within its RECONNECT_SECONDS grace). Rejects if the window has already lapsed. */
+export async function reconnect(token: string): Promise<BattleConnection> {
+  const room = await new Client(endpoint).reconnect(token);
+  return wrap(room);
+}
 
 // The account token (if logged in) rides every join so the server's onAuth can seat the
 // player under their verified account name instead of a client-supplied (spoofable) one.
