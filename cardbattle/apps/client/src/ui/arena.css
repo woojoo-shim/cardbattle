@@ -229,6 +229,23 @@
 .cb-hero-float { animation: cb-hero-float 7s ease-in-out infinite; will-change: transform; }
 .cb-rule { animation: cb-rule-sheen 5.5s cubic-bezier(.5,0,.2,1) infinite; }
 
+/* The two-column entry gate: portal showcase + admission console. Mobile-first single column;
+   splits into side-by-side columns once there's room. Media queries live here because the
+   grid-template switch can't be expressed with inline styles. */
+.cb-gate-split {
+  position: relative; z-index: 2;
+  width: min(1040px, 94vw);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 26px 52px;
+  align-items: center;
+  justify-items: center;
+  padding: 0 20px;
+}
+@media (min-width: 900px) {
+  .cb-gate-split { grid-template-columns: 1.05fr 0.95fr; }
+}
+
 /* ===== Hand cards ===== */
 /* Each freshly dealt/drawn card is flung out of the deck deep in the table, tumbles up through
    3D space (the fan owns the perspective), arcs over the top, then settles with a couple of

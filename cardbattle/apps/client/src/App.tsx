@@ -157,14 +157,8 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
     <div style={gateWrap}>
       <InstallButton />
       <div style={gateMute}><MuteButton /></div>
-      {/* A single dirty bulb hung over the scene — the room's only light, casting a jaundiced
-          shaft down onto the brand and the fanned hand, the way the table is lit in-game. */}
-      <div style={bulbCord} aria-hidden />
-      <div style={lightCone} aria-hidden />
-      <div style={bulb} className="cb-bulb" aria-hidden />
-      <div style={gateGlow} aria-hidden />
-      {/* Dust motes / embers drifting up through the lamp shaft — the still, dead air of the
-          back room made visible. Purely atmospheric, one restrained layer behind the content. */}
+      {/* Dust motes / embers drifting up through the dead air of the back room — one restrained
+          atmospheric layer behind the content. */}
       <div style={emberField} aria-hidden>
         {EMBERS.map((e, i) => (
           <span
@@ -176,98 +170,146 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       </div>
       <div style={gateVignette} aria-hidden />
 
-      <div style={gateContent} className="cb-gate-in">
-        <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
-        <BrandMark size={104} />
-        <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
-
-        <div style={heroFan} className="cb-hero-float" aria-hidden>
-          {HERO_CARDS.map((c, i) => {
-            const t = HERO_TINT[c.rarity] ?? HERO_TINT.common;
-            return (
-              <div key={c.id} className="cb-hero-deal" style={{ ...heroCard(c), animationDelay: `${i * 320}ms` }}>
-                {t.sheen !== 'transparent' && (
-                  <div style={{ ...heroFoil, background: `linear-gradient(128deg, transparent 34%, ${t.sheen} 50%, transparent 66%)` }} />
-                )}
-                <div style={heroArtWindow}>
-                  <div style={{ ...heroArtGlow, background: `radial-gradient(circle at 50% 44%, ${t.glow}, transparent 68%)` }} />
-                  <CardArt id={c.id} size={46} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={tabRow}>
-          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
-          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
-        </div>
-
-        {mode === 'register' && (
-          <>
-            <span style={pickLabel}>캐릭터 선택</span>
-            <div style={pickRow}>
-              {AVATAR_CHOICES.map((c) => {
-                const on = c.id === avatar;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => { setAvatar(c.id); playSfx('hover'); }}
-                    title={c.name}
-                    aria-label={c.name}
-                    aria-pressed={on}
-                    style={pickCell(on)}
-                  >
-                    <AvatarArt avatar={c.id} size={40} />
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        <div style={authFields} className="cb-field">
-          <input
-            className="cb-nick"
-            autoFocus
-            value={username}
-            maxLength={16}
-            placeholder="아이디"
-            autoComplete="username"
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && go()}
-            style={authInput}
-          />
-          <div style={pwWrap}>
-            <input
-              className="cb-nick"
-              value={password}
-              type={showPw ? 'text' : 'password'}
-              maxLength={64}
-              placeholder="비밀번호"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && go()}
-              style={{ ...authInput, paddingRight: 44 }}
-            />
-            <button
-              type="button"
-              onClick={() => { setShowPw((v) => !v); playSfx('toggle'); }}
-              style={pwToggle}
-              aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
-              aria-pressed={showPw}
-              tabIndex={-1}
-            >
-              <Icon name="eye" size={18} color={showPw ? C.you : C.faint} />
-            </button>
+      <div className="cb-gate-split">
+        {/* LEFT — the summoning portal: the crest glowing inside counter-rotating arcane sigils,
+            with the fanned hand dealing in beneath it. */}
+        <div style={heroCol}>
+          <span style={kicker}>◈&nbsp;&nbsp;THE&nbsp;ABYSSAL&nbsp;ARENA&nbsp;&nbsp;◈</span>
+          <div style={portalWrap}>
+            <div style={portalGlow} aria-hidden />
+            <SigilRing />
+            <div style={{ position: 'relative', zIndex: 2 }}><BrandMark size={104} /></div>
           </div>
-          <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
-            {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
-          </button>
+          <div style={heroFan} className="cb-hero-float" aria-hidden>
+            {HERO_CARDS.map((c, i) => {
+              const t = HERO_TINT[c.rarity] ?? HERO_TINT.common;
+              return (
+                <div key={c.id} className="cb-hero-deal" style={{ ...heroCard(c), animationDelay: `${i * 320}ms` }}>
+                  {t.sheen !== 'transparent' && (
+                    <div style={{ ...heroFoil, background: `linear-gradient(128deg, transparent 34%, ${t.sheen} 50%, transparent 66%)` }} />
+                  )}
+                  <div style={heroArtWindow}>
+                    <div style={{ ...heroArtGlow, background: `radial-gradient(circle at 50% 44%, ${t.glow}, transparent 68%)` }} />
+                    <CardArt id={c.id} size={46} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p style={tagline}>여덟이 앉고, 하나가 살아남는다</p>
         </div>
-        {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+
+        {/* RIGHT — the admission console: a corner-bracketed panel holding the entry form. */}
+        <div style={panelCol}>
+          <div style={consolePanel} className="cb-gate-in">
+            <span style={cornerTL} aria-hidden /><span style={cornerTR} aria-hidden />
+            <span style={cornerBL} aria-hidden /><span style={cornerBR} aria-hidden />
+
+            <div style={consoleHead}>
+              <span style={consoleTitle}>입&nbsp;장</span>
+              <span style={consoleSub}>ENTER&nbsp;THE&nbsp;ARENA</span>
+            </div>
+            <div style={ruleWrap} aria-hidden><span className="cb-rule" style={rule} /></div>
+
+            <div style={tabRow}>
+              <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
+              <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
+            </div>
+
+            {mode === 'register' && (
+              <>
+                <span style={pickLabel}>캐릭터 선택</span>
+                <div style={pickRow}>
+                  {AVATAR_CHOICES.map((c) => {
+                    const on = c.id === avatar;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => { setAvatar(c.id); playSfx('hover'); }}
+                        title={c.name}
+                        aria-label={c.name}
+                        aria-pressed={on}
+                        style={pickCell(on)}
+                      >
+                        <AvatarArt avatar={c.id} size={40} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <div style={authFields} className="cb-field">
+              <input
+                className="cb-nick"
+                autoFocus
+                value={username}
+                maxLength={16}
+                placeholder="아이디"
+                autoComplete="username"
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && go()}
+                style={authInput}
+              />
+              <div style={pwWrap}>
+                <input
+                  className="cb-nick"
+                  value={password}
+                  type={showPw ? 'text' : 'password'}
+                  maxLength={64}
+                  placeholder="비밀번호"
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && go()}
+                  style={{ ...authInput, paddingRight: 44 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => { setShowPw((v) => !v); playSfx('toggle'); }}
+                  style={pwToggle}
+                  aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 표시'}
+                  aria-pressed={showPw}
+                  tabIndex={-1}
+                >
+                  <Icon name="eye" size={18} color={showPw ? C.you : C.faint} />
+                </button>
+              </div>
+              <button className="cb-enter" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
+                {busy ? '…' : mode === 'login' ? '로그인' : '가입'}&nbsp;<Icon name="arrowRight" size={16} />
+              </button>
+            </div>
+            {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+/** Counter-rotating arcane sigil rings that halo the brand crest — the summoning portal.
+ * Three stacked SVG layers spin at different rates/directions; purely decorative. */
+function SigilRing() {
+  const nodes = Array.from({ length: 12 }, (_, i) => {
+    const a = (i / 12) * Math.PI * 2;
+    return { x: 100 + Math.cos(a) * 56, y: 100 + Math.sin(a) * 56, big: i % 3 === 0 };
+  });
+  return (
+    <div style={sigilBox} aria-hidden>
+      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 64s linear infinite' }}>
+        <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(216,162,60,0.5)" strokeWidth="0.6" strokeDasharray="1 7" />
+        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(216,162,60,0.16)" strokeWidth="0.6" />
+      </svg>
+      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin-rev 46s linear infinite' }}>
+        <circle cx="100" cy="100" r="74" fill="none" stroke="rgba(166,197,63,0.42)" strokeWidth="1" strokeDasharray="10 13" strokeLinecap="round" />
+      </svg>
+      <svg viewBox="0 0 200 200" style={{ ...sigilLayer, animation: 'cb-spin 92s linear infinite' }}>
+        <circle cx="100" cy="100" r="56" fill="none" stroke="rgba(111,160,140,0.3)" strokeWidth="0.6" />
+        {nodes.map((n, i) => (
+          <circle key={i} cx={n.x} cy={n.y} r={n.big ? 2 : 1}
+            fill={n.big ? 'rgba(216,162,60,0.75)' : 'rgba(166,197,63,0.5)'} />
+        ))}
+      </svg>
     </div>
   );
 }
@@ -290,34 +332,6 @@ const gateWrap: React.CSSProperties = {
     'linear-gradient(180deg, #140b0e 0%, #0c0709 54%, #060305 100%),' +
     '#060305',
 };
-// One restrained pool of dirty lamp light behind the hand — glow is a moment, not wallpaper.
-const gateGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '46%', width: 520, height: 300,
-  transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at center, rgba(216,162,60,0.14), transparent 68%)',
-  filter: 'blur(6px)',
-};
-// The bulb's flex, cord and volumetric shaft — one hanging lamp lighting the whole gate.
-const bulbCord: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: 0, width: 2, height: 'clamp(40px, 9vh, 78px)',
-  transform: 'translateX(-50%)', pointerEvents: 'none',
-  background: 'linear-gradient(180deg, #000, #241a12)',
-};
-const bulb: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: 'clamp(36px, 8.4vh, 72px)', width: 15, height: 19,
-  transform: 'translateX(-50%)', pointerEvents: 'none',
-  borderRadius: '50% 50% 50% 50% / 62% 62% 40% 40%',
-  background: 'radial-gradient(circle at 50% 38%, #ffe6a6, #e2a448 52%, #6e4410 100%)',
-  boxShadow: '0 0 18px 4px rgba(226,164,72,0.5), 0 0 46px 12px rgba(216,162,60,0.22)',
-};
-const lightCone: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: 'clamp(48px, 10vh, 86px)',
-  width: 'min(560px, 96vw)', height: 'min(560px, 78vh)',
-  transform: 'translateX(-50%)', pointerEvents: 'none',
-  clipPath: 'polygon(48% 0, 52% 0, 100% 100%, 0 100%)',
-  background: 'linear-gradient(180deg, rgba(255,224,150,0.20), rgba(226,164,72,0.06) 46%, transparent 78%)',
-  filter: 'blur(7px)', mixBlendMode: 'screen',
-};
 // Full-height field the embers drift up through; sits behind the gate content (z below it).
 const emberField: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden',
@@ -330,17 +344,73 @@ const gateVignette: React.CSSProperties = {
   background: 'radial-gradient(125% 115% at 50% 44%, transparent 56%, rgba(4,3,5,0.92) 100%)',
 };
 
-const gateContent: React.CSSProperties = {
-  position: 'relative', zIndex: 2,
-  display: 'flex', flexDirection: 'column', alignItems: 'center',
-  padding: '0 20px',
+// LEFT portal column — crest, sigil, hero hand, tagline stacked and centred.
+const heroCol: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+};
+// Square stage holding the rotating sigil rings + the crest floating at their centre.
+const portalWrap: React.CSSProperties = {
+  position: 'relative', width: 'clamp(232px, 32vh, 300px)', height: 'clamp(232px, 32vh, 300px)',
+  display: 'grid', placeItems: 'center', margin: '4px 0 2px',
+};
+const portalGlow: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: '128%', height: '128%',
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', borderRadius: '50%',
+  background: 'radial-gradient(circle at 50% 46%, rgba(216,162,60,0.22), rgba(166,197,63,0.08) 42%, transparent 70%)',
+  filter: 'blur(9px)',
+};
+const sigilBox: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: '112%', height: '112%',
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1,
+};
+const sigilLayer: React.CSSProperties = {
+  position: 'absolute', inset: 0, width: '100%', height: '100%', willChange: 'transform',
+};
+const tagline: React.CSSProperties = {
+  margin: '14px 0 0', fontFamily: mono, fontSize: 12, letterSpacing: 3, color: C.dim, textAlign: 'center',
+};
+
+// RIGHT admission-console column.
+const panelCol: React.CSSProperties = {
+  display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%',
+};
+const consolePanel: React.CSSProperties = {
+  position: 'relative', width: 'min(380px, 92vw)', padding: '26px 24px 22px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 16,
+  background: 'linear-gradient(180deg, rgba(28,30,25,0.82), rgba(16,17,15,0.86))',
+  border: `1px solid ${C.border}`,
+  boxShadow: '0 34px 74px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.045)',
+  backdropFilter: 'blur(10px)',
+};
+// L-shaped brackets clamping the four corners of the console — engraved fixture look.
+function corner(v: 'top' | 'bottom', h: 'left' | 'right'): React.CSSProperties {
+  return {
+    position: 'absolute', [v]: 8, [h]: 8, width: 13, height: 13, pointerEvents: 'none',
+    [`border${v[0].toUpperCase()}${v.slice(1)}`]: `1.5px solid ${C.borderHi}`,
+    [`border${h[0].toUpperCase()}${h.slice(1)}`]: `1.5px solid ${C.borderHi}`,
+    opacity: 0.8,
+  } as React.CSSProperties;
+}
+const cornerTL = corner('top', 'left');
+const cornerTR = corner('top', 'right');
+const cornerBL = corner('bottom', 'left');
+const cornerBR = corner('bottom', 'right');
+const consoleHead: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, marginBottom: 6,
+};
+const consoleTitle: React.CSSProperties = {
+  fontFamily: sans, fontSize: 22, fontWeight: 900, letterSpacing: 6, color: C.text,
+  textShadow: '0 2px 12px rgba(0,0,0,0.6)',
+};
+const consoleSub: React.CSSProperties = {
+  fontFamily: mono, fontSize: 9.5, letterSpacing: 5, color: C.faint, textTransform: 'uppercase',
 };
 const kicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 6, color: C.faint, textTransform: 'uppercase',
-  marginBottom: 12,
+  marginBottom: 4,
 };
 const ruleWrap: React.CSSProperties = {
-  marginTop: 14, width: 'min(340px, 74vw)', height: 2, borderRadius: 2, overflow: 'hidden',
+  margin: '12px 0 16px', width: 'min(240px, 78%)', height: 2, borderRadius: 2, overflow: 'hidden',
 };
 const rule: React.CSSProperties = {
   display: 'block', width: '100%', height: '100%',
@@ -349,7 +419,7 @@ const rule: React.CSSProperties = {
 };
 
 const heroFan: React.CSSProperties = {
-  position: 'relative', width: 'min(440px, 92vw)', height: 168, margin: '30px 0 34px',
+  position: 'relative', width: 'min(420px, 88vw)', height: 168, margin: '10px 0 4px',
   pointerEvents: 'none', filter: 'drop-shadow(0 22px 44px rgba(0,0,0,0.55))',
 };
 // Per-rarity accents mirroring the in-battle hand — glow behind the art, foil sheen on epic+.
@@ -402,7 +472,7 @@ const pickLabel: React.CSSProperties = {
 };
 const pickRow: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8,
-  width: 'min(360px, 90vw)', marginBottom: 18,
+  width: '100%', marginBottom: 18,
 };
 function pickCell(on: boolean): React.CSSProperties {
   return {
@@ -429,12 +499,11 @@ function tab(on: boolean): React.CSSProperties {
     transition: 'color .2s, background .2s',
   };
 }
-// A stacked card holding the id + password fields and the submit action.
+// A recessed well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: 8, width: 'min(360px, 90vw)', padding: 10,
-  borderRadius: 14, background: 'rgba(22,24,20,0.72)', border: `1px solid ${C.border}`,
-  boxShadow: '0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
-  backdropFilter: 'blur(8px)',
+  display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: 10,
+  borderRadius: 12, background: 'rgba(0,0,0,0.26)', border: `1px solid ${C.border}`,
+  boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)',
 };
 const authInput: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: C.text, fontFamily: sans,
