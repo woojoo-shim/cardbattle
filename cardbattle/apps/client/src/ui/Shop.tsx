@@ -52,13 +52,13 @@ export function Shop({ account, onAccount, onClose }: Props) {
 
   return (
     <div style={overlay} onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
+      <div style={modal} className="cb-shop-pop" onClick={(e) => e.stopPropagation()}>
         <div style={head}>
           <div style={hdCol}>
             <span style={hdKicker}>◈&nbsp;&nbsp;암시장 · BLACK MARKET</span>
             <h2 style={hd}>상점</h2>
           </div>
-          <span style={goldPill}><Gold amount={account.gold} /></span>
+          <span style={goldPill} className="cb-gold-shine"><Gold amount={account.gold} /></span>
           <button style={closeBtn} onClick={() => { playSfx('back'); onClose(); }} aria-label="닫기"><Icon name="close" size={14} /></button>
         </div>
 
@@ -100,9 +100,9 @@ function ActionRow({ id, price, equipped, owned, busy, act }: {
   id: string; price: number; equipped: boolean; owned: boolean; busy: boolean; account: Account; act: TabProps['act'];
 }) {
   if (equipped) return <span style={equippedTag}>착용 중</span>;
-  if (owned) return <button style={equipBtn} disabled={busy} onClick={() => { playSfx('select'); act(() => equipCosmetic(id)); }}>착용하기</button>;
+  if (owned) return <button className="cb-shop-btn" style={equipBtn} disabled={busy} onClick={() => { playSfx('select'); act(() => equipCosmetic(id)); }}>착용하기</button>;
   return (
-    <button style={buyBtn} disabled={busy} onClick={() => { playSfx('coin'); act(() => buyCosmetic(id)); }}><Gold amount={price} /> 구매</button>
+    <button className="cb-shop-btn" style={buyBtn} disabled={busy} onClick={() => { playSfx('coin'); act(() => buyCosmetic(id)); }}><Gold amount={price} /> 구매</button>
   );
 }
 
@@ -113,14 +113,14 @@ function BorderTab({ account, owns, busy, act }: TabProps) {
   return (
     <>
       <div style={previewCol}>
-        <div style={cardFrame(sel)}><CardArt id="snipe" size={72} /></div>
+        <div style={cardFrame(sel)} className="cb-shop-float"><CardArt id="snipe" size={72} /></div>
         <span style={previewName}>{sel.name}</span>
         <ActionRow id={sel.id} price={sel.price} equipped={sel.id === account.equippedBorder}
           owned={owns(sel.id)} busy={busy} account={account} act={act} />
       </div>
       <div style={grid}>
         {COSMETICS.map((c) => (
-          <button key={c.id} style={swatch(c.id === sel.id, c.glow)} onClick={() => { playSfx('hover'); setSel(c); }} title={c.name}>
+          <button key={c.id} className="cb-shop-swatch" style={swatch(c.id === sel.id, c.glow)} onClick={() => { playSfx('hover'); setSel(c); }} title={c.name}>
             <span style={swatchName}>{c.name}</span>
             <span style={swatchPrice}>{c.id === account.equippedBorder ? '착용 중' : owns(c.id) ? '보유' : <Gold amount={c.price} />}</span>
           </button>
@@ -149,7 +149,7 @@ function TitleTab({ account, owns, busy, act }: TabProps) {
       </div>
       <div style={grid}>
         {TITLES.map((t) => (
-          <button key={t.id} style={swatch(t.id === sel.id, 'rgba(166,197,63,0.4)')} onClick={() => { playSfx('hover'); setSel(t); }} title={t.name}>
+          <button key={t.id} className="cb-shop-swatch" style={swatch(t.id === sel.id, 'rgba(166,197,63,0.4)')} onClick={() => { playSfx('hover'); setSel(t); }} title={t.name}>
             <span style={t.text ? titleText(t.color) : swatchName}>{t.text || t.name}</span>
             <span style={swatchPrice}>{t.id === account.equippedTitle ? '착용 중' : owns(t.id) ? '보유' : <Gold amount={t.price} />}</span>
           </button>
@@ -168,7 +168,7 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
       <div style={previewCol}>
         <div style={effectPreviewBox(sel.color)}>
           {EFFECT_ICON[sel.id]
-            ? <span style={{ filter: `drop-shadow(0 0 14px ${sel.color})` }}><Icon name={EFFECT_ICON[sel.id]!} size={48} color={sel.color} /></span>
+            ? <span className="cb-shop-float" style={{ filter: `drop-shadow(0 0 14px ${sel.color})` }}><Icon name={EFFECT_ICON[sel.id]!} size={48} color={sel.color} /></span>
             : <span style={titleNone}>(이펙트 없음)</span>}
         </div>
         <span style={previewName}>{sel.name}</span>
@@ -177,7 +177,7 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
       </div>
       <div style={grid}>
         {PLAY_EFFECTS.map((e) => (
-          <button key={e.id} style={swatch(e.id === sel.id, e.color)} onClick={() => { playSfx('hover'); setSel(e); }} title={e.name}>
+          <button key={e.id} className="cb-shop-swatch" style={swatch(e.id === sel.id, e.color)} onClick={() => { playSfx('hover'); setSel(e); }} title={e.name}>
             <span style={{ height: 22, display: 'grid', placeItems: 'center' }}>
               {EFFECT_ICON[e.id] ? <Icon name={EFFECT_ICON[e.id]!} size={20} color={e.color} /> : '—'}
             </span>

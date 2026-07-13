@@ -126,6 +126,31 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* Shop modal springs up as it opens instead of snapping into place. */
+@keyframes cb-shop-pop {
+  0%   { transform: translateY(16px) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+.cb-shop-pop { animation: cb-shop-pop 0.32s cubic-bezier(.2,.85,.3,1) both; }
+/* The showcased preview item floats gently so the display never feels static. */
+@keyframes cb-shop-float {
+  0%, 100% { transform: translateY(0)    rotate(-0.8deg); }
+  50%      { transform: translateY(-7px) rotate(0.8deg); }
+}
+.cb-shop-float { animation: cb-shop-float 4s ease-in-out infinite; }
+/* The gold balance keeps a soft, precious shimmer. */
+@keyframes cb-gold-shine {
+  0%, 100% { text-shadow: 0 0 6px rgba(255,215,94,0.3); }
+  50%      { text-shadow: 0 0 13px rgba(255,215,94,0.75); }
+}
+.cb-gold-shine { animation: cb-gold-shine 2.6s ease-in-out infinite; }
+/* Shop swatch tiles rise toward the cursor and brighten on hover. */
+.cb-shop-swatch { transition: transform .16s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease; }
+.cb-shop-swatch:hover { transform: translateY(-3px); filter: brightness(1.08); }
+/* Buy / equip buttons lift and brighten on hover. */
+.cb-shop-btn { transition: transform .14s ease, filter .16s ease, box-shadow .2s ease; }
+.cb-shop-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.07); }
+.cb-shop-btn:active:not(:disabled) { transform: translateY(0); }
 /* The brand crest breathes a soft neon glow so the badge feels lit, not printed. */
 @keyframes cb-crest-glow {
   0%, 100% { filter: drop-shadow(0 0 4px rgba(124,240,220,0.25)) drop-shadow(0 0 10px rgba(166,197,63,0.14)); }
