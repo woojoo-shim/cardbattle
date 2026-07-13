@@ -198,7 +198,9 @@ const fan: React.CSSProperties = {
 // rotation and hover lift, so the entrance animation never fights the hover transform.
 const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -6px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
-  width: 'clamp(92px, 9vw, 132px)', height: 'clamp(128px, 12.5vw, 184px)',
+  // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
+  // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
+  width: 'clamp(92px, 9vw, 132px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a lit embossed top edge, a fine woven cross-hatch grain,
   // then the rarity-neutral body. Pure CSS — no image, no extra DOM per card.
