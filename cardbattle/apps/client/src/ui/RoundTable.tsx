@@ -143,13 +143,23 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             </div>
 
             <div style={hpBar}>
-              <i style={{ ...hpFill, width: `${hpPct}%`, background: isMe ? `linear-gradient(90deg,#c3e04d,${C.you})` : `linear-gradient(90deg,#ff6b8f,${C.enemy})` }} />
+              {(() => {
+                const crit = p.alive && hpPct <= 30;
+                const fillBg = crit
+                  ? 'linear-gradient(90deg,#ff4d4d,#c4122a)'
+                  : isMe ? `linear-gradient(90deg,#c3e04d,${C.you})` : `linear-gradient(90deg,#ff6b8f,${C.enemy})`;
+                return (
+                  <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
+                    <span style={hpGloss} />
+                  </i>
+                );
+              })()}
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
                 {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
               </span>
-              <span style={val}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
+              <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#ff5a5a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}>◈{p.mana}</span>}
             </div>
             {(() => {
@@ -351,7 +361,12 @@ const spot: React.CSSProperties = {
 const hpBar: React.CSSProperties = {
   width: '86%', height: 8, borderRadius: 6, background: '#0c0f18', border: `1px solid ${C.border}`, overflow: 'hidden',
 };
-const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, transition: 'width .5s cubic-bezier(.22,.61,.36,1)' };
+const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, position: 'relative', overflow: 'hidden', transition: 'width .5s cubic-bezier(.22,.61,.36,1)' };
+// A slim specular strip across the top of the fill — the bar reads as a lit glass tube, not a flat block.
+const hpGloss: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '45%', borderRadius: '6px 6px 40% 40%',
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0))',
+};
 const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, maxWidth: '100%' };
 const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

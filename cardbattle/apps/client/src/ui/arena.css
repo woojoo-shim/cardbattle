@@ -126,6 +126,11 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* Critically-wounded HP bar: a slow red throb so a near-dead seat reads as in danger at a glance. */
+@keyframes cb-hp-crit {
+  0%, 100% { filter: brightness(1)   drop-shadow(0 0 2px rgba(255,60,60,0.5)); }
+  50%      { filter: brightness(1.4) drop-shadow(0 0 8px rgba(255,60,60,0.9)); }
+}
 /* The acting portrait flares up then eases back as a card is played (smooth glow, no flicker). */
 @keyframes cb-cast {
   0%   { filter: brightness(1); }
