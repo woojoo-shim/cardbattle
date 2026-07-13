@@ -126,6 +126,21 @@
   70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
   100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
 }
+/* Atmospheric embers/dust rising through the login lamp shaft — each drifts up, sways, and fades. */
+@keyframes cb-ember {
+  0%   { transform: translateY(0) translateX(0)     scale(1);   opacity: 0; }
+  12%  { opacity: 0.8; }
+  50%  { transform: translateY(-46vh) translateX(14px) scale(0.9); opacity: 0.55; }
+  88%  { opacity: 0.5; }
+  100% { transform: translateY(-92vh) translateX(-10px) scale(0.6); opacity: 0; }
+}
+.cb-ember {
+  position: absolute; bottom: -8px; border-radius: 50%;
+  background: radial-gradient(circle, #ffdca0, rgba(226,164,72,0.5) 60%, transparent 72%);
+  box-shadow: 0 0 6px 1px rgba(226,164,72,0.5);
+  animation: cb-ember linear infinite;
+  will-change: transform, opacity;
+}
 /* Newest combat-log line slides in from the left and fades up as it's appended. */
 @keyframes cb-log-line {
   0%   { transform: translateX(-14px); opacity: 0; }

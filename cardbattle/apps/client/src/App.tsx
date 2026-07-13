@@ -109,6 +109,20 @@ const HERO_CARDS = [
   { id: 'sword',     rarity: 'common',    a: 22,  x: 168,  y: 34 },
 ] as const;
 
+// Hand-scattered embers so the drift never looks like a repeating grid — varied column, size,
+// start offset and speed. Concentrated toward the centre where the lamp shaft falls.
+const EMBERS = [
+  { left: 32, size: 3, delay: 0, dur: 9 },
+  { left: 46, size: 2, delay: 2.4, dur: 11 },
+  { left: 54, size: 4, delay: 5.1, dur: 8.5 },
+  { left: 60, size: 2, delay: 1.2, dur: 12 },
+  { left: 41, size: 3, delay: 6.7, dur: 10 },
+  { left: 68, size: 2, delay: 3.6, dur: 9.5 },
+  { left: 28, size: 2, delay: 8.2, dur: 11.5 },
+  { left: 50, size: 3, delay: 4.3, dur: 13 },
+  { left: 72, size: 3, delay: 7.5, dur: 10.5 },
+] as const;
+
 function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
@@ -149,6 +163,17 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       <div style={lightCone} aria-hidden />
       <div style={bulb} className="cb-bulb" aria-hidden />
       <div style={gateGlow} aria-hidden />
+      {/* Dust motes / embers drifting up through the lamp shaft — the still, dead air of the
+          back room made visible. Purely atmospheric, one restrained layer behind the content. */}
+      <div style={emberField} aria-hidden>
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            className="cb-ember"
+            style={{ left: `${e.left}%`, width: e.size, height: e.size, animationDelay: `${e.delay}s`, animationDuration: `${e.dur}s` }}
+          />
+        ))}
+      </div>
       <div style={gateVignette} aria-hidden />
 
       <div style={gateContent} className="cb-gate-in">
@@ -292,6 +317,10 @@ const lightCone: React.CSSProperties = {
   clipPath: 'polygon(48% 0, 52% 0, 100% 100%, 0 100%)',
   background: 'linear-gradient(180deg, rgba(255,224,150,0.20), rgba(226,164,72,0.06) 46%, transparent 78%)',
   filter: 'blur(7px)', mixBlendMode: 'screen',
+};
+// Full-height field the embers drift up through; sits behind the gate content (z below it).
+const emberField: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden',
 };
 const gateMute: React.CSSProperties = {
   position: 'fixed', top: 16, left: 16, zIndex: 40,
