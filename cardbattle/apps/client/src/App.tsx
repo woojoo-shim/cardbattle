@@ -231,7 +231,9 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
                     aria-pressed={on}
                     style={pickCell(on)}
                   >
-                    <AvatarArt avatar={c.id} size={40} />
+                    {on && <span style={pickPin} aria-hidden><Icon name="check" size={9} color="#1a1206" /></span>}
+                    <span style={pickArt(on)}><AvatarArt avatar={c.id} size={44} /></span>
+                    <span style={pickName(on)}>{c.name}</span>
                   </button>
                 );
               })}
@@ -414,17 +416,51 @@ const pickLabel: React.CSSProperties = {
   marginBottom: 10,
 };
 const pickRow: React.CSSProperties = {
-  display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8,
+  display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
   width: '100%', marginBottom: 18,
 };
+// Each character is a small portrait card: a recessed art window over a name strip, framed in
+// brass and lifted when chosen — reads as picking a fighter, not toggling a swatch.
 function pickCell(on: boolean): React.CSSProperties {
   return {
-    width: 52, height: 52, padding: 0, cursor: 'pointer', borderRadius: 12,
-    display: 'grid', placeItems: 'center',
-    background: on ? 'linear-gradient(160deg, rgba(224,165,60,0.20), rgba(180,120,40,0.10))' : 'rgba(18,14,10,0.6)',
+    position: 'relative', padding: '7px 5px 6px', cursor: 'pointer', borderRadius: 11,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+    background: on
+      ? 'linear-gradient(180deg, rgba(224,165,60,0.22), rgba(120,80,26,0.10))'
+      : 'linear-gradient(180deg, rgba(26,20,14,0.72), rgba(12,9,6,0.86))',
     border: `1px solid ${on ? TICKET.brass : TICKET.edge}`,
-    boxShadow: on ? `0 0 0 1px ${TICKET.brass}, 0 0 16px rgba(224,165,60,0.4)` : 'inset 0 1px 0 rgba(255,240,210,0.05)',
-    transition: 'border-color .2s, box-shadow .2s, background .2s',
+    boxShadow: on
+      ? `0 0 0 1px ${TICKET.brass}, 0 10px 22px rgba(224,165,60,0.28), inset 0 1px 0 rgba(255,240,210,0.10)`
+      : 'inset 0 1px 0 rgba(255,240,210,0.05)',
+    transform: on ? 'translateY(-2px)' : 'none',
+    transition: 'border-color .2s, box-shadow .2s, background .2s, transform .2s',
+  };
+}
+// A little brass "selected" seal pinned to the card corner.
+const pickPin: React.CSSProperties = {
+  position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
+  display: 'grid', placeItems: 'center', zIndex: 2,
+  background: 'linear-gradient(150deg, #f0cf7a, #d8b45a 60%, #b8923c)',
+  boxShadow: '0 2px 8px rgba(40,24,4,0.55)',
+};
+// The recessed portrait well that mounts the avatar art.
+function pickArt(on: boolean): React.CSSProperties {
+  return {
+    width: '100%', aspectRatio: '1', borderRadius: 8, display: 'grid', placeItems: 'center',
+    overflow: 'hidden',
+    background: [
+      `radial-gradient(circle at 50% 38%, ${on ? 'rgba(224,165,60,0.22)' : 'rgba(120,110,90,0.10)'}, transparent 68%)`,
+      'radial-gradient(circle at 50% 42%, rgba(0,0,0,0.10), rgba(0,0,0,0.52))',
+    ].join(','),
+    border: `1px solid ${on ? TICKET.edgeHi : TICKET.edge}`,
+    boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6)',
+  };
+}
+function pickName(on: boolean): React.CSSProperties {
+  return {
+    maxWidth: '100%', fontFamily: sans, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.2,
+    color: on ? TICKET.text : TICKET.faint, textAlign: 'center', lineHeight: 1,
+    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   };
 }
 // Segmented 로그인 / 회원가입 toggle.
