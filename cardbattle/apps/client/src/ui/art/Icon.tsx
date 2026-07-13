@@ -236,8 +236,9 @@ export const MODE_ICON: Record<GameModeId, IconName> = {
 /** Which glyph stands in for each card-play burst effect (replaces cosmetics.ts glyphs).
  * `null` for the "no effect" default. */
 export const EFFECT_ICON: Record<string, IconName | null> = {
-  fx_none: null, fx_sparkle: 'sparkle', fx_petals: 'petal',
-  fx_embers: 'fire', fx_frost: 'frost', fx_stars: 'star',
+  fx_none: null, fx_sparkle: 'sparkle', fx_bolt: 'bolt', fx_petals: 'petal',
+  fx_swirl: 'swirl', fx_hearts: 'heart', fx_embers: 'fire', fx_frost: 'frost',
+  fx_skulls: 'skull', fx_coins: 'coin', fx_stars: 'star', fx_crystal: 'crystal',
 };
 
 /** Inline SVG glyph. Sits on the text baseline via `verticalAlign` so it reads like a letter. */
