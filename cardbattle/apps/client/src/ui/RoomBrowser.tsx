@@ -101,7 +101,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
         <div style={cols}>
         {/* Left: live room list */}
-        <section style={panel}>
+        <section style={panel} className="cb-panel">
           <div style={winBar}>
             <span>OPEN SESSIONS</span>
             <span style={winMeta}>{open.length} FOUND</span>
@@ -125,9 +125,10 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         </section>
 
         {/* Right: create / code / quick */}
-        <section style={panel}>
+        <section style={panel} className="cb-panel">
           <div style={winBar}>
             <span>HOST NEW SESSION</span>
+            <span style={winStat}><span style={winStatDot} className="cb-blink" aria-hidden />READY</span>
           </div>
           <div style={form}>
             <label style={cap}><span style={capDot}>&#9670;</span>&nbsp;세션 이름 <span style={capHint}>TITLE</span></label>
@@ -235,6 +236,24 @@ const blinkCss = `
   content: ''; flex: 1; height: 1px;
   background: linear-gradient(90deg, transparent, rgba(166,197,63,0.24), transparent);
 }
+@keyframes cb-blink { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.15; } }
+.cb-blink { animation: cb-blink 1.3s steps(1,end) infinite; }
+/* Hard L-shaped ticks pinned to each panel's four corners — the HUD frame that makes the two
+   columns read as scoped terminal windows rather than plain cards. Drawn as eight thin bars from
+   a single overlay pseudo so there's no extra DOM. */
+.cb-panel::after {
+  content: ''; position: absolute; inset: 5px; pointer-events: none; z-index: 6; opacity: 0.6;
+  background:
+    linear-gradient(#4dff6a 0 0) 0 0 / 15px 2px no-repeat,
+    linear-gradient(#4dff6a 0 0) 0 0 / 2px 15px no-repeat,
+    linear-gradient(#4dff6a 0 0) 100% 0 / 15px 2px no-repeat,
+    linear-gradient(#4dff6a 0 0) 100% 0 / 2px 15px no-repeat,
+    linear-gradient(#4dff6a 0 0) 0 100% / 15px 2px no-repeat,
+    linear-gradient(#4dff6a 0 0) 0 100% / 2px 15px no-repeat,
+    linear-gradient(#4dff6a 0 0) 100% 100% / 15px 2px no-repeat,
+    linear-gradient(#4dff6a 0 0) 100% 100% / 2px 15px no-repeat;
+  filter: drop-shadow(0 0 4px rgba(77,255,106,0.5));
+}
 `;
 
 const wrap: React.CSSProperties = {
@@ -297,6 +316,7 @@ const cols: React.CSSProperties = {
   alignItems: 'stretch', position: 'relative', zIndex: 5,
 };
 const panel: React.CSSProperties = {
+  position: 'relative',
   flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
   background: 'rgba(4,8,3,0.55)', border: `1px solid rgba(166,197,63,0.16)`,
   boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5)',
@@ -307,6 +327,14 @@ const winBar: React.CSSProperties = {
   background: 'rgba(77,255,106,0.08)', borderBottom: `1px dashed #4f7a3c`,
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
+// A live "● READY" status pinned to the right of the host panel's title bar.
+const winStat: React.CSSProperties = {
+  marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7,
+  fontFamily: mono, fontSize: 13, letterSpacing: 2, color: '#7dff92',
+};
+const winStatDot: React.CSSProperties = {
+  width: 8, height: 8, borderRadius: '50%', background: '#4dff6a', boxShadow: '0 0 8px #4dff6a, 0 0 3px #4dff6a',
+};
 // Padded body for the host form so every field shares one consistent gutter and rhythm.
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
 // Field caption: a lit ◆ marker, the Korean label, and a dim English tag on the right.
