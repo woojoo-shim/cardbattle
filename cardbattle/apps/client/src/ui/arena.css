@@ -3,6 +3,22 @@
 /* Auto-fill countdown banner: a slow amber breathe so it reads as "searching…", not urgent. */
 @keyframes cb-fill-pulse { 50% { box-shadow: 0 0 22px rgba(216, 162, 60, 0.28); border-color: rgba(216, 162, 60, 0.6); } }
 .cb-fill-pulse { animation: cb-fill-pulse 1.8s ease-in-out infinite; }
+/* "당신의 턴" onset telegraph — fires once the instant the turn lands on me, so a player can
+   never miss their cue in a crowded 8-way table. The whole layer fades up then out; the words
+   punch in from a blurred spread and settle; a light bar sweeps across; the screen edge blooms
+   in my colour for a beat. All pointer-transparent so it never blocks a play. */
+@keyframes cb-turn-flash { 0% { opacity: 0; } 12% { opacity: 1; } 68% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes cb-turn-text {
+  0% { transform: translateY(9px) scale(1.32); filter: blur(7px); opacity: 0; letter-spacing: 24px; }
+  20% { transform: translateY(0) scale(1); filter: blur(0); opacity: 1; letter-spacing: 11px; }
+  70% { transform: translateY(0) scale(1); opacity: 1; letter-spacing: 11px; }
+  100% { transform: translateY(-7px) scale(1.03); opacity: 0; letter-spacing: 16px; }
+}
+@keyframes cb-turn-sweep {
+  0% { transform: translateX(-135%) skewX(-16deg); opacity: 0; }
+  28% { opacity: 0.85; }
+  100% { transform: translateX(135%) skewX(-16deg); opacity: 0; }
+}
 /* End-screen climax: the title punches in with an overshoot, the winner medallion swells up
    from nothing, and (on victory) a fan of light rays turns slowly behind the winner. */
 @keyframes cb-end-pop {

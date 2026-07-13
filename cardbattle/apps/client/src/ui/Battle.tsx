@@ -42,6 +42,15 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   // Clear a half-finished target selection whenever the turn passes away from me.
   useEffect(() => { if (!isMyTurn) setPending(null); }, [isMyTurn]);
 
+  // Fire the "당신의 턴" telegraph on the RISING edge of my turn — a bump to a nonce key remounts
+  // the banner so its one-shot animation replays each time the turn lands back on me.
+  const [turnFlash, setTurnFlash] = useState(0);
+  const wasMyTurn = useRef(false);
+  useEffect(() => {
+    if (isMyTurn && !wasMyTurn.current) setTurnFlash((n) => n + 1);
+    wasMyTurn.current = isMyTurn;
+  }, [isMyTurn]);
+
   // Sound the freshest game events (whooshes, impacts, win/lose) in lockstep with the VFX.
   const soundCursor = useRef(0);
   useEffect(() => { soundCursor.current = soundEvents(events, soundCursor.current, myId); }, [events, myId]);
@@ -126,6 +135,13 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
+      {turnFlash > 0 && (
+        <div key={turnFlash} style={turnBanner} aria-hidden>
+          <span style={turnEdge} />
+          <span style={turnSweep} />
+          <span style={turnWord}>당신의 턴</span>
+        </div>
+      )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
         <div style={fieldGrid} />
@@ -418,6 +434,32 @@ const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
   padding: '8px 18px', background: 'rgba(255,59,107,0.18)', border: `1px solid ${C.enemy}`,
   borderRadius: 999, color: '#ff9cba', fontSize: 14, zIndex: 16,
+};
+// The "당신의 턴" onset telegraph. A full-screen, pointer-transparent layer that flashes up once
+// the instant my turn begins, then clears itself out. zIndex sits under the VfxLayer flash (50)
+// so incoming impacts still read over it, but above the table and needle.
+const turnBanner: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 44, pointerEvents: 'none',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  animation: 'cb-turn-flash 1.5s ease-out forwards',
+};
+// A brief bloom of my colour hugging the screen edge, so the cue registers in peripheral vision.
+const turnEdge: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  boxShadow: 'inset 0 0 150px 26px rgba(166,197,63,0.30)',
+};
+// A raking light bar that wipes across behind the words for a bit of showmanship.
+const turnSweep: React.CSSProperties = {
+  position: 'absolute', top: '50%', left: '50%', width: '58%', height: 132,
+  transform: 'translate(-50%,-50%)',
+  background: 'linear-gradient(90deg, transparent, rgba(166,197,63,0.16) 44%, rgba(230,244,180,0.30) 50%, rgba(166,197,63,0.16) 56%, transparent)',
+  filter: 'blur(2px)', animation: 'cb-turn-sweep 1.5s cubic-bezier(.4,0,.25,1) forwards',
+};
+const turnWord: React.CSSProperties = {
+  position: 'relative', fontFamily: sans, fontWeight: 900, fontSize: 'clamp(44px, 8vw, 96px)',
+  color: '#eaf6c2', letterSpacing: 11,
+  textShadow: '0 0 32px rgba(166,197,63,0.85), 0 0 12px rgba(166,197,63,0.7), 0 6px 20px rgba(0,0,0,0.7)',
+  animation: 'cb-turn-text 1.5s cubic-bezier(.16,.84,.3,1) forwards',
 };
 const errToast: React.CSSProperties = {
   position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
