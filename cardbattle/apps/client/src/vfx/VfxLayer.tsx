@@ -18,9 +18,7 @@ type Fx =
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
-  | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'charge'; x: number; y: number; color: string }
-  | { id: number; kind: 'slash'; x: number; y: number; color: string; ang: number; delay: number; big: boolean }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -172,29 +170,30 @@ export function VfxLayer({ events, players }: Props) {
           add.push(...burstParticles(() => nextId.current++, src.x, src.y, caster!.effect, fxDef.color));
         }
       } else if (e.type === 'damage_dealt') {
-        const tgt = centerOf(e.targetId);
-        if (!tgt) continue;
+        // Only bail if the target truly isn't on screen. Everything else is DEFERRED to the exact
+        // moment of impact and the face is RE-MEASURED then — so the hit lands dead-centre on the
+        // portrait even after the mouse-parallax has drifted the seat since the card was played.
+        if (!centerOf(e.targetId)) continue;
         damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
-        // The streak was already launched by the preceding card_played; as it arrives the target
-        // recoils and the damage number rises off the face. The hit now DETONATES on impact: a
-        // white-hot flash ringed by a shockwave, plus a spray of sparks — all delayed to land in
-        // lockstep with the comet and the slam number.
         const big = e.amount >= 8;
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big });
-        // Art-directed hit: the blade-cut is the hero (a crossing second cut on heavy blows), backed by
-        // ONE tight contact flash and a little tapered debris — no generic soft glow-rings or firework spray.
-        const cut = -34 + (Math.random() * 26 - 13);
-        add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: cut, delay: IMPACT_DELAY, big });
-        if (big) add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: cut + 78, delay: IMPACT_DELAY + 0.06, big });
-        add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY, big });
-        const sparks = big ? 7 : 4;
-        for (let i = 0; i < sparks; i++) {
-          const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.7;
-          const dist = 26 + Math.random() * (big ? 40 : 22);
-          add.push({ id: nextId.current++, kind: 'spark', x: tgt.x, y: tgt.y, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay: IMPACT_DELAY });
-        }
-        setTimeout(() => { shake(e.targetId); cameraKick(big); }, IMPACT_DELAY * 1000);
+        // The hit is now ONE cohesive, centred burst — no diagonal slashes or scattered spark dots
+        // slapped on. The slamming damage number is the hero, sitting on a single tight flash that
+        // detonates from the exact centre of the face; the seat recoils and the camera kicks.
+        setTimeout(() => {
+          const t = centerOf(e.targetId);
+          if (t) {
+            const spawn: Fx[] = [
+              { id: nextId.current++, kind: 'impact', x: t.x, y: t.y, color, delay: 0, big },
+              { id: nextId.current++, kind: 'num', x: t.x, y: t.y, text: `${e.amount}`, color, delay: 0, variant: 'hit', big },
+            ];
+            setFx((cur) => [...cur, ...spawn]);
+            const ids = new Set(spawn.map((s) => s.id));
+            setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2000);
+          }
+          shake(e.targetId);
+          cameraKick(big);
+        }, IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
         const from = centerOf(e.targetId);
@@ -243,12 +242,8 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={streakStyle(f)}><span style={streakHeadStyle(f)} /></span>
           ) : f.kind === 'impact' ? (
             <span key={f.id} style={impactStyle(f)} />
-          ) : f.kind === 'spark' ? (
-            <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'charge' ? (
             <span key={f.id} style={chargeStyle(f)} />
-          ) : f.kind === 'slash' ? (
-            <span key={f.id} style={slashStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -330,16 +325,6 @@ function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
     animation: `cb-impact ${f.big ? 0.3 : 0.24}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
   };
 }
-/** A single hot mote flung off the impact point, streaking outward then burning out. */
-function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: 5, height: 5, borderRadius: '50%',
-    background: '#fff', boxShadow: `0 0 9px 2px ${f.color}`,
-    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
-    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
-    animation: `cb-spark 0.5s cubic-bezier(.2,.7,.35,1) ${f.delay}s backwards`,
-  } as React.CSSProperties;
-}
 /** Energy gathering at the caster's seat during the wind-up, then releasing — a bright core orb
  *  that swells and implodes as the strike launches, so the attack reads as charged, not tossed. */
 function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
@@ -350,21 +335,6 @@ function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     animation: 'cb-charge .44s cubic-bezier(.3,.7,.3,1) forwards',
   };
-}
-/** The blade-cut that wipes across the struck target: a bowed white-cored crescent oriented along
- *  --ang that grows out along its length and burns off — a slash, not just a flash ring. */
-function slashStyle(f: Extract<Fx, { kind: 'slash' }>): React.CSSProperties {
-  const w = f.big ? 176 : 126;
-  const h = f.big ? 12 : 9;
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: w, height: h, borderRadius: '50%',
-    // A razor centre: colour edges taper to a hot white core so the cut reads as a sharp blade, not a smear.
-    background: `linear-gradient(90deg, transparent 8%, ${f.color} 38%, #fff 50%, ${f.color} 62%, transparent 92%)`,
-    boxShadow: `0 0 12px ${f.color}`,
-    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
-    ['--ang' as string]: `${f.ang}deg`,
-    animation: `cb-slash .32s cubic-bezier(.2,.7,.3,1) ${f.delay}s backwards`,
-  } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
   return {
