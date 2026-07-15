@@ -25,13 +25,14 @@ type Fx =
  *  Kept in step with the slower, weightier hurl so the hit reads as a deliberate arrival. */
 const IMPACT_DELAY = 0.55;
 
-/** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
+/** Per-element tint for projectiles/impacts — muted printed-ink pigments, not neon; physical/none
+ *  fall back to a dusty ochre-rose. */
 const ELEM: Record<Element, string> = {
-  physical: '#ff5c8a', fire: '#ff7a3c', ice: '#5fd0ff',
-  lightning: '#ffd84a', poison: '#9be85a', holy: '#ffe9a8', none: '#ff5c8a',
+  physical: '#bd6f66', fire: '#c1703c', ice: '#7fa6b6',
+  lightning: '#c4a24e', poison: '#8b9b52', holy: '#d6c69a', none: '#bd6f66',
 };
-const HEAL = '#a6c53f';
-const SHIELD = '#7fb6ff';
+const HEAL = '#8f9d4f';
+const SHIELD = '#7f95aa';
 
 /** Viewport-centre of a player's portrait (the face), so hits land on the person and not the
  *  nameplate below. Prefers the dedicated portrait anchor; falls back to the whole seat card. */
