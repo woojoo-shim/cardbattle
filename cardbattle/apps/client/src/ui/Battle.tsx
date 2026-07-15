@@ -450,24 +450,18 @@ function ChamberDeco() {
 }
 const chamberDeco: React.CSSProperties = {
   position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0,
-  // Mouse-tracked parallax: the back room tips in perspective and drifts OPPOSITE the cursor, so the
-  // den reads as a real receding volume behind the table. scale(1.09) hides the tilt-exposed edges.
-  transform:
-    'perspective(1600px)' +
-    ' rotateX(calc(var(--cb-py, 0) * 5deg))' +
-    ' rotateY(calc(var(--cb-px, 0) * -7deg))' +
-    ' translate(calc(var(--cb-px, 0) * -10px), calc(var(--cb-py, 0) * -8px))' +
-    ' scale(1.09)',
-  transformOrigin: '50% 45%',
-  transition: 'transform .25s ease-out',
+  // Subtle depth parallax: the back room drifts gently OPPOSITE the cursor (NO rotation — a tilting
+  // background reads as disorienting during play). scale(1.04) hides the edges the small drift exposes.
+  transform: 'translate(calc(var(--cb-px, 0) * -6px), calc(var(--cb-py, 0) * -4px)) scale(1.04)',
+  transition: 'transform .3s ease-out',
   willChange: 'transform',
 };
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = {
   position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  // The table + fighters slide WITH the cursor — opposite the back room's drift — for true parallax separation.
-  transform: 'translate(calc(var(--cb-px, 0) * 12px), calc(var(--cb-py, 0) * 8px))',
-  transition: 'transform .2s ease-out',
+  // A faint counter-drift so the table separates slightly from the back room — parallax without any tilt.
+  transform: 'translate(calc(var(--cb-px, 0) * 4px), calc(var(--cb-py, 0) * 3px))',
+  transition: 'transform .25s ease-out',
   willChange: 'transform',
 };
 // The wet concrete floor of the pit: grimy tile seams tilted back in perspective so the lines
