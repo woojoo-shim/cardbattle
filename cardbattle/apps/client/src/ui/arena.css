@@ -248,6 +248,16 @@
   35%  { filter: brightness(1.4) drop-shadow(0 0 16px rgba(255, 255, 255, 0.55)); }
   100% { filter: brightness(1); }
 }
+/* The attacker's committed lunge: a small wind-back (opposite the target), then a weighty drive
+   toward the victim that peaks with a bright flare as the strike lands, then settles. --lx/--ly
+   is the pixel offset toward the target; the seat's translate(-50%,-50%) centring is baked in. */
+@keyframes cb-lunge {
+  0%   { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+  20%  { transform: translate(calc(-50% - var(--lx) * 0.42), calc(-50% - var(--ly) * 0.42)) scale(1.03); filter: brightness(1.15); }
+  44%  { transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) scale(1.1); filter: brightness(1.5) drop-shadow(0 0 18px rgba(255, 255, 255, 0.55)); }
+  68%  { transform: translate(calc(-50% + var(--lx) * 0.22), calc(-50% + var(--ly) * 0.22)) scale(1.03); filter: brightness(1.12); }
+  100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+}
 
 /* ===== Landing / name-gate ("The Abyssal Arena" entry screen) ===== */
 /* Content rises into place on load. */

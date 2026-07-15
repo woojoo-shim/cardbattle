@@ -70,6 +70,19 @@ function castPulse(id: string): void {
   setTimeout(() => { el.style.animation = ''; }, 740);
 }
 
+/** The attacker winds back a hair, then drives a committed lunge toward the victim just before
+ *  the strike lands — a real weighty blow instead of a stationary glow. dirX/dirY = unit vector
+ *  pointing at the target; the seat is centred with translate(-50%,-50%) so the offset is baked in. */
+function lunge(id: string, dirX: number, dirY: number): void {
+  const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
+  if (!el) return;
+  const mag = 18;
+  el.style.setProperty('--lx', `${(dirX * mag).toFixed(1)}px`);
+  el.style.setProperty('--ly', `${(dirY * mag).toFixed(1)}px`);
+  el.style.animation = 'cb-lunge .5s cubic-bezier(.3,.82,.35,1)';
+  setTimeout(() => { el.style.animation = ''; }, 520);
+}
+
 /**
  * S1 attack-animation layer. Maps the GameEvent stream to lightweight DOM effects:
  * a projectile orb flies attacker→target, lands with an impact ring + portrait shake,
@@ -126,13 +139,16 @@ export function VfxLayer({ events, players }: Props) {
           const dest = chosen ?? tableCenter() ?? src;
           const dx = dest.x - src.x, dy = dest.y - src.y;
           add.push({ id: nextId.current++, kind: 'streak', x: src.x, y: src.y, dx, dy, color, ang: Math.atan2(dy, dx) * 180 / Math.PI });
+          // The attacker physically lunges at the victim — the missing weight in the old motion.
+          const len = Math.hypot(dx, dy) || 1;
+          lunge(e.playerId, dx / len, dy / len);
         } else {
           // Non-offensive cards (heal/shield/tempo) are dealt onto the table in front of the player.
           const c = tableCenter();
           const spot = c ? { x: src.x + (c.x - src.x) * 0.34, y: src.y + (c.y - src.y) * 0.34 } : src;
           add.push({ id: nextId.current++, kind: 'cast', x: spot.x, y: spot.y, dx: src.x - spot.x, dy: src.y - spot.y, defId: e.defId, name: def.name, color });
+          castPulse(e.playerId);
         }
-        castPulse(e.playerId);
         // Cosmetic play-effect: a purchasable burst pops at the caster's seat — visible to all.
         const caster = playersRef.current?.find((p) => p.id === e.playerId);
         const fxDef = caster ? EFFECT_BY_ID[caster.effect] : undefined;
