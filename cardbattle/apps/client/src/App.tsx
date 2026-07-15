@@ -122,7 +122,24 @@ function Game({ connect, onExit, borderCosmetic }: { connect: Connect; onExit: (
   const myId = conn?.sessionId ?? '';
 
   if (!ui) {
-    return <Centered>{error ? `연결 실패: ${error.message}` : '연결 중…'}</Centered>;
+    // A failed join/resume must never strand the player on a dead screen. This most often fires
+    // when a saved seat's room has already ended (stale resume token, or an invite link to a
+    // finished game) — surface a calm message and always offer a way back to the lobby list.
+    if (error) {
+      const gone = /disposed|not found|locked|no rooms/i.test(error.message);
+      return (
+        <div style={connOverlay}>
+          <div style={connCard}>
+            <span style={connTitle}>{gone ? '방이 종료되었습니다' : '연결 실패'}</span>
+            <span style={connSub}>
+              {gone ? '이미 끝났거나 사라진 방이에요. 목록으로 돌아가 주세요.' : error.message}
+            </span>
+            <button style={connBtn} onClick={() => { playSfx('back'); onExit(); }}>목록으로</button>
+          </div>
+        </div>
+      );
+    }
+    return <Centered>연결 중…</Centered>;
   }
   return (
     <>
