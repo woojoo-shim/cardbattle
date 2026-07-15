@@ -17,7 +17,7 @@ type Fx =
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
-  | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean; outer?: boolean }
+  | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
   | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'charge'; x: number; y: number; color: string }
   | { id: number; kind: 'slash'; x: number; y: number; color: string; ang: number; delay: number; big: boolean }
@@ -182,15 +182,16 @@ export function VfxLayer({ events, players }: Props) {
         // lockstep with the comet and the slam number.
         const big = e.amount >= 8;
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big });
-        // The detonation: a white-hot core flash, then a trailing shockwave ring races out behind it.
+        // Art-directed hit: the blade-cut is the hero (a crossing second cut on heavy blows), backed by
+        // ONE tight contact flash and a little tapered debris — no generic soft glow-rings or firework spray.
+        const cut = -34 + (Math.random() * 26 - 13);
+        add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: cut, delay: IMPACT_DELAY, big });
+        if (big) add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: cut + 78, delay: IMPACT_DELAY + 0.06, big });
         add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY, big });
-        add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY + 0.05, big, outer: true });
-        // A bright blade-cut wipes across the target on contact — the "slashed" read a bare ring can't give.
-        add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: -34 + (Math.random() * 26 - 13), delay: IMPACT_DELAY, big });
-        const sparks = big ? 14 : 8;
+        const sparks = big ? 7 : 4;
         for (let i = 0; i < sparks; i++) {
-          const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.6;
-          const dist = 34 + Math.random() * (big ? 58 : 34);
+          const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.7;
+          const dist = 26 + Math.random() * (big ? 40 : 22);
           add.push({ id: nextId.current++, kind: 'spark', x: tgt.x, y: tgt.y, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay: IMPACT_DELAY });
         }
         setTimeout(() => { shake(e.targetId); cameraKick(big); }, IMPACT_DELAY * 1000);
@@ -294,38 +295,27 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
  *  Oriented along the travel angle so it always leads with its glowing head. */
 function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: f.x, top: f.y, width: 74, height: 5, borderRadius: 5,
-    background: `linear-gradient(90deg, transparent, ${f.color} 55%, #fff)`,
-    boxShadow: `0 0 16px ${f.color}, 0 0 30px ${f.color}, 6px 0 20px 4px ${f.color}`,
+    position: 'fixed', left: f.x, top: f.y, width: 64, height: 3, borderRadius: 3,
+    background: `linear-gradient(90deg, transparent, ${f.color} 60%, #fff)`,
+    boxShadow: `0 0 10px ${f.color}, 0 0 18px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
-    animation: 'cb-streak .55s cubic-bezier(.4,0,.3,1) forwards',
+    animation: 'cb-streak .5s cubic-bezier(.4,0,.3,1) forwards',
   } as React.CSSProperties;
 }
 /** The detonation an attack makes on arrival: a bright core radial ringed by an element-tinted
  *  shockwave circle, scaled up and thinned out. One element carries both — the background is the
  *  flash, the border is the ring, and both grow together under the transform scale. */
+/** A single TIGHT contact flash at the point of impact — a hard, brief white spark, not a big soft
+ *  expanding bubble. The slash carries the shape; this just marks the moment of contact. */
 function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
-  if (f.outer) {
-    // The trailing shockwave: a thin bright ring that races out well past the core flash and thins to
-    // nothing — sells the concussive "boom" that a single flash can't.
-    const size = f.big ? 132 : 96;
-    return {
-      position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
-      border: `2px solid ${f.color}`, background: 'transparent',
-      boxShadow: `0 0 22px ${f.color}, inset 0 0 12px ${f.color}`,
-      mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-      animation: `cb-shockwave ${f.big ? 0.72 : 0.6}s cubic-bezier(.12,.7,.25,1) ${f.delay}s backwards`,
-    };
-  }
-  const size = f.big ? 118 : 82;
+  const size = f.big ? 74 : 50;
   return {
     position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
-    border: `2px solid ${f.color}`,
-    background: `radial-gradient(circle, rgba(255,255,255,0.96), ${f.color}66 38%, transparent 66%)`,
-    boxShadow: `0 0 30px ${f.color}, 0 0 60px ${f.color}, inset 0 0 24px ${f.color}`,
+    background: `radial-gradient(circle, #fff 0%, ${f.color}aa 32%, transparent 62%)`,
+    boxShadow: `0 0 18px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    animation: `cb-impact ${f.big ? 0.64 : 0.52}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
+    animation: `cb-impact ${f.big ? 0.3 : 0.24}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
   };
 }
 /** A single hot mote flung off the impact point, streaking outward then burning out. */
@@ -342,9 +332,9 @@ function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
  *  that swells and implodes as the strike launches, so the attack reads as charged, not tossed. */
 function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: f.x, top: f.y, width: 34, height: 34, borderRadius: '50%',
-    background: `radial-gradient(circle, #fff, ${f.color} 52%, transparent 72%)`,
-    boxShadow: `0 0 22px ${f.color}, 0 0 40px ${f.color}`,
+    position: 'fixed', left: f.x, top: f.y, width: 26, height: 26, borderRadius: '50%',
+    background: `radial-gradient(circle, #fff 10%, ${f.color} 46%, transparent 72%)`,
+    boxShadow: `0 0 14px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     animation: 'cb-charge .44s cubic-bezier(.3,.7,.3,1) forwards',
   };
@@ -352,15 +342,16 @@ function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
 /** The blade-cut that wipes across the struck target: a bowed white-cored crescent oriented along
  *  --ang that grows out along its length and burns off — a slash, not just a flash ring. */
 function slashStyle(f: Extract<Fx, { kind: 'slash' }>): React.CSSProperties {
-  const w = f.big ? 168 : 120;
-  const h = f.big ? 16 : 12;
+  const w = f.big ? 176 : 126;
+  const h = f.big ? 12 : 9;
   return {
     position: 'fixed', left: f.x, top: f.y, width: w, height: h, borderRadius: '50%',
-    background: `linear-gradient(90deg, transparent, #fff 45%, ${f.color} 72%, transparent)`,
-    boxShadow: `0 0 18px ${f.color}`,
+    // A razor centre: colour edges taper to a hot white core so the cut reads as a sharp blade, not a smear.
+    background: `linear-gradient(90deg, transparent 8%, ${f.color} 38%, #fff 50%, ${f.color} 62%, transparent 92%)`,
+    boxShadow: `0 0 12px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
     ['--ang' as string]: `${f.ang}deg`,
-    animation: `cb-slash .34s cubic-bezier(.2,.7,.3,1) ${f.delay}s backwards`,
+    animation: `cb-slash .32s cubic-bezier(.2,.7,.3,1) ${f.delay}s backwards`,
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {

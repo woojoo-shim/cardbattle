@@ -89,13 +89,6 @@
   84%  { transform: translate(-3px, 2px) scale(1.008); }
   100% { transform: translate(0, 0) scale(1); }
 }
-/* The concussive shockwave ring an attack throws off after the core flash — expands well past the
-   flash and thins out, giving the hit a real "boom". */
-@keyframes cb-shockwave {
-  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-  14%  { opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
-}
 /* The table lamp powering on at game start: a few stutters, then settles to full glow. */
 @keyframes cb-lampon {
   0%   { opacity: 0; }
@@ -154,13 +147,12 @@
   22%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot, 90deg)); opacity: 0; }
 }
-/* Impact when an attack lands: a white-hot flash ringed by an element-tinted shockwave that
-   expands and thins out, synced to the streak's arrival — the hit now detonates on the face
-   instead of the comet quietly fading. Big hits (cb-impact-big) punch a wider, hotter ring. */
+/* Impact when an attack lands: one tight white-hot contact flash synced to the streak's arrival —
+   a hard, brief pop on the face rather than an expanding ring. The slash carries the drama. */
 @keyframes cb-impact {
   0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
   18%  { opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
 }
 /* Energy gathering at the caster during the wind-up: a core orb blooms then implodes as the strike
    releases, so the attack reads as charged rather than casually tossed. */
