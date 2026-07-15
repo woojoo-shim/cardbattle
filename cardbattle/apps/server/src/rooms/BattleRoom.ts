@@ -2,8 +2,8 @@ import { Room, Client, updateLobby } from '@colyseus/core';
 import {
   initGame, startGame, reduce, endTurn, spawnPlayer,
   CARD_DEFS, requiresTarget, resolveMode,
-  type GameState, type Action, type GameEvent, type PlayerState, type GameModeId,
-  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS, MANA_MAX,
+  type GameState, type Action, type GameEvent, type PlayerState, type GameModeId, type CardDef,
+  MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS,
   BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
@@ -262,43 +262,100 @@ export class BattleRoom extends Room<BattleState> {
     this.afterCurrent();
   }
 
-  /** Simple bot policy: heal when badly hurt, else play the first useful affordable card. Only
-   *  ever returns actions the bot can currently pay for — the caller loops until this yields null. */
+  /** Tactical bot policy. Priority ladder, one action per call (the caller loops until null):
+   *    1) LETHAL   — finish any opponent it can outright kill (accounts for shield & pierce)
+   *    2) SURVIVE  — badly hurt → the biggest self-heal it can afford
+   *    3) STRIKE   — focus-fire the weakest foe for the most removed HP; value AoE by how many it hits;
+   *                  disrupt the strongest foe (bind/steal/manaburn); swap HP when frail
+   *    4) BANK     — nothing worth doing → ramp mana (charge/meditate)
+   *  This makes a solo game feel like a real opponent: it never wastes a nuke, never scatters damage,
+   *  and it WILL close the gap and finish you off when you drop low. */
   private chooseBotAction(bot: PlayerState): Action | null {
     const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
-    const has = (card: { defId: string }, kind: string, target?: string) =>
-      CARD_DEFS[card.defId]?.effects.some((e) => e.kind === kind && (target === undefined || (e as any).target === target)) ?? false;
-    const affordable = (card: { defId: string }) => (CARD_DEFS[card.defId]?.cost ?? 99) <= bot.mana;
+    if (opponents.length === 0) return null;
+    const manaMax = this.gs.rules.manaMax;
+    const play = (id: string, targetId?: string): Action =>
+      targetId ? { type: 'play_card', cardInstanceId: id, targetId } : { type: 'play_card', cardInstanceId: id };
 
-    // 1. Badly hurt: prefer a pure self-heal (potion/대회복), not a targeted lifesteal.
-    if (bot.hp < bot.maxHp * 0.5) {
-      const healCard = bot.hand.find((c) => affordable(c) && has(c, 'heal') && !requiresTarget(CARD_DEFS[c.defId]!));
-      if (healCard) return { type: 'play_card', cardInstanceId: healCard.id };
+    const byWeak = [...opponents].sort((a, b) => (a.hp + a.defense) - (b.hp + b.defense) || a.hp - b.hp);
+    const weakest = byWeak[0];
+    const strongest = [...opponents].sort((a, b) => (b.hp + b.defense) - (a.hp + a.defense) || b.hp - a.hp)[0];
+
+    const sumBy = (def: CardDef, kind: string, chosenOnly = false) =>
+      def.effects.filter((e) => e.kind === kind && (!chosenOnly || (e as any).target === 'chosen'))
+                 .reduce((s, e) => s + ((e as any).amount ?? 0), 0);
+    const hasKind = (def: CardDef, kind: string) => def.effects.some((e) => e.kind === kind);
+    // HP actually removed from `opp` by single-targeting this card (defense soaks normal, pierce bypasses,
+    // desperation scales with our own missing HP).
+    const removedFrom = (def: CardDef, opp: PlayerState) => {
+      let normal = sumBy(def, 'damage', true);
+      const desp = def.effects.filter((e) => e.kind === 'desperation').reduce((s, e) => s + (e as any).amount, 0);
+      if (desp) normal += desp + (bot.maxHp - bot.hp);
+      const pierce = sumBy(def, 'pierce');
+      return pierce + Math.max(0, normal - opp.defense);
+    };
+    // HP removed from `opp` by an AoE (damage all / leech) that hits everyone.
+    const aoeRemovedFrom = (def: CardDef, opp: PlayerState) => {
+      const all = def.effects.filter((e) => e.kind === 'damage' && (e as any).target === 'all').reduce((s, e) => s + (e as any).amount, 0);
+      const raw = all + sumBy(def, 'leech');
+      return raw > 0 ? Math.max(0, raw - opp.defense) : 0;
+    };
+
+    const hand = bot.hand.map((c) => ({ inst: c, def: CARD_DEFS[c.defId]! })).filter((h) => h.def && h.def.cost <= bot.mana);
+    if (hand.length === 0) return null;
+
+    // 1) LETHAL — the smart kill. Take the cheapest card that finishes a foe.
+    let lethal: { action: Action; cost: number } | null = null;
+    for (const h of hand) {
+      if (requiresTarget(h.def)) {
+        if (!(hasKind(h.def, 'damage') || hasKind(h.def, 'pierce') || hasKind(h.def, 'desperation'))) continue;
+        const victim = opponents.filter((o) => removedFrom(h.def, o) >= o.hp).sort((a, b) => a.hp - b.hp)[0];
+        if (victim && (!lethal || h.def.cost < lethal.cost)) lethal = { action: play(h.inst.id, victim.id), cost: h.def.cost };
+      } else if (aoeRemovedFrom(h.def, weakest) >= weakest.hp && aoeRemovedFrom(h.def, weakest) > 0) {
+        if (!lethal || h.def.cost < lethal.cost) lethal = { action: play(h.inst.id), cost: h.def.cost };
+      }
+    }
+    if (lethal) return lethal.action;
+
+    // 2) SURVIVE — badly hurt: the strongest self-heal available (else a lifesteal on the weakest).
+    if (bot.hp < bot.maxHp * 0.45) {
+      const heal = hand.filter((h) => sumBy(h.def, 'heal') > 0 && !requiresTarget(h.def) && !hasKind(h.def, 'selfskip'))
+                       .sort((a, b) => sumBy(b.def, 'heal') - sumBy(a.def, 'heal'))[0];
+      if (heal) return play(heal.inst.id);
+      const drain = hand.find((h) => sumBy(h.def, 'heal') > 0 && requiresTarget(h.def) && removedFrom(h.def, weakest) > 0);
+      if (drain) return play(drain.inst.id, weakest.id);
     }
 
-    // 2. Otherwise act on the first playable (affordable) card in hand order.
-    for (const card of bot.hand) {
-      const def = CARD_DEFS[card.defId];
-      if (!def || !affordable(card)) continue;
-      if (requiresTarget(def)) {
-        if (opponents.length > 0) {
-          const target = opponents[Math.floor(Math.random() * opponents.length)];
-          return { type: 'play_card', cardInstanceId: card.id, targetId: target.id };
+    // 3) STRIKE / control — score every affordable play, take the best.
+    const cands: { score: number; action: Action }[] = [];
+    const consider = (score: number, action: Action) => { if (score > 0) cands.push({ score, action }); };
+    for (const h of hand) {
+      const d = h.def;
+      if (requiresTarget(d)) {
+        const removed = removedFrom(d, weakest);
+        if (removed > 0) consider(removed * 3 - d.cost, play(h.inst.id, weakest.id));       // focus-fire
+        if (hasKind(d, 'skip')) consider(9 - d.cost, play(h.inst.id, strongest.id));        // lock down the threat
+        if (hasKind(d, 'steal') || hasKind(d, 'discard')) {
+          const rich = [...opponents].sort((a, b) => b.hand.length - a.hand.length)[0];
+          if (rich.hand.length > 0) consider(6 - d.cost, play(h.inst.id, rich.id));
         }
-        continue;
+        if (hasKind(d, 'manaburn')) {
+          const mrich = [...opponents].sort((a, b) => b.mana - a.mana)[0];
+          if (mrich.mana >= 2) consider(5 - d.cost, play(h.inst.id, mrich.id));
+        }
+        if (hasKind(d, 'swap') && strongest.hp > bot.hp + 12) consider(strongest.hp - bot.hp, play(h.inst.id, strongest.id));
+      } else {
+        const aoe = aoeRemovedFrom(d, weakest);
+        if (aoe > 0) consider(aoe * opponents.length * 2 - d.cost + (sumBy(d, 'leech') ? 4 : 0), play(h.inst.id));
+        if (sumBy(d, 'heal') > 0 && !hasKind(d, 'selfskip') && bot.hp < bot.maxHp * 0.8) consider(sumBy(d, 'heal') - d.cost, play(h.inst.id));
+        if (sumBy(d, 'shield') > 0 && bot.defense < 8 && bot.hp < bot.maxHp * 0.75) consider(sumBy(d, 'shield') / 2 - d.cost, play(h.inst.id));
       }
-      if (has(card, 'damage', 'all') || has(card, 'damage', 'random')) {
-        if (opponents.length > 0) return { type: 'play_card', cardInstanceId: card.id };
-        continue;
-      }
-      if (has(card, 'heal') && bot.hp < bot.maxHp) return { type: 'play_card', cardInstanceId: card.id };
-      if (has(card, 'shield') && bot.defense < 8) return { type: 'play_card', cardInstanceId: card.id };
-      // '역류'(reverse) has no direct value to the bot's heuristic — it simply skips it.
     }
+    if (cands.length) return cands.sort((a, b) => b.score - a.score)[0].action;
 
-    // 3. Nothing better to do this turn: bank mana with '충전' if it's still worth it (not near cap).
-    const chargeCard = bot.hand.find((c) => affordable(c) && has(c, 'mana') && bot.mana <= MANA_MAX - 3);
-    if (chargeCard) return { type: 'play_card', cardInstanceId: chargeCard.id };
+    // 4) BANK — nothing worth attacking with: ramp mana toward a bigger turn if not near the cap.
+    const ramp = hand.find((h) => sumBy(h.def, 'mana') > 0 && bot.mana <= manaMax - 3);
+    if (ramp) return play(ramp.inst.id);
 
     return null;
   }
