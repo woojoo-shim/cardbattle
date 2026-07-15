@@ -62,6 +62,18 @@ function shake(id: string): void {
   setTimeout(() => { el.style.animation = ''; }, 680);
 }
 
+/** A whole-screen camera kick on impact — the entire arena jolts and settles, so a hit shoves the
+ *  world, not just the little portrait. A faint scale masks the edges the translate exposes. Bigger
+ *  hits kick harder. The animation is cleared+restarted so back-to-back hits always re-fire. */
+function cameraKick(big: boolean): void {
+  const el = document.querySelector<HTMLElement>('[data-arena]');
+  if (!el) return;
+  el.style.animation = 'none';
+  void el.offsetWidth; // reflow so a repeat hit restarts the shake from 0
+  el.style.animation = `${big ? 'cb-camera-big' : 'cb-camera'} ${big ? 0.4 : 0.32}s cubic-bezier(.36,.07,.4,1)`;
+  setTimeout(() => { el.style.animation = ''; }, big ? 420 : 340);
+}
+
 /** The acting portrait swells up then eases back as it plays a card — a slow, deliberate glow. */
 function castPulse(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
@@ -175,7 +187,7 @@ export function VfxLayer({ events, players }: Props) {
           const dist = 34 + Math.random() * (big ? 58 : 34);
           add.push({ id: nextId.current++, kind: 'spark', x: tgt.x, y: tgt.y, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay: IMPACT_DELAY });
         }
-        setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
+        setTimeout(() => { shake(e.targetId); cameraKick(big); }, IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
         const from = centerOf(e.targetId);

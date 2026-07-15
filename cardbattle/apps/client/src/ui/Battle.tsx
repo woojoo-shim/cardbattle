@@ -170,7 +170,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   }
 
   return (
-    <div style={screen} ref={sceneRef} onPointerMove={onSceneMove} onPointerLeave={onSceneLeave}>
+    <div style={screen} data-arena ref={sceneRef} onPointerMove={onSceneMove} onPointerLeave={onSceneLeave}>
       <ChamberDeco />
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
