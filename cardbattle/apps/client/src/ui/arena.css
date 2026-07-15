@@ -61,13 +61,21 @@
    naturally like a real recoil. The seat is centred with translate(-50%,-50%), so that
    offset is baked into every key to keep the shake a tiny vibration in place, not a jump. */
 @keyframes cb-shake {
-  0%   { transform: translate(-50%, -50%); }
-  13%  { transform: translate(calc(-50% - 4.4px), calc(-50% + 2.4px)); }
-  27%  { transform: translate(calc(-50% + 3.6px), calc(-50% - 1.8px)); }
-  42%  { transform: translate(calc(-50% - 2.6px), calc(-50% + 1.4px)); }
-  58%  { transform: translate(calc(-50% + 1.8px), calc(-50% - 0.9px)); }
-  75%  { transform: translate(calc(-50% - 1px),   calc(-50% + 0.5px)); }
-  100% { transform: translate(-50%, -50%); }
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  6%   { transform: translate(-50%, -50%) scale(1.16); }                                   /* hitstop: the blow lands and the portrait freezes-punches */
+  16%  { transform: translate(calc(-50% - 5px),   calc(-50% + 2.6px)) scale(1.05); }
+  30%  { transform: translate(calc(-50% + 4px),   calc(-50% - 2px))   scale(1); }
+  46%  { transform: translate(calc(-50% - 2.8px), calc(-50% + 1.4px)) scale(1); }
+  62%  { transform: translate(calc(-50% + 1.9px), calc(-50% - 0.9px)) scale(1); }
+  78%  { transform: translate(calc(-50% - 1px),   calc(-50% + 0.5px)) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+/* The concussive shockwave ring an attack throws off after the core flash — expands well past the
+   flash and thins out, giving the hit a real "boom". */
+@keyframes cb-shockwave {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  14%  { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
 }
 /* The table lamp powering on at game start: a few stutters, then settles to full glow. */
 @keyframes cb-lampon {
@@ -253,9 +261,10 @@
    is the pixel offset toward the target; the seat's translate(-50%,-50%) centring is baked in. */
 @keyframes cb-lunge {
   0%   { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
-  20%  { transform: translate(calc(-50% - var(--lx) * 0.42), calc(-50% - var(--ly) * 0.42)) scale(1.03); filter: brightness(1.15); }
-  44%  { transform: translate(calc(-50% + var(--lx)), calc(-50% + var(--ly))) scale(1.1); filter: brightness(1.5) drop-shadow(0 0 18px rgba(255, 255, 255, 0.55)); }
-  68%  { transform: translate(calc(-50% + var(--lx) * 0.22), calc(-50% + var(--ly) * 0.22)) scale(1.03); filter: brightness(1.12); }
+  14%  { transform: translate(calc(-50% - var(--lx) * 0.5), calc(-50% - var(--ly) * 0.5)) scale(0.97); filter: brightness(1.08); }    /* wind back — coil */
+  27%  { transform: translate(calc(-50% - var(--lx) * 0.56), calc(-50% - var(--ly) * 0.56)) scale(0.96); filter: brightness(1.12); } /* hold — anticipation */
+  46%  { transform: translate(calc(-50% + var(--lx) * 1.14), calc(-50% + var(--ly) * 1.14)) scale(1.13); filter: brightness(1.6) drop-shadow(0 0 22px rgba(255, 255, 255, 0.6)); } /* explosive strike + overshoot */
+  60%  { transform: translate(calc(-50% + var(--lx) * 0.68), calc(-50% + var(--ly) * 0.68)) scale(1.06); filter: brightness(1.2); }  /* settle back from overshoot */
   100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
 }
 

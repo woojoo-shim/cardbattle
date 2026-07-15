@@ -17,13 +17,13 @@ type Fx =
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
-  | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
+  | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean; outer?: boolean }
   | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
  *  Kept in step with the slower, weightier hurl so the hit reads as a deliberate arrival. */
-const IMPACT_DELAY = 0.46;
+const IMPACT_DELAY = 0.55;
 
 /** Per-element tint for projectiles/impacts; physical/none fall back to crimson. */
 const ELEM: Record<Element, string> = {
@@ -58,8 +58,8 @@ function tableCenter(): { x: number; y: number } | null {
 function shake(id: string): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  el.style.animation = 'cb-shake .58s cubic-bezier(.33,.06,.28,.98)';
-  setTimeout(() => { el.style.animation = ''; }, 600);
+  el.style.animation = 'cb-shake .66s cubic-bezier(.33,.06,.28,.98)';
+  setTimeout(() => { el.style.animation = ''; }, 680);
 }
 
 /** The acting portrait swells up then eases back as it plays a card — a slow, deliberate glow. */
@@ -76,11 +76,11 @@ function castPulse(id: string): void {
 function lunge(id: string, dirX: number, dirY: number): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  const mag = 18;
+  const mag = 22;
   el.style.setProperty('--lx', `${(dirX * mag).toFixed(1)}px`);
   el.style.setProperty('--ly', `${(dirY * mag).toFixed(1)}px`);
-  el.style.animation = 'cb-lunge .5s cubic-bezier(.3,.82,.35,1)';
-  setTimeout(() => { el.style.animation = ''; }, 520);
+  el.style.animation = 'cb-lunge .8s cubic-bezier(.34,.8,.3,1)';
+  setTimeout(() => { el.style.animation = ''; }, 820);
 }
 
 /**
@@ -166,11 +166,13 @@ export function VfxLayer({ events, players }: Props) {
         // lockstep with the comet and the slam number.
         const big = e.amount >= 8;
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `${e.amount}`, color, delay: IMPACT_DELAY, variant: 'hit', big });
+        // The detonation: a white-hot core flash, then a trailing shockwave ring races out behind it.
         add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY, big });
-        const sparks = big ? 10 : 6;
+        add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY + 0.05, big, outer: true });
+        const sparks = big ? 14 : 8;
         for (let i = 0; i < sparks; i++) {
           const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.6;
-          const dist = 28 + Math.random() * (big ? 46 : 26);
+          const dist = 34 + Math.random() * (big ? 58 : 34);
           add.push({ id: nextId.current++, kind: 'spark', x: tgt.x, y: tgt.y, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, color, delay: IMPACT_DELAY });
         }
         setTimeout(() => shake(e.targetId), IMPACT_DELAY * 1000);
@@ -195,8 +197,8 @@ export function VfxLayer({ events, players }: Props) {
 
     if (damaged && flashRef.current) {
       // A deep, unhurried crimson bloom at the screen edge — the hit sinks in, then recedes.
-      flashRef.current.style.boxShadow = 'inset 0 0 160px 20px rgba(196,42,74,0.5)';
-      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 260);
+      flashRef.current.style.boxShadow = 'inset 0 0 200px 30px rgba(196,42,74,0.62)';
+      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 300);
     }
 
     if (add.length) {
@@ -270,24 +272,36 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
  *  Oriented along the travel angle so it always leads with its glowing head. */
 function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: f.x, top: f.y, width: 54, height: 3, borderRadius: 3,
-    background: `linear-gradient(90deg, transparent, ${f.color} 62%, #fff)`,
-    boxShadow: `0 0 12px ${f.color}, 0 0 22px ${f.color}`,
+    position: 'fixed', left: f.x, top: f.y, width: 74, height: 5, borderRadius: 5,
+    background: `linear-gradient(90deg, transparent, ${f.color} 55%, #fff)`,
+    boxShadow: `0 0 16px ${f.color}, 0 0 30px ${f.color}, 6px 0 20px 4px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
-    animation: 'cb-streak .46s cubic-bezier(.4,0,.3,1) forwards',
+    animation: 'cb-streak .55s cubic-bezier(.4,0,.3,1) forwards',
   } as React.CSSProperties;
 }
 /** The detonation an attack makes on arrival: a bright core radial ringed by an element-tinted
  *  shockwave circle, scaled up and thinned out. One element carries both — the background is the
  *  flash, the border is the ring, and both grow together under the transform scale. */
 function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
+  if (f.outer) {
+    // The trailing shockwave: a thin bright ring that races out well past the core flash and thins to
+    // nothing — sells the concussive "boom" that a single flash can't.
+    const size = f.big ? 132 : 96;
+    return {
+      position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
+      border: `2px solid ${f.color}`, background: 'transparent',
+      boxShadow: `0 0 22px ${f.color}, inset 0 0 12px ${f.color}`,
+      mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
+      animation: `cb-shockwave ${f.big ? 0.72 : 0.6}s cubic-bezier(.12,.7,.25,1) ${f.delay}s backwards`,
+    };
+  }
   const size = f.big ? 118 : 82;
   return {
     position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
     border: `2px solid ${f.color}`,
-    background: `radial-gradient(circle, rgba(255,255,255,0.92), ${f.color}66 38%, transparent 66%)`,
-    boxShadow: `0 0 26px ${f.color}, inset 0 0 22px ${f.color}`,
+    background: `radial-gradient(circle, rgba(255,255,255,0.96), ${f.color}66 38%, transparent 66%)`,
+    boxShadow: `0 0 30px ${f.color}, 0 0 60px ${f.color}, inset 0 0 24px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     animation: `cb-impact ${f.big ? 0.64 : 0.52}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
   };
