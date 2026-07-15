@@ -117,13 +117,15 @@
   14%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(680deg) scale(1); opacity: 0; }
 }
-/* A sleek light-streak lancing caster->target — a comet that stretches out of its origin,
-   races along its heading (--ang), then fades as its head reaches the target. Kept oriented
-   along the travel direction so scaleX reads as a motion-blur trail, not a sideways squash. */
+/* A comet lancing caster->target: it translates WHOLE from origin to the target's face (oriented
+   along --ang so its head leads), rather than stretching via scaleX — the head child stays a crisp
+   round fireball instead of smearing into a flat beam. Fades in fast, holds, snuffs out on arrival
+   as the impact takes over. */
 @keyframes cb-streak {
-  0%   { transform: translate(-50%, -50%) rotate(var(--ang)) scaleX(0.25); opacity: 0; }
-  16%  { opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--ang)) scaleX(1); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) rotate(var(--ang)); opacity: 0; }
+  18%  { opacity: 1; }
+  82%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--ang)); opacity: 0; }
 }
 /* A hurled spell/orb — glides caster->target, swelling as it nears the impact. */
 @keyframes cb-hurl-glide {

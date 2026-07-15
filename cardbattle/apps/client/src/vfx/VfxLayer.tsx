@@ -240,7 +240,7 @@ export function VfxLayer({ events, players }: Props) {
               {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
             </span>
           ) : f.kind === 'streak' ? (
-            <span key={f.id} style={streakStyle(f)} />
+            <span key={f.id} style={streakStyle(f)}><span style={streakHeadStyle(f)} /></span>
           ) : f.kind === 'impact' ? (
             <span key={f.id} style={impactStyle(f)} />
           ) : f.kind === 'spark' ? (
@@ -291,17 +291,29 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
     animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .64s cubic-bezier(.34,.32,.2,1) forwards`,
   } as React.CSSProperties;
 }
-/** A slender element-tinted comet — bright head, fading tail — that lances caster->target.
- *  Oriented along the travel angle so it always leads with its glowing head. */
+/** A real comet, not a laser line: a tapering trail (this element) leading with a concentrated,
+ *  crisp head orb (the child, streakHeadStyle). Travels caster->target by translating whole —
+ *  no scaleX squash — so the head stays round and reads as a THING being thrown, not a beam. */
 function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: f.x, top: f.y, width: 64, height: 3, borderRadius: 3,
-    background: `linear-gradient(90deg, transparent, ${f.color} 60%, #fff)`,
-    boxShadow: `0 0 10px ${f.color}, 0 0 18px ${f.color}`,
+    position: 'fixed', left: f.x, top: f.y, width: 58, height: 9, borderRadius: '50%',
+    // Trail: transparent at the tail (left), swelling to white-hot at the leading tip (right).
+    background: `linear-gradient(90deg, transparent 4%, ${f.color}00 10%, ${f.color} 58%, #fff 97%)`,
+    boxShadow: `0 0 9px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
-    animation: 'cb-streak .5s cubic-bezier(.4,0,.3,1) forwards',
+    animation: 'cb-streak .52s cubic-bezier(.35,.12,.5,1) forwards',
   } as React.CSSProperties;
+}
+/** The comet's bright head, pinned to the leading (right) tip of the trail — a concentrated
+ *  fireball with a hot white core and a soft element halo. This is what sells "a projectile". */
+function streakHeadStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
+  return {
+    position: 'absolute', right: -7, top: '50%', width: 18, height: 18, borderRadius: '50%',
+    transform: 'translateY(-50%)',
+    background: `radial-gradient(circle, #fff 20%, ${f.color} 52%, transparent 76%)`,
+    boxShadow: `0 0 12px ${f.color}, 0 0 22px ${f.color}`,
+  };
 }
 /** The detonation an attack makes on arrival: a bright core radial ringed by an element-tinted
  *  shockwave circle, scaled up and thinned out. One element carries both — the background is the
