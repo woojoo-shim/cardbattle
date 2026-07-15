@@ -19,6 +19,8 @@ type Fx =
   | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean; outer?: boolean }
   | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; color: string; delay: number }
+  | { id: number; kind: 'charge'; x: number; y: number; color: string }
+  | { id: number; kind: 'slash'; x: number; y: number; color: string; ang: number; delay: number; big: boolean }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -151,6 +153,8 @@ export function VfxLayer({ events, players }: Props) {
           const dest = chosen ?? tableCenter() ?? src;
           const dx = dest.x - src.x, dy = dest.y - src.y;
           add.push({ id: nextId.current++, kind: 'streak', x: src.x, y: src.y, dx, dy, color, ang: Math.atan2(dy, dx) * 180 / Math.PI });
+          // Energy gathers at the caster's hand as they coil, then releases into the strike.
+          add.push({ id: nextId.current++, kind: 'charge', x: src.x, y: src.y, color });
           // The attacker physically lunges at the victim — the missing weight in the old motion.
           const len = Math.hypot(dx, dy) || 1;
           lunge(e.playerId, dx / len, dy / len);
@@ -181,6 +185,8 @@ export function VfxLayer({ events, players }: Props) {
         // The detonation: a white-hot core flash, then a trailing shockwave ring races out behind it.
         add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY, big });
         add.push({ id: nextId.current++, kind: 'impact', x: tgt.x, y: tgt.y, color, delay: IMPACT_DELAY + 0.05, big, outer: true });
+        // A bright blade-cut wipes across the target on contact — the "slashed" read a bare ring can't give.
+        add.push({ id: nextId.current++, kind: 'slash', x: tgt.x, y: tgt.y, color, ang: -34 + (Math.random() * 26 - 13), delay: IMPACT_DELAY, big });
         const sparks = big ? 14 : 8;
         for (let i = 0; i < sparks; i++) {
           const ang = (i / sparks) * Math.PI * 2 + Math.random() * 0.6;
@@ -238,6 +244,10 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={impactStyle(f)} />
           ) : f.kind === 'spark' ? (
             <span key={f.id} style={sparkStyle(f)} />
+          ) : f.kind === 'charge' ? (
+            <span key={f.id} style={chargeStyle(f)} />
+          ) : f.kind === 'slash' ? (
+            <span key={f.id} style={slashStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -326,6 +336,31 @@ function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
     animation: `cb-spark 0.5s cubic-bezier(.2,.7,.35,1) ${f.delay}s backwards`,
+  } as React.CSSProperties;
+}
+/** Energy gathering at the caster's seat during the wind-up, then releasing — a bright core orb
+ *  that swells and implodes as the strike launches, so the attack reads as charged, not tossed. */
+function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 34, height: 34, borderRadius: '50%',
+    background: `radial-gradient(circle, #fff, ${f.color} 52%, transparent 72%)`,
+    boxShadow: `0 0 22px ${f.color}, 0 0 40px ${f.color}`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
+    animation: 'cb-charge .44s cubic-bezier(.3,.7,.3,1) forwards',
+  };
+}
+/** The blade-cut that wipes across the struck target: a bowed white-cored crescent oriented along
+ *  --ang that grows out along its length and burns off — a slash, not just a flash ring. */
+function slashStyle(f: Extract<Fx, { kind: 'slash' }>): React.CSSProperties {
+  const w = f.big ? 168 : 120;
+  const h = f.big ? 16 : 12;
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: w, height: h, borderRadius: '50%',
+    background: `linear-gradient(90deg, transparent, #fff 45%, ${f.color} 72%, transparent)`,
+    boxShadow: `0 0 18px ${f.color}`,
+    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 62,
+    ['--ang' as string]: `${f.ang}deg`,
+    animation: `cb-slash .34s cubic-bezier(.2,.7,.3,1) ${f.delay}s backwards`,
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
