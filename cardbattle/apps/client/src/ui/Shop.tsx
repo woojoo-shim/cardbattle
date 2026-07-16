@@ -11,12 +11,6 @@ import { Icon, EFFECT_ICON } from './art/Icon.js';
 
 // The engraved display serif shared with the menu/lobby — one back-room voice across screens.
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
-// Parchment-page inks for the shop chrome. Product-preview boxes stay dark so cosmetic art pops.
-const INK = '#3a2c18';
-const INK_DIM = '#6b5636';
-const INK_FAINT = '#94805a';
-const SEAL = '#9c3b28';
-const PAPER_HI = '#f4e9cb';
 
 /** Price tag / gold amount with the coin glyph. */
 function Gold({ amount }: { amount: number }) {
@@ -155,7 +149,7 @@ function TitleTab({ account, owns, busy, act }: TabProps) {
       </div>
       <div style={grid}>
         {TITLES.map((t) => (
-          <button key={t.id} className="cb-shop-swatch" style={swatch(t.id === sel.id, 'rgba(156,59,40,0.4)')} onClick={() => { playSfx('hover'); setSel(t); }} title={t.name}>
+          <button key={t.id} className="cb-shop-swatch" style={swatch(t.id === sel.id, 'rgba(166,197,63,0.4)')} onClick={() => { playSfx('hover'); setSel(t); }} title={t.name}>
             <span style={t.text ? titleText(t.color) : swatchName}>{t.text || t.name}</span>
             <span style={swatchPrice}>{t.id === account.equippedTitle ? '착용 중' : owns(t.id) ? '보유' : <Gold amount={t.price} />}</span>
           </button>
@@ -198,46 +192,46 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
 
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
-  // Warm walnut scrim so the parchment modal reads as a page laid on the desk.
+  // Oxblood haze over wet black, matching the menu's back-room mood.
   background:
-    'radial-gradient(70% 60% at 50% 30%, rgba(60,40,16,0.4), transparent 70%),' +
-    'rgba(20,12,4,0.66)',
+    'radial-gradient(70% 60% at 50% 30%, rgba(126,38,62,0.22), transparent 70%),' +
+    'rgba(6,3,5,0.8)',
   backdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(720px, 94vw)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  borderRadius: 18, background: 'linear-gradient(180deg, #eddcb2 0%, #e4d1a4 55%, #d7c194 100%)',
-  border: `1px solid rgba(90,66,34,0.5)`, color: INK,
-  boxShadow: '0 40px 90px rgba(30,18,6,0.5), inset 0 1px 0 rgba(255,250,232,0.5)',
+  borderRadius: 18, background: 'linear-gradient(180deg, #1a1013 0%, #120b0d 55%, #0c0709 100%)',
+  border: `1px solid ${C.borderHi}`, color: C.text,
+  boxShadow: '0 40px 90px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,238,206,0.05)',
 };
 const head: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid rgba(90,66,34,0.34)`,
-  background: 'linear-gradient(180deg, rgba(156,59,40,0.08), transparent)',
+  display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(126,38,62,0.12), transparent)',
 };
 const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
 const hdKicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: INK_FAINT, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
 };
 const hd: React.CSSProperties = {
-  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: INK,
-  textShadow: '0 1px 0 rgba(255,250,232,0.55)',
+  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
+  textShadow: '0 2px 0 #1a0f10, 0 0 24px rgba(126,38,62,0.4)',
 };
 const goldPill: React.CSSProperties = {
-  fontFamily: mono, fontSize: 15, fontWeight: 800, color: PAPER_HI, padding: '5px 12px', borderRadius: 999,
-  border: `1px solid ${SEAL}`, background: 'linear-gradient(180deg,#b8492f,#8f2f1f)',
+  fontFamily: mono, fontSize: 15, fontWeight: 800, color: '#ffd75e', padding: '5px 12px', borderRadius: 999,
+  border: '1px solid #6a5620', background: 'rgba(60,48,12,0.5)',
 };
 const closeBtn: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: 8, cursor: 'pointer', color: INK_DIM, fontSize: 16,
-  border: `1px solid rgba(90,66,34,0.34)`, background: 'rgba(247,238,214,0.5)',
+  width: 34, height: 34, borderRadius: 8, cursor: 'pointer', color: C.dim, fontSize: 16,
+  border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.04)',
 };
 const tabRow: React.CSSProperties = {
-  display: 'flex', gap: 8, padding: '12px 20px 0', borderBottom: `1px solid rgba(90,66,34,0.34)`,
+  display: 'flex', gap: 8, padding: '12px 20px 0', borderBottom: `1px solid ${C.border}`,
 };
 function tabBtn(on: boolean): React.CSSProperties {
   return {
     padding: '9px 18px', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: sans,
-    color: on ? SEAL : INK_DIM, background: 'transparent', border: 'none',
-    borderBottom: on ? `2px solid ${SEAL}` : '2px solid transparent', marginBottom: -1,
+    color: on ? C.you : C.dim, background: 'transparent', border: 'none',
+    borderBottom: on ? `2px solid ${C.you}` : '2px solid transparent', marginBottom: -1,
   };
 }
 const body: React.CSSProperties = { display: 'flex', gap: 20, padding: 20, overflow: 'auto' };
@@ -279,27 +273,27 @@ function effectPreviewBox(color: string): React.CSSProperties {
   };
 }
 const previewName: React.CSSProperties = { fontSize: 15, fontWeight: 800 };
-const equippedTag: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: SEAL };
+const equippedTag: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: C.you };
 const equipBtn: React.CSSProperties = {
-  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: PAPER_HI, cursor: 'pointer', border: 'none',
-  borderRadius: 10, background: 'linear-gradient(100deg,#b8492f,#9c3b28 56%,#7f2f1f)', boxShadow: '0 6px 16px rgba(60,20,10,0.3)',
+  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer', border: 'none',
+  borderRadius: 10, background: 'linear-gradient(180deg,#c3e04d,#8fa832)', boxShadow: '0 6px 16px rgba(166,197,63,0.3)',
 };
 const buyBtn: React.CSSProperties = {
   padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#2a1e04', cursor: 'pointer', border: 'none',
-  borderRadius: 10, background: 'linear-gradient(180deg,#e6b752,#c9922f)', boxShadow: '0 6px 16px rgba(120,84,20,0.3)',
+  borderRadius: 10, background: 'linear-gradient(180deg,#ffd75e,#f4a11a)', boxShadow: '0 6px 16px rgba(244,161,26,0.35)',
 };
-const errLine: React.CSSProperties = { margin: '10px 20px 0', color: SEAL, fontSize: 12.5, textAlign: 'center' };
+const errLine: React.CSSProperties = { margin: '10px 20px 0', color: C.enemy, fontSize: 12.5, textAlign: 'center' };
 const grid: React.CSSProperties = {
   flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 10, alignContent: 'start',
 };
 function swatch(on: boolean, glow: string): React.CSSProperties {
   return {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', cursor: 'pointer',
-    borderRadius: 12, color: INK, fontFamily: sans, minHeight: 66, justifyContent: 'center',
-    background: on ? 'rgba(156,59,40,0.1)' : 'rgba(247,238,214,0.45)',
-    border: on ? `2px solid ${SEAL}` : `1px solid rgba(90,66,34,0.34)`,
-    boxShadow: on ? `inset 0 0 0 1px rgba(156,59,40,0.3)` : 'none',
+    borderRadius: 12, color: C.text, fontFamily: sans, minHeight: 66, justifyContent: 'center',
+    background: on ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
+    border: on ? `2px solid ${C.you}` : `1px solid ${C.border}`,
+    boxShadow: on ? `0 0 14px ${glow}` : 'none',
   };
 }
 const swatchName: React.CSSProperties = { fontSize: 13, fontWeight: 700 };
-const swatchPrice: React.CSSProperties = { fontFamily: mono, fontSize: 11.5, color: INK_DIM };
+const swatchPrice: React.CSSProperties = { fontFamily: mono, fontSize: 11.5, color: C.dim };

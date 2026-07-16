@@ -5,7 +5,7 @@ import { MODE_LIST, GAME_MODES, DEFAULT_MODE, type GameModeId } from '@cardbattl
 import { Shop } from './Shop.js';
 import { Icon, MODE_ICON } from './art/Icon.js';
 import { playSfx } from '../audio/sfx.js';
-import { mono } from './theme.js';
+import { C, mono } from './theme.js';
 
 interface Props {
   account: Account;
@@ -89,7 +89,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
             <div>&gt; User authenticated. Access granted.</div>
             <div>&gt; ABYSSAL ARENA — BACK-ROOM TERMINAL v6</div>
             <div>
-              &gt; Balance:&nbsp;<span style={{ color: SEAL }}>&#9670; {account.gold} GOLD</span>
+              &gt; Balance:&nbsp;<span style={{ color: C.rare }}>&#9670; {account.gold} GOLD</span>
             </div>
             <div style={loadRow}>
               &gt; Establishing uplink&nbsp;
@@ -112,7 +112,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
               <button key={r.roomId} style={roomRow} onClick={() => join(r.roomId)}>
                 <span style={rTitle}>
                   <span style={rMode} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
-                    <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={16} color={SEAL} />
+                    <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={16} color={C.rare} />
                   </span>
                   <span style={rArrow}>&gt;</span>{r.metadata?.title || 'untitled'}
                 </span>
@@ -169,7 +169,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                       onClick={() => { playSfx('select'); setMode(m.id); }}
                       title={m.desc}
                     >
-                      <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={SEAL} /></span>
+                      <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
                       <span style={modeName}>{on ? '> ' : ''}{m.name}</span>
                       <span style={modeTag}>{m.tagline}</span>
                     </button>
@@ -218,54 +218,51 @@ const blinkCss = `
   100% { width: 100%; }
 }
 .cb-input:focus {
-  border-color: #9c3b28 !important;
-  background: rgba(255,250,232,0.7) !important;
-  box-shadow: inset 0 0 0 1px rgba(156,59,40,0.35) !important;
+  border-color: #e0aa46 !important;
+  background: rgba(224,170,70,0.06) !important;
+  box-shadow: inset 0 0 0 1px rgba(224,170,70,0.4), 0 0 18px rgba(224,170,70,0.22) !important;
 }
-.cb-input::placeholder { color: rgba(94,80,54,0.5); }
+.cb-input::placeholder { color: rgba(224,170,70,0.28); }
 .cb-exec { position: relative; overflow: hidden; transition: box-shadow .14s, transform .08s; }
-.cb-exec:hover { box-shadow: 0 6px 16px rgba(60,20,10,0.28); }
+.cb-exec:hover { box-shadow: 0 0 30px rgba(224,170,70,0.5); }
 .cb-exec:active { transform: translateY(1px); }
 .cb-exec::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 35%, rgba(255,247,224,0.28) 50%, transparent 65%);
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
   transform: translateX(-120%); transition: transform .55s ease;
 }
 .cb-exec:hover::after { transform: translateX(120%); }
 .cb-sep::before, .cb-sep::after {
   content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(90,66,34,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(224,170,70,0.24), transparent);
 }
 @keyframes cb-blink { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.15; } }
 .cb-blink { animation: cb-blink 1.3s steps(1,end) infinite; }
-/* Hard L-shaped ticks pinned to each panel's four corners — printed registry corner marks in
-   oxblood ink that make the two columns read as scoped ledger pages rather than plain cards.
-   Drawn as eight thin bars from a single overlay pseudo so there's no extra DOM. */
+/* Hard L-shaped ticks pinned to each panel's four corners — the HUD frame that makes the two
+   columns read as scoped terminal windows rather than plain cards. Drawn as eight thin bars from
+   a single overlay pseudo so there's no extra DOM. */
 .cb-panel::after {
-  content: ''; position: absolute; inset: 5px; pointer-events: none; z-index: 6; opacity: 0.5;
+  content: ''; position: absolute; inset: 5px; pointer-events: none; z-index: 6; opacity: 0.6;
   background:
-    linear-gradient(#9c3b28 0 0) 0 0 / 15px 2px no-repeat,
-    linear-gradient(#9c3b28 0 0) 0 0 / 2px 15px no-repeat,
-    linear-gradient(#9c3b28 0 0) 100% 0 / 15px 2px no-repeat,
-    linear-gradient(#9c3b28 0 0) 100% 0 / 2px 15px no-repeat,
-    linear-gradient(#9c3b28 0 0) 0 100% / 15px 2px no-repeat,
-    linear-gradient(#9c3b28 0 0) 0 100% / 2px 15px no-repeat,
-    linear-gradient(#9c3b28 0 0) 100% 100% / 15px 2px no-repeat,
-    linear-gradient(#9c3b28 0 0) 100% 100% / 2px 15px no-repeat;
+    linear-gradient(#ffb43a 0 0) 0 0 / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 0 / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 0 / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 0 / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 100% / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 0 100% / 2px 15px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 100% / 15px 2px no-repeat,
+    linear-gradient(#ffb43a 0 0) 100% 100% / 2px 15px no-repeat;
+  filter: drop-shadow(0 0 4px rgba(255,178,54,0.5));
 }
 `;
 
-// This browser is now a paper ROOM LEDGER, not a glowing CRT — sepia ink on aged parchment.
-// AY is the body ink; INK_DIM/INK_FAINT the softer inks; SEAL the oxblood ruling/heading accent.
-const AY = '#3a2c18';
-const INK_DIM = '#6b5636';
-const INK_FAINT = '#94805a';
-const SEAL = '#9c3b28';
-const PAPER_HI = '#f4e9cb';
+// Amber phosphor text tone — replaces the theme's sickly-green AY throughout this terminal so
+// the whole browser reads as a warm amber CRT, cohering with the oxblood/brass world.
+const AY = '#f0d18a';
 const wrap: React.CSSProperties = {
   minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'stretch',
   justifyContent: 'flex-start', fontFamily: mono, color: AY,
-  background: 'radial-gradient(78% 60% at 50% 0%, #e6d4ac 0%, #dcc99c 58%, #cdb88a 100%)',
+  background: 'radial-gradient(78% 60% at 50% 0%, #130b0e 0%, #070406 58%, #030203 100%)',
 };
 // The whole browser lives inside one curved CRT monitor: a heavy plastic bezel, a phosphor-dark
 // glass, screen-edge curvature vignette and hard scanlines — so it reads as a terminal screen,
@@ -273,25 +270,23 @@ const wrap: React.CSSProperties = {
 const screen: React.CSSProperties = {
   position: 'relative', flex: 1, minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', gap: 26,
   padding: '56px clamp(28px, 6vw, 96px) 52px', overflow: 'hidden',
-  background: [
-    'radial-gradient(120% 85% at 18% 4%, rgba(255,250,232,0.4), transparent 52%)', // sunlit top of the sheet
-    'radial-gradient(90% 70% at 84% 96%, rgba(140,104,54,0.16), transparent 60%)', // foxed corner
-    'linear-gradient(180deg, #ecdcb4 0%, #e0cd9e 50%, #d3bd8c 100%)',              // parchment body
-  ].join(','),
-  boxShadow: 'inset 0 0 160px 40px rgba(120,90,50,0.16)', // soft page vignette, no glow
+  background: 'radial-gradient(130% 108% at 50% 0%, #2e1c0a 0%, #1c1006 48%, #0a0603 100%)',
+  boxShadow:
+    'inset 0 0 200px 40px rgba(0,0,0,0.82), inset 0 0 120px rgba(255,178,54,0.14),' + // glass depth + hot phosphor haze
+    'inset 0 0 90px rgba(255,178,54,0.3)',                                             // amber bloom
 };
-// A faint ruled-paper line pattern instead of CRT scanlines.
 const scanlines: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3,
-  background: 'repeating-linear-gradient(0deg, rgba(90,66,34,0.05) 0px, rgba(90,66,34,0.05) 1px, transparent 2px, transparent 28px)',
+  background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.34) 0px, rgba(0,0,0,0.34) 1px, transparent 2px, transparent 4px)',
   mixBlendMode: 'multiply',
 };
 const curve: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 4,
-  background: 'radial-gradient(128% 118% at 50% 44%, transparent 62%, rgba(96,68,34,0.4) 100%)',
+  background: 'radial-gradient(128% 118% at 50% 44%, transparent 60%, rgba(8,4,1,0.8) 100%)',
+  boxShadow: 'inset 0 0 140px 44px rgba(8,4,1,0.86)',
 };
-// Ledger heading ink — the oxblood ruling used for the registry title/boot readout.
-const P = SEAL;
+// Fallout-terminal phosphor: a brighter, hotter amber than the body text for the boot readout.
+const P = '#ffb43a';
 const banner: React.CSSProperties = {
   width: '100%', maxWidth: 1280, margin: '0 auto', fontFamily: mono, color: P, letterSpacing: 0.3, textAlign: 'left',
   position: 'relative', zIndex: 5,
@@ -299,21 +294,24 @@ const banner: React.CSSProperties = {
 const welcome: React.CSSProperties = {
   display: 'inline-block', fontSize: 30, fontWeight: 800, letterSpacing: 5, textTransform: 'uppercase',
   color: P, borderBottom: `2px solid ${P}`, paddingBottom: 8,
+  textShadow: `0 0 16px ${P}, 0 0 6px ${P}`,
 };
-// The `>`-prefixed readout under the title — left-aligned mono lines in soft ink.
+// The `>`-prefixed boot log under the title — left-aligned mono lines, hot phosphor green with a glow.
 const bootLines: React.CSSProperties = {
-  marginTop: 14, fontSize: 15, lineHeight: 1.75, color: INK_DIM, letterSpacing: 1,
+  marginTop: 14, fontSize: 15, lineHeight: 1.75, color: P, letterSpacing: 1,
+  textShadow: `0 0 8px rgba(255,178,54,0.5)`,
 };
 const loadRow: React.CSSProperties = { display: 'flex', alignItems: 'center', marginTop: 2 };
 // Bracketed loading track à la `[****---------]`; the fill sweeps across on a loop.
 const loadBar: React.CSSProperties = {
   display: 'inline-block', width: 150, height: 13, verticalAlign: 'middle',
-  border: `1px solid ${P}`, borderRadius: 1, background: 'rgba(247,238,214,0.5)', overflow: 'hidden',
+  border: `1px solid ${P}`, borderRadius: 1, background: 'rgba(0,0,0,0.5)',
+  boxShadow: `inset 0 0 8px rgba(255,178,54,0.25), 0 0 8px rgba(255,178,54,0.3)`, overflow: 'hidden',
 };
 const loadFill: React.CSSProperties = {
   display: 'block', height: '100%', width: '38%',
-  background: `repeating-linear-gradient(90deg, ${P} 0px, ${P} 6px, rgba(156,59,40,0.3) 6px, rgba(156,59,40,0.3) 9px)`,
-  animation: 'cb-load 2.4s ease-in-out infinite',
+  background: `repeating-linear-gradient(90deg, ${P} 0px, ${P} 6px, rgba(255,178,54,0.35) 6px, rgba(255,178,54,0.35) 9px)`,
+  boxShadow: `0 0 10px ${P}`, animation: 'cb-load 2.4s ease-in-out infinite',
 };
 const caret: React.CSSProperties = { color: P, animation: 'cb-caret 1.06s steps(1,end) infinite', marginLeft: 1 };
 const cols: React.CSSProperties = {
@@ -323,22 +321,22 @@ const cols: React.CSSProperties = {
 const panel: React.CSSProperties = {
   position: 'relative',
   flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14, padding: '0 0 22px', borderRadius: 6, overflow: 'hidden',
-  background: 'rgba(247,238,214,0.5)', border: `1px solid rgba(90,66,34,0.34)`,
-  boxShadow: 'inset 0 1px 0 rgba(255,250,232,0.5)',
+  background: 'rgba(9,5,2,0.55)', border: `1px solid rgba(224,170,70,0.16)`,
+  boxShadow: 'inset 0 0 60px rgba(0,0,0,0.5)',
 };
 const winBar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '14px 18px', fontFamily: mono, fontSize: 17, fontWeight: 700,
-  color: SEAL, textTransform: 'uppercase', letterSpacing: 2.5,
-  background: 'rgba(156,59,40,0.08)', borderBottom: `1px dashed rgba(90,66,34,0.4)`,
+  color: '#ffce7a', textTransform: 'uppercase', letterSpacing: 2.5, textShadow: '0 0 10px rgba(255,178,54,0.5)',
+  background: 'rgba(255,178,54,0.08)', borderBottom: `1px dashed #7a5a2c`,
 };
-const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: INK_DIM, letterSpacing: 1 };
+const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 // A live "● READY" status pinned to the right of the host panel's title bar.
 const winStat: React.CSSProperties = {
   marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7,
-  fontFamily: mono, fontSize: 13, letterSpacing: 2, color: SEAL,
+  fontFamily: mono, fontSize: 13, letterSpacing: 2, color: '#ffce7a',
 };
 const winStatDot: React.CSSProperties = {
-  width: 8, height: 8, borderRadius: '50%', background: SEAL,
+  width: 8, height: 8, borderRadius: '50%', background: '#ffb43a', boxShadow: '0 0 8px #ffb43a, 0 0 3px #ffb43a',
 };
 // Padded body for the host form so every field shares one consistent gutter and rhythm.
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
@@ -347,84 +345,84 @@ const cap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', fontFamily: mono, fontSize: 14, fontWeight: 700,
   letterSpacing: 0.5, color: AY, marginTop: 4,
 };
-const capDot: React.CSSProperties = { color: SEAL, fontSize: 11 };
-const capHint: React.CSSProperties = { marginLeft: 'auto', fontSize: 11, letterSpacing: 2, color: INK_FAINT, fontWeight: 600 };
+const capDot: React.CSSProperties = { color: C.rare, fontSize: 11, textShadow: '0 0 8px rgba(216,162,60,0.6)' };
+const capHint: React.CSSProperties = { marginLeft: 'auto', fontSize: 11, letterSpacing: 2, color: C.faint, fontWeight: 600 };
 const execArrow: React.CSSProperties = { fontSize: 13 };
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 300, maxHeight: '52vh', overflowY: 'auto', padding: '6px 20px 20px' };
-const empty: React.CSSProperties = { color: INK_FAINT, fontSize: 16, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
+const empty: React.CSSProperties = { color: C.faint, fontSize: 16, fontFamily: mono, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 16,
   padding: '14px 16px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
-  background: 'rgba(247,238,214,0.45)', border: `1px solid rgba(90,66,34,0.34)`, color: AY, fontFamily: mono,
+  background: 'rgba(224,170,70,0.03)', border: `1px solid ${C.border}`, color: C.text, fontFamily: mono,
 };
 const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 17, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono };
 const rMode: React.CSSProperties = { fontSize: 19, flexShrink: 0 };
 const rArrow: React.CSSProperties = { color: AY, marginRight: 2 };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
-  flex: 1, padding: '14px 14px', fontSize: 16, fontWeight: 700, color: INK_DIM, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 4, border: `1px solid rgba(90,66,34,0.34)`, background: 'rgba(247,238,214,0.4)', fontFamily: mono,
+  flex: 1, padding: '14px 14px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', fontFamily: mono,
   transition: 'border-color .12s, background .12s, color .12s',
 };
 const visBtnOn: React.CSSProperties = {
-  color: PAPER_HI, border: `1px solid ${SEAL}`, background: 'linear-gradient(180deg,#b8492f,#8f2f1f)',
+  color: C.rare, border: '1px solid #d8a23c', background: 'rgba(216,162,60,0.12)', boxShadow: '0 0 14px rgba(216,162,60,0.22)',
 };
-const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: INK_FAINT, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
+const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: C.faint, fontSize: 14, lineHeight: 1.35, fontFamily: mono };
 const modeToggle: React.CSSProperties = {
-  marginTop: 4, padding: '14px 16px', fontSize: 16, fontWeight: 700, color: INK_DIM, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 4, border: `1px dashed rgba(90,66,34,0.5)`, background: 'rgba(247,238,214,0.3)', fontFamily: mono,
+  marginTop: 4, padding: '14px 16px', fontSize: 16, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  borderRadius: 4, border: `1px dashed ${C.borderHi}`, background: 'rgba(224,170,70,0.02)', fontFamily: mono,
   transition: 'border-color .12s, color .12s, background .12s',
 };
-const modeToggleOn: React.CSSProperties = { color: SEAL, border: `1px solid ${SEAL}`, background: 'rgba(156,59,40,0.08)' };
+const modeToggleOn: React.CSSProperties = { color: AY, border: `1px solid rgba(224,170,70,0.5)`, background: 'rgba(224,170,70,0.06)' };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
-  borderRadius: 4, border: `1px solid rgba(90,66,34,0.34)`, background: 'rgba(247,238,214,0.4)', color: AY, fontFamily: mono,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.35)', color: C.text, fontFamily: mono,
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const modeCardOn: React.CSSProperties = {
-  border: `1px solid ${SEAL}`, background: 'rgba(156,59,40,0.1)', boxShadow: 'inset 0 0 0 1px rgba(156,59,40,0.3)',
+  border: '1px solid #e0b24d', background: 'rgba(224,170,70,0.1)', boxShadow: '0 0 16px rgba(224,170,70,0.24)',
 };
 const modeIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
 const modeName: React.CSSProperties = { fontWeight: 700, fontSize: 16, fontFamily: mono };
-const modeTag: React.CSSProperties = { fontSize: 13, color: INK_DIM, lineHeight: 1.3, fontFamily: mono };
-const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: SEAL, letterSpacing: 1 };
-const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: INK_DIM };
-const rGo: React.CSSProperties = { fontSize: 15, color: SEAL, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
+const modeTag: React.CSSProperties = { fontSize: 13, color: C.dim, lineHeight: 1.3, fontFamily: mono };
+const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.rare, letterSpacing: 1 };
+const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 16, color: C.dim };
+const rGo: React.CSSProperties = { fontSize: 15, color: AY, fontWeight: 700, fontFamily: mono, letterSpacing: 0.5 };
 const field: React.CSSProperties = {
   padding: '14px 16px', fontSize: 17, color: AY, outline: 'none', letterSpacing: 0.5,
-  background: 'rgba(255,250,232,0.55)', border: `1px solid rgba(90,66,34,0.34)`, borderRadius: 4, fontFamily: mono,
+  background: 'rgba(0,0,0,0.4)', border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: mono,
   transition: 'border-color .12s, background .12s, box-shadow .12s',
 };
 const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  marginTop: 6, padding: '17px 20px', fontSize: 18, fontWeight: 800, color: PAPER_HI, cursor: 'pointer', letterSpacing: 1,
-  border: 'none', borderRadius: 4, background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)', fontFamily: mono,
-  boxShadow: '0 6px 15px rgba(60,20,10,0.32), inset 0 1px 0 rgba(255,250,232,0.28)',
+  marginTop: 6, padding: '17px 20px', fontSize: 18, fontWeight: 800, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
+  border: 'none', borderRadius: 4, background: 'linear-gradient(180deg,#ffd77a,#c9922f)', fontFamily: mono,
+  boxShadow: '0 0 22px rgba(224,170,70,0.3), inset 0 1px 0 rgba(255,255,255,0.4)',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 const ghost: React.CSSProperties = {
   padding: '15px 20px', fontSize: 16, fontWeight: 700, color: AY, cursor: 'pointer', letterSpacing: 0.5,
-  border: `1px solid rgba(90,66,34,0.5)`, borderRadius: 4, background: 'rgba(247,238,214,0.4)', fontFamily: mono,
+  border: `1px solid ${C.borderHi}`, borderRadius: 4, background: 'rgba(224,170,70,0.04)', fontFamily: mono,
 };
 const sep: React.CSSProperties = {
-  textAlign: 'center', color: INK_FAINT, fontSize: 12, margin: '8px 0 2px', fontFamily: mono,
+  textAlign: 'center', color: C.faint, fontSize: 12, margin: '8px 0 2px', fontFamily: mono,
   letterSpacing: 2.5, textTransform: 'uppercase',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
 };
-const errLine: React.CSSProperties = { margin: '2px 0 0', color: SEAL, fontSize: 15, textAlign: 'center', fontFamily: mono };
+const errLine: React.CSSProperties = { margin: '2px 0 0', color: C.enemy, fontSize: 15, textAlign: 'center', fontFamily: mono };
 const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
 const goldChip: React.CSSProperties = {
-  padding: '8px 16px', fontSize: 13, fontWeight: 800, color: PAPER_HI, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 4, border: `1px solid ${SEAL}`, fontFamily: mono,
-  background: 'linear-gradient(180deg,#b8492f,#8f2f1f)',
-  boxShadow: '0 4px 12px rgba(60,20,10,0.28)',
+  padding: '8px 16px', fontSize: 13, fontWeight: 800, color: '#ffe08a', cursor: 'pointer', letterSpacing: 0.5,
+  borderRadius: 4, border: '1px solid #6a5620', fontFamily: mono,
+  background: 'linear-gradient(180deg, rgba(70,56,16,0.9), rgba(40,32,10,0.9))',
+  boxShadow: '0 6px 16px rgba(180,140,30,0.2)',
 };
 const logout: React.CSSProperties = {
   padding: '8px 14px', fontSize: 12.5, fontWeight: 700, letterSpacing: 0.5,
-  color: INK_DIM, cursor: 'pointer', borderRadius: 4, border: `1px solid rgba(90,66,34,0.34)`,
-  background: 'rgba(247,238,214,0.45)', fontFamily: mono,
+  color: C.dim, cursor: 'pointer', borderRadius: 4, border: `1px solid ${C.border}`,
+  background: 'rgba(10,12,9,0.85)', fontFamily: mono,
 };
