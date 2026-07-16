@@ -268,7 +268,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
                     aria-pressed={on}
                     style={pickCell(on)}
                   >
-                    {on && <span style={pickPin} aria-hidden><Icon name="check" size={9} color="#1a1206" /></span>}
+                    {on && <span style={pickPin} aria-hidden><Icon name="check" size={9} color="#f4e9cb" /></span>}
                     <span style={pickArt(on)}><AvatarArt avatar={c.id} size={44} /></span>
                     <span style={pickName(on)}>{c.name}</span>
                   </button>
@@ -343,32 +343,37 @@ const connOverlay: React.CSSProperties = {
 const connCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '30px 38px',
   borderRadius: 16, width: 'min(360px, 90vw)', textAlign: 'center',
-  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
+  background: `linear-gradient(180deg, ${C.panelHi}, ${C.panel})`, border: `1px solid ${C.border}`,
   boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
 };
 const connSpinner: React.CSSProperties = {
   width: 34, height: 34, borderRadius: '50%',
-  border: '3px solid rgba(216,162,60,0.2)', borderTopColor: '#e6ad3e',
+  border: `3px solid ${C.border}`, borderTopColor: C.rare,
   animation: 'cb-spin 0.8s linear infinite',
 };
-const connTitle: React.CSSProperties = { fontSize: 18, fontWeight: 800, color: '#f3eee6', letterSpacing: 1 };
+const connTitle: React.CSSProperties = { fontSize: 18, fontWeight: 800, color: C.text, letterSpacing: 1 };
 const connSub: React.CSSProperties = { fontSize: 13, color: C.dim, lineHeight: 1.5 };
 const connBtn: React.CSSProperties = {
-  marginTop: 6, padding: '10px 26px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer',
+  marginTop: 6, padding: '10px 26px', fontSize: 14, fontWeight: 800, color: '#f4e9cb', cursor: 'pointer',
   border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+  background: `linear-gradient(100deg, ${C.enemy}, #7f2f1f)`, boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };
 
-// Admission-ticket palette — warm brass, obsidian and parchment. Scoped to the login gate.
-// A speakeasy pass to the back room: gold foil on charred card stock.
+// Admission-ticket palette — printed on AGED PARCHMENT. Scoped to the login gate.
+// A pressed paper pass: dark sepia ink and an oxblood wax seal on cream, foxed stock. No gold foil, no glow.
 const TICKET = {
-  text: '#f3ead6',
-  dim: '#b0a184',
-  faint: '#7c7059',
-  brass: '#d8b45a',
-  accent: '#e6ad3e',
-  edge: 'rgba(216,180,90,0.28)',
-  edgeHi: 'rgba(216,180,90,0.55)',
+  ink: '#3a2c18', // primary sepia ink (dark text ON the light paper)
+  dim: '#6b5636', // secondary ink
+  faint: '#94805a', // faint printed / caption ink
+  paper: '#e7d6ac', // aged parchment base
+  paperHi: '#f4e9cb', // sunlit paper highlight
+  seal: '#9c3b28', // oxblood wax-seal red — the single accent
+  edge: 'rgba(90,66,34,0.34)', // pressed ink hairline
+  edgeHi: 'rgba(90,66,34,0.62)',
+  // legacy aliases so any stray reference keeps compiling
+  text: '#3a2c18',
+  brass: '#9c3b28',
+  accent: '#9c3b28',
 };
 
 const gateWrap: React.CSSProperties = {
@@ -397,18 +402,19 @@ const ticketShell: React.CSSProperties = {
   position: 'relative', zIndex: 2, width: 'min(384px, 92vw)', padding: '18px 26px 20px',
   display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 18,
   background: [
-    'linear-gradient(180deg, rgba(32,25,16,0.92), rgba(14,11,8,0.96))',
-    'repeating-linear-gradient(45deg, rgba(255,240,210,0.012) 0 2px, transparent 2px 5px)',
+    'radial-gradient(120% 85% at 18% 8%, rgba(255,250,232,0.55), transparent 52%)', // top-left sun on the sheet
+    'radial-gradient(85% 65% at 88% 96%, rgba(150,118,66,0.20), transparent 58%)', // foxed / aged corner
+    'repeating-linear-gradient(48deg, rgba(120,95,50,0.045) 0 2px, transparent 2px 6px)', // paper fibre
+    'linear-gradient(180deg, #eddcb2, #e0cd9c)', // parchment body
   ].join(','),
   border: `1px solid ${TICKET.edge}`,
-  boxShadow: '0 42px 92px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,240,210,0.08)',
-  backdropFilter: 'blur(8px)',
+  boxShadow: '0 30px 68px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,250,232,0.6), inset 0 -3px 10px rgba(120,90,50,0.2)',
 };
-// A soft brass halo bleeding out from behind the ticket (negative z so it sits behind the body).
+// A soft warm candle-halo bleeding out from behind the sheet (negative z so it sits behind the body).
 const ticketAura: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '46%', width: '118%', height: '118%',
   transform: 'translate(-50%, -50%)', borderRadius: '50%', pointerEvents: 'none', zIndex: -1,
-  background: 'radial-gradient(circle, rgba(224,165,60,0.16), transparent 66%)',
+  background: 'radial-gradient(circle, rgba(150,112,52,0.14), transparent 66%)',
   filter: 'blur(26px)',
 };
 // An engraved inner hairline that frames the ticket a few px inside its edge.
@@ -423,7 +429,7 @@ const stubTop: React.CSSProperties = {
 };
 const admitTag: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, color: TICKET.dim };
 const admitDot: React.CSSProperties = {
-  width: 5, height: 5, borderRadius: '50%', background: TICKET.accent, boxShadow: `0 0 6px ${TICKET.accent}`,
+  width: 5, height: 5, borderRadius: '50%', background: TICKET.seal,
 };
 const serial: React.CSSProperties = { letterSpacing: 2 };
 // A punched perforation line between stub and body.
@@ -433,16 +439,16 @@ const perf: React.CSSProperties = {
 // The crest sits inside a wax-seal medallion.
 const crestMedallion: React.CSSProperties = {
   display: 'grid', placeItems: 'center', width: 92, height: 92, borderRadius: '50%', margin: '2px 0 8px',
-  background: 'radial-gradient(circle at 50% 42%, rgba(224,165,60,0.16), rgba(12,10,8,0.4) 66%, transparent)',
-  boxShadow: `inset 0 0 0 1px ${TICKET.edge}, 0 0 22px rgba(224,165,60,0.16)`,
+  background: 'radial-gradient(circle at 50% 42%, rgba(156,59,40,0.18), rgba(120,90,50,0.10) 62%, transparent)',
+  boxShadow: `inset 0 0 0 1px ${TICKET.edge}, inset 0 2px 7px rgba(90,66,34,0.28)`,
 };
 const ticketTitle: React.CSSProperties = {
-  margin: 0, fontFamily: sans, fontSize: 26, fontWeight: 900, letterSpacing: 2, color: TICKET.text, textAlign: 'center',
-  textShadow: '0 2px 16px rgba(0,0,0,0.6), 0 0 22px rgba(224,165,60,0.2)',
+  margin: 0, fontFamily: sans, fontSize: 26, fontWeight: 900, letterSpacing: 2, color: TICKET.ink, textAlign: 'center',
+  textShadow: '0 1px 0 rgba(255,250,232,0.55)',
 };
 const ticketSub: React.CSSProperties = {
-  marginTop: 5, marginBottom: 18, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.brass,
-  textTransform: 'uppercase', opacity: 0.85,
+  marginTop: 5, marginBottom: 18, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.seal,
+  textTransform: 'uppercase', opacity: 0.9,
 };
 const stubTagline: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 3, color: TICKET.dim, textAlign: 'center',
@@ -463,12 +469,12 @@ function pickCell(on: boolean): React.CSSProperties {
     position: 'relative', padding: '7px 5px 6px', cursor: 'pointer', borderRadius: 11,
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
     background: on
-      ? 'linear-gradient(180deg, rgba(224,165,60,0.22), rgba(120,80,26,0.10))'
-      : 'linear-gradient(180deg, rgba(26,20,14,0.72), rgba(12,9,6,0.86))',
-    border: `1px solid ${on ? TICKET.brass : TICKET.edge}`,
+      ? 'linear-gradient(180deg, rgba(156,59,40,0.16), rgba(200,168,116,0.14))'
+      : 'linear-gradient(180deg, rgba(226,206,158,0.66), rgba(206,182,132,0.5))',
+    border: `1px solid ${on ? TICKET.seal : TICKET.edge}`,
     boxShadow: on
-      ? `0 0 0 1px ${TICKET.brass}, 0 10px 22px rgba(224,165,60,0.28), inset 0 1px 0 rgba(255,240,210,0.10)`
-      : 'inset 0 1px 0 rgba(255,240,210,0.05)',
+      ? `inset 0 0 0 1px ${TICKET.seal}, 0 7px 16px rgba(90,66,34,0.24), inset 0 1px 0 rgba(255,250,232,0.5)`
+      : 'inset 0 1px 0 rgba(255,250,232,0.4)',
     transform: on ? 'translateY(-2px)' : 'none',
     transition: 'border-color .2s, box-shadow .2s, background .2s, transform .2s',
   };
@@ -477,8 +483,8 @@ function pickCell(on: boolean): React.CSSProperties {
 const pickPin: React.CSSProperties = {
   position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
   display: 'grid', placeItems: 'center', zIndex: 2,
-  background: 'linear-gradient(150deg, #f0cf7a, #d8b45a 60%, #b8923c)',
-  boxShadow: '0 2px 8px rgba(40,24,4,0.55)',
+  background: 'radial-gradient(circle at 40% 34%, #bd4e34, #8f2f1f 72%)',
+  boxShadow: '0 2px 7px rgba(60,20,10,0.45)',
 };
 // The recessed portrait well that mounts the avatar art.
 function pickArt(on: boolean): React.CSSProperties {
@@ -486,11 +492,11 @@ function pickArt(on: boolean): React.CSSProperties {
     width: '100%', aspectRatio: '1', borderRadius: 8, display: 'grid', placeItems: 'center',
     overflow: 'hidden',
     background: [
-      `radial-gradient(circle at 50% 38%, ${on ? 'rgba(224,165,60,0.22)' : 'rgba(120,110,90,0.10)'}, transparent 68%)`,
-      'radial-gradient(circle at 50% 42%, rgba(0,0,0,0.10), rgba(0,0,0,0.52))',
+      `radial-gradient(circle at 50% 38%, ${on ? 'rgba(156,59,40,0.18)' : 'rgba(120,95,50,0.10)'}, transparent 68%)`,
+      'radial-gradient(circle at 50% 42%, rgba(60,44,20,0.10), rgba(48,34,16,0.42))',
     ].join(','),
     border: `1px solid ${on ? TICKET.edgeHi : TICKET.edge}`,
-    boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6)',
+    boxShadow: 'inset 0 2px 8px rgba(60,44,20,0.42)',
   };
 }
 function pickName(on: boolean): React.CSSProperties {
@@ -503,27 +509,27 @@ function pickName(on: boolean): React.CSSProperties {
 // Segmented 로그인 / 회원가입 toggle.
 const tabRow: React.CSSProperties = {
   display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 12,
-  background: 'rgba(10,8,6,0.7)', border: `1px solid ${TICKET.edge}`,
+  background: 'rgba(200,175,125,0.42)', border: `1px solid ${TICKET.edge}`,
 };
 function tab(on: boolean): React.CSSProperties {
   return {
     padding: '9px 22px', fontSize: 14, fontWeight: 800, letterSpacing: 0.5, cursor: 'pointer',
     border: 'none', borderRadius: 9, fontFamily: sans,
-    color: on ? '#1a1206' : TICKET.dim,
-    background: on ? 'linear-gradient(100deg, #f0cf7a, #d8b45a 58%, #b8923c)' : 'transparent',
-    boxShadow: on ? '0 6px 16px rgba(40,24,4,0.5)' : 'none',
+    color: on ? TICKET.paperHi : TICKET.dim,
+    background: on ? 'linear-gradient(180deg, #4a3823, #382a17)' : 'transparent',
+    boxShadow: on ? '0 4px 11px rgba(60,42,18,0.35)' : 'none',
     transition: 'color .2s, background .2s',
   };
 }
 // A recessed well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: 10,
-  borderRadius: 12, background: 'rgba(4,3,2,0.4)', border: `1px solid ${TICKET.edge}`,
-  boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,240,210,0.05)',
+  borderRadius: 12, background: 'rgba(206,182,132,0.36)', border: `1px solid ${TICKET.edge}`,
+  boxShadow: 'inset 0 2px 9px rgba(90,66,34,0.2), inset 0 1px 0 rgba(255,250,232,0.4)',
 };
 const authInput: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: TICKET.text, fontFamily: sans,
-  background: 'rgba(8,6,4,0.5)', border: `1px solid ${TICKET.edge}`, borderRadius: 10, outline: 'none',
+  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: TICKET.ink, fontFamily: sans,
+  background: 'rgba(247,238,214,0.78)', border: `1px solid ${TICKET.edge}`, borderRadius: 10, outline: 'none',
 };
 // Password field wraps the input so the reveal toggle can sit inside its right edge.
 const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
@@ -534,9 +540,9 @@ const pwToggle: React.CSSProperties = {
 };
 const enter: React.CSSProperties = {
   width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 800, letterSpacing: 0.5,
-  color: '#1a1206', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #f2d488, #dcb457 56%, #bc9438)',
-  boxShadow: '0 6px 18px rgba(50,30,4,0.5)',
+  color: TICKET.paperHi, cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)',
+  boxShadow: '0 6px 15px rgba(60,20,10,0.35)',
 };
 const hint: React.CSSProperties = {
   margin: '16px 0 6px', fontSize: 12.5, color: TICKET.faint, fontFamily: sans, letterSpacing: 0.2,
