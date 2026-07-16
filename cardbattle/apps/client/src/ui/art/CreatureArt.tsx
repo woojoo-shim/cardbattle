@@ -1,8 +1,11 @@
 /** Hand-drawn SVG creature portraits — replaces emoji faces. Stylized dark-fantasy
- * head-and-shoulders busts with neon rim light. 64x64 viewBox; scale via `size`. */
+ * head-and-shoulders busts with warm candlelit rim light. 64x64 viewBox; scale via `size`. */
 
-const RED = '#ff3b6b';
-const TEAL = '#38e8c8';
+// De-neoned to match the parchment/candlelight art direction: the old neon-pink /
+// neon-cyan rim lights read as loud on the muted table, so they're now an ember
+// oxblood and a faded verdigris teal.
+const RED = '#c2543a';
+const TEAL = '#79b0a2';
 
 function EyeGlow({ x, color = RED }: { x: number; color?: string }) {
   return (
