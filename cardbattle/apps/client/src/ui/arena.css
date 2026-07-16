@@ -217,8 +217,8 @@
 .cb-shop-btn:active:not(:disabled) { transform: translateY(0); }
 /* The brand crest breathes a soft neon glow so the badge feels lit, not printed. */
 @keyframes cb-crest-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(124,240,220,0.25)) drop-shadow(0 0 10px rgba(166,197,63,0.14)); }
-  50%      { filter: drop-shadow(0 0 9px rgba(124,240,220,0.5))  drop-shadow(0 0 20px rgba(166,197,63,0.28)); }
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(124,240,220,0.25)) drop-shadow(0 0 10px rgba(216,162,60,0.16)); }
+  50%      { filter: drop-shadow(0 0 9px rgba(124,240,220,0.5))  drop-shadow(0 0 20px rgba(216,162,60,0.3)); }
 }
 .cb-crest-glow { animation: cb-crest-glow 4.5s ease-in-out infinite; }
 /* The halo ring behind the crest swells and fades on a slow, offset cycle. */
@@ -262,8 +262,8 @@
 }
 /* Critically-wounded HP bar: a slow red throb so a near-dead seat reads as in danger at a glance. */
 @keyframes cb-hp-crit {
-  0%, 100% { filter: brightness(1)   drop-shadow(0 0 2px rgba(255,60,60,0.5)); }
-  50%      { filter: brightness(1.4) drop-shadow(0 0 8px rgba(255,60,60,0.9)); }
+  0%, 100% { filter: brightness(1)   drop-shadow(0 0 2px rgba(176,70,47,0.55)); }
+  50%      { filter: brightness(1.35) drop-shadow(0 0 8px rgba(176,70,47,0.95)); }
 }
 /* The acting portrait flares up then eases back as a card is played (smooth glow, no flicker). */
 @keyframes cb-cast {
@@ -406,7 +406,7 @@
 .cb-enter:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6), 0 0 22px rgba(166, 197, 63, 0.4);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6), 0 0 22px rgba(156, 59, 40, 0.4);
 }
 .cb-enter:active { transform: translateY(0); }
 /* Ticket-themed login submit — brass hover glow, overrides the shared oxblood .cb-enter:hover. */

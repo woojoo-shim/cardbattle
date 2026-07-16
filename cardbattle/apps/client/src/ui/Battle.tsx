@@ -483,8 +483,8 @@ const fieldHint: React.CSSProperties = {
 const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-  padding: '8px 18px', background: 'rgba(255,59,107,0.18)', border: `1px solid ${C.enemy}`,
-  borderRadius: 999, color: '#ff9cba', fontSize: 14, zIndex: 16,
+  padding: '8px 18px', background: 'rgba(176,70,47,0.18)', border: `1px solid ${C.enemy}`,
+  borderRadius: 999, color: '#e8b4a6', fontSize: 14, zIndex: 16,
 };
 // The "당신의 턴" onset telegraph. A full-screen, pointer-transparent layer that flashes up once
 // the instant my turn begins, then clears itself out. zIndex sits under the VfxLayer flash (50)
@@ -497,25 +497,25 @@ const turnBanner: React.CSSProperties = {
 // A brief bloom of my colour hugging the screen edge, so the cue registers in peripheral vision.
 const turnEdge: React.CSSProperties = {
   position: 'absolute', inset: 0,
-  boxShadow: 'inset 0 0 150px 26px rgba(166,197,63,0.30)',
+  boxShadow: 'inset 0 0 150px 26px rgba(195,154,76,0.24)',
 };
 // A raking light bar that wipes across behind the words for a bit of showmanship.
 const turnSweep: React.CSSProperties = {
   position: 'absolute', top: '50%', left: '50%', width: '58%', height: 132,
   transform: 'translate(-50%,-50%)',
-  background: 'linear-gradient(90deg, transparent, rgba(166,197,63,0.16) 44%, rgba(230,244,180,0.30) 50%, rgba(166,197,63,0.16) 56%, transparent)',
+  background: 'linear-gradient(90deg, transparent, rgba(195,154,76,0.14) 44%, rgba(236,224,198,0.28) 50%, rgba(195,154,76,0.14) 56%, transparent)',
   filter: 'blur(2px)', animation: 'cb-turn-sweep 1.5s cubic-bezier(.4,0,.25,1) forwards',
 };
 const turnWord: React.CSSProperties = {
   position: 'relative', fontFamily: sans, fontWeight: 900, fontSize: 'clamp(44px, 8vw, 96px)',
-  color: '#eaf6c2', letterSpacing: 11,
-  textShadow: '0 0 32px rgba(166,197,63,0.85), 0 0 12px rgba(166,197,63,0.7), 0 6px 20px rgba(0,0,0,0.7)',
+  color: '#f2e6c8', letterSpacing: 11,
+  textShadow: '0 2px 2px rgba(30,18,6,0.7), 0 8px 22px rgba(30,18,6,0.6)',
   animation: 'cb-turn-text 1.5s cubic-bezier(.16,.84,.3,1) forwards',
 };
 const errToast: React.CSSProperties = {
   position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-  padding: '8px 16px', background: 'rgba(255,59,107,0.2)', border: `1px solid ${C.enemy}`,
-  borderRadius: 8, color: '#ff9cba', fontSize: 13, zIndex: 17,
+  padding: '8px 16px', background: 'rgba(176,70,47,0.2)', border: `1px solid ${C.enemy}`,
+  borderRadius: 8, color: '#e8b4a6', fontSize: 13, zIndex: 17,
 };
 // My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). The ManaBar carries its
 // own frame; this just pins it to the corner. Bounded width keeps it clear of the card fan on iPad.
@@ -524,8 +524,8 @@ const manaDock: React.CSSProperties = {
 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
-  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(180deg,#c3e04d,#8fa832)', boxShadow: '0 8px 20px rgba(166,197,63,0.35)',
+  color: '#f4e9cb', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
+  background: 'linear-gradient(100deg,#b8492f,#9c3b28 56%,#7f2f1f)', boxShadow: '0 8px 20px rgba(60,20,10,0.4)',
   transition: 'transform .15s', zIndex: 16,
 };
 const endWrap: React.CSSProperties = {
@@ -596,7 +596,7 @@ const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fon
 const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
 const returnBtn: React.CSSProperties = {
   marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 800, letterSpacing: 0.5,
-  color: '#141608', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)',
-  boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+  color: '#f4e9cb', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
+  background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)',
+  boxShadow: '0 6px 18px rgba(60,20,10,0.45)',
 };

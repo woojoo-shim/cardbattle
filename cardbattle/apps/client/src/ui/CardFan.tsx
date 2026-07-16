@@ -130,7 +130,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 filter: playable ? 'none' : 'grayscale(0.4)',
                 borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
                 boxShadow: isPending
-                  ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(166,197,63,0.3)`
+                  ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(143,157,79,0.3)`
                   : hasCos && isHover
                   ? `0 0 22px ${cos!.glow}, 0 26px 44px rgba(0,0,0,0.6)`
                   : hasCos
@@ -262,8 +262,8 @@ const costBadgeShort: React.CSSProperties = {
   color: '#ffc2cf', background: 'linear-gradient(160deg, rgba(90,30,48,0.95), rgba(50,16,26,0.95))',
   border: '1px solid #b0466a', boxShadow: '0 2px 8px rgba(190,50,90,0.4)',
 };
-const dmgVal: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,59,107,0.16)', border: '1px solid #5a2436' };
-const healVal: React.CSSProperties = { color: '#dcefb0', background: 'rgba(166,197,63,0.16)', border: '1px solid #4a5a1f' };
+const dmgVal: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.18)', border: '1px solid #5a2c22' };
+const healVal: React.CSSProperties = { color: '#cdd3a0', background: 'rgba(143,157,79,0.18)', border: '1px solid #4a5230' };
 const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127,182,255,0.16)', border: '1px solid #2a4870' };
 const revVal: React.CSSProperties = { color: '#d9c4ff', background: 'rgba(139,108,255,0.16)', border: '1px solid #4a3a78' };
 const peekVal: React.CSSProperties = { color: '#cdeaff', background: 'rgba(139,227,255,0.16)', border: '1px solid #2a5a78' };

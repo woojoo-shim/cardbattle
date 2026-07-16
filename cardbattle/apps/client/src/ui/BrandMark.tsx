@@ -35,8 +35,8 @@ function Crest({ size }: { size: number }) {
       <defs>
         <linearGradient id="cbRing" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#d8a23c" />
-          <stop offset="0.5" stopColor="#c3e04d" />
-          <stop offset="1" stopColor="#a6c53f" />
+          <stop offset="0.5" stopColor="#e6c877" />
+          <stop offset="1" stopColor="#b98a3e" />
         </linearGradient>
         <radialGradient id="cbAbyss" cx="0.5" cy="0.4" r="0.75">
           <stop offset="0" stopColor="#1a2340" />
@@ -120,7 +120,7 @@ const wordA: React.CSSProperties = {
   filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 10px rgba(216,162,60,0.45))',
 };
 const wordB: React.CSSProperties = {
-  background: 'linear-gradient(180deg,#f2f5da 0%,#c3e04d 46%,#7c9a2f 100%)',
+  background: 'linear-gradient(180deg,#f5eccf 0%,#d8a23c 46%,#9c7a2e 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 12px rgba(166,197,63,0.5))',
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 12px rgba(216,162,60,0.5))',
 };

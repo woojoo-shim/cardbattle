@@ -83,7 +83,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                   key={ci}
                   style={{ ...miniBack, ...(hasCos ? miniBackCos(cos!) : null), left: off * spread, transform: `translate(-50%,-50%) rotate(${off * 4}deg)`, zIndex: ci }}
                 >
-                  <span style={{ fontSize: 8, color: 'rgba(166,197,63,0.45)' }}>◈</span>
+                  <span style={{ fontSize: 8, color: 'rgba(143,157,79,0.45)' }}>◈</span>
                 </span>
               );
             })}
@@ -126,11 +126,11 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                 width: isMe ? 92 : 80, height: isMe ? 92 : 80,
                 borderColor: isActive || canTarget || isMe ? accent : C.border,
                 boxShadow: isActive
-                  ? `0 0 0 2px ${accent}, 0 14px 38px ${isMe ? 'rgba(166,197,63,0.4)' : 'rgba(255,59,107,0.4)'}`
+                  ? `0 0 0 2px ${accent}, 0 14px 38px ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.4)'}`
                   : isMe
-                  ? `0 0 0 1px ${C.you}, 0 0 22px rgba(166,197,63,0.3)`
+                  ? `0 0 0 1px ${C.you}, 0 0 22px rgba(143,157,79,0.3)`
                   : canTarget
-                  ? `0 0 0 1px ${C.enemy}, 0 0 24px rgba(255,59,107,0.45)`
+                  ? `0 0 0 1px ${C.enemy}, 0 0 24px rgba(176,70,47,0.45)`
                   : '0 10px 24px rgba(0,0,0,0.5)',
               }}
             >
@@ -139,7 +139,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={56} />
               {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
-              {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(166,197,63,0.4)' : 'rgba(255,59,107,0.35)'}, transparent 70%)` }} />}
+              {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
 
             <div style={hpBar}>
@@ -147,7 +147,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                 const crit = p.alive && hpPct <= 30;
                 const fillBg = crit
                   ? 'linear-gradient(90deg,#ff4d4d,#c4122a)'
-                  : isMe ? `linear-gradient(90deg,#c3e04d,${C.you})` : `linear-gradient(90deg,#ff6b8f,${C.enemy})`;
+                  : isMe ? `linear-gradient(90deg,#aeb877,${C.you})` : `linear-gradient(90deg,#c96a52,${C.enemy})`;
                 return (
                   <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
                     <span style={hpGloss} />
@@ -312,7 +312,7 @@ const miniBack: React.CSSProperties = {
   position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
   transformOrigin: 'center bottom', display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: 'linear-gradient(160deg,#1b2336,#101626)', border: `1px solid ${C.border}`,
-  boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(166,197,63,0.06)',
+  boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(143,157,79,0.06)',
 };
 /** Paint a mini face-down card's border/glow from an equipped border cosmetic. Gradient
  *  borders use the backgroundImage+clip trick; solid colors set borderColor directly. */
