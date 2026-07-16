@@ -61,14 +61,14 @@
    naturally like a real recoil. The seat is centred with translate(-50%,-50%), so that
    offset is baked into every key to keep the shake a tiny vibration in place, not a jump. */
 @keyframes cb-shake {
-  0%   { transform: translate(-50%, -50%) scale(1); }
-  6%   { transform: translate(-50%, -50%) scale(1.16); }                                   /* hitstop: the blow lands and the portrait freezes-punches */
-  16%  { transform: translate(calc(-50% - 5px),   calc(-50% + 2.6px)) scale(1.05); }
-  30%  { transform: translate(calc(-50% + 4px),   calc(-50% - 2px))   scale(1); }
-  46%  { transform: translate(calc(-50% - 2.8px), calc(-50% + 1.4px)) scale(1); }
-  62%  { transform: translate(calc(-50% + 1.9px), calc(-50% - 0.9px)) scale(1); }
-  78%  { transform: translate(calc(-50% - 1px),   calc(-50% + 0.5px)) scale(1); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0%   { transform: translate(-50%, -50%) scale(1);    filter: brightness(1); }
+  6%   { transform: translate(-50%, -50%) scale(1.16); filter: brightness(2.1) contrast(1.15) drop-shadow(0 0 16px rgba(196,42,74,0.95)); }   /* hitstop: freeze-punch AND flash the struck portrait — white blowout + hurt-red bloom = the "got hit" beat */
+  16%  { transform: translate(calc(-50% - 5px),   calc(-50% + 2.6px)) scale(1.05); filter: brightness(1.35) drop-shadow(0 0 10px rgba(196,42,74,0.6)); }
+  30%  { transform: translate(calc(-50% + 4px),   calc(-50% - 2px))   scale(1);    filter: brightness(1.08); }
+  46%  { transform: translate(calc(-50% - 2.8px), calc(-50% + 1.4px)) scale(1);    filter: brightness(1); }
+  62%  { transform: translate(calc(-50% + 1.9px), calc(-50% - 0.9px)) scale(1);    filter: brightness(1); }
+  78%  { transform: translate(calc(-50% - 1px),   calc(-50% + 0.5px)) scale(1);    filter: brightness(1); }
+  100% { transform: translate(-50%, -50%) scale(1);    filter: brightness(1); }
 }
 /* Whole-arena camera kick when a blow lands — the entire screen jolts and settles. A tiny scale
    (1.014 / 1.022) keeps the translated edges from exposing the black void behind the screen. */
