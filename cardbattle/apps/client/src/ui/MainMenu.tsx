@@ -15,16 +15,8 @@ interface Props {
 }
 
 // A dramatic display serif for the title — no serif is bundled, so lean on a system stack to
-// get the heavy, engraved manuscript look.
+// get the heavy, engraved "back-room sign" look (à la Buckshot Roulette's cover).
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
-
-// Local ink palette — this whole hub sits on a LIGHT parchment page, so text is dark sepia ink
-// (the shared C.text/dim/faint tokens are light-on-dark and would wash out here). Oxblood seal accent.
-const INK = '#3a2c18';
-const INK_DIM = '#6b5636';
-const INK_FAINT = '#94805a';
-const SEAL = '#9c3b28';
-const PAPER_HI = '#f4e9cb';
 
 type ItemKey = 'start' | 'multi' | 'how' | 'shop' | 'credits' | 'logout';
 const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
@@ -101,21 +93,44 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
   return (
     <div style={wrap}>
-      {/* the scriptorium backdrop: an aged sheet of parchment lit by one warm candle, with paper
-          fibre grain and soft foxing at the corners — the whole page reads as old stock, not a room */}
+      {/* the back-room scene: a receding floor plane, a far wall, and the table's lamp pooling
+          up from below — depth behind the falling cards, not just a flat wash */}
       <div style={sceneLayer} aria-hidden>
-        <div style={paperTop} />
-        <div style={paperFox} />
-        <div style={{ ...paperFox, ...paperFoxR }} />
-        <div style={paperGrain} />
-        <span style={candleGlow} />
-        <div style={inkHairline} />
+        <div style={sceneCeiling} />
+        <div style={sceneWall} />
+        <div style={wallStreaks} />
+        <div style={stallDoor} />
+        <div style={wallMirror} />
+        <div style={{ ...wallMirror, ...wallMirrorR }} />
+        <div style={counter}>
+          {[15, 37, 59].map((lx) => (
+            <span key={lx} style={{ ...basin, left: `${lx}%` }}>
+              <span style={faucet} />
+            </span>
+          ))}
+        </div>
+        <div style={sceneHorizon} />
+        {/* The drain lives INSIDE the tilted floor plane, so the parent's rotateX foreshortens it
+            onto the tiles as a real hole in the ground rather than a flat sticker on the wall. */}
+        <div style={sceneFloor}>
+          <div style={floorDrain} aria-hidden>
+            <span style={drainWell} />
+            {[16, 32, 48, 64, 80].map((tp) => (
+              <span key={tp} style={{ ...drainGrateBar, top: `${tp}%` }} />
+            ))}
+          </div>
+        </div>
+        <div style={floorSheen} />
+        <div style={sceneLight} />
+        <span style={sceneBulb} />
+        <div style={sceneLampPool} />
+        <div style={sceneGrime} />
       </div>
       {/* strewn cards behind everything */}
       <div style={scatterLayer} aria-hidden>
         {SCATTER.map((c, i) => (
           <span key={i} style={scatterCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(156,59,40,0.42)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -124,7 +139,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={fallLayer} aria-hidden>
         {FALLING.map((c, i) => (
           <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(156,59,40,0.42)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -237,52 +252,181 @@ function Credits({ onClose }: { onClose: () => void }) {
 
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
-  display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontFamily: sans, color: INK,
+  display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontFamily: sans, color: C.text,
   padding: '0 clamp(32px, 8vw, 130px)',
-  // A single sheet of aged parchment under warm candlelight — the manuscript mood, no back-room grime.
+  // Oxblood back-room haze bleeding down into wet black — the arena mood, carried to the menu.
   background:
-    'radial-gradient(62% 46% at 50% 24%, rgba(216,172,98,0.22), transparent 66%),' +
-    'radial-gradient(80% 60% at 50% 112%, rgba(120,88,46,0.16), transparent 62%),' +
-    'linear-gradient(180deg, #ecdcb6 0%, #e2d0a4 52%, #d3bd8e 100%),' +
-    '#e2d0a4',
+    'radial-gradient(58% 40% at 50% 30%, rgba(126,38,62,0.20), transparent 68%),' +
+    'radial-gradient(70% 50% at 50% 108%, rgba(56,232,200,0.06), transparent 62%),' +
+    'linear-gradient(180deg, #140b0e 0%, #0d070a 52%, #060305 100%),' +
+    '#060305',
 };
-// The scriptorium backdrop: one aged sheet of parchment lit by a warm candle. Built from a few
-// soft layers — a sunlit top wash, foxing stains at the corners, paper fibre grain, a candle
-// halo, and a faint ruled ink hairline — so the whole page reads as old stock, no room, no grime.
+// A grimy back-room washroom built from layered CSS, aiming for the Buckshot cover mood: a dark
+// panelled ceiling, a tiled ceramic wall with grouted seams and grime, a couple of dead mirrors,
+// and a dirty checkerboard floor receding into the dark under one jaundiced overhead bulb.
 const sceneLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden',
 };
-// Fibre grain scattered over the sheet so the flat washes read as pressed paper, not flat colour.
+// Grit/grain scattered over the whole room so the flat gradients read as worn surfaces.
 const NOISE =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>\")";
-// A warm sunlit wash across the top of the sheet.
-const paperTop: React.CSSProperties = {
-  position: 'absolute', left: 0, right: 0, top: 0, height: '46%',
-  background: 'linear-gradient(180deg, rgba(255,248,228,0.5), transparent 92%)',
+const sceneCeiling: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '13%',
+  backgroundColor: '#0a0806',
+  backgroundImage:
+    'repeating-linear-gradient(90deg, rgba(0,0,0,0.65) 0 2px, transparent 2px 118px),' +
+    'repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 40px)',
+  boxShadow: 'inset 0 -26px 46px rgba(0,0,0,0.75)',
 };
-// A soft brown foxing/age stain blooming in from a corner.
-const paperFox: React.CSSProperties = {
-  position: 'absolute', left: '-6%', top: '-8%', width: '46%', height: '52%',
-  background: 'radial-gradient(circle at 40% 40%, rgba(140,104,54,0.20), transparent 62%)',
-  filter: 'blur(8px)',
+// Tiled ceramic wall: dirty beige base, dark grout seams both ways, greasy blotches, top sheen.
+const sceneWall: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '60%',
+  backgroundColor: '#241d16',
+  backgroundImage:
+    'radial-gradient(circle at 22% 30%, rgba(0,0,0,0.45) 0 6%, transparent 18%),' +
+    'radial-gradient(circle at 80% 24%, rgba(0,0,0,0.4) 0 5%, transparent 15%),' +
+    'radial-gradient(circle at 62% 48%, rgba(0,0,0,0.35) 0 7%, transparent 18%),' +
+    'radial-gradient(70% 60% at 50% 34%, rgba(74,64,48,0.55), transparent 72%),' +   // pooled light on tiles
+    'repeating-linear-gradient(90deg, rgba(0,0,0,0.55) 0 2px, transparent 2px 92px),' +  // vertical grout
+    'repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 2px, transparent 2px 74px),' +    // horizontal grout
+    'linear-gradient(180deg, rgba(255,238,206,0.06), transparent 26%)',                  // faint top sheen
+  boxShadow: 'inset 0 -50px 90px rgba(0,0,0,0.66)',
 };
-const paperFoxR: React.CSSProperties = { left: 'auto', right: '-8%', top: 'auto', bottom: '-10%', width: '54%', height: '58%' };
-// Pressed paper fibre — the turbulence texture, multiplied faintly into the sheet.
-const paperGrain: React.CSSProperties = {
-  position: 'absolute', inset: 0, backgroundImage: NOISE, backgroundSize: '150px 150px',
-  opacity: 0.10, mixBlendMode: 'multiply',
+// A dead mirror bolted to the tile: dark glass with a lit top bevel (relief, not a 3D box) so it
+// stands proud of the wall rather than floating.
+const wallMirror: React.CSSProperties = {
+  position: 'absolute', left: '7%', top: '15%', width: '30%', height: '32%', borderRadius: 3,
+  background: 'linear-gradient(158deg, rgba(38,50,48,0.55) 0%, rgba(12,15,15,0.7) 55%, rgba(6,8,8,0.8) 100%)',
+  border: '1px solid rgba(0,0,0,0.7)',
+  boxShadow:
+    'inset 0 2px 0 rgba(190,200,188,0.10), inset 0 0 60px rgba(0,0,0,0.55),' +
+    '0 6px 20px rgba(0,0,0,0.5)',
 };
-// The candle's warm halo pooling over the page.
-const candleGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '20%', width: '70%', height: '70%',
-  transform: 'translate(-50%, -50%)', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 50%, rgba(226,178,96,0.22), transparent 66%)',
-  filter: 'blur(12px)',
+const wallMirrorR: React.CSSProperties = { left: 'auto', right: '7%', width: '26%', height: '28%', top: '17%' };
+// Vertical grime runs weeping down the tiles — thin dark drips of varying length, plus a couple
+// of pale mineral streaks, so the wall reads as water-stained rather than a clean gradient.
+const wallStreaks: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: 0, height: '56%', mixBlendMode: 'multiply', opacity: 0.7,
+  backgroundImage:
+    'linear-gradient(180deg, rgba(0,0,0,0.5) 0 40%, transparent 90%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.45) 0 28%, transparent 76%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.4) 0 52%, transparent 92%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.42) 0 34%, transparent 80%),' +
+    'linear-gradient(180deg, rgba(0,0,0,0.38) 0 60%, transparent 96%),' +
+    'linear-gradient(180deg, rgba(214,196,150,0.10) 0 46%, transparent 84%)',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '2px 100%, 3px 100%, 2px 100%, 4px 100%, 2px 100%, 3px 100%',
+  backgroundPosition: '19% 0, 27% 0, 44% 0, 66% 0, 73% 0, 58% 0',
 };
-// A faint ruled ink line, like the guide-rule on old manuscript stock.
-const inkHairline: React.CSSProperties = {
-  position: 'absolute', left: 0, right: 0, top: '62%', height: 1,
-  background: 'linear-gradient(90deg, transparent, rgba(90,66,34,0.22) 24%, rgba(90,66,34,0.22) 76%, transparent)',
+// A closed stall/service door bolted to the right wall: recessed dark panel with a lit top-left
+// bevel (relief), a faint inset panel line, and a small round handle plate.
+const stallDoor: React.CSSProperties = {
+  position: 'absolute', right: '3.5%', top: '10%', width: '13%', height: '46%', borderRadius: 2,
+  background: 'linear-gradient(150deg, #1c1712 0%, #120d0a 48%, #0a0705 100%)',
+  border: '1px solid rgba(0,0,0,0.72)',
+  boxShadow:
+    'inset 0 2px 0 rgba(190,180,150,0.10), inset 2px 0 0 rgba(150,140,110,0.06),' +
+    'inset 0 0 40px rgba(0,0,0,0.6), 0 6px 22px rgba(0,0,0,0.55)',
+  backgroundClip: 'padding-box',
+};
+// The sink counter running along the base of the wall: a dark ledge with a lit front lip
+// (relief) so it stands proud, holding a row of basin ellipses.
+const counter: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: '46%', height: '11%',
+  background: 'linear-gradient(180deg, #2a231a 0%, #1a140e 46%, #0d0906 100%)',
+  borderTop: '1px solid rgba(210,196,160,0.16)',
+  boxShadow: 'inset 0 2px 0 rgba(230,214,170,0.10), 0 10px 26px rgba(0,0,0,0.6)',
+};
+// A shallow washbasin sunk into the counter: dark porcelain ellipse with a lit rear rim and a
+// pooled shadow at the drain — relief, not a 3D bowl.
+const basin: React.CSSProperties = {
+  position: 'absolute', top: '30%', width: '17%', height: '58%', transform: 'translateX(-50%)',
+  borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 38%, #0a0706 0%, #14100b 60%, #221a12 100%)',
+  boxShadow: 'inset 0 3px 5px rgba(0,0,0,0.7), inset 0 -2px 0 rgba(214,196,150,0.12)',
+};
+// A stub faucet rising from the back rim of each basin — a thin lit vertical with a bent neck.
+const faucet: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-34%', width: 3, height: '46%', transform: 'translateX(-50%)',
+  borderRadius: 2,
+  background: 'linear-gradient(180deg, rgba(200,190,160,0.5), rgba(90,84,66,0.5))',
+  boxShadow: '0 0 6px rgba(0,0,0,0.5)',
+};
+// A hairline of light where wall meets floor — the room's vanishing seam.
+const sceneHorizon: React.CSSProperties = {
+  position: 'absolute', left: 0, right: 0, top: '56%', height: 2,
+  background: 'linear-gradient(90deg, transparent, rgba(238,200,120,0.26) 30%, rgba(238,200,120,0.28) 70%, transparent)',
+  filter: 'blur(1px)',
+};
+// Dirty checkerboard floor skewed into perspective, receding into the dark.
+const sceneFloor: React.CSSProperties = {
+  position: 'absolute', left: '-40%', right: '-40%', bottom: 0, height: '52%',
+  backgroundColor: '#120e0a',
+  backgroundImage:
+    'linear-gradient(45deg, #2b271f 25%, transparent 25%),' +
+    'linear-gradient(-45deg, #2b271f 25%, transparent 25%),' +
+    'linear-gradient(45deg, transparent 75%, #2b271f 75%),' +
+    'linear-gradient(-45deg, transparent 75%, #2b271f 75%)',
+  backgroundSize: '84px 84px',
+  backgroundPosition: '0 0, 0 42px, 42px -42px, -42px 0',
+  transform: 'perspective(560px) rotateX(61deg)', transformOrigin: 'center top',
+  boxShadow: 'inset 0 70px 120px rgba(0,0,0,0.78)',
+};
+// A wet vertical smear of light on the floor directly under the bulb — the damp, greasy sheen
+// that reads the tiles as slick rather than dry. Sits over the checkerboard, below the lamp pool.
+const floorSheen: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: 0, width: '30%', height: '48%', transform: 'translateX(-50%)',
+  background: 'linear-gradient(180deg, rgba(240,206,132,0.14) 0%, rgba(240,206,132,0.05) 40%, transparent 78%)',
+  filter: 'blur(10px)', mixBlendMode: 'screen',
+};
+// The square gray metal drain plate. It's a child of the tilted floor plane, so it's a true
+// square here; the parent's rotateX foreshortens it onto the tiles. Cast-iron frame with a lit
+// top edge and a shadow skirt so it reads as set into the floor near the wall.
+const floorDrain: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '5%', width: 150, height: 150,
+  transform: 'translateX(-50%)', borderRadius: 3,
+  background: 'linear-gradient(160deg, #55534d 0%, #35342f 40%, #201f1b 100%)',
+  border: '1px solid rgba(20,19,16,0.9)',
+  boxShadow:
+    'inset 0 2px 0 rgba(150,148,140,0.35), inset 0 -2px 6px rgba(0,0,0,0.7),' +
+    '0 6px 14px rgba(0,0,0,0.6)',
+};
+// The sunken black mouth inside the plate — the hole the runoff falls into.
+const drainWell: React.CSSProperties = {
+  position: 'absolute', inset: 9, borderRadius: 2,
+  background: 'radial-gradient(ellipse at 50% 45%, #000 0%, #060503 70%, #131109 100%)',
+  boxShadow: 'inset 0 3px 7px rgba(0,0,0,0.95)',
+};
+// One parallel bar of the cast grate spanning the mouth — thin lit steel struts.
+const drainGrateBar: React.CSSProperties = {
+  position: 'absolute', left: 9, right: 9, height: 4, borderRadius: 2,
+  transform: 'translateY(-50%)',
+  background: 'linear-gradient(180deg, #6a675f, #34322c)',
+  boxShadow: '0 1px 1px rgba(0,0,0,0.8)',
+};
+// The overhead bulb's light cone falling through the room.
+const sceneLight: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-4%', width: '48%', height: '74%', transform: 'translateX(-50%)',
+  background: 'linear-gradient(180deg, rgba(240,204,128,0.16), rgba(240,204,128,0.02) 70%, transparent)',
+  clipPath: 'polygon(45% 0%, 55% 0%, 80% 100%, 20% 100%)', filter: 'blur(7px)',
+};
+// The bare sodium bulb up top.
+const sceneBulb: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '4%', width: 14, height: 14, borderRadius: '50%',
+  transform: 'translateX(-50%)',
+  background: 'radial-gradient(circle, #fff2cf 0%, #f0b256 55%, rgba(210,140,50,0.2) 100%)',
+  boxShadow: '0 0 26px 8px rgba(240,190,90,0.55)',
+};
+// The bulb's pool welling up from the floor centre.
+const sceneLampPool: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '-6%', width: '66%', height: '44%',
+  transform: 'translateX(-50%)', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 50%, rgba(240,200,120,0.16), rgba(240,200,120,0.04) 55%, transparent 72%)',
+  filter: 'blur(6px)',
+};
+const sceneGrime: React.CSSProperties = {
+  position: 'absolute', inset: 0, backgroundImage: NOISE, backgroundSize: '160px 160px',
+  opacity: 0.13, mixBlendMode: 'overlay',
 };
 const scatterLayer: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, opacity: 0.5,
@@ -297,8 +441,8 @@ function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
     position: 'absolute', left: `${c.l}%`, top: 0,
     width: 74 * c.s, height: 104 * c.s, borderRadius: 9,
     display: 'grid', placeItems: 'center', filter: 'blur(0.6px)',
-    background: 'linear-gradient(160deg,#3a2c18,#241a10)', border: `1px solid ${C.borderHi}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(244,233,203,0.06)',
+    background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
+    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(166,197,63,0.05)',
     animation: `cb-cardfall ${c.dur}s linear ${c.delay}s infinite`,
     ['--r0' as string]: `${c.r0}deg`, ['--r1' as string]: `${c.r1}deg`, ['--o' as string]: `${c.o}`,
   };
@@ -309,13 +453,13 @@ function scatterCard(c: { l: number; t: number; r: number; o: number; s: number 
     width: 76 * c.s, height: 106 * c.s, borderRadius: 9,
     transform: `translate(-50%,-50%) rotate(${c.r}deg)`, opacity: c.o,
     display: 'grid', placeItems: 'center', filter: 'blur(0.4px)',
-    background: 'linear-gradient(160deg,#3a2c18,#241a10)', border: `1px solid ${C.borderHi}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(244,233,203,0.06)',
+    background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
+    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(166,197,63,0.05)',
   };
 }
 const vignette: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-  background: 'radial-gradient(120% 108% at 50% 42%, transparent 52%, rgba(96,68,34,0.42) 100%)',
+  background: 'radial-gradient(120% 108% at 50% 42%, transparent 44%, rgba(4,3,5,0.9) 100%)',
 };
 
 const content: React.CSSProperties = {
@@ -323,7 +467,7 @@ const content: React.CSSProperties = {
   textAlign: 'left',
 };
 const kicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, letterSpacing: 5, color: INK_FAINT, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 11, letterSpacing: 5, color: C.faint, textTransform: 'uppercase',
   marginBottom: 4,
 };
 const titleWrap: React.CSSProperties = {
@@ -331,36 +475,36 @@ const titleWrap: React.CSSProperties = {
 };
 const titleLine: React.CSSProperties = {
   display: 'block', fontFamily: serif, fontWeight: 700, lineHeight: 0.92, letterSpacing: 'clamp(4px, 1.2vw, 12px)',
-  fontSize: 'clamp(52px, 12vw, 128px)', color: INK,
-  textShadow: '0 1px 0 rgba(255,248,228,0.6), 0 3px 8px rgba(90,66,34,0.28)',
+  fontSize: 'clamp(52px, 12vw, 128px)', color: '#f3eee6',
+  textShadow: '0 3px 0 #1a0f10, 0 10px 30px rgba(0,0,0,0.7), 0 0 40px rgba(126,38,62,0.4)',
 };
 const titleLine2: React.CSSProperties = {
-  color: SEAL, letterSpacing: 'clamp(8px, 2.4vw, 26px)', marginTop: '-0.06em',
+  color: '#e7d8c6', letterSpacing: 'clamp(8px, 2.4vw, 26px)', marginTop: '-0.06em',
 };
 // The title struck through like the Buckshot cover: a ghosted duplicate shoved down-right behind
 // the crisp word, with a bright blade-line bisecting both and a gem punched through its centre.
 const titleStack: React.CSSProperties = { position: 'relative', display: 'inline-block' };
 const titleGhost: React.CSSProperties = {
   ...titleLine, position: 'absolute', left: 'clamp(5px, 0.7vw, 12px)', top: 'clamp(6px, 0.9vw, 16px)',
-  color: 'transparent', WebkitTextStroke: '1px rgba(156,59,40,0.42)', textShadow: 'none', opacity: 0.6,
+  color: 'transparent', WebkitTextStroke: '1px rgba(126,38,62,0.55)', textShadow: 'none', opacity: 0.75,
 };
 const strike: React.CSSProperties = {
   position: 'absolute', left: '-3%', right: '-3%', top: '52%', height: 'clamp(3px, 0.4vw, 5px)',
   transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: `linear-gradient(90deg, transparent, ${SEAL} 7%, ${SEAL} 93%, transparent)`,
-  boxShadow: '0 1px 0 rgba(255,248,228,0.5)',
+  background: 'linear-gradient(90deg, transparent, #f3eee6 7%, #f3eee6 93%, transparent)',
+  boxShadow: '0 0 14px rgba(243,238,230,0.5), 0 2px 0 #1a0f10',
 };
 const bladeShine: React.CSSProperties = {
   position: 'absolute', top: 0, bottom: 0, left: 0, width: '30%',
-  background: 'linear-gradient(90deg, transparent, rgba(255,244,220,0.9), transparent)',
+  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
   filter: 'blur(0.6px)', pointerEvents: 'none',
 };
 const strikeGem: React.CSSProperties = {
-  position: 'relative', fontSize: 'clamp(14px, 1.8vw, 22px)', color: PAPER_HI, lineHeight: 1, padding: '0 10px',
-  background: SEAL, borderRadius: 3,
+  position: 'relative', fontSize: 'clamp(14px, 1.8vw, 22px)', color: C.rare, lineHeight: 1, padding: '0 10px',
+  background: '#0d070a', textShadow: '0 0 14px rgba(216,162,60,0.85)',
 };
 const byline: React.CSSProperties = {
-  fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: INK_DIM,
+  fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
   marginTop: 10, textTransform: 'uppercase',
 };
 
@@ -369,13 +513,15 @@ const menu: React.CSSProperties = {
   paddingLeft: 28,
 };
 function menuItem(on: boolean, danger: boolean): React.CSSProperties {
+  const base = danger ? C.enemy : C.you;
   return {
     // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
     position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
     padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
-    color: on ? (danger ? SEAL : INK) : INK_DIM,
+    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
     transform: on ? 'translateX(10px)' : 'none',
-    transition: 'color .16s ease, transform .16s ease',
+    textShadow: on ? `0 0 20px ${base}66` : 'none',
+    transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
 }
 // The label + its hover caret. Relative so the caret can hang off the label's left edge without
@@ -383,7 +529,7 @@ function menuItem(on: boolean, danger: boolean): React.CSSProperties {
 const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
 function caret(on: boolean): React.CSSProperties {
   return {
-    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: SEAL, lineHeight: 1,
+    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
     transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
     opacity: on ? 1 : 0,
     transition: 'opacity .16s ease, transform .16s ease',
@@ -392,7 +538,7 @@ function caret(on: boolean): React.CSSProperties {
 const menuLabel: React.CSSProperties = { fontSize: 'clamp(22px, 3.4vw, 30px)', fontWeight: 800, letterSpacing: 1 };
 function menuSub(on: boolean): React.CSSProperties {
   return {
-    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? INK_DIM : INK_FAINT,
+    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? C.dim : C.faint,
     transition: 'color .16s ease',
   };
 }
@@ -401,59 +547,54 @@ const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
 const goldChip: React.CSSProperties = {
-  padding: '7px 14px', fontSize: 13, fontWeight: 800, color: PAPER_HI, cursor: 'pointer',
-  borderRadius: 999, border: '1px solid #7a2f20', fontFamily: sans,
-  background: `linear-gradient(180deg, ${SEAL}, #7f2f1f)`,
-  boxShadow: '0 4px 12px rgba(60,20,10,0.28)',
+  padding: '7px 14px', fontSize: 13, fontWeight: 800, color: '#ffe08a', cursor: 'pointer',
+  borderRadius: 999, border: '1px solid #6a5620', fontFamily: sans,
+  background: 'linear-gradient(180deg, rgba(70,56,16,0.9), rgba(40,32,10,0.9))',
+  boxShadow: '0 6px 16px rgba(180,140,30,0.25)',
 };
 const nameChip: React.CSSProperties = {
-  padding: '7px 14px', fontSize: 13, fontWeight: 700, color: INK_DIM,
-  borderRadius: 999, border: '1px solid rgba(90,66,34,0.4)', background: 'rgba(247,238,214,0.6)', fontFamily: sans,
+  padding: '7px 14px', fontSize: 13, fontWeight: 700, color: C.dim,
+  borderRadius: 999, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
 };
 
 const creditsBackdrop: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
-  background: 'rgba(40,28,12,0.6)', backdropFilter: 'blur(4px)',
+  background: 'rgba(4,3,5,0.72)', backdropFilter: 'blur(4px)',
 };
-// The modals are torn parchment slips: cream paper, sepia ink, pressed shadow — same stock as the page.
-const parchmentCard = [
-  'radial-gradient(120% 85% at 18% 8%, rgba(255,250,232,0.5), transparent 52%)',
-  'linear-gradient(180deg, #eddcb2, #e0cd9c)',
-].join(',');
 const creditsCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 34px',
   borderRadius: 16, width: 'min(420px, 90vw)', textAlign: 'center',
-  background: parchmentCard, border: '1px solid rgba(90,66,34,0.4)',
-  boxShadow: '0 30px 68px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,250,232,0.6)',
+  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
+  boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
 };
-const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 34, fontWeight: 700, margin: '2px 0 8px', color: INK, letterSpacing: 2 };
+const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 34, fontWeight: 700, margin: '2px 0 8px', color: '#f3eee6', letterSpacing: 2 };
 // The how-to panel is a taller card holding the five numbered beats.
 const howCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '26px 30px 24px',
   borderRadius: 16, width: 'min(500px, 92vw)', maxHeight: '86vh', overflowY: 'auto', textAlign: 'center',
-  background: parchmentCard, border: '1px solid rgba(90,66,34,0.4)',
-  boxShadow: '0 30px 68px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,250,232,0.6)',
+  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
+  boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
 };
 const howList: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12, width: '100%', margin: '10px 0 4px' };
 const howRow: React.CSSProperties = {
   display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 12,
-  background: 'rgba(206,182,132,0.36)', border: '1px solid rgba(90,66,34,0.3)',
+  background: 'rgba(0,0,0,0.28)', border: `1px solid ${C.border}`,
 };
 const howNum: React.CSSProperties = {
   flexShrink: 0, width: 30, height: 30, borderRadius: '50%', display: 'grid', placeItems: 'center',
-  fontFamily: serif, fontSize: 16, fontWeight: 700, color: PAPER_HI,
-  background: `radial-gradient(circle at 40% 34%, #bd4e34, ${SEAL} 72%)`, boxShadow: '0 2px 7px rgba(60,20,10,0.4)',
+  fontFamily: serif, fontSize: 16, fontWeight: 700, color: '#141608',
+  background: 'linear-gradient(150deg, #d8b45a, #a6c53f)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
 };
-const howStepTitle: React.CSSProperties = { fontSize: 15.5, fontWeight: 800, color: INK, letterSpacing: 0.4 };
-const howBody: React.CSSProperties = { fontSize: 13, lineHeight: 1.55, color: INK_DIM };
+const howStepTitle: React.CSSProperties = { fontSize: 15.5, fontWeight: 800, color: '#f3eee6', letterSpacing: 0.4 };
+const howBody: React.CSSProperties = { fontSize: 13, lineHeight: 1.55, color: C.dim };
 const howGhostBtn: React.CSSProperties = {
-  padding: '10px 22px', fontSize: 14, fontWeight: 700, color: INK_DIM, cursor: 'pointer',
-  border: '1px solid rgba(90,66,34,0.4)', borderRadius: 10, background: 'rgba(247,238,214,0.5)', fontFamily: sans,
+  padding: '10px 22px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'pointer',
+  border: `1px solid ${C.borderHi}`, borderRadius: 10, background: 'rgba(255,255,255,0.05)', fontFamily: sans,
 };
-const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: INK };
-const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: INK_FAINT, lineHeight: 1.4 };
+const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
+const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.4 };
 const creditsClose: React.CSSProperties = {
-  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: PAPER_HI, cursor: 'pointer',
+  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer',
   border: 'none', borderRadius: 10, fontFamily: sans,
-  background: `linear-gradient(100deg, #b8492f, ${SEAL} 56%, #7f2f1f)`, boxShadow: '0 6px 15px rgba(60,20,10,0.35)',
+  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };
