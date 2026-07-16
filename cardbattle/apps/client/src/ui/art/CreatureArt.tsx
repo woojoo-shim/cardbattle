@@ -297,7 +297,7 @@ export const AVATAR_CHOICES: { id: string; name: string }[] = [
 ];
 
 /** Distinct glow colors so each bot at the table reads as its own machine. */
-export const BOT_TINTS = ['#ff3b6b', '#38e8c8', '#ffd84a', '#8b6cff', '#5aa9ff', '#ff8a3b', '#5df08a', '#ff5ad0'];
+export const BOT_TINTS = ['#c2543a', '#79b0a2', '#d8a63c', '#8b6cff', '#5f8fc4', '#c47a3a', '#8f9d4f', '#b06a92'];
 
 /** Unified portrait renderer. `bot` avatars render one of 8 distinct machines,
  *  picked by `variant` (usually the seat index) and tinted by `tint`. */

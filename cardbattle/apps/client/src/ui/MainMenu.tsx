@@ -130,7 +130,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={scatterLayer} aria-hidden>
         {SCATTER.map((c, i) => (
           <span key={i} style={scatterCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(143,157,79,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -139,7 +139,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
       <div style={fallLayer} aria-hidden>
         {FALLING.map((c, i) => (
           <span key={`f${i}`} className="cb-cardfall" style={fallingCard(c)}>
-            <span style={{ fontSize: 13 * c.s, color: 'rgba(166,197,63,0.4)' }}>◈</span>
+            <span style={{ fontSize: 13 * c.s, color: 'rgba(143,157,79,0.4)' }}>◈</span>
           </span>
         ))}
       </div>
@@ -442,7 +442,7 @@ function fallingCard(c: (typeof FALLING)[number]): React.CSSProperties {
     width: 74 * c.s, height: 104 * c.s, borderRadius: 9,
     display: 'grid', placeItems: 'center', filter: 'blur(0.6px)',
     background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(166,197,63,0.05)',
+    boxShadow: '0 10px 22px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(143,157,79,0.05)',
     animation: `cb-cardfall ${c.dur}s linear ${c.delay}s infinite`,
     ['--r0' as string]: `${c.r0}deg`, ['--r1' as string]: `${c.r1}deg`, ['--o' as string]: `${c.o}`,
   };
@@ -454,7 +454,7 @@ function scatterCard(c: { l: number; t: number; r: number; o: number; s: number 
     transform: `translate(-50%,-50%) rotate(${c.r}deg)`, opacity: c.o,
     display: 'grid', placeItems: 'center', filter: 'blur(0.4px)',
     background: 'linear-gradient(160deg,#211a12,#100a08)', border: `1px solid ${C.border}`,
-    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(166,197,63,0.05)',
+    boxShadow: '0 10px 22px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(143,157,79,0.05)',
   };
 }
 const vignette: React.CSSProperties = {
@@ -583,7 +583,7 @@ const howRow: React.CSSProperties = {
 const howNum: React.CSSProperties = {
   flexShrink: 0, width: 30, height: 30, borderRadius: '50%', display: 'grid', placeItems: 'center',
   fontFamily: serif, fontSize: 16, fontWeight: 700, color: '#141608',
-  background: 'linear-gradient(150deg, #d8b45a, #a6c53f)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
+  background: 'linear-gradient(150deg, #d8b45a, #b98a3e)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
 };
 const howStepTitle: React.CSSProperties = { fontSize: 15.5, fontWeight: 800, color: '#f3eee6', letterSpacing: 0.4 };
 const howBody: React.CSSProperties = { fontSize: 13, lineHeight: 1.55, color: C.dim };
@@ -594,7 +594,7 @@ const howGhostBtn: React.CSSProperties = {
 const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
 const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.4 };
 const creditsClose: React.CSSProperties = {
-  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer',
+  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#f4e9cb', cursor: 'pointer',
   border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b6d24a, #93ad34 58%, #74902a)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+  background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
 };

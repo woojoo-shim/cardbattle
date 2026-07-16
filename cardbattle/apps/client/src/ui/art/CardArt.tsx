@@ -91,10 +91,10 @@ function Bomb() {
 function Potion() {
   return (
     <>
-      <Glow color="#38e8c8" o={0.45} />
+      <Glow color="#79b0a2" o={0.45} />
       {/* liquid */}
       <path d="M24 28 L24 24 L40 24 L40 28 L46 50 Q46 58 32 58 Q18 58 18 50 Z" fill="#0e2a28" stroke="#2e6f66" strokeWidth="1.5" />
-      <path d="M21 44 Q32 40 43 44 L46 50 Q46 58 32 58 Q18 58 18 50 Z" fill="#38e8c8" opacity="0.85" />
+      <path d="M21 44 Q32 40 43 44 L46 50 Q46 58 32 58 Q18 58 18 50 Z" fill="#79b0a2" opacity="0.85" />
       <path d="M21 44 Q32 41 43 44" stroke="#bff6ec" strokeWidth="1" opacity="0.7" fill="none" />
       {/* bubbles */}
       <circle cx="29" cy="50" r="2" fill="#d6fff7" opacity="0.8" />
@@ -335,12 +335,12 @@ function TwinStrike() {
 function FirstAid() {
   return (
     <>
-      <Glow color="#38e8c8" o={0.45} />
+      <Glow color="#79b0a2" o={0.45} />
       {/* aid kit body */}
-      <rect x="12" y="22" width="40" height="30" rx="5" fill="#13312c" stroke="#38e8c8" strokeWidth="2" />
+      <rect x="12" y="22" width="40" height="30" rx="5" fill="#13312c" stroke="#79b0a2" strokeWidth="2" />
       <rect x="12" y="22" width="40" height="10" rx="5" fill="#0e2a28" opacity="0.6" />
       {/* handle */}
-      <path d="M26 22 L26 18 Q26 16 28 16 L36 16 Q38 16 38 18 L38 22" fill="none" stroke="#38e8c8" strokeWidth="2" />
+      <path d="M26 22 L26 18 Q26 16 28 16 L36 16 Q38 16 38 18 L38 22" fill="none" stroke="#79b0a2" strokeWidth="2" />
       {/* green cross */}
       <path d="M29 34 L35 34 L35 40 L41 40 L41 46 L35 46 L35 52 L29 52 L29 46 L23 46 L23 40 L29 40 Z"
         fill="#7af0d3" stroke="#d6fff7" strokeWidth="1.2" />
@@ -361,7 +361,7 @@ function Snipe() {
       <line x1="10" y1="32" x2="24" y2="32" stroke="#ffd0db" strokeWidth="2" />
       <line x1="40" y1="32" x2="54" y2="32" stroke="#ffd0db" strokeWidth="2" />
       {/* locked-on dot */}
-      <circle cx="32" cy="32" r="4" fill="#ff3b6b" />
+      <circle cx="32" cy="32" r="4" fill="#c2543a" />
       <circle cx="32" cy="32" r="1.6" fill="#fff" opacity="0.9" />
     </>
   );
@@ -513,7 +513,7 @@ function Bulwark() {
 function Meditate() {
   return (
     <>
-      <Glow color="#38e8c8" o={0.42} />
+      <Glow color="#79b0a2" o={0.42} />
       {/* aura rings */}
       <circle cx="32" cy="34" r="20" fill="none" stroke="#7af0d3" strokeWidth="1" opacity="0.4" />
       <circle cx="32" cy="34" r="14" fill="none" stroke="#7af0d3" strokeWidth="1" opacity="0.55" />
@@ -564,7 +564,7 @@ function HolyNova() {
 function Execute() {
   return (
     <>
-      <Glow color="#ff3b6b" o={0.5} />
+      <Glow color="#c2543a" o={0.5} />
       {/* headsman's axe */}
       <rect x="30" y="10" width="4" height="46" rx="1.5" fill={WOOD} stroke={WOOD_D} strokeWidth="0.8" />
       {/* broad blade */}
@@ -668,7 +668,7 @@ function LastStand() {
       <path d="M32 6 L50 12 L50 30 Q50 44 32 52 Q14 44 14 30 L14 12 Z"
         fill="#1a2230" stroke="#ff7aa0" strokeWidth="2" strokeLinejoin="round" />
       {/* crack */}
-      <path d="M32 6 L28 20 L36 26 L30 38 L34 52" fill="none" stroke="#ff3b6b" strokeWidth="2" strokeLinejoin="round" opacity="0.8" />
+      <path d="M32 6 L28 20 L36 26 L30 38 L34 52" fill="none" stroke="#c2543a" strokeWidth="2" strokeLinejoin="round" opacity="0.8" />
       {/* fist */}
       <path d="M24 40 Q24 32 30 32 L40 32 Q46 32 46 38 L46 46 Q46 52 38 52 L30 52 Q24 52 24 46 Z"
         fill="#3a2530" stroke="#ffd0db" strokeWidth="1.6" />
