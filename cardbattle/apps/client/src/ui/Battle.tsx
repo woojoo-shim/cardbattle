@@ -172,6 +172,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   return (
     <div style={screen} data-arena ref={sceneRef} onPointerMove={onSceneMove} onPointerLeave={onSceneLeave}>
       <ChamberDeco />
+      <SceneAtmosphere />
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
@@ -448,6 +449,64 @@ function ChamberDeco() {
     </svg>
   );
 }
+// Living-air layer over the static room: a swinging volumetric light cone under the failing bulb,
+// a flickering amber pool on the table, and dust motes drifting up through the beam. All screen-
+// blended and pointer-transparent — they add light and life, never block a play. This is what
+// turns the painted set into a room that feels lived-in and dim-lit rather than a flat backdrop.
+const MOTES = Array.from({ length: 16 }, (_, i) => {
+  // Deterministic scatter across the light pool so the field is even but never gridded.
+  const x = 12 + ((i * 53) % 76);          // 12%..88% across
+  const y = 34 + ((i * 37) % 50);          // 34%..84% down (in/under the cone)
+  const size = 1.3 + ((i * 7) % 5) * 0.5;  // 1.3..3.3px
+  const dur = 11 + ((i * 13) % 12);        // 11..23s slow drift
+  const delay = -((i * 29) % 22);          // desync so they don't pulse together
+  const mx = (i % 2 ? 1 : -1) * (8 + (i % 5) * 5); // lateral drift px
+  const mo = 0.28 + ((i * 11) % 6) * 0.06; // peak opacity 0.28..0.58
+  return { x, y, size, dur, delay, mx, mo };
+});
+function SceneAtmosphere() {
+  return (
+    <div style={atmoWrap} aria-hidden>
+      <div style={lightShaft} className="cb-shaft-anim" />
+      <div style={bulbPool} className="cb-pool-anim" />
+      {MOTES.map((m, i) => (
+        <span
+          key={i}
+          className="cb-mote-anim"
+          style={{
+            position: 'absolute', left: `${m.x}%`, top: `${m.y}%`,
+            width: m.size, height: m.size, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(244,214,150,0.95), rgba(226,164,72,0.35) 55%, transparent 72%)',
+            // @ts-expect-error CSS custom props for the shared cb-mote keyframe
+            '--mx': `${m.mx}px`, '--mo': m.mo,
+            animation: `cb-mote ${m.dur}s ease-in-out ${m.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+const atmoWrap: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden',
+  mixBlendMode: 'screen',
+};
+// The cone of light hanging under the bulb — a soft amber wedge, brightest at the top (the source)
+// fading into the table. Swings a hair on cb-shaft-sway as if the bulb rocks on its cord.
+const lightShaft: React.CSSProperties = {
+  position: 'absolute', top: '-6%', left: '50%', width: '52%', height: '72%',
+  transformOrigin: '50% 0%',
+  background: 'linear-gradient(180deg, rgba(236,180,96,0.16) 0%, rgba(226,164,72,0.07) 42%, transparent 82%)',
+  clipPath: 'polygon(40% 0%, 60% 0%, 96% 100%, 4% 100%)',
+  filter: 'blur(7px)',
+};
+// The amber pool the bulb throws on the felt — same flicker cadence as the shaft so the whole
+// fixture stutters as one failing light.
+const bulbPool: React.CSSProperties = {
+  position: 'absolute', top: '30%', left: '50%', width: '46%', height: '40%',
+  transform: 'translateX(-50%)',
+  background: 'radial-gradient(50% 50% at 50% 42%, rgba(230,168,78,0.12), transparent 70%)',
+  filter: 'blur(3px)',
+};
 const chamberDeco: React.CSSProperties = {
   position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0,
   // Subtle depth parallax: the back room drifts gently OPPOSITE the cursor (NO rotation — a tilting

@@ -1,5 +1,36 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
+/* ===== LIVING ATMOSPHERE — the static back room was reading as flat/dead. Real dens breathe:
+   a failing bulb stutters, its cone hangs in the dusty air, and motes drift through the light.
+   All three layers are pointer-transparent and screen-blended so they add light, never block. */
+/* The dirty overhead bulb never sits still — a mostly-steady amber pool that stutters and dips on
+   an irregular cadence (a bad filament), with two hard blink dips so it feels electrical, not a
+   smooth sine. Drives the light pool AND the shaft together. */
+@keyframes cb-bulb-flicker {
+  0%   { opacity: 0.92; }  7%  { opacity: 1; }    11% { opacity: 0.74; }  14% { opacity: 0.98; }
+  22%  { opacity: 0.9; }   38% { opacity: 1; }    41% { opacity: 0.58; }  43% { opacity: 0.95; }  /* hard blink */
+  55%  { opacity: 0.88; }  63% { opacity: 1; }    76% { opacity: 0.83; }  79% { opacity: 1; }
+  88%  { opacity: 0.7; }   90% { opacity: 0.97; } 100% { opacity: 0.92; } /* hard blink */
+}
+/* The volumetric cone hanging under the bulb breathes and sways a hair, as if the bulb swings on
+   its cord — widens/narrows and tips a couple degrees so the beam feels like it's in real air. */
+@keyframes cb-shaft-sway {
+  0%, 100% { transform: translateX(-50%) rotate(-1.6deg) scaleX(0.97); }
+  50%      { transform: translateX(-50%) rotate(1.6deg)  scaleX(1.03); }
+}
+/* A dust mote lit by the cone: drifts slowly upward and across on faint air currents, twinkling in
+   and out as it passes through brighter/dimmer bands of the beam. Per-mote vars set start offset. */
+@keyframes cb-mote {
+  0%   { transform: translate(0, 0);                    opacity: 0; }
+  12%  {                                                 opacity: var(--mo, 0.5); }
+  50%  { transform: translate(var(--mx, 10px), -46%);   opacity: calc(var(--mo, 0.5) * 0.55); }
+  88%  {                                                 opacity: var(--mo, 0.5); }
+  100% { transform: translate(calc(var(--mx, 10px) * -0.6), -92%); opacity: 0; }
+}
+/* Shaft: swings on its cord AND flickers with the bulb. Pool: flickers in lockstep (same 4.6s
+   cadence) so the whole failing fixture stutters as one light. */
+.cb-shaft-anim { animation: cb-shaft-sway 7.5s ease-in-out infinite, cb-bulb-flicker 4.6s linear infinite; }
+.cb-pool-anim  { animation: cb-bulb-flicker 4.6s linear infinite; }
 /* Auto-fill countdown banner: a slow amber breathe so it reads as "searching…", not urgent. */
 @keyframes cb-fill-pulse { 50% { box-shadow: 0 0 22px rgba(216, 162, 60, 0.28); border-color: rgba(216, 162, 60, 0.6); } }
 .cb-fill-pulse { animation: cb-fill-pulse 1.8s ease-in-out infinite; }
