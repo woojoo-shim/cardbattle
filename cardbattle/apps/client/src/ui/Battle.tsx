@@ -518,10 +518,8 @@ const chamberDeco: React.CSSProperties = {
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = {
   position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  // A faint counter-drift so the table separates slightly from the back room — parallax without any tilt.
-  transform: 'translate(calc(var(--cb-px, 0) * 4px), calc(var(--cb-py, 0) * 3px))',
-  transition: 'transform .25s ease-out',
-  willChange: 'transform',
+  // The table stays ANCHORED. Only the back room drifts with the cursor (parallax depth); a foreground
+  // desk that slides when you move the mouse reads as the whole scene sloshing, not as peering around.
 };
 // The wet concrete floor of the pit: grimy tile seams tilted back in perspective so the lines
 // converge toward the horizon, making the table read as sitting on a receding floor in a real room.
