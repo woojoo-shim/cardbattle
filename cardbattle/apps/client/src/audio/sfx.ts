@@ -7,6 +7,7 @@ type Cue =
   | 'hover' | 'select' | 'back' | 'toggle'
   | 'deal' | 'play' | 'draw'
   | 'damage' | 'heal' | 'shield' | 'reverse' | 'coin'
+  | 'poison' | 'regen' | 'reflect'
   | 'win' | 'lose' | 'turn';
 
 const MUTE_KEY = 'cb_muted';
@@ -110,6 +111,20 @@ export function playSfx(cue: Cue) {
     case 'coin':
       tone(ac, master, 'square', 880, 1320, t, 0.07, 0.12);
       tone(ac, master, 'square', 1320, 1760, t + 0.06, 0.09, 0.1); break;
+    case 'poison':
+      // A sickly corrosive hiss: airy high-pass noise over a queasy detuned low buzz.
+      noise(ac, master, t, 0.26, 0.12, 5200, true);
+      tone(ac, master, 'sawtooth', 150, 96, t, 0.28, 0.11);
+      tone(ac, master, 'sawtooth', 156, 100, t, 0.28, 0.08); break;
+    case 'regen':
+      // A soft holy shimmer: a gentle rising open-fifth chime pair.
+      tone(ac, master, 'sine', 660, 990, t, 0.22, 0.1);
+      tone(ac, master, 'sine', 990, 1320, t + 0.07, 0.24, 0.07); break;
+    case 'reflect':
+      // A hard metallic barrier ring: bright square ping plus a crisp noise clink.
+      tone(ac, master, 'square', 620, 880, t, 0.16, 0.12);
+      tone(ac, master, 'triangle', 1240, 1240, t, 0.2, 0.06);
+      noise(ac, master, t, 0.05, 0.1, 6000, true); break;
     case 'turn':
       tone(ac, master, 'sine', 440, 560, t, 0.09, 0.08); break;
     case 'win': {
@@ -127,7 +142,7 @@ export function playSfx(cue: Cue) {
  * cursor of how many were already sounded; returns the new cursor. Win/lose is personalised to
  * the local player. Frequent, low-signal events (draws, mana ticks) are intentionally silent. */
 export function soundEvents(
-  events: { type: string; targetId?: string; playerId?: string; winnerId?: string }[],
+  events: { type: string; targetId?: string; playerId?: string; winnerId?: string; status?: string; element?: string }[],
   seen: number,
   myId: string,
 ): number {
@@ -135,7 +150,11 @@ export function soundEvents(
     const e = events[i];
     switch (e.type) {
       case 'card_played': playSfx('play'); break;
-      case 'damage_dealt': playSfx('damage'); break;
+      case 'status_applied':
+        playSfx(e.status === 'regen' ? 'regen' : e.status === 'reflect' ? 'reflect' : 'poison'); break;
+      case 'damage_dealt':
+        // Poison damage-over-time ticks get the corrosive hiss instead of the blunt hit.
+        playSfx(e.element === 'poison' ? 'poison' : 'damage'); break;
       case 'healed': playSfx('heal'); break;
       case 'shielded': playSfx('shield'); break;
       case 'direction_reversed': playSfx('reverse'); break;
