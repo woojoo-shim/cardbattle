@@ -142,6 +142,22 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
 
+            {p.alive && p.statuses.length > 0 && (
+              <div style={statusRow}>
+                {p.statuses.map((st) => {
+                  const meta = STATUS_META[st.kind] ?? { color: C.dim, icon: 'zzz' as const };
+                  const label = st.kind === 'reflect' ? `${st.amount}%` : String(st.amount);
+                  return (
+                    <span key={st.kind} style={{ ...statusChip, color: meta.color, borderColor: `${meta.color}66` }}
+                      title={`${st.turns}턴 남음`}>
+                      <Icon name={meta.icon} size={10} />{label}
+                      <i style={statusTurns}>{st.turns}</i>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
             <div style={hpBar}>
               {(() => {
                 const crit = p.alive && hpPct <= 30;
@@ -348,6 +364,22 @@ const badge: React.CSSProperties = {
 };
 const badgeDef: React.CSSProperties = { left: 5, color: '#7fb6ff' };
 const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
+// Ongoing turn-start effects, shown as a compact chip row under the portrait.
+const STATUS_META: Record<string, { color: string; icon: 'poison' | 'reflect' | 'regen' | 'zzz' }> = {
+  poison: { color: '#8fd14f', icon: 'poison' },
+  regen: { color: '#79b0a2', icon: 'regen' },
+  reflect: { color: '#b08fe0', icon: 'reflect' },
+};
+const statusRow: React.CSSProperties = {
+  display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 3, maxWidth: '96%',
+};
+const statusChip: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 2, height: 16, padding: '0 4px', borderRadius: 6,
+  fontSize: 9, fontFamily: mono, fontWeight: 700, border: '1px solid', background: 'rgba(10,12,20,0.82)',
+};
+const statusTurns: React.CSSProperties = {
+  fontSize: 8, opacity: 0.7, fontStyle: 'normal', marginLeft: 1,
+};
 const crosshair: React.CSSProperties = {
   position: 'absolute', inset: 0, border: '1px dashed', borderRadius: 16, animation: 'cb-spin 6s linear infinite',
 };

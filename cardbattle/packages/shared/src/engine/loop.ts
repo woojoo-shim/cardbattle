@@ -68,6 +68,32 @@ function refillHands(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => v
   }
 }
 
+/** Tick a player's ongoing statuses at THEIR turn start: poison bites (ignoring shield),
+ *  regen mends, reflect counts down. Each survivor loses one turn of duration; expired
+ *  effects drop off. A poison kill flips alive/emits elimination — caller re-advances. */
+function tickStatuses(state: GameState, p: PlayerState, emit: (e: GameEvent) => void): void {
+  if (!p.alive || p.statuses.length === 0) return;
+  const kept: PlayerState['statuses'] = [];
+  for (const st of p.statuses) {
+    if (st.kind === 'poison') {
+      if (p.alive) {
+        p.hp = Math.max(0, p.hp - st.amount); // damage-over-time bypasses shield entirely
+        emit({ type: 'damage_dealt', sourceId: st.sourceId, targetId: p.id, amount: st.amount, element: 'poison', targetHpAfter: p.hp });
+        if (p.hp === 0 && p.alive) { p.alive = false; emit({ type: 'player_eliminated', playerId: p.id }); }
+      }
+    } else if (st.kind === 'regen') {
+      if (p.alive) {
+        const before = p.hp;
+        p.hp = Math.min(p.maxHp, p.hp + st.amount);
+        emit({ type: 'healed', targetId: p.id, amount: p.hp - before, targetHpAfter: p.hp });
+      }
+    }
+    if (!p.alive) continue; // corpse keeps nothing
+    if (st.turns - 1 > 0) kept.push({ ...st, turns: st.turns - 1 });
+  }
+  p.statuses = p.alive ? kept : [];
+}
+
 export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
   if (input.phase !== 'playing') return { state: input, events: [] };
   const state = structuredClone(input);
@@ -81,7 +107,9 @@ export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
 
   // advance to the next living player in the current direction; crossing the wrap
   // point (seam) means the token completed a full lap -> a new round begins. A player
-  // carrying skipTurns is passed over (consuming one skip) and we keep advancing.
+  // carrying skipTurns is passed over (consuming one skip) and we keep advancing. The
+  // player we settle on has their turn-start statuses ticked here; if poison kills them
+  // we keep advancing past the corpse to the next taker.
   const n = state.turnOrder.length;
   const dir = state.turnDir;
   let lapped = false;
@@ -105,6 +133,8 @@ export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
       emit({ type: 'turn_skipped', playerId: landed.id });
       continue; // keep advancing past the skipped player
     }
+    if (landed) tickStatuses(state, landed, emit);
+    if (landed && !landed.alive) continue; // poison finished them -> find the next taker
     break;
   }
   state.currentTurnIndex = cursor;

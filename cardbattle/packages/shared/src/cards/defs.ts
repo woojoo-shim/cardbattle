@@ -44,6 +44,11 @@ export const CARD_DEFS: Record<string, CardDef> = {
   gale:     { id: 'gale',     name: '돌풍',   rarity: 'rare',   cost: 3, element: 'ice',      kind: 'special',effects: [{ kind: 'reverse' }, { kind: 'skip' }],          cooldown: 0, vfxKey: 'bind',    sfxKey: 'bind',    icon: '🌫️', desc: '진행 방향을 뒤집고 지목한 상대의 다음 턴을 건너뛰게 한다', drawWeight: 5 },
   tempest:  { id: 'tempest',  name: '폭풍',   rarity: 'epic',   cost: 4, element: 'lightning',kind: 'magic',  effects: [{ kind: 'damage', amount: 7, target: 'all' }, { kind: 'reverse' }], cooldown: 0, vfxKey: 'bolt', sfxKey: 'bolt', icon: '🌩️', desc: '모두에게 7 피해를 주고 진행 방향을 반전시킨다', drawWeight: 4 },
   backstab: { id: 'backstab', name: '기습',   rarity: 'rare',   cost: 3, element: 'poison',   kind: 'special',effects: [{ kind: 'steal' }, { kind: 'damage', amount: 4, target: 'chosen' }], cooldown: 0, vfxKey: 'plunder', sfxKey: 'plunder', icon: '🗡️', desc: '지목한 상대의 손패 1장을 빼앗고 4 피해를 준다', drawWeight: 5 },
+  // Status effects — poison DoT, an AoE poison cloud, a lingering regen, and a reflect barrier.
+  venomdart:{ id: 'venomdart',name: '독침',   rarity: 'rare',   cost: 2, element: 'poison',   kind: 'weapon', effects: [{ kind: 'damage', amount: 4, target: 'chosen' }, { kind: 'poison', amount: 3, turns: 3, target: 'chosen' }], cooldown: 0, vfxKey: 'drain', sfxKey: 'drain', icon: '🐍', desc: '대상에게 4 피해 + 3턴간 매 턴 3 중독 피해(방어 무시)', drawWeight: 7 },
+  plaguemist:{id: 'plaguemist',name:'역병안개',rarity:'epic',    cost: 4, element: 'poison',   kind: 'magic',  effects: [{ kind: 'poison', amount: 3, turns: 3, target: 'all' }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '☠️', desc: '나를 제외한 모두에게 3턴간 매 턴 3 중독 피해(방어 무시)', drawWeight: 4 },
+  regenward:{ id: 'regenward',name: '재생축복',rarity: 'rare',   cost: 3, element: 'holy',     kind: 'heal',   effects: [{ kind: 'regen', amount: 5, turns: 3 }],         cooldown: 0, vfxKey: 'heal',    sfxKey: 'heal',    icon: '🌿', desc: '내 턴이 시작될 때마다 3턴간 5 회복', drawWeight: 6 },
+  thornmail:{ id: 'thornmail',name: '가시갑옷',rarity:'epic',    cost: 3, element: 'physical', kind: 'equipment',effects:[{ kind: 'reflect', pct: 0.5, turns: 2 }],       cooldown: 0, vfxKey: 'shield',  sfxKey: 'shield',  icon: '🦔', desc: '내 다음 턴까지 받는 피해의 50%를 공격자에게 되돌린다', drawWeight: 5 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
@@ -51,6 +56,6 @@ export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);
 /** Does this card require the player to pick a target before playing? */
 export function requiresTarget(def: CardDef): boolean {
   return def.effects.some(
-    (e) => (e.kind === 'damage' && e.target === 'chosen') || e.kind === 'pierce' || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal' || e.kind === 'swap' || e.kind === 'manaburn' || e.kind === 'desperation',
+    (e) => (e.kind === 'damage' && e.target === 'chosen') || (e.kind === 'poison' && e.target === 'chosen') || e.kind === 'pierce' || e.kind === 'peek' || e.kind === 'discard' || e.kind === 'skip' || e.kind === 'steal' || e.kind === 'swap' || e.kind === 'manaburn' || e.kind === 'desperation',
   );
 }

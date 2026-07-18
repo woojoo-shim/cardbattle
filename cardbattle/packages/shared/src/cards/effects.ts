@@ -1,4 +1,4 @@
-import type { Effect, GameEvent, GameState, PlayerState, Element } from '../types.js';
+import type { Effect, GameEvent, GameState, PlayerState, Element, Status } from '../types.js';
 import { weightedPick } from '../engine/rng.js';
 
 /** Resolve an attack's amount after this turn's empower and any gamble (armed or mode-forced).
@@ -30,18 +30,52 @@ function livingOthers(state: GameState, sourceId: string): PlayerState[] {
   return state.players.filter((p) => p.alive && p.id !== sourceId);
 }
 
-export function damageOne(target: PlayerState, amount: number, element: Element, sourceId: string, emit: (e: GameEvent) => void): void {
+/** Deal `amount` of `element` damage from `source` to `target`. Shield soaks first; if the target
+ *  wears a reflector, a fraction of the HP damage bounces straight back at the attacker (once — the
+ *  bounce itself never re-reflects). `allowReflect=false` is used for that bounce and for sources
+ *  (pierce) that should ignore reflectors entirely. */
+export function damageOne(target: PlayerState, amount: number, element: Element, source: PlayerState, emit: (e: GameEvent) => void, allowReflect = true): void {
   if (!target.alive) return;
   // Shield (defense) is a consumable buffer, not a passive: it soaks damage and is spent doing so.
   const absorbed = Math.min(target.defense, amount);
   target.defense -= absorbed;
   const dealt = amount - absorbed;
   target.hp = Math.max(0, target.hp - dealt);
-  emit({ type: 'damage_dealt', sourceId, targetId: target.id, amount: dealt, element, targetHpAfter: target.hp });
+  emit({ type: 'damage_dealt', sourceId: source.id, targetId: target.id, amount: dealt, element, targetHpAfter: target.hp });
   if (target.hp === 0) {
     target.alive = false;
+    target.statuses = []; // the dead carry no lingering effects
     emit({ type: 'player_eliminated', playerId: target.id });
   }
+  // Reflector: bounce a share of the HP damage back at the attacker (never itself reflected).
+  if (allowReflect && dealt > 0 && source.alive && source.id !== target.id) {
+    const refl = target.statuses.find((s) => s.kind === 'reflect');
+    if (refl) {
+      const back = Math.round(dealt * refl.pct);
+      if (back > 0) damageOne(source, back, element, target, emit, false);
+    }
+  }
+}
+
+/** Apply/merge an ongoing status onto a player and announce it. Poison stacks its per-tick amount
+ *  and refreshes duration; regen/reflect take the stronger magnitude and the longer duration. */
+function applyStatus(p: PlayerState, st: Status, emit: (e: GameEvent) => void): void {
+  const cur = p.statuses.find((s) => s.kind === st.kind);
+  if (!cur) {
+    p.statuses.push(st);
+  } else if (cur.kind === 'poison' && st.kind === 'poison') {
+    cur.amount += st.amount;
+    cur.turns = Math.max(cur.turns, st.turns);
+    cur.sourceId = st.sourceId;
+  } else if (cur.kind === 'regen' && st.kind === 'regen') {
+    cur.amount = Math.max(cur.amount, st.amount);
+    cur.turns = Math.max(cur.turns, st.turns);
+  } else if (cur.kind === 'reflect' && st.kind === 'reflect') {
+    cur.pct = Math.max(cur.pct, st.pct);
+    cur.turns = Math.max(cur.turns, st.turns);
+  }
+  const amount = st.kind === 'reflect' ? Math.round(st.pct * 100) : st.amount;
+  emit({ type: 'status_applied', targetId: p.id, status: st.kind, amount, turns: st.turns });
 }
 
 export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx) => void> = {
@@ -53,7 +87,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     // '희생' empowers every attack this turn; a gamble (armed by '도박', or forced in 도박장 mode)
     // then either doubles or whiffs it.
     const amount = resolveAttackAmount(ctx, effect.amount);
-    for (const t of targets) damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
+    for (const t of targets) damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
   },
   heal: (effect: Extract<Effect, { kind: 'heal' }>, ctx) => {
     ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + effect.amount);
@@ -154,7 +188,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     let healed = 0;
     for (const t of targets) {
       const before = t.hp;
-      damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
+      damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
       healed += before - t.hp;
     }
     if (healed > 0) {
@@ -169,6 +203,25 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     if (!t) return;
     const missing = ctx.source.maxHp - ctx.source.hp;
     const amount = resolveAttackAmount(ctx, effect.amount + missing);
-    damageOne(t, amount, ctx.element, ctx.source.id, ctx.emit);
+    damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
+  },
+  // '독' — lay a damage-over-time on the target(s); it bites at the start of each of their turns
+  // (loop.ts), bypassing shield. Empower/gamble don't apply — it's a lingering toxin, not a strike.
+  poison: (effect: Extract<Effect, { kind: 'poison' }>, ctx) => {
+    const targets = effect.target === 'all'
+      ? livingOthers(ctx.state, ctx.source.id)
+      : (() => { const t = ctx.state.players.find((p) => p.id === ctx.chosenTargetId && p.alive); return t ? [t] : []; })();
+    for (const t of targets) {
+      applyStatus(t, { kind: 'poison', amount: effect.amount, turns: effect.turns, sourceId: ctx.source.id }, ctx.emit);
+    }
+  },
+  // '재생' — a heal-over-time on the caster, ticking at the start of their own turns.
+  regen: (effect: Extract<Effect, { kind: 'regen' }>, ctx) => {
+    applyStatus(ctx.source, { kind: 'regen', amount: effect.amount, turns: effect.turns }, ctx.emit);
+  },
+  // '반사막' — a reflector: until the caster's next turn, a share of incoming HP damage bounces
+  // back at whoever struck them (handled in damageOne).
+  reflect: (effect: Extract<Effect, { kind: 'reflect' }>, ctx) => {
+    applyStatus(ctx.source, { kind: 'reflect', pct: effect.pct, turns: effect.turns }, ctx.emit);
   },
 };

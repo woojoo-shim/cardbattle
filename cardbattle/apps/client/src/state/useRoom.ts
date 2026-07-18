@@ -27,6 +27,14 @@ function clearResumeToken(): void {
   try { sessionStorage.removeItem(RESUME_KEY); } catch { /* ignore */ }
 }
 
+/** An ongoing turn-start effect on a player, mirrored for portrait badges. `amount` is the
+ *  per-tick damage/heal, or the reflect percent (50 for 0.5). */
+export interface UiStatus {
+  kind: string;
+  amount: number;
+  turns: number;
+}
+
 export interface UiPlayer {
   id: string;
   name: string;
@@ -40,6 +48,7 @@ export interface UiPlayer {
   handCount: number;
   skipTurns: number;
   mana: number;
+  statuses: UiStatus[];
   /** Equipped cosmetics, broadcast from the server so every player sees them. */
   border: string;
   title: string;
@@ -119,6 +128,7 @@ function snapshot(state: any): UiState {
       handCount: p.handCount,
       skipTurns: p.skipTurns ?? 0,
       mana: p.mana ?? 0,
+      statuses: p.statuses ? Array.from(p.statuses, (st: any) => ({ kind: st.kind, amount: st.amount, turns: st.turns })) : [],
       border: p.border ?? 'none',
       title: p.titleCosmetic ?? 'title_none',
       effect: p.effectCosmetic ?? 'fx_none',

@@ -22,7 +22,17 @@ export type Effect =
   | { kind: 'swap' }       // swap the caster's current HP with a chosen player's HP
   | { kind: 'manaburn'; amount: number }    // drain up to `amount` mana from a chosen player
   | { kind: 'leech'; amount: number }       // hit every other living player, healing the caster by the HP actually removed
-  | { kind: 'desperation'; amount: number }; // hit a chosen player for `amount` + the caster's missing HP (comeback finisher)
+  | { kind: 'desperation'; amount: number } // hit a chosen player for `amount` + the caster's missing HP (comeback finisher)
+  | { kind: 'poison'; amount: number; turns: number; target: 'chosen' | 'all' } // damage-over-time: ticks at the victim's turn start, ignores shield
+  | { kind: 'regen'; amount: number; turns: number }   // heal-over-time on the caster: ticks at their own turn start
+  | { kind: 'reflect'; pct: number; turns: number };   // a reflector: bounces `pct` of incoming HP damage back at the attacker until the caster's next turn
+
+/** An ongoing effect riding on a player, ticked at that player's turn start (loop.ts). */
+export type Status =
+  | { kind: 'poison'; amount: number; turns: number; sourceId: string }
+  | { kind: 'regen'; amount: number; turns: number }
+  | { kind: 'reflect'; pct: number; turns: number };
+export type StatusKind = Status['kind'];
 
 export interface CardDef {
   id: string;
@@ -53,7 +63,7 @@ export interface PlayerState {
   defense: number;
   hand: CardInstance[];
   equipment: CardInstance[]; // S1: always []
-  statuses: unknown[];       // S1: always []
+  statuses: Status[];        // ongoing poison/regen/reflect effects, ticked at this player's turn start
   buffs: unknown[];          // S1: always []
   alive: boolean;
   skipTurns: number;         // pending turns to skip (from '결박' / '희생'); decremented on arrival
@@ -100,6 +110,7 @@ export type GameEvent =
   | { type: 'mana_gained'; playerId: string; amount: number; manaAfter: number }
   | { type: 'mana_burned'; targetId: string; amount: number; manaAfter: number } // a chosen player's mana was drained
   | { type: 'hp_swapped'; aId: string; bId: string; aHp: number; bHp: number }    // two players traded current HP
+  | { type: 'status_applied'; targetId: string; status: StatusKind; amount: number; turns: number } // poison/regen/reflect landed on a player
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

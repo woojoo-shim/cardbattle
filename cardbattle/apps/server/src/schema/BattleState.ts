@@ -6,6 +6,14 @@ export class CardInstanceSchema extends Schema {
   @type('string') defId = '';
 }
 
+/** One ongoing status riding on a player (poison/regen/reflect), surfaced so clients can
+ *  paint turn-start effect badges. `amount` doubles as reflect's percent (0.5 -> 50). */
+export class StatusSchema extends Schema {
+  @type('string') kind = '';
+  @type('number') amount = 0;
+  @type('number') turns = 0;
+}
+
 export class PlayerSchema extends Schema {
   @type('string') id = '';
   @type('string') name = '';
@@ -25,6 +33,7 @@ export class PlayerSchema extends Schema {
   @type('string') titleCosmetic = 'title_none';
   @type('string') effectCosmetic = 'fx_none';
   @type([CardInstanceSchema]) hand = new ArraySchema<CardInstanceSchema>();
+  @type([StatusSchema]) statuses = new ArraySchema<StatusSchema>();
 }
 
 export class BattleState extends Schema {
@@ -73,5 +82,14 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
     ps.handCount = p.hand.length;
     ps.skipTurns = p.skipTurns;
     ps.mana = p.mana;
+    // Rebuild the status list (small, changes rarely) so effect badges stay in sync.
+    while (ps.statuses.length > 0) ps.statuses.pop();
+    for (const st of p.statuses) {
+      const ss = new StatusSchema();
+      ss.kind = st.kind;
+      ss.amount = st.kind === 'reflect' ? Math.round(st.pct * 100) : st.amount;
+      ss.turns = st.turns;
+      ps.statuses.push(ss);
+    }
   }
 }

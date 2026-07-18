@@ -9,6 +9,7 @@ export type IconName =
   | 'eye' | 'chain' | 'zzz' | 'fire' | 'target' | 'card' | 'burst'
   | 'heart' | 'reverse' | 'crystal' | 'trash' | 'hand' | 'download'
   | 'petal' | 'frost' | 'star' | 'sound' | 'mute'
+  | 'poison' | 'reflect' | 'regen'
   | 'arrowRight' | 'arrowSwap' | 'arrowCW' | 'arrowCCW' | 'chevronUp' | 'chevronDown';
 
 interface Props {
@@ -226,6 +227,29 @@ const GLYPHS: Record<IconName, () => JSX.Element> = {
   ),
   chevronUp: () => <path d="M6 15 L12 9 L18 15" {...S} strokeWidth={2.2} />,
   chevronDown: () => <path d="M6 9 L12 15 L18 9" {...S} strokeWidth={2.2} />,
+  // A dripping venom drop with a skull hint — damage-over-time.
+  poison: () => (
+    <>
+      <path d="M12 3 C12 3 6 10 6 14.5 a6 6 0 0 0 12 0 C18 10 12 3 12 3 Z" {...S} strokeWidth={1.8} />
+      <circle cx="10" cy="14" r="1" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="14" r="1" fill="currentColor" stroke="none" />
+      <path d="M10.5 16.5 h3" {...S} strokeWidth={1.6} />
+    </>
+  ),
+  // A shield with a bounce-back arrow — the reflector barrier.
+  reflect: () => (
+    <>
+      <path d="M12 3 L19 6 V11 c0 5 -3.5 8 -7 10 c-3.5 -2 -7 -5 -7 -10 V6 Z" {...S} strokeWidth={1.8} />
+      <path d="M9.5 13 l-2.5 -2.5 l2.5 -2.5 M7.2 10.5 H13 a2.5 2.5 0 0 1 0 5 h-1" {...S} strokeWidth={1.6} />
+    </>
+  ),
+  // A rising leaf/cross — heal-over-time.
+  regen: () => (
+    <>
+      <path d="M12 20 C12 20 5 15 5 9 C5 9 10 9 12 13 C14 9 19 9 19 9 C19 15 12 20 12 20 Z" {...S} strokeWidth={1.8} />
+      <path d="M12 20 V11" {...S} strokeWidth={1.6} />
+    </>
+  ),
 };
 
 /** Which glyph stands in for each game mode (replaces the emoji in modes.ts data). */

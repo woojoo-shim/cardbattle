@@ -344,11 +344,32 @@ export class BattleRoom extends Room<BattleState> {
           if (mrich.mana >= 2) consider(5 - d.cost, play(h.inst.id, mrich.id));
         }
         if (hasKind(d, 'swap') && strongest.hp > bot.hp + 12) consider(strongest.hp - bot.hp, play(h.inst.id, strongest.id));
+        if (hasKind(d, 'poison')) {
+          // A lingering toxin pays off on a durable foe (each tick bypasses shield); aim the
+          // healthiest target that isn't already rotting so all its ticks land.
+          const pe = d.effects.find((e) => e.kind === 'poison') as any;
+          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
+          consider(sumBy(d, 'poison') * (pe?.turns ?? 1) - d.cost, play(h.inst.id, victim.id));
+        }
       } else {
         const aoe = aoeRemovedFrom(d, weakest);
         if (aoe > 0) consider(aoe * opponents.length * 2 - d.cost + (sumBy(d, 'leech') ? 4 : 0), play(h.inst.id));
         if (sumBy(d, 'heal') > 0 && !hasKind(d, 'selfskip') && bot.hp < bot.maxHp * 0.8) consider(sumBy(d, 'heal') - d.cost, play(h.inst.id));
         if (sumBy(d, 'shield') > 0 && bot.defense < 8 && bot.hp < bot.maxHp * 0.75) consider(sumBy(d, 'shield') / 2 - d.cost, play(h.inst.id));
+        // '역병안개' — AoE poison every foe (bypasses shield); scale by heads and duration.
+        if (hasKind(d, 'poison')) {
+          const pe = d.effects.find((e) => e.kind === 'poison') as any;
+          consider(sumBy(d, 'poison') * (pe?.turns ?? 1) * opponents.length / 2 - d.cost, play(h.inst.id));
+        }
+        // '재생축복' — stack a heal-over-time when wounded and not already regenerating.
+        if (hasKind(d, 'regen') && !bot.statuses.some((s) => s.kind === 'regen') && bot.hp < bot.maxHp * 0.85) {
+          const re = d.effects.find((e) => e.kind === 'regen') as any;
+          consider((re?.amount ?? 0) * (re?.turns ?? 1) / 2 - d.cost, play(h.inst.id));
+        }
+        // '가시갑옷' — raise a reflector when hurt and unguarded, so the next hit bites back.
+        if (hasKind(d, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.7) {
+          consider(6 - d.cost, play(h.inst.id));
+        }
       }
     }
     if (cands.length) return cands.sort((a, b) => b.score - a.score)[0].action;

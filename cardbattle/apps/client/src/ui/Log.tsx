@@ -34,6 +34,13 @@ function line(ui: UiState, e: GameEvent): Line | null {
     case 'game_over': return { icon: 'trophy', text: `${nameOf(ui, e.winnerId)} 승리!`, tone: 'win' };
     case 'hp_swapped': return { icon: 'arrowSwap', text: `${nameOf(ui, e.aId)} ↔ ${nameOf(ui, e.bId)} 체력 교환`, tone: 'reverse' };
     case 'mana_burned': return { icon: 'crystal', text: `${nameOf(ui, e.targetId)} 마나 -${e.amount} (남은 ${e.manaAfter})`, tone: 'reveal' };
+    case 'status_applied': {
+      const label = e.status === 'poison' ? `중독 ${e.amount}×${e.turns}턴`
+        : e.status === 'regen' ? `재생 ${e.amount}×${e.turns}턴`
+        : `반사 ${e.amount}% (${e.turns}턴)`;
+      const icon = e.status === 'poison' ? 'poison' : e.status === 'regen' ? 'regen' : 'reflect';
+      return { icon, text: `${nameOf(ui, e.targetId)} — ${label}`, tone: e.status === 'poison' ? 'discard' : e.status === 'regen' ? 'heal' : 'reverse' };
+    }
     default: return null;
   }
 }
