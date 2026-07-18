@@ -15,10 +15,8 @@ type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName; variant: 'hit' | 'gain'; big?: boolean }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
-  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean }
-  | { id: number; kind: 'streak'; x: number; y: number; dx: number; dy: number; color: string; ang: number }
+  | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean; dur?: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
-  | { id: number; kind: 'charge'; x: number; y: number; color: string }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -146,14 +144,13 @@ export function VfxLayer({ events, players }: Props) {
           (ef) => ef.kind === 'damage' || ef.kind === 'pierce' || ef.kind === 'leech' || ef.kind === 'desperation',
         );
         if (isAttack) {
-          // A sleek light-streak lances from the caster toward its target (a chosen foe, or the
-          // table centre for area/random hits) — an element-tinted comet, not a thrown blade.
+          // GODFIELD SIGNATURE: the actual weapon/item card is HURLED at the victim — it spins
+          // end-over-end across the table and lands as the blow connects, instead of an abstract
+          // comet beam. Aims at the chosen foe, or the table centre for area/random hits.
           const chosen = e.targetId ? centerOf(e.targetId) : null;
           const dest = chosen ?? tableCenter() ?? src;
           const dx = dest.x - src.x, dy = dest.y - src.y;
-          add.push({ id: nextId.current++, kind: 'streak', x: src.x, y: src.y, dx, dy, color, ang: Math.atan2(dy, dx) * 180 / Math.PI });
-          // Energy gathers at the caster's hand as they coil, then releases into the strike.
-          add.push({ id: nextId.current++, kind: 'charge', x: src.x, y: src.y, color });
+          add.push({ id: nextId.current++, kind: 'hurl', x: src.x, y: src.y, dx, dy, defId: e.defId, color, spin: true, dur: IMPACT_DELAY });
           // The attacker physically lunges at the victim — the missing weight in the old motion.
           const len = Math.hypot(dx, dy) || 1;
           lunge(e.playerId, dx / len, dy / len);
@@ -239,12 +236,8 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={hurlStyle(f)}>
               {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
             </span>
-          ) : f.kind === 'streak' ? (
-            <span key={f.id} style={streakStyle(f)}><span style={streakHeadStyle(f)} /></span>
           ) : f.kind === 'impact' ? (
             <span key={f.id} style={impactStyle(f)} />
-          ) : f.kind === 'charge' ? (
-            <span key={f.id} style={chargeStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -284,32 +277,8 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
     filter: `drop-shadow(0 0 10px ${f.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))`,
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
-    animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} .64s cubic-bezier(.34,.32,.2,1) forwards`,
+    animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} ${(f.dur ?? 0.64).toFixed(2)}s cubic-bezier(.34,.32,.2,1) forwards`,
   } as React.CSSProperties;
-}
-/** A real comet, not a laser line: a tapering trail (this element) leading with a concentrated,
- *  crisp head orb (the child, streakHeadStyle). Travels caster->target by translating whole —
- *  no scaleX squash — so the head stays round and reads as a THING being thrown, not a beam. */
-function streakStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: 58, height: 9, borderRadius: '50%',
-    // Trail: transparent at the tail (left), swelling to white-hot at the leading tip (right).
-    background: `linear-gradient(90deg, transparent 4%, ${f.color}00 10%, ${f.color} 58%, #fff 97%)`,
-    boxShadow: `0 0 9px ${f.color}`,
-    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--ang' as string]: `${f.ang}deg`,
-    animation: 'cb-streak .52s cubic-bezier(.35,.12,.5,1) forwards',
-  } as React.CSSProperties;
-}
-/** The comet's bright head, pinned to the leading (right) tip of the trail — a concentrated
- *  fireball with a hot white core and a soft element halo. This is what sells "a projectile". */
-function streakHeadStyle(f: Extract<Fx, { kind: 'streak' }>): React.CSSProperties {
-  return {
-    position: 'absolute', right: -7, top: '50%', width: 18, height: 18, borderRadius: '50%',
-    transform: 'translateY(-50%)',
-    background: `radial-gradient(circle, #fff 20%, ${f.color} 52%, transparent 76%)`,
-    boxShadow: `0 0 12px ${f.color}, 0 0 22px ${f.color}`,
-  };
 }
 /** The detonation an attack makes on arrival: a bright core radial ringed by an element-tinted
  *  shockwave circle, scaled up and thinned out. One element carries both — the background is the
@@ -324,17 +293,6 @@ function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
     boxShadow: `0 0 18px ${f.color}`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     animation: `cb-impact ${f.big ? 0.3 : 0.24}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
-  };
-}
-/** Energy gathering at the caster's seat during the wind-up, then releasing — a bright core orb
- *  that swells and implodes as the strike launches, so the attack reads as charged, not tossed. */
-function chargeStyle(f: Extract<Fx, { kind: 'charge' }>): React.CSSProperties {
-  return {
-    position: 'fixed', left: f.x, top: f.y, width: 26, height: 26, borderRadius: '50%',
-    background: `radial-gradient(circle, #fff 10%, ${f.color} 46%, transparent 72%)`,
-    boxShadow: `0 0 14px ${f.color}`,
-    mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    animation: 'cb-charge .44s cubic-bezier(.3,.7,.3,1) forwards',
   };
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
