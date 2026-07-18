@@ -252,6 +252,10 @@ function Credits({ onClose }: { onClose: () => void }) {
 
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
+  // box-sizing so the horizontal padding is folded INTO the 100% width — without it the padding
+  // added up to 260px beyond the viewport, spawning a horizontal scrollbar that shoved the title
+  // and menu off the left edge.
+  boxSizing: 'border-box',
   display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontFamily: sans, color: C.text,
   padding: '0 clamp(32px, 8vw, 130px)',
   // Oxblood back-room haze bleeding down into wet black — the arena mood, carried to the menu.
