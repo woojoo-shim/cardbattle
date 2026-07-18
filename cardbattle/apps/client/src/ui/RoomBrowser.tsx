@@ -109,7 +109,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
           <div style={listBox}>
             {open.length === 0 && <p style={empty}>-- no open sessions --<br />&gt; run `new` to host one_</p>}
             {open.map((r) => (
-              <button key={r.roomId} style={roomRow} onClick={() => join(r.roomId)}>
+              <button key={r.roomId} className="cb-room" style={roomRow} onClick={() => join(r.roomId)}>
                 <span style={rTitle}>
                   <span style={rMode} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
                     <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={16} color={C.rare} />
@@ -118,7 +118,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                 </span>
                 <span style={rCode}>#{r.metadata?.code}</span>
                 <span style={rCount}>[{headcount(r)}/{r.maxClients}]</span>
-                <span style={rGo}>JOIN&nbsp;<Icon name="arrowRight" size={13} /></span>
+                <span className="cb-go" style={rGo}>JOIN&nbsp;<Icon name="arrowRight" size={13} /></span>
               </button>
             ))}
           </div>
@@ -144,10 +144,10 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
             <label style={cap}><span style={capDot}>&#9670;</span>&nbsp;공개 설정 <span style={capHint}>VISIBILITY</span></label>
             <div style={visRow}>
-              <button style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
+              <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
                 <Icon name="globe" size={15} />&nbsp;PUBLIC
               </button>
-              <button style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
+              <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
                 <Icon name="lock" size={15} />&nbsp;PRIVATE
               </button>
             </div>
@@ -155,7 +155,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
               {isPrivate ? '# 목록 비표시 · 코드 입력으로만 접속 가능' : '# 로비 목록에 공개 노출됩니다'}
             </p>
 
-            <button style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
+            <button className="cb-modetoggle" data-on={showModes ? '1' : undefined} style={{ ...modeToggle, ...(showModes ? modeToggleOn : null) }} onClick={toggleModes}>
               <Icon name="sparkle" size={15} />&nbsp;게임 규칙 {showModes ? <>[접기]&nbsp;<Icon name="chevronUp" size={13} /></> : <>[펼치기]&nbsp;<Icon name="chevronDown" size={13} /></>}
             </button>
             {showModes && (
@@ -165,6 +165,8 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                   return (
                     <button
                       key={m.id}
+                      className="cb-mode"
+                      data-on={on ? '1' : undefined}
                       style={{ ...modeCard, ...(on ? modeCardOn : null) }}
                       onClick={() => { playSfx('select'); setMode(m.id); }}
                       title={m.desc}
@@ -192,11 +194,11 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && joinByCode()}
               />
-              <button style={ghost} onClick={joinByCode}>CONNECT</button>
+              <button className="cb-ghost" style={ghost} onClick={joinByCode}>CONNECT</button>
             </div>
 
             <div style={sep} className="cb-sep"><span>연습</span></div>
-            <button style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;봇과 빠른 대전</button>
+            <button className="cb-ghost" style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;봇과 빠른 대전</button>
 
             {err && <p style={errLine}>! {err}</p>}
           </div>
@@ -238,6 +240,28 @@ const blinkCss = `
 }
 @keyframes cb-blink { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.15; } }
 .cb-blink { animation: cb-blink 1.3s steps(1,end) infinite; }
+/* Live hover reactions — the terminal was dead-static (no element responded to the cursor).
+   Room rows slide out with a lit left-edge tick + the JOIN arrow springs forward; ghost/vis/mode
+   controls warm to amber. data-on guards keep an already-selected control from being re-styled. */
+.cb-room { transition: border-color .14s, background .14s, box-shadow .14s, transform .14s; }
+.cb-room:hover {
+  border-color: #e0aa46 !important;
+  background: rgba(224,170,70,0.09) !important;
+  box-shadow: inset 3px 0 0 #ffb43a, inset 0 0 26px rgba(224,170,70,0.1), 0 0 18px rgba(224,170,70,0.16) !important;
+  transform: translateX(5px);
+}
+.cb-go { opacity: 0.5; transition: opacity .14s, transform .14s; }
+.cb-room:hover .cb-go { opacity: 1; transform: translateX(4px); text-shadow: 0 0 10px rgba(255,178,54,0.6); }
+.cb-ghost { transition: border-color .14s, background .14s, color .14s, box-shadow .14s; }
+.cb-ghost:hover {
+  border-color: #e0aa46 !important; color: #ffce7a !important;
+  background: rgba(224,170,70,0.1) !important; box-shadow: 0 0 16px rgba(224,170,70,0.2) !important;
+}
+.cb-vis:hover:not([data-on="1"]), .cb-mode:hover:not([data-on="1"]), .cb-modetoggle:hover:not([data-on="1"]) {
+  border-color: rgba(224,170,70,0.55) !important; color: #ffce7a !important;
+  background: rgba(224,170,70,0.06) !important;
+}
+.cb-mode:hover:not([data-on="1"]) { box-shadow: 0 0 14px rgba(224,170,70,0.14) !important; }
 /* Hard L-shaped ticks pinned to each panel's four corners — the HUD frame that makes the two
    columns read as scoped terminal windows rather than plain cards. Drawn as eight thin bars from
    a single overlay pseudo so there's no extra DOM. */
