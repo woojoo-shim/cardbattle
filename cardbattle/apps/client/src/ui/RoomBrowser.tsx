@@ -292,7 +292,9 @@ const wrap: React.CSSProperties = {
 // glass, screen-edge curvature vignette and hard scanlines — so it reads as a terminal screen,
 // not a web page. Content sits above the overlays via zIndex.
 const screen: React.CSSProperties = {
-  position: 'relative', flex: 1, minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', gap: 26,
+  position: 'relative', flex: 1, minHeight: '100vh', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 26,
+  // box-sizing folds the horizontal padding INTO the 100% width — without it the up-to-96px side
+  // padding pushed the CRT screen past the viewport, spawning a horizontal scrollbar.
   padding: '56px clamp(28px, 6vw, 96px) 52px', overflow: 'hidden',
   background: 'radial-gradient(130% 108% at 50% 0%, #2e1c0a 0%, #1c1006 48%, #0a0603 100%)',
   boxShadow:
