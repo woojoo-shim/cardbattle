@@ -228,7 +228,7 @@ const felt: React.CSSProperties = {
 // A soft radial sheen where the bulb rakes across the felt nap — the premium lit-baize look.
 const feltNap: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
-  background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.10), transparent 62%)',
+  background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.05), transparent 62%)',
 };
 // The painted play-surface grid. It fills the felt flat and INHERITS the parent's rotateX tilt,
 // so its square cells foreshorten into converging lines on the tilted plane — the strongest cue
@@ -236,8 +236,8 @@ const feltNap: React.CSSProperties = {
 const feltGrid: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
   backgroundImage:
-    'linear-gradient(rgba(188,208,150,0.15) 1px, transparent 1px),' +
-    'linear-gradient(90deg, rgba(188,208,150,0.13) 1px, transparent 1px)',
+    'linear-gradient(rgba(150,168,120,0.07) 1px, transparent 1px),' +
+    'linear-gradient(90deg, rgba(150,168,120,0.06) 1px, transparent 1px)',
   backgroundSize: '12% 12%', backgroundPosition: 'center',
   WebkitMaskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
   maskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
@@ -307,14 +307,14 @@ const lampBulb: React.CSSProperties = {
 const lampCone: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '21%', transform: 'translateX(-50%)',
   width: 240, height: '46%',
-  background: 'linear-gradient(180deg, rgba(238,176,78,0.20), rgba(238,176,78,0))',
+  background: 'linear-gradient(180deg, rgba(238,176,78,0.12), rgba(238,176,78,0))',
   clipPath: 'polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%)',
-  filter: 'blur(2px)', animation: 'cb-lampon 2.4s ease-out both',
+  filter: 'blur(5px)', animation: 'cb-lampon 2.4s ease-out both',
 };
 const lampPool: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
   width: '54%', height: '38%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 40%, rgba(238,176,78,0.16), transparent 68%)',
+  background: 'radial-gradient(ellipse at 50% 40%, rgba(238,176,78,0.10), transparent 68%)',
   animation: 'cb-lampon 2.4s ease-out both',
 };
 // The face-down pile each player has laid on the table. Tilted onto the felt's own plane

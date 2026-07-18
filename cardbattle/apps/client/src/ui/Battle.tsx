@@ -492,20 +492,23 @@ const atmoWrap: React.CSSProperties = {
 };
 // The cone of light hanging under the bulb — a soft amber wedge, brightest at the top (the source)
 // fading into the table. Swings a hair on cb-shaft-sway as if the bulb rocks on its cord.
+// left 31% + width 38% spans 31%..69% → centred under the bulb WITHOUT a translateX (which the
+// cb-shaft sway animation would clobber). Softened hard: low opacity + a heavy blur so it reads as
+// a faint volumetric god-ray settling on the felt, not the bright hard-edged box it used to be.
 const lightShaft: React.CSSProperties = {
-  position: 'absolute', top: '-6%', left: '50%', width: '52%', height: '72%',
+  position: 'absolute', top: '-8%', left: '31%', width: '38%', height: '66%',
   transformOrigin: '50% 0%',
-  background: 'linear-gradient(180deg, rgba(236,180,96,0.16) 0%, rgba(226,164,72,0.07) 42%, transparent 82%)',
-  clipPath: 'polygon(40% 0%, 60% 0%, 96% 100%, 4% 100%)',
-  filter: 'blur(7px)',
+  background: 'linear-gradient(180deg, rgba(236,180,96,0.085) 0%, rgba(226,164,72,0.03) 44%, transparent 80%)',
+  clipPath: 'polygon(38% 0%, 62% 0%, 94% 100%, 6% 100%)',
+  filter: 'blur(17px)',
 };
 // The amber pool the bulb throws on the felt — same flicker cadence as the shaft so the whole
 // fixture stutters as one failing light.
 const bulbPool: React.CSSProperties = {
   position: 'absolute', top: '30%', left: '50%', width: '46%', height: '40%',
   transform: 'translateX(-50%)',
-  background: 'radial-gradient(50% 50% at 50% 42%, rgba(230,168,78,0.12), transparent 70%)',
-  filter: 'blur(3px)',
+  background: 'radial-gradient(50% 50% at 50% 42%, rgba(230,168,78,0.07), transparent 70%)',
+  filter: 'blur(5px)',
 };
 const chamberDeco: React.CSSProperties = {
   position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0,
