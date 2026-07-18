@@ -92,8 +92,7 @@ export function TurnArrow({ activeId, isMyTurn, turnDir }: Props) {
         </svg>
       </span>
 
-      {/* hub: a slowly turning gem with a bright molten core */}
-      <span style={{ ...hubGem, borderColor: color, boxShadow: `0 0 16px ${color}` }} />
+      {/* hub: a bright molten core at the compass centre */}
       <span style={{ ...hub, background: color, boxShadow: `0 0 20px ${color}, 0 0 7px #fff` }} />
     </div>
   );
@@ -132,10 +131,4 @@ const needle: React.CSSProperties = {
 };
 const hub: React.CSSProperties = {
   position: 'absolute', left: -7, top: -7, width: 14, height: 14, borderRadius: '50%',
-};
-// A diamond gem framing the hub, turning slowly so the centre never feels static.
-const hubGem: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 22, height: 22,
-  border: '2px solid', borderRadius: 4, background: 'rgba(0,0,0,0.35)',
-  animation: 'cb-hub-spin 9s linear infinite',
 };
