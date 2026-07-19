@@ -35,6 +35,20 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
           scene so the seat ring reads as sitting around it. No grid, no lamp, no grime. */}
       <div style={felt} aria-hidden />
 
+      {/* House sigil branded into the felt centre — anchors the empty middle instead of a void.
+          A brass-engraved medallion carrying the ROUND count and the flow direction, laid flat
+          on the table plane (rotateX) and dimmed so it reads as inlay, not a focal element. */}
+      <div style={emblem} aria-hidden>
+        <div style={emblemInk}>
+          <Icon name="skull" size={26} />
+          <div style={emblemRound}>ROUND</div>
+          <div style={emblemNum}>{ui.roundCount}</div>
+          <div style={emblemDir}>
+            <Icon name={ui.turnDir === -1 ? 'arrowCCW' : 'arrowCW'} size={13} />
+          </div>
+        </div>
+      </div>
+
       {/* In front of each living seat: a small fan of face-down cards, one per card the player
           is holding. A persistent passive (e.g. shield) shows as a chip above so it stays put. */}
       {ring.map((p, i) => {
@@ -199,6 +213,32 @@ const felt: React.CSSProperties = {
     'inset 0 0 5px 1px rgba(236,202,126,0.24),' + // brass rim highlight
     'inset 0 0 92px 30px rgba(0,0,0,0.72),' +     // felt edge falls to black
     '0 28px 62px rgba(0,0,0,0.6)',                // table floats above the floor
+};
+// The engraved house medallion at the table centre. Laid flat on the felt plane (same rotateX
+// as the card piles) and low-opacity so it feels branded INTO the baize — an anchor for the
+// dead middle, never competing with the seats or VFX.
+const emblem: React.CSSProperties = {
+  position: 'absolute', left: `${CX}%`, top: `${CY}%`, zIndex: 2, pointerEvents: 'none',
+  transform: 'translate(-50%,-50%) perspective(520px) rotateX(58deg)',
+  width: 96, height: 96, borderRadius: '50%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'radial-gradient(circle at 50% 42%, rgba(198,150,72,0.10), rgba(0,0,0,0) 68%)',
+  border: '1.5px solid rgba(198,150,72,0.22)',
+  boxShadow: 'inset 0 0 18px 4px rgba(0,0,0,0.5), inset 0 0 3px rgba(236,202,126,0.18)',
+  opacity: 0.62,
+};
+const emblemInk: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+  color: 'rgba(210,178,116,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+};
+const emblemRound: React.CSSProperties = {
+  fontFamily: mono, fontSize: 8, letterSpacing: 3, color: 'rgba(198,168,120,0.7)', marginTop: 2,
+};
+const emblemNum: React.CSSProperties = {
+  fontFamily: mono, fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'rgba(224,196,140,0.92)',
+};
+const emblemDir: React.CSSProperties = {
+  marginTop: 2, color: 'rgba(198,168,120,0.6)', display: 'flex',
 };
 // The face-down pile each player has laid on the table. Tilted onto the felt's own plane
 // (perspective + rotateX) so the cards lie FLAT on the baize seen from above, not standing
