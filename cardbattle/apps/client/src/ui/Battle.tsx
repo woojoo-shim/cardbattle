@@ -220,6 +220,7 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
   if (gone) return null;
 
   const c = COACH[step];
+  const stepNo = STEP_ORDER[step]; // 1–3 for the action steps, 0 for wait/done
   return (
     <div style={{ ...coachWrap, ...c.anchor }} key={step} className="cb-coach-in">
       <div style={coachBubble}>
@@ -234,37 +235,56 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
             건너뛰기
           </button>
         </div>
+        <p style={coachHeadline}>{c.head}</p>
         <p style={coachText}>{c.text}</p>
+        {c.point && <div style={coachPoint}>{c.point}</div>}
+        {stepNo > 0 && (
+          <div style={coachDots}>
+            {[1, 2, 3].map((n) => (
+              <span key={n} style={n === stepNo ? coachDotOn : coachDot} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 type CoachStep = 'wait' | 'play' | 'target' | 'endturn' | 'done';
-const COACH: Record<CoachStep, { icon: IconName; tag: string; text: string; anchor: React.CSSProperties }> = {
+// Which of the three actionable steps we're on (0 = intro/outro, no progress dots).
+const STEP_ORDER: Record<CoachStep, number> = { wait: 0, play: 1, target: 2, endturn: 3, done: 0 };
+const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text: string; point?: string; anchor: React.CSSProperties }> = {
   wait: {
-    icon: 'zzz', tag: '대기',
-    text: '다른 참가자의 턴입니다. 당신의 차례가 오면 안내가 이어집니다.',
+    icon: 'zzz', tag: '잠깐 대기',
+    head: '지금은 상대 차례예요.',
+    text: '상대가 카드를 내는 걸 지켜보세요. 내 차례가 되면 안내가 바로 이어집니다.',
     anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
   },
   play: {
-    icon: 'card', tag: '① 카드 내기',
-    text: '당신의 턴입니다! 아래 손에서 카드를 클릭해 사용하세요. 공격 카드는 상대의 HP를 깎습니다.',
+    icon: 'card', tag: '1단계 · 카드 내기',
+    head: '카드를 한 장 눌러 내보세요.',
+    text: '내 차례입니다. 각 카드의 숫자만큼 마나를 쓰고, 공격 카드는 상대의 HP를 깎아요.',
+    point: '↓  화면 아래 내 손패에서 카드를 클릭',
     anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
   },
   target: {
-    icon: 'target', tag: '② 대상 선택',
-    text: '이 카드는 대상이 필요합니다. 위쪽 상대의 초상화를 클릭해 겨누세요. (카드를 다시 누르면 취소)',
+    icon: 'target', tag: '2단계 · 대상 고르기',
+    head: '누구를 맞힐지 골라주세요.',
+    text: '이 카드는 대상이 필요해요. 잘못 골랐다면 카드를 다시 눌러 취소할 수 있어요.',
+    point: '↑  위쪽 상대의 얼굴(초상화)을 클릭',
     anchor: { top: 'clamp(76px, 12vh, 120px)', left: '50%', transform: 'translateX(-50%)' },
   },
   endturn: {
-    icon: 'arrowRight', tag: '③ 턴 종료',
-    text: '좋아요! 마나가 남으면 카드를 더 낼 수 있어요. 다 냈다면 오른쪽 «턴 종료»로 넘기세요.',
+    icon: 'arrowRight', tag: '3단계 · 턴 넘기기',
+    head: '다 냈으면 턴을 넘기세요.',
+    text: '마나가 남으면 카드를 더 낼 수 있어요. 더 낼 게 없으면 턴을 마무리합니다.',
+    point: '→  오른쪽 «턴 종료» 버튼을 클릭',
     anchor: { bottom: 'clamp(96px, 12vh, 140px)', right: 24 },
   },
   done: {
-    icon: 'trophy', tag: '준비 완료',
-    text: '규칙은 이제 몸이 기억할 거예요. 자유롭게 싸워 최후의 1인이 되세요!',
+    icon: 'trophy', tag: '다 배웠어요!',
+    head: '이게 한 턴의 전부예요.',
+    text: '카드 내기 → 대상 고르기 → 턴 넘기기. 이제 자유롭게 싸워 최후의 1인이 되세요!',
     anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
   },
 };
@@ -481,4 +501,17 @@ const coachSkip: React.CSSProperties = {
   padding: '4px 10px', fontSize: 11, fontWeight: 700, color: C.dim, cursor: 'pointer',
   border: `1px solid ${C.border}`, borderRadius: 999, background: 'rgba(255,255,255,0.04)', fontFamily: sans,
 };
-const coachText: React.CSSProperties = { margin: 0, fontSize: 13.5, lineHeight: 1.55, color: '#ece0c6' };
+const coachHeadline: React.CSSProperties = { margin: '0 0 4px', fontSize: 16, fontWeight: 800, lineHeight: 1.3, color: '#fbf3df' };
+const coachText: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.55, color: '#c9bda6' };
+// A directional pointer that tells the newcomer exactly WHERE to look/click for this step.
+const coachPoint: React.CSSProperties = {
+  marginTop: 10, padding: '7px 11px', borderRadius: 9, fontFamily: mono, fontSize: 12.5, fontWeight: 700,
+  letterSpacing: 0.3, color: '#f0d89a', background: 'rgba(216,178,76,0.12)', border: '1px solid rgba(216,178,76,0.32)',
+};
+// Three progress dots so the player knows there are exactly three actions to learn, and where they are.
+const coachDots: React.CSSProperties = { display: 'flex', gap: 6, marginTop: 11, justifyContent: 'center' };
+const coachDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: 'rgba(236,224,198,0.24)' };
+const coachDotOn: React.CSSProperties = {
+  width: 18, height: 6, borderRadius: 999,
+  background: 'linear-gradient(90deg, #d8b45a, #b98a3e)', boxShadow: '0 0 8px rgba(216,180,90,0.5)',
+};
