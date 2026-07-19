@@ -54,15 +54,15 @@ function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) 
 
 const wrap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 14,
-  padding: 'clamp(10px, 1.2vw, 15px) clamp(14px, 1.6vw, 20px)', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(42,32,19,0.94), rgba(26,18,10,0.94))',
-  border: '1.5px solid #6a5528',
-  boxShadow: '0 10px 28px rgba(90,60,20,0.42), inset 0 0 20px rgba(220,170,80,0.12)',
+  padding: 'clamp(10px, 1.2vw, 15px) clamp(14px, 1.6vw, 20px)', borderRadius: 4,
+  background: 'rgba(34,26,15,0.94)',
+  border: '1px solid #5a4820',
+  boxShadow: '0 8px 18px rgba(0,0,0,0.4)',
 };
 const readout: React.CSSProperties = { display: 'flex', flexDirection: 'column', lineHeight: 1, alignItems: 'flex-start' };
 const num: React.CSSProperties = {
-  fontFamily: mono, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 900, color: '#f0e2c0',
-  textShadow: '0 0 12px rgba(220,180,100,0.6)', transition: 'opacity .3s ease',
+  fontFamily: mono, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 800, color: '#f0e2c0',
+  transition: 'opacity .3s ease',
 };
 const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 16px)', fontWeight: 700, color: '#c2a878', marginTop: 2 };
 const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(10px, 0.9vw, 12px)', letterSpacing: 3, color: '#c2a878', marginTop: 5 };

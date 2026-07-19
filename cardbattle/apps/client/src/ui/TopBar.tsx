@@ -76,12 +76,11 @@ const round: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.di
 const dirTag: React.CSSProperties = { fontSize: 16, fontWeight: 800, margin: '0 2px 0 6px' };
 const center: React.CSSProperties = { flex: 1, display: 'flex', justifyContent: 'center' };
 const pill: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 22px', borderRadius: 999,
-  fontWeight: 800, fontSize: 20, letterSpacing: 1,
+  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 22px', borderRadius: 4,
+  fontWeight: 700, fontSize: 20, letterSpacing: 1,
 };
 const pillMine: React.CSSProperties = {
   background: 'rgba(143,157,79,0.12)', border: `1px solid ${C.you}`, color: C.you,
-  boxShadow: '0 0 30px rgba(143,157,79,0.25)',
 };
 const pillOther: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: C.dim,

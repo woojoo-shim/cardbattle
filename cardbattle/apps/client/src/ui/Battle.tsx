@@ -360,7 +360,7 @@ const handRow: React.CSSProperties = { position: 'relative', display: 'flex', al
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
   padding: '8px 18px', background: 'rgba(176,70,47,0.18)', border: `1px solid ${C.enemy}`,
-  borderRadius: 999, color: '#e8b4a6', fontSize: 14, zIndex: 16,
+  borderRadius: 4, color: '#e8b4a6', fontSize: 14, zIndex: 16,
 };
 // The "당신의 턴" onset telegraph. A full-screen, pointer-transparent layer that flashes up once
 // the instant my turn begins, then clears itself out. zIndex sits under the VfxLayer flash (50)
@@ -391,7 +391,7 @@ const turnWord: React.CSSProperties = {
 const errToast: React.CSSProperties = {
   position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
   padding: '8px 16px', background: 'rgba(176,70,47,0.2)', border: `1px solid ${C.enemy}`,
-  borderRadius: 8, color: '#e8b4a6', fontSize: 13, zIndex: 17,
+  borderRadius: 4, color: '#e8b4a6', fontSize: 13, zIndex: 17,
 };
 // My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). The ManaBar carries its
 // own frame; this just pins it to the corner. Bounded width keeps it clear of the card fan on iPad.
@@ -399,9 +399,9 @@ const manaDock: React.CSSProperties = {
   position: 'absolute', bottom: 24, left: 24, zIndex: 16,
 };
 const endTurnBtn: React.CSSProperties = {
-  position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 800,
-  color: '#f4e9cb', cursor: 'pointer', border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg,#b8492f,#9c3b28 56%,#7f2f1f)', boxShadow: '0 8px 20px rgba(60,20,10,0.4)',
+  position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 700,
+  color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
+  background: '#9c3b28',
   transition: 'transform .15s', zIndex: 16,
 };
 const endWrap: React.CSSProperties = {
@@ -453,7 +453,7 @@ const endTitle: React.CSSProperties = { margin: '2px 0 0', fontSize: 76, fontWei
 // hard-fought near-win reads as an accomplishment rather than a flat defeat.
 const placePill: React.CSSProperties = {
   marginTop: 8, display: 'inline-flex', alignItems: 'baseline', gap: 10,
-  padding: '8px 20px', borderRadius: 999, border: '1px solid',
+  padding: '8px 20px', borderRadius: 4, border: '1px solid',
   background: 'rgba(255,255,255,0.03)',
 };
 const placeRank: React.CSSProperties = { fontFamily: mono, fontSize: 30, fontWeight: 900, letterSpacing: 0.5 };
@@ -462,19 +462,18 @@ const placeOf: React.CSSProperties = { fontSize: 13, color: C.dim, fontFamily: m
 const endSub: React.CSSProperties = { margin: '4px 0 8px', color: C.dim, fontSize: 18 };
 const rewardPill: React.CSSProperties = {
   marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 8,
-  padding: '10px 18px', borderRadius: 999, fontFamily: mono,
+  padding: '10px 18px', borderRadius: 4, fontFamily: mono,
   color: '#ffd66b', background: 'rgba(255,196,64,0.10)',
-  border: '1px solid rgba(255,196,64,0.35)', boxShadow: '0 0 22px rgba(255,196,64,0.20)',
+  border: '1px solid rgba(255,196,64,0.35)',
 };
 const rewardEarned: React.CSSProperties = { fontSize: 22, fontWeight: 900 };
 const rewardLabel: React.CSSProperties = { fontSize: 14, opacity: 0.8 };
 const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fontSize: 13, color: C.dim, borderLeft: '1px solid rgba(255,255,255,0.14)' };
 const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
 const returnBtn: React.CSSProperties = {
-  marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 800, letterSpacing: 0.5,
-  color: '#f4e9cb', cursor: 'pointer', border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)',
-  boxShadow: '0 6px 18px rgba(60,20,10,0.45)',
+  marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 700, letterSpacing: 0.5,
+  color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
+  background: '#9c3b28',
 };
 
 // The coach note. Deliberately flat and typographic — a bordered slip of dark card with a single
