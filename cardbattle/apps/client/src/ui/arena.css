@@ -66,10 +66,10 @@
 }
 /* The coach callout easing in each time it re-anchors to a new step. The translate is applied on a
    child so it never fights the wrapper's own centring transform. */
-.cb-coach-in > * { animation: cb-coach-in 0.34s cubic-bezier(.2,.8,.3,1) both; }
+.cb-coach-in > * { animation: cb-coach-in 0.28s ease-out both; }
 @keyframes cb-coach-in {
-  0% { transform: translateY(8px) scale(0.96); opacity: 0; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
+  0% { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 /* End-screen climax: the title punches in with an overshoot, the winner medallion swells up
    from nothing, and (on victory) a fan of light rays turns slowly behind the winner. */

@@ -225,7 +225,9 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
     <div style={{ ...coachWrap, ...c.anchor }} key={step} className="cb-coach-in">
       <div style={coachBubble}>
         <div style={coachHead}>
-          <span style={coachBadge}><Icon name={c.icon} size={15} /></span>
+          {stepNo > 0
+            ? <span style={coachNum}>{stepNo}</span>
+            : <span style={coachMark}><Icon name={c.icon} size={16} /></span>}
           <span style={coachStepTag}>{c.tag}</span>
           <button
             style={coachSkip}
@@ -237,12 +239,10 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
         </div>
         <p style={coachHeadline}>{c.head}</p>
         <p style={coachText}>{c.text}</p>
-        {c.point && <div style={coachPoint}>{c.point}</div>}
-        {stepNo > 0 && (
-          <div style={coachDots}>
-            {[1, 2, 3].map((n) => (
-              <span key={n} style={n === stepNo ? coachDotOn : coachDot} />
-            ))}
+        {(c.point || stepNo > 0) && (
+          <div style={coachFoot}>
+            <span style={coachPoint}>{c.point ?? ''}</span>
+            {stepNo > 0 && <span style={coachCount}>{stepNo} / 3</span>}
           </div>
         )}
       </div>
@@ -477,41 +477,38 @@ const returnBtn: React.CSSProperties = {
   boxShadow: '0 6px 18px rgba(60,20,10,0.45)',
 };
 
-// The coach callout: a small parchment-toned card that hangs beside whatever the newcomer should
-// touch next. The wrapper is pointer-transparent so the table stays fully playable underneath; only
-// the bubble (and its 건너뛰기 button) re-enable pointer events.
+// The coach note. Deliberately flat and typographic — a bordered slip of dark card with a single
+// gold spine down its left edge, a big bare step numeral, and a plain "1 / 3" counter. No glowing
+// badge, gradient bubble, or pill dots (those read as a generic AI-made SaaS toast). It should feel
+// like an instruction printed on the game's own stock. Pointer-transparent except the bubble itself.
 const coachWrap: React.CSSProperties = {
-  position: 'fixed', zIndex: 46, pointerEvents: 'none', maxWidth: 'min(360px, 88vw)',
+  position: 'fixed', zIndex: 46, pointerEvents: 'none', maxWidth: 'min(340px, 88vw)',
 };
 const coachBubble: React.CSSProperties = {
-  pointerEvents: 'auto', padding: '13px 16px 14px', borderRadius: 14,
-  background: 'linear-gradient(180deg, #241820, #180f14)',
-  border: '1px solid rgba(216,178,76,0.5)',
-  boxShadow: '0 18px 44px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4), 0 0 26px rgba(216,178,76,0.14)',
+  pointerEvents: 'auto', padding: '12px 15px 13px', borderRadius: 3,
+  background: '#161010', border: '1px solid rgba(150,120,72,0.3)', borderLeft: '3px solid #a4762f',
+  boxShadow: '0 12px 26px rgba(0,0,0,0.5)',
 };
-const coachHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 };
-const coachBadge: React.CSSProperties = {
-  width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#171008',
-  background: 'linear-gradient(150deg, #d8b45a, #b98a3e)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
+const coachHead: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 5 };
+// A big, bare serif numeral instead of a glowing circular badge.
+const coachSerif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
+const coachNum: React.CSSProperties = {
+  fontFamily: coachSerif, fontSize: 26, fontWeight: 700, lineHeight: 0.9, color: '#c79a4e', flexShrink: 0,
 };
+const coachMark: React.CSSProperties = { color: '#9a8558', alignSelf: 'center', flexShrink: 0, display: 'grid', placeItems: 'center' };
 const coachStepTag: React.CSSProperties = {
-  flex: 1, fontFamily: mono, fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: '#e6cf96', textTransform: 'uppercase',
+  flex: 1, fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: 2, color: '#8f7f5c', textTransform: 'uppercase',
 };
 const coachSkip: React.CSSProperties = {
-  padding: '4px 10px', fontSize: 11, fontWeight: 700, color: C.dim, cursor: 'pointer',
-  border: `1px solid ${C.border}`, borderRadius: 999, background: 'rgba(255,255,255,0.04)', fontFamily: sans,
+  padding: 0, fontSize: 11, color: C.faint, cursor: 'pointer', border: 'none', background: 'transparent',
+  fontFamily: sans, textDecoration: 'underline', textUnderlineOffset: 2,
 };
-const coachHeadline: React.CSSProperties = { margin: '0 0 4px', fontSize: 16, fontWeight: 800, lineHeight: 1.3, color: '#fbf3df' };
-const coachText: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.55, color: '#c9bda6' };
-// A directional pointer that tells the newcomer exactly WHERE to look/click for this step.
-const coachPoint: React.CSSProperties = {
-  marginTop: 10, padding: '7px 11px', borderRadius: 9, fontFamily: mono, fontSize: 12.5, fontWeight: 700,
-  letterSpacing: 0.3, color: '#f0d89a', background: 'rgba(216,178,76,0.12)', border: '1px solid rgba(216,178,76,0.32)',
+const coachHeadline: React.CSSProperties = { margin: '0 0 4px', fontSize: 15.5, fontWeight: 700, lineHeight: 1.32, color: '#e7dcc4' };
+const coachText: React.CSSProperties = { margin: 0, fontSize: 12.5, lineHeight: 1.55, color: '#a99a7d' };
+// Footer: the directional hint (left) and a plain step counter (right), divided from the body by a hairline.
+const coachFoot: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+  marginTop: 11, paddingTop: 9, borderTop: '1px solid rgba(150,120,72,0.16)',
 };
-// Three progress dots so the player knows there are exactly three actions to learn, and where they are.
-const coachDots: React.CSSProperties = { display: 'flex', gap: 6, marginTop: 11, justifyContent: 'center' };
-const coachDot: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: 'rgba(236,224,198,0.24)' };
-const coachDotOn: React.CSSProperties = {
-  width: 18, height: 6, borderRadius: 999,
-  background: 'linear-gradient(90deg, #d8b45a, #b98a3e)', boxShadow: '0 0 8px rgba(216,180,90,0.5)',
-};
+const coachPoint: React.CSSProperties = { fontFamily: mono, fontSize: 12, letterSpacing: 0.2, color: '#c79a4e' };
+const coachCount: React.CSSProperties = { fontFamily: mono, fontSize: 11, letterSpacing: 1, color: '#7d6f52', flexShrink: 0 };
