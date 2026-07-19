@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
+import { Tutorial } from './Tutorial.js';
 import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 import { playSfx } from '../audio/sfx.js';
@@ -28,7 +29,7 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
 ];
 
 // Bumped whenever the how-to content meaningfully changes, so returning players see it once more.
-const INTRO_SEEN_KEY = 'cb_intro_v1';
+const INTRO_SEEN_KEY = 'cb_intro_v2';
 
 export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout }: Props) {
   const [hover, setHover] = useState<ItemKey | null>(null);
@@ -98,43 +99,7 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
-      {howOpen && <HowToPlay onClose={() => setHowOpen(false)} onStart={() => { setHowOpen(false); onStart(); }} />}
-    </div>
-  );
-}
-
-// The first-run guide: the core loop in five plain beats, so a newcomer can sit down and play a
-// bot match without guessing. Reachable any time from the "플레이 방법" menu item.
-const HOW_STEPS: { n: string; title: string; body: string }[] = [
-  { n: '1', title: '최후의 1인', body: '2~8명이 한 테이블에 앉아 서로를 공격합니다. 마지막까지 살아남는 한 명이 승리합니다.' },
-  { n: '2', title: '내 턴에 카드', body: '자기 차례가 오면 손에 든 카드를 냅니다. 각 카드는 마나 비용이 있고, 마나가 있으면 한 턴에 여러 장도 낼 수 있습니다.' },
-  { n: '3', title: '카드의 종류', body: '공격으로 상대 HP를 깎고, 회복으로 나를 살리고, 방어막으로 피해를 막습니다. 그 밖에 훔치기·역류·간파 같은 특수 카드도 있습니다.' },
-  { n: '4', title: '마나는 불어난다', body: '마나는 턴마다 자동으로 차오르고, 라운드가 길어질수록 회복량이 커집니다. \'충전\' 카드로 더 모아 큰 한 방을 노릴 수도 있습니다.' },
-  { n: '5', title: '조작', body: '카드를 클릭 → 대상이 필요한 카드는 상대를 고른 뒤 사용됩니다. 낼 카드가 없으면 \'턴 종료\'로 넘기세요. 제한 시간이 지나면 자동으로 넘어갑니다.' },
-];
-
-function HowToPlay({ onClose, onStart }: { onClose: () => void; onStart: () => void }) {
-  return (
-    <div style={creditsBackdrop} onClick={onClose}>
-      <div style={howCard} className="cb-gate-in" onClick={(e) => e.stopPropagation()}>
-        <span style={kicker}>플레이 방법 · HOW TO PLAY</span>
-        <h2 style={creditsTitle}>처음 오셨나요?</h2>
-        <div style={howList}>
-          {HOW_STEPS.map((s) => (
-            <div key={s.n} style={howRow}>
-              <span style={howNum}>{s.n}</span>
-              <span style={{ display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
-                <span style={howStepTitle}>{s.title}</span>
-                <span style={howBody}>{s.body}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-          <button style={howGhostBtn} onClick={() => { playSfx('back'); onClose(); }}>닫기</button>
-          <button style={creditsClose} onClick={() => { playSfx('select'); onStart(); }}>봇과 연습 시작</button>
-        </div>
-      </div>
+      {howOpen && <Tutorial onClose={() => setHowOpen(false)} onStart={() => { setHowOpen(false); onStart(); }} />}
     </div>
   );
 }
@@ -247,29 +212,6 @@ const creditsCard: React.CSSProperties = {
   boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
 };
 const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 34, fontWeight: 700, margin: '2px 0 8px', color: '#f3eee6', letterSpacing: 2 };
-// The how-to panel is a taller card holding the five numbered beats.
-const howCard: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '26px 30px 24px',
-  borderRadius: 16, width: 'min(500px, 92vw)', maxHeight: '86vh', overflowY: 'auto', textAlign: 'center',
-  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
-  boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
-};
-const howList: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12, width: '100%', margin: '10px 0 4px' };
-const howRow: React.CSSProperties = {
-  display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 12,
-  background: 'rgba(0,0,0,0.28)', border: `1px solid ${C.border}`,
-};
-const howNum: React.CSSProperties = {
-  flexShrink: 0, width: 30, height: 30, borderRadius: '50%', display: 'grid', placeItems: 'center',
-  fontFamily: serif, fontSize: 16, fontWeight: 700, color: '#141608',
-  background: 'linear-gradient(150deg, #d8b45a, #b98a3e)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
-};
-const howStepTitle: React.CSSProperties = { fontSize: 15.5, fontWeight: 800, color: '#f3eee6', letterSpacing: 0.4 };
-const howBody: React.CSSProperties = { fontSize: 13, lineHeight: 1.55, color: C.dim };
-const howGhostBtn: React.CSSProperties = {
-  padding: '10px 22px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'pointer',
-  border: `1px solid ${C.borderHi}`, borderRadius: 10, background: 'rgba(255,255,255,0.05)', fontFamily: sans,
-};
 const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
 const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.4 };
 const creditsClose: React.CSSProperties = {
