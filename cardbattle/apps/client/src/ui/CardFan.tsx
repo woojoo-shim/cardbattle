@@ -248,7 +248,7 @@ const nameplate: React.CSSProperties = {
   borderTop: `1px solid ${C.border}`,
 };
 const cname: React.CSSProperties = { fontSize: 'clamp(12px, 1.15vw, 16px)', fontWeight: 700, lineHeight: 1.1 };
-const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
+const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 16px)', padding: '2px 9px', borderRadius: 999 };
 // Every accent below is pulled into the theme's four printed-pigment families so the hand reads
 // as one coherent candlelit palette (icons carry the fine distinctions, not colour):
 //   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
@@ -303,9 +303,9 @@ const tipTopEdge: React.CSSProperties = { position: 'absolute', top: 0, left: 0,
 const tipHead: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 7,
 };
-const tipName: React.CSSProperties = { fontFamily: sans, fontSize: 14.5, fontWeight: 800, letterSpacing: 0.4, lineHeight: 1.15 };
+const tipName: React.CSSProperties = { fontFamily: sans, fontSize: 16, fontWeight: 800, letterSpacing: 0.4, lineHeight: 1.15 };
 const tipRarity: React.CSSProperties = {
-  flexShrink: 0, fontFamily: mono, fontSize: 9.5, fontWeight: 800, letterSpacing: 1,
+  flexShrink: 0, fontFamily: mono, fontSize: 9, fontWeight: 800, letterSpacing: 1,
   padding: '1px 6px', borderRadius: 5, border: '1px solid',
 };
 const tipMeta: React.CSSProperties = {
@@ -313,12 +313,12 @@ const tipMeta: React.CSSProperties = {
   paddingBottom: 8, borderBottom: `1px solid ${C.border}`,
 };
 const tipChip: React.CSSProperties = {
-  fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3,
+  fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.3,
   padding: '2px 7px', borderRadius: 6, border: '1px solid transparent',
 };
 const tipCostChip: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.15)', borderColor: '#6a552855' };
 const tipTargetChip: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.14)', borderColor: '#5a2c2288' };
-const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
+const tipDesc: React.CSSProperties = { fontSize: 13, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
 const tipHint: React.CSSProperties = {
   marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`,
   fontSize: 11, fontWeight: 700, color: C.you, textAlign: 'center', letterSpacing: 0.3,

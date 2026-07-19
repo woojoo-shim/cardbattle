@@ -92,7 +92,7 @@ const head: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 2, margin: '0 0 8px',
 };
 const row: React.CSSProperties = {
-  position: 'relative', display: 'flex', alignItems: 'center', fontSize: 12, padding: '3px 0 3px 8px',
+  position: 'relative', display: 'flex', alignItems: 'center', fontSize: 13, padding: '3px 0 3px 8px',
   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 };
 // A slim tone-colored tab on the row's left edge — lets you scan the record by event type at a glance.

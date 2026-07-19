@@ -73,7 +73,7 @@ const bar: React.CSSProperties = {
 const ribbonLit = `linear-gradient(180deg, rgba(143,157,79,0.12), transparent 80%)`;
 const ribbonIdle = `linear-gradient(180deg, rgba(255,255,255,0.02), transparent 80%)`;
 const round: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.dim, letterSpacing: 1 };
-const dirTag: React.CSSProperties = { fontSize: 15, fontWeight: 800, margin: '0 2px 0 6px' };
+const dirTag: React.CSSProperties = { fontSize: 16, fontWeight: 800, margin: '0 2px 0 6px' };
 const center: React.CSSProperties = { flex: 1, display: 'flex', justifyContent: 'center' };
 const pill: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 10, padding: '8px 22px', borderRadius: 999,

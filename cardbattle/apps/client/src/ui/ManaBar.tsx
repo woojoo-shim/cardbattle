@@ -64,7 +64,7 @@ const num: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 900, color: '#f0e2c0',
   textShadow: '0 0 12px rgba(220,180,100,0.6)', transition: 'opacity .3s ease',
 };
-const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 17px)', fontWeight: 700, color: '#c2a878', marginTop: 2 };
+const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 16px)', fontWeight: 700, color: '#c2a878', marginTop: 2 };
 const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(10px, 0.9vw, 12px)', letterSpacing: 3, color: '#c2a878', marginTop: 5 };
 const crystals: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 128, alignContent: 'center',

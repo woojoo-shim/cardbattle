@@ -232,7 +232,7 @@ const emblemInk: React.CSSProperties = {
   color: 'rgba(210,178,116,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.6)',
 };
 const emblemRound: React.CSSProperties = {
-  fontFamily: mono, fontSize: 8, letterSpacing: 3, color: 'rgba(198,168,120,0.7)', marginTop: 2,
+  fontFamily: mono, fontSize: 9, letterSpacing: 3, color: 'rgba(198,168,120,0.7)', marginTop: 2,
 };
 const emblemNum: React.CSSProperties = {
   fontFamily: mono, fontSize: 22, fontWeight: 900, lineHeight: 1, color: 'rgba(224,196,140,0.92)',
@@ -266,7 +266,7 @@ function miniBackCos(cos: { border: string; glow: string }): React.CSSProperties
 }
 const shieldChip: React.CSSProperties = {
   position: 'absolute', top: -32, left: 0, transform: 'translateX(-50%)',
-  padding: '1px 6px', borderRadius: 6, fontSize: 10, fontWeight: 800, fontFamily: mono,
+  padding: '1px 6px', borderRadius: 6, fontSize: 11, fontWeight: 800, fontFamily: mono,
   color: '#bccfc6', background: 'linear-gradient(160deg,#1c2a24,#12201b)', border: '1px solid #6f9a8e',
   boxShadow: '0 0 10px rgba(113,145,138,0.5)', whiteSpace: 'nowrap', zIndex: 20,
 };
@@ -282,7 +282,7 @@ const portrait: React.CSSProperties = {
 };
 const badge: React.CSSProperties = {
   position: 'absolute', top: 5, minWidth: 24, height: 20, padding: '0 4px', borderRadius: 7, display: 'flex',
-  alignItems: 'center', justifyContent: 'center', fontSize: 10, fontFamily: mono, fontWeight: 700,
+  alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: mono, fontWeight: 700,
   border: `1px solid ${C.border}`, background: 'rgba(10,12,20,0.85)', zIndex: 2,
 };
 const badgeDef: React.CSSProperties = { left: 5, color: '#8fb0a6' };
@@ -301,7 +301,7 @@ const statusChip: React.CSSProperties = {
   fontSize: 9, fontFamily: mono, fontWeight: 700, border: '1px solid', background: 'rgba(10,12,20,0.82)',
 };
 const statusTurns: React.CSSProperties = {
-  fontSize: 8, opacity: 0.7, fontStyle: 'normal', marginLeft: 1,
+  fontSize: 9, opacity: 0.7, fontStyle: 'normal', marginLeft: 1,
 };
 const crosshair: React.CSSProperties = {
   position: 'absolute', inset: 0, border: '1px dashed', borderRadius: 16, animation: 'cb-spin 6s linear infinite',
@@ -332,7 +332,7 @@ const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#
 function titleLine(color: string): React.CSSProperties {
   const grad = color.startsWith('linear') || color.startsWith('radial');
   return {
-    fontSize: 9.5, fontWeight: 900, letterSpacing: 0.4, marginTop: -1, whiteSpace: 'nowrap',
+    fontSize: 9, fontWeight: 900, letterSpacing: 0.4, marginTop: -1, whiteSpace: 'nowrap',
     ...(grad
       ? { backgroundImage: color, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextFillColor: 'transparent' }
       : { color }),
