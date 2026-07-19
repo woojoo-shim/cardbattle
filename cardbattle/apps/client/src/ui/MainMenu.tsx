@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
-import { Tutorial } from './Tutorial.js';
 import { Icon } from './art/Icon.js';
 import { C, mono, sans } from './theme.js';
 import { playSfx } from '../audio/sfx.js';
@@ -11,6 +10,7 @@ interface Props {
   account: Account;
   onAccount: (a: Account) => void;
   onStart: () => void;        // quick bot game
+  onStartCoach: () => void;   // guided bot game (learn by playing)
   onMultiplayer: () => void;  // room browser
   onLogout: () => void;
 }
@@ -22,34 +22,34 @@ type ItemKey = 'start' | 'multi' | 'how' | 'shop' | 'credits' | 'logout';
 const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'start', label: '시작', sub: '봇과 빠른 연습' },
   { key: 'multi', label: '멀티플레이어', sub: '방 목록 · 친구와 대전' },
-  { key: 'how', label: '플레이 방법', sub: '처음이신가요?' },
+  { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
   { key: 'shop', label: '상점', sub: '외형 · 칭호' },
   { key: 'credits', label: '제작진', sub: '' },
   { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
 
-// Bumped whenever the how-to content meaningfully changes, so returning players see it once more.
-const INTRO_SEEN_KEY = 'cb_intro_v2';
+// Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
+const INTRO_SEEN_KEY = 'cb_intro_v3';
 
-export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout }: Props) {
+export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultiplayer, onLogout }: Props) {
   const [hover, setHover] = useState<ItemKey | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
-  const [howOpen, setHowOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
-  // First-timers get the how-to-play guide once, automatically. A localStorage flag keeps it
-  // from re-appearing every visit; it stays reachable from the menu afterwards.
+  // First-timers are offered a guided practice match once, automatically. A localStorage flag keeps
+  // the invite from re-appearing every visit; 플레이 방법 launches the same guided game afterwards.
   useEffect(() => {
     try {
-      if (!localStorage.getItem(INTRO_SEEN_KEY)) { setHowOpen(true); localStorage.setItem(INTRO_SEEN_KEY, '1'); }
-    } catch { /* private mode / storage disabled: just skip the auto-intro */ }
+      if (!localStorage.getItem(INTRO_SEEN_KEY)) { setInviteOpen(true); localStorage.setItem(INTRO_SEEN_KEY, '1'); }
+    } catch { /* private mode / storage disabled: just skip the auto-invite */ }
   }, []);
 
   const act = (k: ItemKey) => {
     playSfx(k === 'logout' ? 'back' : 'select');
     if (k === 'start') onStart();
     else if (k === 'multi') onMultiplayer();
-    else if (k === 'how') setHowOpen(true);
+    else if (k === 'how') onStartCoach();
     else if (k === 'shop') setShopOpen(true);
     else if (k === 'credits') setCreditsOpen(true);
     else if (k === 'logout') onLogout();
@@ -99,7 +99,26 @@ export function MainMenu({ account, onAccount, onStart, onMultiplayer, onLogout 
 
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
-      {howOpen && <Tutorial onClose={() => setHowOpen(false)} onStart={() => { setHowOpen(false); onStart(); }} />}
+      {inviteOpen && <CoachInvite onClose={() => setInviteOpen(false)} onStart={() => { setInviteOpen(false); onStartCoach(); }} />}
+    </div>
+  );
+}
+
+// First-run welcome. Rather than a wall of rules, it offers to drop the player straight into a
+// guided practice match where the coaching happens live, over a real bot game.
+function CoachInvite({ onClose, onStart }: { onClose: () => void; onStart: () => void }) {
+  return (
+    <div style={creditsBackdrop} onClick={onClose}>
+      <div style={creditsCard} onClick={(e) => e.stopPropagation()}>
+        <span style={kicker}>환영합니다</span>
+        <h2 style={creditsTitle}>플레이하며 배우기</h2>
+        <p style={creditsSmall}>
+          백 마디 설명보다 한 판이 빠릅니다. 봇과의 연습 대전에 뛰어들면 카드를 내고 대상을 겨누는
+          순간마다 안내가 따라붙어요. 몸으로 규칙을 익혀보세요.
+        </p>
+        <button style={creditsClose} onClick={() => { playSfx('select'); onStart(); }}>게임하며 배우기</button>
+        <button style={inviteGhost} onClick={() => { playSfx('back'); onClose(); }}>둘러보기</button>
+      </div>
     </div>
   );
 }
@@ -218,4 +237,8 @@ const creditsClose: React.CSSProperties = {
   marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#f4e9cb', cursor: 'pointer',
   border: 'none', borderRadius: 10, fontFamily: sans,
   background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+};
+const inviteGhost: React.CSSProperties = {
+  marginTop: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
+  border: `1px solid ${C.border}`, borderRadius: 10, fontFamily: sans, background: 'transparent',
 };

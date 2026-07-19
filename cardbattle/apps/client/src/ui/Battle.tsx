@@ -11,7 +11,7 @@ import { EmoteBar } from './EmoteBar.js';
 import { EmoteLayer } from './EmoteLayer.js';
 import { ManaBar } from './ManaBar.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
-import { Icon } from './art/Icon.js';
+import { Icon, type IconName } from './art/Icon.js';
 import { AvatarArt } from './art/CreatureArt.js';
 import { soundEvents } from '../audio/sfx.js';
 import { C, mono, sans } from './theme.js';
@@ -29,10 +29,16 @@ interface Props {
   emotes: LiveEmote[];
   sendEmote: (id: string) => void;
   reward?: Reward | null;
+  coach?: boolean;
 }
 
-export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote, reward }: Props) {
+export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote, reward, coach }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
+  // Learn-by-playing coach: tracks whether the newcomer has taken their first play / ended a turn,
+  // so the guidance advances in step with what they actually do at the table.
+  const [coachPlayed, setCoachPlayed] = useState(false);
+  const [coachEnded, setCoachEnded] = useState(false);
+  const [coachOff, setCoachOff] = useState(false);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
   const myMana = ui.players.find((p) => p.id === myId)?.mana ?? 0;
@@ -63,12 +69,14 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       return;
     }
     send({ type: 'play_card', cardInstanceId: card.id });
+    setCoachPlayed(true);
   };
 
   const selectTarget = (targetId: string) => {
     if (!pending) return;
     send({ type: 'play_card', cardInstanceId: pending.id, targetId });
     setPending(null);
+    setCoachPlayed(true);
   };
 
   if (ui.phase === 'ended') {
@@ -169,14 +177,97 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
         {isMyTurn && (
-          <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); }}>
+          <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); setCoachEnded(true); }}>
             턴 종료&nbsp;<Icon name="arrowRight" size={15} />
           </button>
         )}
       </div>
+      {coach && !coachOff && (
+        <CoachLayer
+          isMyTurn={isMyTurn}
+          hasPending={!!pending}
+          played={coachPlayed}
+          ended={coachEnded}
+          onDismiss={() => setCoachOff(true)}
+        />
+      )}
     </div>
   );
 }
+
+// The learn-by-playing coach. A single contextual callout, anchored to whatever the newcomer
+// should touch next, that advances by watching the real game state: wait for your turn → play a
+// card → pick a target → end the turn → free play. Pointer-transparent except its own skip button,
+// so it never blocks the table underneath.
+function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
+  isMyTurn: boolean; hasPending: boolean; played: boolean; ended: boolean; onDismiss: () => void;
+}) {
+  // Derive the step from the true state of play, not a scripted timeline.
+  const step: CoachStep =
+    ended || (played && !isMyTurn) ? 'done'
+    : isMyTurn && hasPending ? 'target'
+    : isMyTurn && played ? 'endturn'
+    : isMyTurn ? 'play'
+    : 'wait';
+
+  // Once the loop is understood, retire the coach so it never nags an experienced hand.
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    if (step !== 'done') return;
+    const t = setTimeout(onDismiss, 4200);
+    return () => clearTimeout(t);
+  }, [step, onDismiss]);
+  if (gone) return null;
+
+  const c = COACH[step];
+  return (
+    <div style={{ ...coachWrap, ...c.anchor }} key={step} className="cb-coach-in">
+      <div style={coachBubble}>
+        <div style={coachHead}>
+          <span style={coachBadge}><Icon name={c.icon} size={15} /></span>
+          <span style={coachStepTag}>{c.tag}</span>
+          <button
+            style={coachSkip}
+            onClick={() => { setGone(true); onDismiss(); }}
+            title="튜토리얼 끄기"
+          >
+            건너뛰기
+          </button>
+        </div>
+        <p style={coachText}>{c.text}</p>
+      </div>
+    </div>
+  );
+}
+
+type CoachStep = 'wait' | 'play' | 'target' | 'endturn' | 'done';
+const COACH: Record<CoachStep, { icon: IconName; tag: string; text: string; anchor: React.CSSProperties }> = {
+  wait: {
+    icon: 'zzz', tag: '대기',
+    text: '다른 참가자의 턴입니다. 당신의 차례가 오면 안내가 이어집니다.',
+    anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
+  },
+  play: {
+    icon: 'card', tag: '① 카드 내기',
+    text: '당신의 턴입니다! 아래 손에서 카드를 클릭해 사용하세요. 공격 카드는 상대의 HP를 깎습니다.',
+    anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
+  },
+  target: {
+    icon: 'target', tag: '② 대상 선택',
+    text: '이 카드는 대상이 필요합니다. 위쪽 상대의 초상화를 클릭해 겨누세요. (카드를 다시 누르면 취소)',
+    anchor: { top: 'clamp(76px, 12vh, 120px)', left: '50%', transform: 'translateX(-50%)' },
+  },
+  endturn: {
+    icon: 'arrowRight', tag: '③ 턴 종료',
+    text: '좋아요! 마나가 남으면 카드를 더 낼 수 있어요. 다 냈다면 오른쪽 «턴 종료»로 넘기세요.',
+    anchor: { bottom: 'clamp(96px, 12vh, 140px)', right: 24 },
+  },
+  done: {
+    icon: 'trophy', tag: '준비 완료',
+    text: '규칙은 이제 몸이 기억할 거예요. 자유롭게 싸워 최후의 1인이 되세요!',
+    anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
+  },
+};
 
 // The living-air layer: what stops a clean board from reading as a frozen render. The key light
 // over the table breathes on a long slow cycle, and a handful of dust motes drift up through the
@@ -365,3 +456,29 @@ const returnBtn: React.CSSProperties = {
   background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)',
   boxShadow: '0 6px 18px rgba(60,20,10,0.45)',
 };
+
+// The coach callout: a small parchment-toned card that hangs beside whatever the newcomer should
+// touch next. The wrapper is pointer-transparent so the table stays fully playable underneath; only
+// the bubble (and its 건너뛰기 button) re-enable pointer events.
+const coachWrap: React.CSSProperties = {
+  position: 'fixed', zIndex: 46, pointerEvents: 'none', maxWidth: 'min(360px, 88vw)',
+};
+const coachBubble: React.CSSProperties = {
+  pointerEvents: 'auto', padding: '13px 16px 14px', borderRadius: 14,
+  background: 'linear-gradient(180deg, #241820, #180f14)',
+  border: '1px solid rgba(216,178,76,0.5)',
+  boxShadow: '0 18px 44px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4), 0 0 26px rgba(216,178,76,0.14)',
+};
+const coachHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 };
+const coachBadge: React.CSSProperties = {
+  width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center', flexShrink: 0, color: '#171008',
+  background: 'linear-gradient(150deg, #d8b45a, #b98a3e)', boxShadow: '0 0 14px rgba(216,180,90,0.4)',
+};
+const coachStepTag: React.CSSProperties = {
+  flex: 1, fontFamily: mono, fontSize: 11, fontWeight: 800, letterSpacing: 1.5, color: '#e6cf96', textTransform: 'uppercase',
+};
+const coachSkip: React.CSSProperties = {
+  padding: '4px 10px', fontSize: 11, fontWeight: 700, color: C.dim, cursor: 'pointer',
+  border: `1px solid ${C.border}`, borderRadius: 999, background: 'rgba(255,255,255,0.04)', fontFamily: sans,
+};
+const coachText: React.CSSProperties = { margin: 0, fontSize: 13.5, lineHeight: 1.55, color: '#ece0c6' };
