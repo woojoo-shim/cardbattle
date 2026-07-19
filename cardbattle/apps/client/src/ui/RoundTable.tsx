@@ -169,15 +169,22 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 }
 
 const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
-// A single clean table oval, tilted into the scene so the seats read as sitting around it —
-// muted felt with a thin gold rim and a soft inner shadow. No grid, lamp, or grime.
+// A single premium table oval, tilted into the scene so the seats read as sitting around it.
+// One clean element, but finished like a real object: a warm overhead pool lights the felt
+// centre, the baize deepens to black at the rim, a brass bezel catches a hairline of light,
+// and a soft drop shadow floats the whole table above the floor. No grid, lamp, or grime.
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
-  width: '60%', height: '58%', borderRadius: '50%', overflow: 'hidden',
-  background: 'radial-gradient(ellipse at 50% 40%, #1a2414 0%, #111a0d 55%, #0a0f07 100%)',
-  border: '1px solid rgba(216,162,60,0.14)',
-  boxShadow: 'inset 0 0 80px 24px rgba(0,0,0,0.7), 0 20px 50px rgba(0,0,0,0.5)',
+  width: '62%', height: '60%', borderRadius: '50%', overflow: 'hidden',
+  background:
+    'radial-gradient(ellipse 58% 52% at 50% 38%, rgba(228,182,98,0.16), transparent 60%),' + // warm overhead light pool
+    'radial-gradient(ellipse at 50% 42%, #24311a 0%, #17230f 52%, #0b1107 100%)',            // rich felt: lit centre → dark rim
+  border: '2px solid rgba(200,152,70,0.30)',
+  boxShadow:
+    'inset 0 0 5px 1px rgba(236,202,126,0.24),' + // brass rim highlight
+    'inset 0 0 92px 30px rgba(0,0,0,0.72),' +     // felt edge falls to black
+    '0 28px 62px rgba(0,0,0,0.6)',                // table floats above the floor
 };
 // The face-down pile each player has laid on the table. Tilted onto the felt's own plane
 // (perspective + rotateX) so the cards lie FLAT on the baize seen from above, not standing

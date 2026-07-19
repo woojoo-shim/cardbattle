@@ -179,14 +179,17 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   );
 }
 
-// A clean, dark board: a soft warm glow lifts the table at centre, everything else falls to flat
-// black so the cards and portraits are the only things that read. No diorama, no clutter.
+// A clean, dark board finished like a lit stage: a warm key light falls on the table at centre,
+// a soft vignette pulls the corners to black to frame the play, and the base grades from oxblood
+// to near-black. No diorama, no clutter — just quality lighting so the cards and portraits are the
+// only things that read.
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
   background:
-    'radial-gradient(52% 40% at 50% 44%, rgba(226,164,72,0.08), transparent 68%),' +   // faint warm lift under the table
-    'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
+    'radial-gradient(56% 42% at 50% 43%, rgba(230,170,80,0.11), transparent 66%),' +  // warm key light on the table
+    'radial-gradient(80% 72% at 50% 46%, transparent 52%, rgba(0,0,0,0.55) 100%),' +  // vignette frames the corners
+    'linear-gradient(180deg, #140b0e 0%, #0a0609 58%, #050205 100%)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
