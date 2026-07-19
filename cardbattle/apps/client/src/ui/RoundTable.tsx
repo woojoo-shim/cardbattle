@@ -73,9 +73,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                 <span
                   key={ci}
                   style={{ ...miniBack, ...(hasCos ? miniBackCos(cos!) : null), left: off * spread, transform: `translate(-50%,-50%) rotate(${off * 4}deg)`, zIndex: ci }}
-                >
-                  <span style={{ fontSize: 8, color: 'rgba(143,157,79,0.45)' }}>◈</span>
-                </span>
+                />
               );
             })}
             {p.defense > 0 && <span style={shieldChip}><Icon name="shield" size={11} />{p.defense}</span>}
@@ -142,7 +140,6 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}><Icon name="shield" size={11} />{p.defense}</span>}
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}><Icon name="warn" size={12} /></span>}
               <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={56} />
-              {canTarget && <span style={{ ...crosshair, borderColor: C.enemy }} />}
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
@@ -302,9 +299,6 @@ const statusChip: React.CSSProperties = {
 };
 const statusTurns: React.CSSProperties = {
   fontSize: 9, opacity: 0.7, fontStyle: 'normal', marginLeft: 1,
-};
-const crosshair: React.CSSProperties = {
-  position: 'absolute', inset: 0, border: '1px dashed', borderRadius: 16, animation: 'cb-spin 6s linear infinite',
 };
 const skull: React.CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,

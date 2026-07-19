@@ -5,7 +5,6 @@ import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js'
 import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
-import { TurnArrow } from './TurnArrow.js';
 import { Log } from './Log.js';
 import { RevealOverlay } from './RevealOverlay.js';
 import { EmoteBar } from './EmoteBar.js';
@@ -159,7 +158,6 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
         <RoundTable ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} />
-        {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}><Icon name="target" size={15} />&nbsp;대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
         {error && <div style={errToast}>{error.message}</div>}
