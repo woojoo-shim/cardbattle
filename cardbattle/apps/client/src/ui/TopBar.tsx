@@ -56,7 +56,7 @@ export function TopBar({ ui, myId }: Props) {
         <span
           style={{
             ...ring,
-            background: `conic-gradient(${ringColor} ${pct}%, #21263a 0)`,
+            background: `conic-gradient(${ringColor} ${pct}%, #3a2e1c 0)`,
             animation: danger ? 'cb-pulse 1s infinite' : undefined,
           }}
         />

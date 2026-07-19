@@ -102,7 +102,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
                 ? '0 0 40px rgba(216,178,76,0.5), inset 0 2px 10px rgba(0,0,0,0.6)'
                 : '0 0 26px rgba(120,50,50,0.4), inset 0 2px 10px rgba(0,0,0,0.6)',
             }}>
-              <AvatarArt avatar={winner?.avatar ?? 'ghost'} tint={iWon ? '#ffd84a' : '#9a6a6a'} size={92} />
+              <AvatarArt avatar={winner?.avatar ?? 'ghost'} tint={iWon ? '#e8c880' : '#9a6a6a'} size={92} />
             </div>
           </div>
 

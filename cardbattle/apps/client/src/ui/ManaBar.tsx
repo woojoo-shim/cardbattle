@@ -33,19 +33,19 @@ export function ManaBar({ mana, max, lit }: Props) {
 }
 
 function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) {
-  const base = on ? '#2f7fe0' : '#111a2c';
-  const outline = on ? '#bfe0ff' : '#2b3d5c';
+  const base = on ? '#c8912f' : '#241a10';
+  const outline = on ? '#f0d089' : '#3a2e1c';
   return (
     <svg
       viewBox="0 0 24 24" width="15" height="15" aria-hidden
-      style={{ display: 'block', filter: on ? `drop-shadow(0 0 ${lit ? 4 : 2}px rgba(90,160,255,0.9))` : undefined, animation: fresh ? 'cb-mana-pop 0.5s cubic-bezier(.2,1.5,.4,1) both' : undefined }}
+      style={{ display: 'block', filter: on ? `drop-shadow(0 0 ${lit ? 4 : 2}px rgba(224,178,90,0.9))` : undefined, animation: fresh ? 'cb-mana-pop 0.5s cubic-bezier(.2,1.5,.4,1) both' : undefined }}
     >
       <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill={base} stroke={outline} strokeWidth="1.3" strokeLinejoin="round" />
       {on && (
         <>
-          <polygon points="12,2 21,7 12,12 3,7" fill="#8ec4ff" opacity="0.6" />
-          <polygon points="3,7 12,12 3,17" fill="#1b53a8" opacity="0.55" />
-          <circle cx="9" cy="8" r="1.5" fill="#eaf4ff" opacity="0.92" />
+          <polygon points="12,2 21,7 12,12 3,7" fill="#f0cd83" opacity="0.6" />
+          <polygon points="3,7 12,12 3,17" fill="#8a5f1f" opacity="0.55" />
+          <circle cx="9" cy="8" r="1.5" fill="#fff2d4" opacity="0.92" />
         </>
       )}
     </svg>
@@ -55,17 +55,17 @@ function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) 
 const wrap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 14,
   padding: 'clamp(10px, 1.2vw, 15px) clamp(14px, 1.6vw, 20px)', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(20,30,54,0.94), rgba(12,18,34,0.94))',
-  border: '1.5px solid #3a5da0',
-  boxShadow: '0 10px 28px rgba(30,70,150,0.42), inset 0 0 20px rgba(80,150,255,0.12)',
+  background: 'linear-gradient(180deg, rgba(42,32,19,0.94), rgba(26,18,10,0.94))',
+  border: '1.5px solid #6a5528',
+  boxShadow: '0 10px 28px rgba(90,60,20,0.42), inset 0 0 20px rgba(220,170,80,0.12)',
 };
 const readout: React.CSSProperties = { display: 'flex', flexDirection: 'column', lineHeight: 1, alignItems: 'flex-start' };
 const num: React.CSSProperties = {
-  fontFamily: mono, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 900, color: '#e2f0ff',
-  textShadow: '0 0 12px rgba(120,180,255,0.6)', transition: 'opacity .3s ease',
+  fontFamily: mono, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 900, color: '#f0e2c0',
+  textShadow: '0 0 12px rgba(220,180,100,0.6)', transition: 'opacity .3s ease',
 };
-const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 17px)', fontWeight: 700, color: '#7fa8d8', marginTop: 2 };
-const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(10px, 0.9vw, 12px)', letterSpacing: 3, color: '#7fa8d8', marginTop: 5 };
+const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 17px)', fontWeight: 700, color: '#c2a878', marginTop: 2 };
+const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(10px, 0.9vw, 12px)', letterSpacing: 3, color: '#c2a878', marginTop: 5 };
 const crystals: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 128, alignContent: 'center',
 };

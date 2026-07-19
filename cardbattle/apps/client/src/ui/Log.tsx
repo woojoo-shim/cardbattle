@@ -45,10 +45,12 @@ function line(ui: UiState, e: GameEvent): Line | null {
   }
 }
 
+// Every tone pulled into the four printed-pigment families (ochre-red / sage / gold-leaf /
+// faded-teal) so the combat record reads as the same candlelit palette, not neon confetti.
 const TONE: Record<Tone, string> = {
-  turn: C.dim, card: C.text, dmg: '#ff8aa6', heal: '#7fe9d6',
-  shield: '#7fb6ff', reverse: '#c9a0ff', round: C.rare, out: C.faint, win: C.rare,
-  reveal: '#8be3ff', discard: '#9be85a', skip: '#5fd0ff', gamble: '#ffd84a', steal: '#c9a0ff',
+  turn: C.dim, card: C.text, dmg: '#e8b4a6', heal: '#cdd3a0',
+  shield: '#b9cdc4', reverse: '#c3b0d0', round: C.rare, out: C.faint, win: C.rare,
+  reveal: '#a9c4bf', discard: '#9aa863', skip: '#a9c4bf', gamble: '#e8cf96', steal: '#c3b0d0',
 };
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */

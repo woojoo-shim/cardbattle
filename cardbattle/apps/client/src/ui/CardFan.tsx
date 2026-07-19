@@ -249,43 +249,47 @@ const nameplate: React.CSSProperties = {
 };
 const cname: React.CSSProperties = { fontSize: 'clamp(12px, 1.15vw, 16px)', fontWeight: 700, lineHeight: 1.1 };
 const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', padding: '2px 9px', borderRadius: 999 };
-const manaValPill: React.CSSProperties = { color: '#bfe0ff', background: 'rgba(90,160,255,0.18)', border: '1px solid #2a4a80' };
-// Mana cost, top-left. Turns red when the player can't currently afford it (on their turn).
+// Every accent below is pulled into the theme's four printed-pigment families so the hand reads
+// as one coherent candlelit palette (icons carry the fine distinctions, not colour):
+//   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
+const manaValPill: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.16)', border: '1px solid #6a5528' };
+// Mana cost, top-left — gold-leaf resource. Turns ochre-red when the player can't afford it.
 const costBadge: React.CSSProperties = {
   position: 'absolute', top: 6, left: 6, minWidth: 20, height: 20, padding: '0 5px',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
   fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', fontWeight: 800, borderRadius: 7, zIndex: 3,
-  color: '#cfe6ff', background: 'linear-gradient(160deg, rgba(30,58,110,0.95), rgba(16,30,60,0.95))',
-  border: '1px solid #3a6bb0', boxShadow: '0 2px 8px rgba(40,90,190,0.4)',
+  color: '#e8cf96', background: 'linear-gradient(160deg, rgba(74,58,26,0.95), rgba(46,34,14,0.95))',
+  border: '1px solid #6a5528', boxShadow: '0 2px 8px rgba(120,90,30,0.4)',
 };
 const costBadgeShort: React.CSSProperties = {
-  color: '#ffc2cf', background: 'linear-gradient(160deg, rgba(90,30,48,0.95), rgba(50,16,26,0.95))',
-  border: '1px solid #b0466a', boxShadow: '0 2px 8px rgba(190,50,90,0.4)',
+  color: '#e8b09a', background: 'linear-gradient(160deg, rgba(90,44,34,0.95), rgba(50,22,16,0.95))',
+  border: '1px solid #7a3a2a', boxShadow: '0 2px 8px rgba(150,60,40,0.4)',
 };
 const dmgVal: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.18)', border: '1px solid #5a2c22' };
 const healVal: React.CSSProperties = { color: '#cdd3a0', background: 'rgba(143,157,79,0.18)', border: '1px solid #4a5230' };
-const shieldVal: React.CSSProperties = { color: '#cfe2ff', background: 'rgba(127,182,255,0.16)', border: '1px solid #2a4870' };
-const revVal: React.CSSProperties = { color: '#d9c4ff', background: 'rgba(139,108,255,0.16)', border: '1px solid #4a3a78' };
-const peekVal: React.CSSProperties = { color: '#cdeaff', background: 'rgba(139,227,255,0.16)', border: '1px solid #2a5a78' };
-const shatterVal: React.CSSProperties = { color: '#d6f5b8', background: 'rgba(155,232,90,0.16)', border: '1px solid #3e6a2a' };
-const skipVal: React.CSSProperties = { color: '#bfe6ff', background: 'rgba(95,208,255,0.16)', border: '1px solid #2a5a78' };
-const gambleVal: React.CSSProperties = { color: '#ffe39a', background: 'rgba(255,216,74,0.16)', border: '1px solid #6a5a22' };
-const sacrificeVal: React.CSSProperties = { color: '#ffc6a0', background: 'rgba(255,122,60,0.16)', border: '1px solid #6a3a22' };
-// Korean label + accent colour per element / rarity, so the detail panel can chip them.
+const shieldVal: React.CSSProperties = { color: '#b9cdc4', background: 'rgba(113,145,138,0.16)', border: '1px solid #44605a' };
+const revVal: React.CSSProperties = { color: '#c3b0d0', background: 'rgba(150,120,160,0.15)', border: '1px solid #574a5e' };
+const peekVal: React.CSSProperties = { color: '#a9c4bf', background: 'rgba(113,145,138,0.15)', border: '1px solid #44605a' };
+const shatterVal: React.CSSProperties = { color: '#d8b79a', background: 'rgba(150,100,60,0.15)', border: '1px solid #5e4630' };
+const skipVal: React.CSSProperties = { color: '#a9c4bf', background: 'rgba(113,145,138,0.15)', border: '1px solid #44605a' };
+const gambleVal: React.CSSProperties = { color: '#e8cf96', background: 'rgba(195,154,76,0.16)', border: '1px solid #6a5528' };
+const sacrificeVal: React.CSSProperties = { color: '#e6b393', background: 'rgba(176,80,47,0.16)', border: '1px solid #6a3a24' };
+// Korean label + accent colour per element / rarity, so the detail panel can chip them. Elements
+// keep individual identity but as muted printed pigments (not fluorescent), coherent with the room.
 const ELEM_META: Record<string, { label: string; color: string }> = {
-  physical: { label: '물리', color: '#ff7d9c' },
-  fire: { label: '화염', color: '#ff8a4c' },
-  ice: { label: '냉기', color: '#5fd0ff' },
-  lightning: { label: '전격', color: '#ffd84a' },
-  poison: { label: '맹독', color: '#9be85a' },
-  holy: { label: '신성', color: '#ffe9a8' },
-  none: { label: '무속성', color: '#9aa0aa' },
+  physical: { label: '물리', color: '#cf8f74' },
+  fire: { label: '화염', color: '#d68a50' },
+  ice: { label: '냉기', color: '#8fb1bd' },
+  lightning: { label: '전격', color: '#d0b25e' },
+  poison: { label: '맹독', color: '#9aa863' },
+  holy: { label: '신성', color: '#dcc78c' },
+  none: { label: '무속성', color: '#a89f88' },
 };
 const RARITY_META: Record<string, { label: string; color: string }> = {
-  common: { label: '일반', color: '#a6ac96' },
-  rare: { label: '희귀', color: '#79c2a6' },
-  epic: { label: '영웅', color: '#e0ab48' },
-  legendary: { label: '전설', color: '#ffd478' },
+  common: { label: '일반', color: '#a89f88' },
+  rare: { label: '희귀', color: '#8fb0a2' },
+  epic: { label: '영웅', color: '#d8ab5a' },
+  legendary: { label: '전설', color: '#e8c880' },
 };
 // Card-detail panel: a rarity-framed card, a stat row (cost / element / target), then the text.
 const tip: React.CSSProperties = {
@@ -312,8 +316,8 @@ const tipChip: React.CSSProperties = {
   fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3,
   padding: '2px 7px', borderRadius: 6, border: '1px solid transparent',
 };
-const tipCostChip: React.CSSProperties = { color: '#cfe6ff', background: 'rgba(60,110,200,0.16)', borderColor: '#3a6bb055' };
-const tipTargetChip: React.CSSProperties = { color: '#ffd0db', background: 'rgba(255,80,120,0.14)', borderColor: '#b0466a55' };
+const tipCostChip: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.15)', borderColor: '#6a552855' };
+const tipTargetChip: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.14)', borderColor: '#5a2c2288' };
 const tipDesc: React.CSSProperties = { fontSize: 12.5, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
 const tipHint: React.CSSProperties = {
   marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`,

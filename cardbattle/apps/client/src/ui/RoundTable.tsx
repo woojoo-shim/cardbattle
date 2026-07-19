@@ -139,7 +139,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               {(() => {
                 const crit = p.alive && hpPct <= 30;
                 const fillBg = crit
-                  ? 'linear-gradient(90deg,#ff4d4d,#c4122a)'
+                  ? 'linear-gradient(90deg,#d24a35,#a5301f)'
                   : isMe ? `linear-gradient(90deg,#aeb877,${C.you})` : `linear-gradient(90deg,#c96a52,${C.enemy})`;
                 return (
                   <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
@@ -152,7 +152,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
                 {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
               </span>
-              <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#ff5a5a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
+              <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#d9634a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}>◈{p.mana}</span>}
             </div>
             {(() => {
@@ -196,7 +196,7 @@ const tableFan: React.CSSProperties = {
 const miniBack: React.CSSProperties = {
   position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
   transformOrigin: 'center bottom', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'linear-gradient(160deg,#1b2336,#101626)', border: `1px solid ${C.border}`,
+  background: 'linear-gradient(160deg,#2a2013,#171009)', border: `1px solid ${C.border}`,
   boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(143,157,79,0.06)',
 };
 /** Paint a mini face-down card's border/glow from an equipped border cosmetic. Gradient
@@ -206,15 +206,15 @@ function miniBackCos(cos: { border: string; glow: string }): React.CSSProperties
   return {
     boxShadow: `0 0 8px ${cos.glow}, 0 3px 8px rgba(0,0,0,0.5)`,
     ...(grad
-      ? { border: '1.5px solid transparent', backgroundImage: `linear-gradient(160deg,#1b2336,#101626), ${cos.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
+      ? { border: '1.5px solid transparent', backgroundImage: `linear-gradient(160deg,#2a2013,#171009), ${cos.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
       : { borderColor: cos.border }),
   };
 }
 const shieldChip: React.CSSProperties = {
   position: 'absolute', top: -32, left: 0, transform: 'translateX(-50%)',
   padding: '1px 6px', borderRadius: 6, fontSize: 10, fontWeight: 800, fontFamily: mono,
-  color: '#bcd8ff', background: 'linear-gradient(160deg,#15233f,#0e1830)', border: '1px solid #7fb6ff',
-  boxShadow: '0 0 10px rgba(127,182,255,0.5)', whiteSpace: 'nowrap', zIndex: 20,
+  color: '#bccfc6', background: 'linear-gradient(160deg,#1c2a24,#12201b)', border: '1px solid #6f9a8e',
+  boxShadow: '0 0 10px rgba(113,145,138,0.5)', whiteSpace: 'nowrap', zIndex: 20,
 };
 const seat: React.CSSProperties = {
   position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
@@ -231,13 +231,13 @@ const badge: React.CSSProperties = {
   alignItems: 'center', justifyContent: 'center', fontSize: 10, fontFamily: mono, fontWeight: 700,
   border: `1px solid ${C.border}`, background: 'rgba(10,12,20,0.85)', zIndex: 2,
 };
-const badgeDef: React.CSSProperties = { left: 5, color: '#7fb6ff' };
+const badgeDef: React.CSSProperties = { left: 5, color: '#8fb0a6' };
 const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
 // Ongoing turn-start effects, shown as a compact chip row under the portrait.
 const STATUS_META: Record<string, { color: string; icon: 'poison' | 'reflect' | 'regen' | 'zzz' }> = {
-  poison: { color: '#8fd14f', icon: 'poison' },
-  regen: { color: '#79b0a2', icon: 'regen' },
-  reflect: { color: '#b08fe0', icon: 'reflect' },
+  poison: { color: '#9aa863', icon: 'poison' },
+  regen: { color: '#8bb0a6', icon: 'regen' },
+  reflect: { color: '#a48ec0', icon: 'reflect' },
 };
 const statusRow: React.CSSProperties = {
   display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 3, maxWidth: '96%',
@@ -273,7 +273,7 @@ const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
-const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#6fb6ff', whiteSpace: 'nowrap' };
+const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#c9ab63', whiteSpace: 'nowrap' };
 /** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */
 function titleLine(color: string): React.CSSProperties {
   const grad = color.startsWith('linear') || color.startsWith('radial');
