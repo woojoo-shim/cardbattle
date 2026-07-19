@@ -178,8 +178,8 @@ const felt: React.CSSProperties = {
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
   width: '62%', height: '60%', borderRadius: '50%', overflow: 'hidden',
   background:
-    'radial-gradient(ellipse 58% 52% at 50% 38%, rgba(228,182,98,0.16), transparent 60%),' + // warm overhead light pool
-    'radial-gradient(ellipse at 50% 42%, #24311a 0%, #17230f 52%, #0b1107 100%)',            // rich felt: lit centre → dark rim
+    'radial-gradient(ellipse 58% 52% at 50% 38%, rgba(230,180,96,0.17), transparent 60%),' + // warm overhead light pool
+    'radial-gradient(ellipse at 50% 42%, #3a1c1e 0%, #26100f 52%, #100607 100%)',            // deep burgundy felt tied to the oxblood room: lit centre → black rim
   border: '2px solid rgba(200,152,70,0.30)',
   boxShadow:
     'inset 0 0 5px 1px rgba(236,202,126,0.24),' + // brass rim highlight
