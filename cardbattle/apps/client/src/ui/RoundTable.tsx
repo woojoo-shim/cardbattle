@@ -175,10 +175,10 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
-                {p.name}{isMe ? ' (나)' : ''}{isActive && p.alive ? ' · 턴' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
+                {p.name}{isMe ? ' (나)' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
               </span>
               <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#d9634a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
-              {p.alive && <span style={manaVal}>◈{p.mana}</span>}
+              {p.alive && <span style={manaVal}><Icon name="crystal" size={10} />{p.mana}</span>}
             </div>
             {(() => {
               // A player's equipped title (칭호), shown to everyone under their name.
@@ -321,7 +321,7 @@ const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
-const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#c9ab63', whiteSpace: 'nowrap' };
+const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#c9ab63', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
 /** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */
 function titleLine(color: string): React.CSSProperties {
   const grad = color.startsWith('linear') || color.startsWith('radial');
