@@ -27,6 +27,12 @@
   88%  {                                                 opacity: var(--mo, 0.5); }
   100% { transform: translate(calc(var(--mx, 10px) * -0.6), -92%); opacity: 0; }
 }
+/* Slow, near-imperceptible breathing of the key light over the table — the room feels alive
+   rather than a frozen render. Scale + opacity drift on a long, easing cycle. */
+@keyframes cb-breathe {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.06); }
+}
 /* Shaft: swings on its cord AND flickers with the bulb. Pool: flickers in lockstep (same 4.6s
    cadence) so the whole failing fixture stutters as one light. */
 .cb-shaft-anim { animation: cb-shaft-sway 7.5s ease-in-out infinite, cb-bulb-flicker 4.6s linear infinite; }

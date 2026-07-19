@@ -145,6 +145,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 
   return (
     <div style={screen} data-arena>
+      <SceneLife />
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
@@ -179,6 +180,56 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   );
 }
 
+// The living-air layer: what stops a clean board from reading as a frozen render. The key light
+// over the table breathes on a long slow cycle, and a handful of dust motes drift up through the
+// beam. Pointer-transparent, screen-blended, low opacity — presence, not clutter. This is the
+// deliberate cure for "밋밋" (flat): ambient LIFE, not more objects.
+function SceneLife() {
+  return (
+    <div style={lifeWrap} aria-hidden>
+      <div style={keyBreath} />
+      {MOTES.map((m, i) => (
+        <span
+          key={i}
+          style={{
+            ...mote,
+            left: `${m.x}%`, top: `${m.y}%`,
+            width: m.s, height: m.s,
+            ['--mx' as string]: `${m.dx}px`, ['--mo' as string]: m.o,
+            animation: `cb-mote ${m.d}s linear ${m.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+// Deterministic scatter across the central light so the drift reads as even but never gridded.
+const MOTES = [
+  { x: 34, y: 62, s: 3, dx: 16, o: 0.5, d: 15, delay: 0 },
+  { x: 46, y: 70, s: 2, dx: -12, o: 0.42, d: 19, delay: 2.5 },
+  { x: 58, y: 58, s: 3, dx: 20, o: 0.55, d: 17, delay: 5 },
+  { x: 40, y: 52, s: 2, dx: -18, o: 0.36, d: 21, delay: 1.2 },
+  { x: 66, y: 66, s: 2.5, dx: 14, o: 0.48, d: 16, delay: 6.4 },
+  { x: 52, y: 48, s: 2, dx: -10, o: 0.34, d: 23, delay: 3.7 },
+  { x: 28, y: 56, s: 2.5, dx: 22, o: 0.44, d: 18, delay: 8.1 },
+  { x: 62, y: 74, s: 3, dx: -16, o: 0.5, d: 14, delay: 4.3 },
+  { x: 48, y: 64, s: 2, dx: 12, o: 0.38, d: 20, delay: 9.6 },
+  { x: 72, y: 60, s: 2.5, dx: -20, o: 0.46, d: 16.5, delay: 7 },
+];
+const lifeWrap: React.CSSProperties = {
+  position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+  mixBlendMode: 'screen', overflow: 'hidden',
+};
+const keyBreath: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '43%', width: '58%', height: '46%',
+  borderRadius: '50%', filter: 'blur(46px)',
+  background: 'radial-gradient(ellipse at 50% 45%, rgba(230,172,84,0.14), transparent 66%)',
+  animation: 'cb-breathe 7.5s ease-in-out infinite',
+};
+const mote: React.CSSProperties = {
+  position: 'absolute', borderRadius: '50%',
+  background: 'radial-gradient(circle, rgba(244,220,168,0.9), rgba(230,180,96,0) 70%)',
+};
 // A clean, dark board finished like a lit stage: a warm key light falls on the table at centre,
 // a soft vignette pulls the corners to black to frame the play, and the base grades from oxblood
 // to near-black. No diorama, no clutter — just quality lighting so the cards and portraits are the
