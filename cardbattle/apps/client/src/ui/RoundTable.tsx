@@ -80,6 +80,20 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
         const accent = isMe ? C.you : C.enemy;
         const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
 
+        // Value hierarchy: the acting player is the clear focus (bigger, brighter); everyone
+        // else who isn't me or a current target recedes into the background (dimmer, desaturated,
+        // a touch smaller) so the eye lands on whose turn it is. Targetable foes stay bright.
+        const recede = p.alive && !isActive && !isMe && !canTarget;
+        const seatFilter = !p.alive
+          ? 'grayscale(1)'
+          : isActive
+          ? 'brightness(1.1) saturate(1.06)'
+          : recede
+          ? 'brightness(0.62) saturate(0.8)'
+          : 'none';
+        const seatOpacity = !p.alive ? 0.4 : isActive ? 1 : recede ? 0.58 : isMe ? 1 : 0.9;
+        const seatScale = isActive ? 1.12 : recede ? 0.96 : 1;
+
         return (
           <div
             key={p.id}
@@ -90,10 +104,10 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               left: `${left}%`, top: `${top}%`,
               width: isMe ? 132 : 112,
               cursor: canTarget ? 'crosshair' : 'default',
-              filter: p.alive ? 'none' : 'grayscale(1)',
-              opacity: p.alive ? 1 : 0.45,
-              transform: `translate(-50%,-50%) scale(${isActive ? 1.08 : 1})`,
-              zIndex: isActive ? 8 : 4,
+              filter: seatFilter,
+              opacity: seatOpacity,
+              transform: `translate(-50%,-50%) scale(${seatScale})`,
+              zIndex: isActive ? 8 : recede ? 3 : 4,
             }}
           >
             <div
@@ -218,7 +232,7 @@ const shieldChip: React.CSSProperties = {
 };
 const seat: React.CSSProperties = {
   position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-  pointerEvents: 'auto', transition: 'transform .3s cubic-bezier(.22,.61,.36,1)',
+  pointerEvents: 'auto', transition: 'transform .45s cubic-bezier(.22,.61,.36,1), filter .45s ease, opacity .45s ease',
 };
 const portrait: React.CSSProperties = {
   borderRadius: 16, position: 'relative', overflow: 'hidden',
