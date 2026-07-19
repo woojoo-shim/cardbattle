@@ -55,32 +55,6 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const soundCursor = useRef(0);
   useEffect(() => { soundCursor.current = soundEvents(events, soundCursor.current, myId); }, [events, myId]);
 
-  // Mouse-driven parallax turns the flat scene into a 3D diorama you peer into: as the cursor moves,
-  // the whole back room tilts and drifts in perspective while the table slides the opposite way, so
-  // the depth between the far wall and the felt reads as real space. We write normalised cursor
-  // offset (-1..1) into CSS vars on the root — pure style mutation, no React re-render per move — and
-  // the layers' transforms (chamberDeco / tableRow) read those vars. Pointer-transparent layers only,
-  // so nothing interactive shifts. rAF-throttled; snaps back to centre when the cursor leaves.
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const parRaf = useRef(0);
-  const setParallax = (px: number, py: number) => {
-    const el = sceneRef.current;
-    if (!el) return;
-    el.style.setProperty('--cb-px', px.toFixed(3));
-    el.style.setProperty('--cb-py', py.toFixed(3));
-  };
-  const onSceneMove = (e: React.PointerEvent) => {
-    const el = sceneRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const px = ((e.clientX - r.left) / r.width - 0.5) * 2;
-    const py = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    cancelAnimationFrame(parRaf.current);
-    parRaf.current = requestAnimationFrame(() => setParallax(px, py));
-  };
-  const onSceneLeave = () => { cancelAnimationFrame(parRaf.current); setParallax(0, 0); };
-  useEffect(() => () => cancelAnimationFrame(parRaf.current), []);
-
   const playCard = (card: CardInstance) => {
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
@@ -170,9 +144,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   }
 
   return (
-    <div style={screen} data-arena ref={sceneRef} onPointerMove={onSceneMove} onPointerLeave={onSceneLeave}>
-      <ChamberDeco />
-      <SceneAtmosphere />
+    <div style={screen} data-arena>
       <VfxLayer events={events} players={ui.players} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
@@ -185,10 +157,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
-        <div style={fieldGrid} />
         <RoundTable ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} />
         {ui.phase === 'playing' && activeId && <TurnArrow activeId={activeId} isMyTurn={isMyTurn} turnDir={ui.turnDir} />}
-        <span style={fieldHint}>◈ BACK-ROOM TABLE ◈</span>
         <Log events={events} ui={ui} />
         {pending && <div style={targetHint}><Icon name="target" size={15} />&nbsp;대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
         {error && <div style={errToast}>{error.message}</div>}
@@ -209,336 +179,19 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   );
 }
 
-// A cluttered underground back room where nobody's supposed to be gambling — oxblood-stained
-// walls swallowed by black, a single dirty bulb pooling jaundiced light on the worn table, and
-// pink grime sprayed across the walls (see ChamberDeco). Corners drown so the room feels buried.
+// A clean, dark board: a soft warm glow lifts the table at centre, everything else falls to flat
+// black so the cards and portraits are the only things that read. No diorama, no clutter.
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
   background:
-    'radial-gradient(54% 38% at 50% 43%, rgba(226,164,72,0.17), transparent 66%),' +   // dirty bulb pooling on the table
-    'radial-gradient(66% 44% at 50% 26%, rgba(126,38,62,0.16), transparent 72%),' +     // oxblood haze bleeding down the back wall
-    'radial-gradient(44% 24% at 50% 74%, rgba(150,92,58,0.08), transparent 74%),' +     // grimy light on the wet floor
-    'linear-gradient(180deg, transparent 48%, rgba(120,52,66,0.05) 53%, transparent 60%),' + // grubby seam where wall meets floor
-    'linear-gradient(180deg, #170d10 0%, #120a0d 46%, #0d070a 55%, #060305 100%),' +    // oxblood wall → wet black floor
-    '#060305',
-  boxShadow: 'inset 0 0 270px 96px rgba(0,0,0,0.96)',
+    'radial-gradient(52% 40% at 50% 44%, rgba(226,164,72,0.08), transparent 68%),' +   // faint warm lift under the table
+    'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
   color: C.text,
-};
-// The back room, redrawn from scratch: a buried gambling den with an exposed-brick back wall under
-// peeling plaster, a barred window leaking cold street-light, a caged wall lamp burning amber, a
-// crooked framed picture, an electrical junction box with live LEDs, junked gear receding down both
-// side walls (metal shelving left, a locker with a dead CRT + pipes right), ceiling conduit and
-// frayed cables, a cracked concrete floor with an iron drain, all sunk in shadow and old pink grime.
-function ChamberDeco() {
-  return (
-    <svg style={chamberDeco} viewBox="0 0 192 108" preserveAspectRatio="xMidYMid slice" aria-hidden>
-      <defs>
-        <filter id="cb-splat" x="-25%" y="-25%" width="150%" height="150%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-        <filter id="cb-grime" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.16 0.24" numOctaves="3" seed="11" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="4" />
-        </filter>
-        <radialGradient id="cb-cone" cx="50%" cy="44%" r="56%">
-          <stop offset="0" stopColor="#2c1e1d" />
-          <stop offset="0.55" stopColor="#0e0809" />
-          <stop offset="1" stopColor="#060304" />
-        </radialGradient>
-        <linearGradient id="cb-side" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#1d1315" />
-          <stop offset="1" stopColor="#090507" />
-        </linearGradient>
-        {/* floor: darkest at the far wall foot, a touch warmer near the viewer where the lamp reaches */}
-        <linearGradient id="cb-floor" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#080705" />
-          <stop offset="0.5" stopColor="#0e0b08" />
-          <stop offset="1" stopColor="#15110b" />
-        </linearGradient>
-        <radialGradient id="cb-glass" cx="50%" cy="38%" r="66%">
-          <stop offset="0" stopColor="#24343a" />
-          <stop offset="0.55" stopColor="#121c20" />
-          <stop offset="1" stopColor="#0a1013" />
-        </radialGradient>
-      </defs>
-
-      {/* ===== ANGLED SIDE WALLS. The back wall stops high (y58) so a big receding FLOOR opens
-           below it — the room is now seen from ABOVE, matching the tilted table oval instead of
-           a flat head-on wall. Side walls fold from the ceiling down to the floor at the seams. */}
-      <polygon points="0,0 40,15 40,58 0,108" fill="url(#cb-side)" />
-      <polygon points="192,0 152,15 152,58 192,108" fill="url(#cb-side)" />
-
-      {/* ===== FLOOR PLANE — the concrete pit floor, a wide quad receding from the near edge up to
-           the back wall foot (y58). Its seam lines converge to a high vanishing point (~96,24) so
-           the ground tilts up toward us at the SAME angle as the felt oval and the seat ring. */}
-      <polygon points="40,58 152,58 192,108 0,108" fill="url(#cb-floor)" />
-      <g stroke="#0a0908" strokeWidth="0.4" opacity="0.5">
-        {/* radial seams fanning from the back edge toward the viewer (depth lines) */}
-        <line x1="60" y1="58" x2="7" y2="108" /><line x1="80" y1="58" x2="56.5" y2="108" />
-        <line x1="96" y1="58" x2="96" y2="108" />
-        <line x1="112" y1="58" x2="135.5" y2="108" /><line x1="132" y1="58" x2="185" y2="108" />
-        {/* transverse depth bands, bunching as they recede */}
-        <line x1="28.8" y1="72" x2="163.2" y2="72" /><line x1="16" y1="88" x2="176" y2="88" />
-        <line x1="6.4" y1="100" x2="185.6" y2="100" />
-      </g>
-      {/* corner seams where the side walls fold into the back wall + down to the floor */}
-      <line x1="40" y1="15" x2="40" y2="58" stroke="#060304" strokeWidth="0.6" />
-      <line x1="152" y1="15" x2="152" y2="58" stroke="#060304" strokeWidth="0.6" />
-      {/* the bright-ish line where the back wall meets the floor */}
-      <line x1="40" y1="58" x2="152" y2="58" stroke="#221a12" strokeWidth="0.6" opacity="0.8" />
-
-      {/* ===== BACK WALL — grimy plaster with a scar of exposed brick ===== */}
-      {/* damp / peeling plaster blotches */}
-      <g filter="url(#cb-grime)" opacity="0.6">
-        <rect x="44" y="8" width="104" height="18" fill="#22161a" />
-        <rect x="60" y="40" width="74" height="10" fill="#1a1013" />
-      </g>
-      {/* exposed brick patch, plaster fallen away (upper-left of the back wall) */}
-      <g>
-        <rect x="49" y="14" width="31" height="27" fill="#160c0d" />
-        <g stroke="#0d0607" strokeWidth="0.3">
-          {[0, 1, 2, 3, 4, 5].map((r) => {
-            const y = 15.5 + r * 4;
-            const off = r % 2 ? 3 : 0;
-            return [0, 1, 2, 3, 4].map((c) => (
-              <rect key={`br-${r}-${c}`} x={49.5 + off + c * 6} y={y} width="5.4" height="3.4"
-                fill={(r + c) % 3 === 0 ? '#281618' : '#201315'} />
-            ));
-          })}
-        </g>
-        {/* ragged plaster edge overhanging the brick */}
-        <path d="M49 14 Q47 26 49 41 L52 41 Q50 26 52 20 L80 15 L80 14 Z" fill="#221619" opacity="0.9" />
-        <path d="M80 41 Q82 30 80 20 L77 22 Q79 31 77 41 Z" fill="#221619" opacity="0.7" />
-      </g>
-
-      {/* barred window, upper-right of the back wall — cold outside light bleeding through */}
-      <g>
-        {/* faint cold spill washing down the wall under the sill */}
-        <polygon points="108,12 140,12 146,58 102,58" fill="#3a5560" opacity="0.03" />
-        <rect x="110" y="11" width="30" height="23" rx="1" fill="#0c0708" stroke="#2a1c1e" strokeWidth="0.8" />
-        <rect x="112" y="13" width="26" height="19" fill="url(#cb-glass)" />
-        {/* iron bars */}
-        <g stroke="#05070a" strokeWidth="1">
-          <line x1="119" y1="12.5" x2="119" y2="32.5" /><line x1="125" y1="12.5" x2="125" y2="32.5" />
-          <line x1="131" y1="12.5" x2="131" y2="32.5" />
-          <line x1="112.5" y1="22.5" x2="137.5" y2="22.5" strokeWidth="0.8" />
-        </g>
-        {/* cracked pane hints */}
-        <g stroke="#8fb0bb" strokeWidth="0.2" opacity="0.4">
-          <line x1="114" y1="15" x2="118" y2="20" /><line x1="133" y1="26" x2="136" y2="30" />
-        </g>
-        <rect x="109" y="33.5" width="32" height="1.6" fill="#160e10" />
-      </g>
-
-      {/* a crooked framed picture, gone black with grime */}
-      <g transform="rotate(-4 90 44)">
-        <rect x="82" y="38" width="16" height="12" fill="#0e0809" stroke="#2b2019" strokeWidth="0.8" />
-        <rect x="84" y="40" width="12" height="8" fill="#161011" />
-        <line x1="84" y1="40" x2="96" y2="48" stroke="#241a1a" strokeWidth="0.3" opacity="0.5" />
-      </g>
-
-      {/* electrical conduit dropping to a junction box with live indicator LEDs */}
-      <g>
-        <rect x="141" y="8" width="1.8" height="30" fill="#150f0e" stroke="#2a1e1a" strokeWidth="0.3" />
-        <rect x="137" y="38" width="10" height="8" rx="0.8" fill="#120d0c" stroke="#2c211d" strokeWidth="0.5" />
-        <circle cx="140" cy="41.5" r="0.9" fill="#7ad07f"><animate attributeName="opacity" values="1;0.3;1" dur="2.6s" repeatCount="indefinite" /></circle>
-        <circle cx="143.5" cy="41.5" r="0.9" fill="#d8a23c"><animate attributeName="opacity" values="0.4;1;0.4" dur="1.7s" repeatCount="indefinite" /></circle>
-        <rect x="138.5" y="43.6" width="7" height="1" rx="0.5" fill="#241a18" />
-      </g>
-
-      {/* ===== LEFT WALL — metal shelving rack receding to the vanishing point, loaded with junk ===== */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* uprights: near (x=6) tall, far (x=34) short */}
-        <polygon points="5,42 7,42 7,94 5,96" fill="#191110" />
-        <polygon points="33,46 34.4,46 34.4,80 33,80.5" fill="#160f0e" />
-        {/* three shelves foreshortening back */}
-        <polygon points="5,52 34,54 34,55.6 5,54" fill="#1d1513" />
-        <polygon points="5,66 34,66 34,67.6 5,68" fill="#1a1211" />
-        <polygon points="5,82 34,78.5 34,80.1 5,84" fill="#170f0e" />
-        {/* boxes / cans on the shelves, larger up front */}
-        <g stroke="#2c211f" strokeWidth="0.3">
-          <rect x="8" y="43.5" width="11" height="8.5" fill="#140d0d" />
-          <rect x="21" y="46" width="8" height="7" fill="#120c0c" />
-          <rect x="9" y="57" width="9" height="9" fill="#170f0e" />
-          <rect x="22" y="59.5" width="7" height="6" fill="#120c0c" />
-          {/* a jerrycan silhouette */}
-          <path d="M9 74 h9 v9 h-9 z M11 72 h5 v2 h-5 z" fill="#130d0c" />
-          <rect x="21" y="73.5" width="6.5" height="5" fill="#110b0b" />
-        </g>
-        {/* debris at the foot */}
-        <g fill="#181212" stroke="#2c211f" strokeWidth="0.3">
-          <rect x="14" y="90" width="16" height="2.6" transform="rotate(-3 22 91)" />
-          <rect x="14" y="93.6" width="16" height="2.6" transform="rotate(2 22 95)" />
-        </g>
-      </g>
-
-      {/* ===== RIGHT WALL — a tall steel locker + dead CRT, pipes and a valve at the near corner ===== */}
-      <g stroke="#2a1e1d" strokeWidth="0.4">
-        {/* locker body receding */}
-        <polygon points="188,42 160,46 160,90 188,94" fill="#140e0f" />
-        <polygon points="188,42 174,44 174,90 188,92" fill="#181110" />
-        {/* louvred door slats */}
-        <g stroke="#0a0506" strokeWidth="0.4" opacity="0.8">
-          <line x1="176" y1="50" x2="186.6" y2="49" /><line x1="176" y1="53" x2="186.6" y2="52" />
-          <line x1="176" y1="56" x2="186.6" y2="55" /><line x1="176" y1="59" x2="186.6" y2="58" />
-        </g>
-        {/* handle */}
-        <rect x="175.5" y="66" width="1.6" height="7" rx="0.6" fill="#2c211d" />
-        {/* dead green CRT bolted above, near-right */}
-        <polygon points="161,50 172,49 172,60 161,61" fill="#0a1210" />
-        <polygon points="162,51 171,50.2 171,59 162,59.8" fill="#153029" />
-        <g stroke="#1f4640" strokeWidth="0.3" opacity="0.7">
-          <line x1="163" y1="52.6" x2="170.4" y2="52" /><line x1="163" y1="54.6" x2="170.4" y2="54" /><line x1="163" y1="56.6" x2="170.4" y2="56" />
-        </g>
-        <circle cx="169.5" cy="58.4" r="0.7" fill="#3a6a5c" opacity="0.7"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="3.2s" repeatCount="indefinite" /></circle>
-        {/* pipes down the near corner + valve wheel */}
-        <g fill="#140e0d" stroke="#2a1e1d" strokeWidth="0.4">
-          <rect x="176" y="80" width="16" height="4.6" rx="2.3" />
-          <rect x="176" y="88" width="16" height="4.6" rx="2.3" />
-          <rect x="186" y="60" width="4.6" height="48" rx="2" />
-        </g>
-        <g stroke="none" opacity="0.5">
-          <rect x="177" y="81" width="14" height="0.8" rx="0.4" fill="#3a2b28" />
-          <rect x="186.6" y="61" width="0.8" height="46" rx="0.4" fill="#3a2b28" />
-        </g>
-        <g stroke="#33241f" strokeWidth="0.6" fill="none">
-          <circle cx="184" cy="82.3" r="3.2" fill="#171110" />
-          <line x1="184" y1="79.1" x2="184" y2="85.5" /><line x1="180.8" y1="82.3" x2="187.2" y2="82.3" /><line x1="181.7" y1="80" x2="186.3" y2="84.6" /><line x1="181.7" y1="84.6" x2="186.3" y2="80" />
-        </g>
-      </g>
-
-      {/* ===== CEILING — conduit pipe + a vent, frayed cables drooping across ===== */}
-      <g stroke="#2a1e1d" strokeWidth="0.4" fill="#120c0c">
-        <rect x="40" y="3" width="112" height="2.4" rx="1.2" />
-        <rect x="70" y="1.5" width="16" height="5" rx="0.6" fill="#0e0908" />
-        <g stroke="#0a0506" strokeWidth="0.4">
-          <line x1="72" y1="2.5" x2="72" y2="5.5" /><line x1="76" y1="2.5" x2="76" y2="5.5" /><line x1="80" y1="2.5" x2="80" y2="5.5" /><line x1="84" y1="2.5" x2="84" y2="5.5" />
-        </g>
-      </g>
-      <g stroke="#080405" strokeWidth="0.8" fill="none" opacity="0.9" strokeLinecap="round">
-        <path d="M-2 9 Q 48 27 96 13 T 194 17" />
-        <path d="M-2 4 Q 60 21 120 7 T 194 10" />
-        <path d="M40 5 Q 70 24 104 8" />
-      </g>
-
-      {/* ===== FLOOR — cracked concrete with an iron drain grate, mostly under the table ===== */}
-      <g opacity="0.7">
-        <g stroke="#0a0607" strokeWidth="0.4" fill="none" opacity="0.6">
-          <path d="M20 100 L34 96 L46 101" /><path d="M150 99 L164 95 L176 100" /><path d="M96 104 L104 100" />
-        </g>
-        {/* iron drain grate, front-left of the floor */}
-        <g transform="translate(150 98)">
-          <rect x="-7" y="-7" width="14" height="14" rx="0.6" fill="#0d0908" stroke="#2a201c" strokeWidth="0.5" />
-          <g stroke="#241a17" strokeWidth="0.7">
-            <line x1="-5" y1="-4" x2="5" y2="-4" /><line x1="-5" y1="-1.5" x2="5" y2="-1.5" /><line x1="-5" y1="1" x2="5" y2="1" /><line x1="-5" y1="3.5" x2="5" y2="3.5" />
-          </g>
-        </g>
-      </g>
-
-      {/* pink grime splatter — clustered on the upper walls and corners, fading toward the table */}
-      <g filter="url(#cb-splat)">
-        <g fill="#d1568c" opacity="0.11"><circle cx="40" cy="22" r="6.2" /><circle cx="45" cy="16" r="2" /><circle cx="34" cy="28" r="1.4" /><circle cx="48" cy="26" r="1" /></g>
-        <g fill="#e08ab0" opacity="0.09"><circle cx="158" cy="30" r="5" /><circle cx="166" cy="23" r="1.7" /><circle cx="150" cy="37" r="1.1" /></g>
-        <g fill="#d1568c" opacity="0.08"><circle cx="112" cy="52" r="3.2" /><circle cx="118" cy="48" r="0.9" /></g>
-        <g fill="#e08ab0" opacity="0.07"><circle cx="169" cy="72" r="4.2" /><circle cx="177" cy="65" r="1.3" /></g>
-        <g fill="#d1568c" opacity="0.07"><circle cx="120" cy="90" r="3.6" /><circle cx="128" cy="86" r="1.1" /></g>
-        <g fill="#e08ab0" opacity="0.06"><circle cx="30" cy="88" r="3" /></g>
-      </g>
-    </svg>
-  );
-}
-// Living-air layer over the static room: a swinging volumetric light cone under the failing bulb,
-// a flickering amber pool on the table, and dust motes drifting up through the beam. All screen-
-// blended and pointer-transparent — they add light and life, never block a play. This is what
-// turns the painted set into a room that feels lived-in and dim-lit rather than a flat backdrop.
-const MOTES = Array.from({ length: 16 }, (_, i) => {
-  // Deterministic scatter across the light pool so the field is even but never gridded.
-  const x = 12 + ((i * 53) % 76);          // 12%..88% across
-  const y = 34 + ((i * 37) % 50);          // 34%..84% down (in/under the cone)
-  const size = 1.3 + ((i * 7) % 5) * 0.5;  // 1.3..3.3px
-  const dur = 11 + ((i * 13) % 12);        // 11..23s slow drift
-  const delay = -((i * 29) % 22);          // desync so they don't pulse together
-  const mx = (i % 2 ? 1 : -1) * (8 + (i % 5) * 5); // lateral drift px
-  const mo = 0.28 + ((i * 11) % 6) * 0.06; // peak opacity 0.28..0.58
-  return { x, y, size, dur, delay, mx, mo };
-});
-function SceneAtmosphere() {
-  return (
-    <div style={atmoWrap} aria-hidden>
-      <div style={lightShaft} className="cb-shaft-anim" />
-      <div style={bulbPool} className="cb-pool-anim" />
-      {MOTES.map((m, i) => (
-        <span
-          key={i}
-          className="cb-mote-anim"
-          style={{
-            position: 'absolute', left: `${m.x}%`, top: `${m.y}%`,
-            width: m.size, height: m.size, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(244,214,150,0.95), rgba(226,164,72,0.35) 55%, transparent 72%)',
-            // @ts-expect-error CSS custom props for the shared cb-mote keyframe
-            '--mx': `${m.mx}px`, '--mo': m.mo,
-            animation: `cb-mote ${m.dur}s ease-in-out ${m.delay}s infinite`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-const atmoWrap: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden',
-  mixBlendMode: 'screen',
-};
-// The cone of light hanging under the bulb — a soft amber wedge, brightest at the top (the source)
-// fading into the table. Swings a hair on cb-shaft-sway as if the bulb rocks on its cord.
-// left 31% + width 38% spans 31%..69% → centred under the bulb WITHOUT a translateX (which the
-// cb-shaft sway animation would clobber). Softened hard: low opacity + a heavy blur so it reads as
-// a faint volumetric god-ray settling on the felt, not the bright hard-edged box it used to be.
-const lightShaft: React.CSSProperties = {
-  position: 'absolute', top: '-8%', left: '31%', width: '38%', height: '66%',
-  transformOrigin: '50% 0%',
-  background: 'linear-gradient(180deg, rgba(236,180,96,0.085) 0%, rgba(226,164,72,0.03) 44%, transparent 80%)',
-  clipPath: 'polygon(38% 0%, 62% 0%, 94% 100%, 6% 100%)',
-  filter: 'blur(17px)',
-};
-// The amber pool the bulb throws on the felt — same flicker cadence as the shaft so the whole
-// fixture stutters as one failing light.
-const bulbPool: React.CSSProperties = {
-  position: 'absolute', top: '30%', left: '50%', width: '46%', height: '40%',
-  transform: 'translateX(-50%)',
-  background: 'radial-gradient(50% 50% at 50% 42%, rgba(230,168,78,0.07), transparent 70%)',
-  filter: 'blur(5px)',
-};
-const chamberDeco: React.CSSProperties = {
-  position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0,
-  // Subtle depth parallax: the back room drifts gently OPPOSITE the cursor (NO rotation — a tilting
-  // background reads as disorienting during play). scale(1.04) hides the edges the small drift exposes.
-  transform: 'translate(calc(var(--cb-px, 0) * -6px), calc(var(--cb-py, 0) * -4px)) scale(1.04)',
-  transition: 'transform .3s ease-out',
-  willChange: 'transform',
 };
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = {
   position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  // The table stays ANCHORED. Only the back room drifts with the cursor (parallax depth); a foreground
-  // desk that slides when you move the mouse reads as the whole scene sloshing, not as peering around.
-};
-// The wet concrete floor of the pit: grimy tile seams tilted back in perspective so the lines
-// converge toward the horizon, making the table read as sitting on a receding floor in a real room.
-const fieldGrid: React.CSSProperties = {
-  position: 'absolute', left: '50%', bottom: '-6%', width: '172%', height: '62%',
-  transform: 'translateX(-50%) perspective(560px) rotateX(62deg)',
-  transformOrigin: '50% 100%', pointerEvents: 'none',
-  backgroundImage:
-    'linear-gradient(rgba(122,140,102,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(122,140,102,0.045) 1px, transparent 1px)',
-  backgroundSize: '46px 46px',
-  WebkitMaskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',
-  maskImage: 'radial-gradient(72% 92% at 50% 100%, #000 28%, transparent 78%)',
-};
-const fieldHint: React.CSSProperties = {
-  position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
-  fontFamily: mono, fontSize: 11, color: C.faint, letterSpacing: 3,
 };
 const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {

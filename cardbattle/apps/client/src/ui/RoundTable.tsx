@@ -31,32 +31,9 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 
   return (
     <div style={area}>
-      {/* A padded leather rail hoops the baize — the raised bumper of a real card table, catching
-          the bulb on its top curve and stitched just inside. It's what lifts the felt off the floor
-          and reads as furniture, not a painted disc. */}
-      <span style={feltRail} aria-hidden />
-      <div style={felt} aria-hidden>
-        <span style={feltNap} />
-        {/* Perspective grid raked across the baize — the painted lines of the play surface,
-            converging toward the far edge so the top reads as a desk seen from above (Buckshot-style). */}
-        <span style={feltGrid} />
-        <span style={feltStains} />
-        <span style={feltPaint} />
-        <span style={feltPaintInner} />
-        <span style={feltRim} />
-        <span style={feltStitch} />
-        <span style={feltGlow} />
-      </div>
-
-      {/* Pendant lamp hung over the table centre. The fixture (cord + shade) is always on;
-          the emitted light (cone + floor pool + bulb) flickers up once when the match begins. */}
-      <div style={lampWrap} aria-hidden>
-        <span style={lampCord} />
-        <span style={lampShade} />
-        <span style={lampBulb} />
-        <span style={lampCone} />
-        <span style={lampPool} />
-      </div>
+      {/* A single clean table oval — a muted felt disc with a thin gold rim, tilted into the
+          scene so the seat ring reads as sitting around it. No grid, no lamp, no grime. */}
+      <div style={felt} aria-hidden />
 
       {/* In front of each living seat: a small fan of face-down cards, one per card the player
           is holding. A persistent passive (e.g. shield) shows as a chip above so it stays put. */}
@@ -192,130 +169,15 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 }
 
 const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
-// The padded leather rail — a slightly larger oval sitting under/around the baize. A soft oxblood
-// leather bumper with a lit top curve (bulb catching the padding) and its own drop shadow so the
-// whole table stands proud of the floor like real furniture.
-const feltRail: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: `${CY}%`,
-  // Tilted onto the SAME plane as the felt (same perspective + rotateX about the same centre line)
-  // so the padded bumper hoops the baize as one coherent piece of furniture seen from above.
-  transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
-  width: '68%', height: '66%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 26%, #4a2b23 0%, #351d17 42%, #21120e 74%, #0c0605 100%)',
-  border: '1px solid #4d2e22',
-  boxShadow:
-    'inset 0 4px 8px rgba(150,96,60,0.30),' +      // bulb catching the top of the leather roll
-    'inset 0 -12px 26px rgba(0,0,0,0.72),' +        // underside of the roll in shadow
-    '0 30px 62px rgba(0,0,0,0.6), 0 8px 0 #0a0504', // floor drop + a solid near lip
-};
+// A single clean table oval, tilted into the scene so the seats read as sitting around it —
+// muted felt with a thin gold rim and a soft inner shadow. No grid, lamp, or grime.
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
-  // A near-round surface actually TILTED back in 3D (rotateX) rather than a pre-squashed flat oval,
-  // so the near edge swells toward the viewer and the far edge recedes — a real desk you look down
-  // onto (Buckshot framing). All children (grid, betting rings, stains) tilt with it as one plane.
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
   width: '60%', height: '58%', borderRadius: '50%', overflow: 'hidden',
-  // A worn card-table hauled down here to gamble on: bottle-green baize gone mossy and damp-stained,
-  // burns and grime near the middle, edges rotting into the dark. The felt of an illegal back room —
-  // muddy olive, not neon, so it sits in the gloom instead of glowing like a disc.
-  background: 'radial-gradient(ellipse at 50% 32%, #223016 0%, #16210f 40%, #0c1208 66%, #070b05 100%)',
-  border: '2px solid #2c3a20',
-  boxShadow:
-    'inset 0 0 96px 20px rgba(0,0,0,0.8),' +    // heavy vignette — edges rot into the dark
-    'inset 0 3px 10px rgba(0,0,0,0.5),' +        // felt tucked just under the leading edge of the rail
-    '0 26px 60px rgba(0,0,0,0.5)',
-};
-// A soft radial sheen where the bulb rakes across the felt nap — the premium lit-baize look.
-const feltNap: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: '50%',
-  background: 'radial-gradient(ellipse 46% 40% at 50% 34%, rgba(150,196,96,0.05), transparent 62%)',
-};
-// The painted play-surface grid. It fills the felt flat and INHERITS the parent's rotateX tilt,
-// so its square cells foreshorten into converging lines on the tilted plane — the strongest cue
-// that you're looking DOWN onto a desk. Faded at the rim by the mask so it melts into the baize.
-const feltGrid: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: '50%',
-  backgroundImage:
-    'linear-gradient(rgba(150,168,120,0.07) 1px, transparent 1px),' +
-    'linear-gradient(90deg, rgba(150,168,120,0.06) 1px, transparent 1px)',
-  backgroundSize: '12% 12%', backgroundPosition: 'center',
-  WebkitMaskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
-  maskImage: 'radial-gradient(64% 64% at 50% 50%, #000 40%, transparent 82%)',
-};
-// Grime worked into the baize: greasy dark blotches, worn bald patches, and a faint pink smear
-// caught from the room — the wear of a table that's seen a lot of bad nights.
-const feltStains: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: '50%',
-  backgroundImage:
-    'radial-gradient(circle at 38% 34%, rgba(0,0,0,0.40) 0 6%, transparent 13%),' +
-    'radial-gradient(circle at 66% 58%, rgba(0,0,0,0.36) 0 5%, transparent 12%),' +
-    'radial-gradient(circle at 52% 72%, rgba(0,0,0,0.32) 0 7%, transparent 14%),' +
-    'radial-gradient(circle at 30% 62%, rgba(110,82,36,0.16) 0 5%, transparent 12%),' +
-    'radial-gradient(circle at 70% 30%, rgba(0,0,0,0.30) 0 4%, transparent 10%),' +
-    'radial-gradient(circle at 44% 54%, rgba(0,0,0,0.22) 0 8%, transparent 16%),' +   // bald worn patch mid-table
-    'radial-gradient(circle at 60% 42%, rgba(80,70,30,0.12) 0 6%, transparent 13%),' + // greasy sheen
-    'radial-gradient(ellipse 14% 9% at 58% 46%, rgba(209,86,140,0.09), transparent 70%)',
-};
-// The old betting circle, painted in faded gilt — a thin gold ring worn to a dull amber gleam.
-const feltPaint: React.CSSProperties = {
-  position: 'absolute', inset: '23%', borderRadius: '50%',
-  border: '1.5px solid rgba(216,162,60,0.28)',
-  boxShadow: 'inset 0 0 12px rgba(216,162,60,0.10), 0 0 6px rgba(216,162,60,0.08)',
-};
-// A second, tighter gilt ring inside it — the double-line betting circle of a proper table.
-const feltPaintInner: React.CSSProperties = {
-  position: 'absolute', inset: '27%', borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 40%, #1a2414 0%, #111a0d 55%, #0a0f07 100%)',
   border: '1px solid rgba(216,162,60,0.14)',
-};
-const feltRim: React.CSSProperties = {
-  position: 'absolute', inset: 6, borderRadius: '50%', border: '1px solid rgba(150,168,110,0.12)',
-};
-// Stitching where the baize meets the leather rail — a dashed thread just inside the felt edge.
-const feltStitch: React.CSSProperties = {
-  position: 'absolute', inset: 3, borderRadius: '50%',
-  border: '1px dashed rgba(200,150,70,0.14)',
-};
-const feltGlow: React.CSSProperties = {
-  position: 'absolute', inset: 0, borderRadius: '50%',
-  boxShadow: 'inset 0 0 52px rgba(224,164,72,0.12)',
-};
-// Pendant lamp over the table centre. The fixture (cord + shade) is always lit; the emitted
-// light (bulb, cone, floor pool) plays the cb-lampon flicker once when RoundTable mounts (= game start).
-const lampWrap: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
-};
-const lampCord: React.CSSProperties = {
-  // A frayed wire dropping from the dark — the kind strung up in a back room nobody pays rent on.
-  position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)',
-  width: 2, height: '14%', background: 'linear-gradient(#060504,#2a2216)',
-};
-const lampShade: React.CSSProperties = {
-  // A battered tin dish clamped over a bare bulb — dented metal, no fixture, just what was on hand.
-  position: 'absolute', left: '50%', top: '13%', transform: 'translateX(-50%)',
-  width: 64, height: 30, borderRadius: '50% 50% 46% 46% / 80% 80% 20% 20%',
-  background: 'linear-gradient(160deg,#2a2620,#141009)', border: '1px solid #3d3428',
-  boxShadow: '0 6px 14px rgba(0,0,0,0.6)',
-};
-const lampBulb: React.CSSProperties = {
-  // A single dirty sodium bulb — the only law in the room. Warm, jaundiced, buzzing.
-  position: 'absolute', left: '50%', top: '20%', transform: 'translateX(-50%)',
-  width: 16, height: 16, borderRadius: '50%',
-  background: 'radial-gradient(circle, #fff2cf 0%, #f0b256 52%, rgba(210,140,50,0.22) 100%)',
-  boxShadow: '0 0 22px 6px rgba(240,180,80,0.6)',
-  animation: 'cb-lampon 2.4s ease-out both',
-};
-const lampCone: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '21%', transform: 'translateX(-50%)',
-  width: 240, height: '46%',
-  background: 'linear-gradient(180deg, rgba(238,176,78,0.12), rgba(238,176,78,0))',
-  clipPath: 'polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%)',
-  filter: 'blur(5px)', animation: 'cb-lampon 2.4s ease-out both',
-};
-const lampPool: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: `${CY}%`, transform: 'translate(-50%,-50%)',
-  width: '54%', height: '38%', borderRadius: '50%',
-  background: 'radial-gradient(ellipse at 50% 40%, rgba(238,176,78,0.10), transparent 68%)',
-  animation: 'cb-lampon 2.4s ease-out both',
+  boxShadow: 'inset 0 0 80px 24px rgba(0,0,0,0.7), 0 20px 50px rgba(0,0,0,0.5)',
 };
 // The face-down pile each player has laid on the table. Tilted onto the felt's own plane
 // (perspective + rotateX) so the cards lie FLAT on the baize seen from above, not standing
