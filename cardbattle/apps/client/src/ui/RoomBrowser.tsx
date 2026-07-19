@@ -241,7 +241,7 @@ const heading: React.CSSProperties = {
 const sub: React.CSSProperties = { margin: '8px 0 0', fontSize: 15, color: C.dim, fontFamily: mono, letterSpacing: 0.5 };
 const cols: React.CSSProperties = { display: 'flex', gap: 22, width: '100%', alignItems: 'flex-start', flexWrap: 'wrap' };
 const panel: React.CSSProperties = {
-  flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', borderRadius: 10, overflow: 'hidden',
+  flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', borderRadius: 4, overflow: 'hidden',
   background: 'rgba(12,7,5,0.6)', border: `1px solid ${C.border}`,
 };
 const winBar: React.CSSProperties = {
@@ -257,7 +257,7 @@ const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column',
 const empty: React.CSSProperties = { color: C.faint, fontSize: 15, fontFamily: sans, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 14,
-  padding: '14px 16px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+  padding: '14px 16px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
   background: 'rgba(224,170,70,0.02)', border: `1px solid ${C.border}`, color: C.text, fontFamily: sans,
 };
 const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 };
@@ -265,7 +265,7 @@ const rMode: React.CSSProperties = { fontSize: 18, flexShrink: 0 };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
   flex: 1, padding: '13px 14px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
   transition: 'border-color .12s, background .12s, color .12s',
 };
 const visBtnOn: React.CSSProperties = {
@@ -274,14 +274,14 @@ const visBtnOn: React.CSSProperties = {
 const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: C.faint, fontSize: 13, lineHeight: 1.35, fontFamily: sans };
 const modeToggle: React.CSSProperties = {
   marginTop: 4, padding: '13px 16px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
   display: 'flex', alignItems: 'center', gap: 4,
   transition: 'border-color .12s, color .12s, background .12s',
 };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
-  borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', color: C.text, fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', color: C.text, fontFamily: sans,
   transition: 'border-color .12s, background .12s',
 };
 const modeCardOn: React.CSSProperties = {
@@ -295,18 +295,18 @@ const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 15, color: C.d
 const rGo: React.CSSProperties = { fontSize: 14, color: C.rare, fontWeight: 700, letterSpacing: 0.5, display: 'flex', alignItems: 'center' };
 const field: React.CSSProperties = {
   padding: '14px 16px', fontSize: 16, color: C.text, outline: 'none', letterSpacing: 0.5,
-  background: 'rgba(0,0,0,0.35)', border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: sans,
+  background: 'rgba(0,0,0,0.35)', border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: sans,
   transition: 'border-color .12s, background .12s',
 };
 const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  marginTop: 6, padding: '16px 20px', fontSize: 17, fontWeight: 800, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
-  border: 'none', borderRadius: 8, background: 'linear-gradient(180deg,#ffd77a,#c9922f)', fontFamily: sans,
+  marginTop: 6, padding: '16px 20px', fontSize: 17, fontWeight: 700, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
+  border: '1px solid #b98a2c', borderRadius: 4, background: '#cf9a2f', fontFamily: sans,
 };
 const ghost: React.CSSProperties = {
   padding: '15px 20px', fontSize: 15, fontWeight: 700, color: C.text, cursor: 'pointer', letterSpacing: 0.5,
-  border: `1px solid ${C.border}`, borderRadius: 8, background: 'rgba(224,170,70,0.03)', fontFamily: sans,
+  border: `1px solid ${C.border}`, borderRadius: 4, background: 'rgba(224,170,70,0.03)', fontFamily: sans,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 const sep: React.CSSProperties = {
@@ -318,12 +318,12 @@ const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
 const goldChip: React.CSSProperties = {
-  padding: '8px 16px', fontSize: 13, fontWeight: 800, color: '#ffe08a', cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 8, border: '1px solid #6a5620', fontFamily: sans,
-  background: 'linear-gradient(180deg, rgba(70,56,16,0.9), rgba(40,32,10,0.9))',
+  padding: '8px 16px', fontSize: 13, fontWeight: 700, color: '#e6cf96', cursor: 'pointer', letterSpacing: 0.5,
+  borderRadius: 4, border: '1px solid #5a4820', fontFamily: sans,
+  background: 'rgba(42,33,14,0.85)',
 };
 const logout: React.CSSProperties = {
   padding: '8px 14px', fontSize: 12.5, fontWeight: 700, letterSpacing: 0.5,
-  color: C.dim, cursor: 'pointer', borderRadius: 8, border: `1px solid ${C.border}`,
+  color: C.dim, cursor: 'pointer', borderRadius: 4, border: `1px solid ${C.border}`,
   background: 'rgba(10,12,9,0.85)', fontFamily: sans,
 };

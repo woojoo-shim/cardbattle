@@ -200,13 +200,13 @@ const overlay: React.CSSProperties = {
 };
 const modal: React.CSSProperties = {
   width: 'min(720px, 94vw)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  borderRadius: 18, background: 'linear-gradient(180deg, #1a1013 0%, #120b0d 55%, #0c0709 100%)',
-  border: `1px solid ${C.borderHi}`, color: C.text,
-  boxShadow: '0 40px 90px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,238,206,0.05)',
+  borderRadius: 4, background: '#150e10',
+  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a4762f', color: C.text,
+  boxShadow: '0 20px 44px rgba(0,0,0,0.55)',
 };
 const head: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
-  background: 'linear-gradient(180deg, rgba(126,38,62,0.12), transparent)',
+  background: 'rgba(126,38,62,0.06)',
 };
 const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
 const hdKicker: React.CSSProperties = {
@@ -214,14 +214,14 @@ const hdKicker: React.CSSProperties = {
 };
 const hd: React.CSSProperties = {
   margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10, 0 0 24px rgba(126,38,62,0.4)',
+  textShadow: '0 2px 0 #1a0f10',
 };
 const goldPill: React.CSSProperties = {
-  fontFamily: mono, fontSize: 15, fontWeight: 800, color: '#ffd75e', padding: '5px 12px', borderRadius: 999,
-  border: '1px solid #6a5620', background: 'rgba(60,48,12,0.5)',
+  fontFamily: mono, fontSize: 15, fontWeight: 700, color: '#e6cf96', padding: '5px 12px', borderRadius: 4,
+  border: '1px solid #5a4820', background: 'rgba(42,33,14,0.85)',
 };
 const closeBtn: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: 8, cursor: 'pointer', color: C.dim, fontSize: 16,
+  width: 34, height: 34, borderRadius: 4, cursor: 'pointer', color: C.dim, fontSize: 16,
   border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.04)',
 };
 const tabRow: React.CSSProperties = {
@@ -275,12 +275,12 @@ function effectPreviewBox(color: string): React.CSSProperties {
 const previewName: React.CSSProperties = { fontSize: 15, fontWeight: 800 };
 const equippedTag: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: C.you };
 const equipBtn: React.CSSProperties = {
-  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#141608', cursor: 'pointer', border: 'none',
-  borderRadius: 10, background: 'linear-gradient(180deg,#9fae6a,#6f7d3a)', boxShadow: '0 6px 16px rgba(143,157,79,0.3)',
+  padding: '10px 18px', fontSize: 14, fontWeight: 700, color: '#141608', cursor: 'pointer',
+  border: '1px solid #6f7d3a', borderRadius: 4, background: '#9fae6a',
 };
 const buyBtn: React.CSSProperties = {
-  padding: '10px 18px', fontSize: 14, fontWeight: 800, color: '#2a1e04', cursor: 'pointer', border: 'none',
-  borderRadius: 10, background: 'linear-gradient(180deg,#ffd75e,#f4a11a)', boxShadow: '0 6px 16px rgba(244,161,26,0.35)',
+  padding: '10px 18px', fontSize: 14, fontWeight: 700, color: '#2a1e04', cursor: 'pointer',
+  border: '1px solid #b98a2c', borderRadius: 4, background: '#cf9a2f',
 };
 const errLine: React.CSSProperties = { margin: '10px 20px 0', color: C.enemy, fontSize: 12.5, textAlign: 'center' };
 const grid: React.CSSProperties = {
@@ -289,7 +289,7 @@ const grid: React.CSSProperties = {
 function swatch(on: boolean, glow: string): React.CSSProperties {
   return {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', cursor: 'pointer',
-    borderRadius: 12, color: C.text, fontFamily: sans, minHeight: 66, justifyContent: 'center',
+    borderRadius: 4, color: C.text, fontFamily: sans, minHeight: 66, justifyContent: 'center',
     background: on ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
     border: on ? `2px solid ${C.you}` : `1px solid ${C.border}`,
     boxShadow: on ? `0 0 14px ${glow}` : 'none',

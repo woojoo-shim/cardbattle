@@ -163,36 +163,34 @@ const title: React.CSSProperties = {
 // A framed slab holding the room details.
 const panel: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
-  width: 'min(400px, 92vw)', padding: '22px 22px 24px', borderRadius: 16,
+  width: 'min(400px, 92vw)', padding: '22px 22px 24px', borderRadius: 4,
   background: 'rgba(12,7,5,0.6)',
   border: `1px solid ${C.border}`,
 };
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 999,
+  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px', borderRadius: 4,
   background: 'rgba(216,162,60,0.08)', border: '1px solid rgba(216,162,60,0.3)',
 };
 const modeBadgeIcon: React.CSSProperties = { fontSize: 18 };
-const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: '#e0b24d', letterSpacing: 1 };
+const modeBadgeName: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: '#e0b24d', letterSpacing: 1 };
 const modeBadgeTag: React.CSSProperties = { fontSize: 12, color: C.dim };
 const inviteBox: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8, width: '100%',
 };
 const codeBadge: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '10px 20px', borderRadius: 12,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '10px 20px', borderRadius: 4,
   background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
-  boxShadow: '0 0 24px rgba(216,162,60,0.2)',
 };
 const codeLabel: React.CSSProperties = { fontSize: 13, color: C.dim };
 const codeValue: React.CSSProperties = {
-  fontFamily: mono, fontSize: 26, fontWeight: 900, letterSpacing: 8,
-  color: C.rare, textShadow: '0 0 16px rgba(216,162,60,0.5)',
+  fontFamily: mono, fontSize: 26, fontWeight: 800, letterSpacing: 8, color: C.rare,
 };
 // Share-by-link button — dashed brass, warms on hover (reuses .cb-seat-add), copies the invite URL.
 const inviteBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100%',
   padding: '11px 18px', fontSize: 14, fontWeight: 700, letterSpacing: 0.4, cursor: 'pointer',
-  fontFamily: sans, color: C.rare, borderRadius: 12,
+  fontFamily: sans, color: C.rare, borderRadius: 4,
   border: '1px dashed rgba(216,162,60,0.45)', background: 'rgba(216,162,60,0.06)',
 };
 // The seating chart: a 2-column grid of every chair, filled portraits and open (dashed) invitations.
@@ -201,14 +199,14 @@ const seatGrid: React.CSSProperties = {
 };
 const seatCell: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
-  borderRadius: 11, textAlign: 'left',
-  background: 'linear-gradient(160deg, rgba(32,21,12,0.66), rgba(15,10,7,0.66))',
+  borderRadius: 4, textAlign: 'left',
+  background: 'rgba(26,17,10,0.66)',
   border: `1px solid ${C.border}`,
 };
-const seatMe: React.CSSProperties = { borderColor: C.magic, boxShadow: '0 0 16px rgba(111,160,140,0.32)' };
+const seatMe: React.CSSProperties = { borderColor: C.magic };
 const seatThumb: React.CSSProperties = {
-  width: 40, height: 40, borderRadius: 9, display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden',
-  background: 'linear-gradient(160deg,#211a12,#100b08)', border: '1px solid rgba(255,255,255,0.1)',
+  width: 40, height: 40, borderRadius: 4, display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden',
+  background: '#1a140d', border: '1px solid rgba(255,255,255,0.1)',
 };
 const seatText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 };
 const seatName: React.CSSProperties = {
@@ -218,42 +216,41 @@ const seatTag: React.CSSProperties = { fontFamily: mono, fontSize: 11, letterSpa
 // An open chair — dashed brass frame, ghost "+" thumb, tap to seat a bot.
 const emptySeat: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
-  borderRadius: 11, textAlign: 'left', cursor: 'pointer', fontFamily: sans,
+  borderRadius: 4, textAlign: 'left', cursor: 'pointer', fontFamily: sans,
   border: '1px dashed rgba(216,162,60,0.38)', background: 'rgba(216,162,60,0.03)',
 };
 const emptyPlus: React.CSSProperties = {
-  width: 40, height: 40, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 9,
+  width: 40, height: 40, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 4,
   fontSize: 24, fontWeight: 300, lineHeight: 1, color: C.rare,
   border: '1px dashed rgba(216,162,60,0.4)', background: 'rgba(216,162,60,0.05)',
 };
 const emptyText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 };
 const emptyLabel: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: C.rare, letterSpacing: 0.3 };
 const btn: React.CSSProperties = {
-  width: '100%', marginTop: 2, padding: '14px 34px', fontSize: 17, fontWeight: 800, color: '#2a1a06', cursor: 'pointer',
-  border: 'none', borderRadius: 12, fontFamily: sans,
-  background: 'linear-gradient(100deg, #ffd77a, #e0a83e 58%, #c9922f)',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+  width: '100%', marginTop: 2, padding: '14px 34px', fontSize: 17, fontWeight: 700, color: '#2a1a06', cursor: 'pointer',
+  border: '1px solid #b98a2c', borderRadius: 4, fontFamily: sans,
+  background: '#cf9a2f',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
-const btnReady: React.CSSProperties = { background: 'linear-gradient(90deg,#c9922f,#ffd77a)', color: '#2a1a06', boxShadow: '0 8px 24px rgba(216,162,60,0.4)' };
+const btnReady: React.CSSProperties = { background: '#e6b845', borderColor: '#cf9a2f', color: '#2a1a06' };
 const kickBtn: React.CSSProperties = {
   marginLeft: 'auto', width: 22, height: 22, display: 'grid', placeItems: 'center', flexShrink: 0,
   fontSize: 12, fontWeight: 800, color: '#ff9a9a', cursor: 'pointer', lineHeight: 1,
-  border: '1px solid rgba(255,120,120,0.35)', borderRadius: 6, background: 'rgba(255,80,80,0.12)',
+  border: '1px solid rgba(255,120,120,0.35)', borderRadius: 4, background: 'rgba(255,80,80,0.12)',
 };
 const fillBanner: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 10,
+  display: 'flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 4,
   fontSize: 13, color: '#f4ead1', width: '100%', justifyContent: 'center',
   background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
 };
 const fillDot: React.CSSProperties = {
   width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-  background: '#e6ad3e', boxShadow: '0 0 8px 1px rgba(230,173,62,0.7)',
+  background: '#e6ad3e',
 };
-const fillCount: React.CSSProperties = { color: C.rare, fontFamily: mono, fontWeight: 900, fontSize: 15 };
+const fillCount: React.CSSProperties = { color: C.rare, fontFamily: mono, fontWeight: 800, fontSize: 15 };
 const hint: React.CSSProperties = { margin: '2px 0 0', color: C.faint, fontSize: 13 };
 const backBtn: React.CSSProperties = {
   position: 'fixed', top: 16, left: 16, zIndex: 40,
   padding: '9px 16px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
-  borderRadius: 999, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
 };
