@@ -216,6 +216,19 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
     });
   };
 
+  // No-account entry: mint a throwaway local guest and drop straight into the arena. Carries no
+  // token, so joins seat the player as a guest (server onAuth returns username:null) — progress
+  // (gold, wins, cosmetics) simply doesn't persist. Lets a visitor play instantly before signing up.
+  const goGuest = () => {
+    if (busy) return;
+    playSfx('select');
+    onAuthed({
+      token: '', username: '', display: `손님${Math.floor(1000 + Math.random() * 9000)}`,
+      avatar, wins: 0, losses: 0, gold: 0,
+      owned: [], equippedBorder: '', equippedTitle: '', equippedEffect: '',
+    });
+  };
+
   return (
     <div style={gateWrap}>
       <InstallButton />
@@ -321,6 +334,8 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
           </button>
         </div>
         {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+
+        <button type="button" style={guestLink} onClick={goGuest} disabled={busy}>계정 없이 게스트로 둘러보기</button>
 
         {/* BOTTOM STUB — the flavour tear-off */}
         <div style={perf} aria-hidden />
@@ -552,4 +567,9 @@ const hint: React.CSSProperties = {
 };
 const errText: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.enemy, fontFamily: sans, letterSpacing: 0.2,
+};
+const guestLink: React.CSSProperties = {
+  margin: '10px 0 0', padding: '6px 4px', fontSize: 12.5, fontFamily: sans, color: TICKET.dim,
+  background: 'transparent', border: 'none', cursor: 'pointer',
+  textDecoration: 'underline', textUnderlineOffset: 3, letterSpacing: 0.2,
 };
