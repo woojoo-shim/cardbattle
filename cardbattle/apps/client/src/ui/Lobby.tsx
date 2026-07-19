@@ -50,8 +50,6 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
 
   return (
     <div style={wrap}>
-      <div style={vignette} aria-hidden />
-
       {onExit && (
         <button style={backBtn} onClick={() => { playSfx('back'); onExit(); }} title="방을 나가고 목록으로">
           ←&nbsp;나가기
@@ -59,7 +57,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
       )}
 
       <div style={content} className="cb-gate-in">
-        <span style={kicker}>◈&nbsp;&nbsp;대기실 · WAITING ROOM&nbsp;&nbsp;◈</span>
+        <span style={kicker}>대기실 · WAITING ROOM</span>
         <h1 style={title}>{ui.title || '심연의 투기장'}</h1>
 
         <div style={panel}>
@@ -145,19 +143,10 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
 }
 
 const wrap: React.CSSProperties = {
-  position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
+  position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   fontFamily: sans, color: C.text,
-  // The same oxblood back-room haze as the main menu, so the flow feels of one place.
-  background:
-    'radial-gradient(58% 42% at 50% 20%, rgba(126,38,62,0.20), transparent 68%),' +
-    'radial-gradient(70% 50% at 50% 110%, rgba(216,162,60,0.07), transparent 62%),' +
-    'linear-gradient(180deg, #140b0e 0%, #0d070a 52%, #060305 100%),' +
-    '#060305',
-};
-const vignette: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-  background: 'radial-gradient(120% 108% at 50% 42%, transparent 46%, rgba(4,3,5,0.9) 100%)',
+  background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
 };
 const content: React.CSSProperties = {
   position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -169,16 +158,14 @@ const kicker: React.CSSProperties = {
 const title: React.CSSProperties = {
   margin: '2px 0 4px', fontFamily: serif, fontWeight: 700, letterSpacing: 'clamp(2px, 0.8vw, 8px)',
   fontSize: 'clamp(34px, 6vw, 64px)', color: '#f3eee6',
-  textShadow: '0 3px 0 #1a0f10, 0 10px 30px rgba(0,0,0,0.7), 0 0 40px rgba(126,38,62,0.4)',
+  textShadow: '0 2px 0 #1a0f10, 0 8px 24px rgba(0,0,0,0.6)',
 };
-// A framed slab holding the room details — the felted table where the deal is set up.
+// A framed slab holding the room details.
 const panel: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
   width: 'min(400px, 92vw)', padding: '22px 22px 24px', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(26,16,19,0.92), rgba(14,9,11,0.92))',
+  background: 'rgba(12,7,5,0.6)',
   border: `1px solid ${C.border}`,
-  boxShadow: '0 30px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04)',
-  backdropFilter: 'blur(6px)',
 };
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
