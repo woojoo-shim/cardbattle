@@ -43,6 +43,13 @@ export async function quickPlay(name: string, avatar: string): Promise<BattleCon
   return wrap(room);
 }
 
+/** Guided practice: always a fresh PRIVATE coach-mode room (never joins a live game), pre-seeded
+ * with one bot and a limited beginner card pool, so the learn-by-playing tutorial stays simple. */
+export async function startCoachGame(name: string, avatar: string): Promise<BattleConnection> {
+  const room = await new Client(endpoint).create('battle', { name, avatar, mode: 'coach', private: true, title: '연습 대전', ...auth() });
+  return wrap(room);
+}
+
 /** Host a brand-new named room; the returned room carries its own code (in state).
  * A private room is hidden from the browser list — it's joinable only via its code. */
 export async function createRoom(name: string, title: string, avatar: string, mode: GameModeId, isPrivate: boolean): Promise<BattleConnection> {

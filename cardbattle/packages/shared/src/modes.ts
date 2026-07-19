@@ -3,7 +3,7 @@ import {
   START_MANA, MANA_MAX, MANA_REGEN_BASE, MANA_REGEN_STEP, MANA_REGEN_CAP,
 } from './constants.js';
 
-export type GameModeId = 'standard' | 'blitz' | 'chaos' | 'tank' | 'casino';
+export type GameModeId = 'standard' | 'blitz' | 'chaos' | 'tank' | 'casino' | 'coach';
 
 /** Every tunable that a game mode can override. The pure engine reads these off
  *  GameState.rules instead of the module constants, so a new mode is data-only. */
@@ -22,6 +22,9 @@ export interface RuleSet {
   manaRegenCap: number;
   /** '도박장' mode: every attack is forced into a double-or-nothing coin flip. */
   forceGamble: boolean;
+  /** When set, the draw pool is restricted to these card ids (used by the coach/tutorial so a
+   *  newcomer only ever sees a small, easy-to-grasp set of cards). Undefined = full deck. */
+  cardPool?: readonly string[];
 }
 
 export interface GameMode {
@@ -95,10 +98,24 @@ export const GAME_MODES: Record<GameModeId, GameMode> = {
       startHp: 44, startMana: 6, forceGamble: true,
     },
   },
+  // Learn-by-playing tutorial mode. Not shown in the room browser (filtered out of MODE_LIST);
+  // reachable only via the 플레이 방법 coach flow. A tiny 5-card pool — two simple targeted
+  // attacks, one AoE, one heal, one shield — so a first-timer grasps every card at a glance.
+  coach: {
+    id: 'coach', name: '연습', icon: '🎓',
+    tagline: '기본 카드만으로 배우는 연습 대전',
+    desc: '기본 카드 몇 장만 나오는 튜토리얼 전용 대전. 규칙을 익히기 위한 부드러운 설정.',
+    rules: {
+      ...DEFAULT_RULES,
+      turnSeconds: 60,
+      cardPool: ['dagger', 'sword', 'bomb', 'potion', 'shield'],
+    },
+  },
 };
 
 export const DEFAULT_MODE: GameModeId = 'standard';
-export const MODE_LIST: GameMode[] = Object.values(GAME_MODES);
+// The coach/tutorial mode is deliberately excluded — it's not a mode players pick in the browser.
+export const MODE_LIST: GameMode[] = Object.values(GAME_MODES).filter((m) => m.id !== 'coach');
 
 /** Coerce a client-supplied mode id to a known mode (falls back to standard). */
 export function resolveMode(id: unknown): GameMode {

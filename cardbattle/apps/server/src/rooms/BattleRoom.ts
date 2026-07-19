@@ -68,6 +68,16 @@ export class BattleRoom extends Room<BattleState> {
     this.state.code = makeCode();
     this.state.mode = mode;
     this.state.title = (options.title ?? '').slice(0, 24) || `${options.name ?? '누군가'}의 방`;
+
+    // Coach/tutorial rooms are solo practice: seed one bot up front so the newcomer only has to
+    // ready up (no lobby fumbling), then drop straight into the guided match against it.
+    if (mode === 'coach') {
+      const id = `bot-${this.botCounter++}`;
+      this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, id, '연습 상대', BOT_AVATAR));
+      this.bots.add(id);
+      this.ready.set(id, true);
+    }
+
     this.refreshLobby();
 
     this.onMessage('setReady', (client, msg: { ready: boolean }) => {

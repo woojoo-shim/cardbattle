@@ -25,7 +25,12 @@ export function initGame(seats: { id: string; name: string }[], mode: GameModeId
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
 function drawCard(state: GameState, player: PlayerState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   if (player.hand.length >= state.rules.handCap) return; // a hand never overflows past the cap
-  const pick = weightedPick(state.rngSeed, ALL_DEFS, (d) => d.drawWeight);
+  // The coach/tutorial restricts the deck to a small curated pool; every other mode uses the full deck.
+  const pool = state.rules.cardPool
+    ? ALL_DEFS.filter((d) => state.rules.cardPool!.includes(d.id))
+    : ALL_DEFS;
+  const src = pool.length ? pool : ALL_DEFS; // safety: an empty/misconfigured pool falls back to the full deck
+  const pick = weightedPick(state.rngSeed, src, (d) => d.drawWeight);
   state.rngSeed = pick.seed;
   const inst = { id: ctx.nextCardId(), defId: pick.item.id };
   player.hand.push(inst);

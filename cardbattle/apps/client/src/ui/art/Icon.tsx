@@ -254,7 +254,7 @@ const GLYPHS: Record<IconName, () => JSX.Element> = {
 
 /** Which glyph stands in for each game mode (replaces the emoji in modes.ts data). */
 export const MODE_ICON: Record<GameModeId, IconName> = {
-  standard: 'swords', blitz: 'bolt', chaos: 'swirl', tank: 'shield', casino: 'dice',
+  standard: 'swords', blitz: 'bolt', chaos: 'swirl', tank: 'shield', casino: 'dice', coach: 'card',
 };
 
 /** Which glyph stands in for each card-play burst effect (replaces cosmetics.ts glyphs).

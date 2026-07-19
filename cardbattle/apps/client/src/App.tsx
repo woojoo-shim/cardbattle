@@ -5,7 +5,7 @@ import { Battle } from './ui/Battle.js';
 import { RoomBrowser } from './ui/RoomBrowser.js';
 import { MainMenu } from './ui/MainMenu.js';
 import { Splash } from './ui/Splash.js';
-import { quickPlay, reconnect, findRoomByCode, joinRoomById } from './net/client.js';
+import { quickPlay, startCoachGame, reconnect, findRoomByCode, joinRoomById } from './net/client.js';
 import { InstallButton, promptInstall } from './ui/InstallButton.js';
 import { C, mono, sans } from './ui/theme.js';
 import { BrandMark } from './ui/BrandMark.js';
@@ -100,7 +100,7 @@ export function App() {
           account={account}
           onAccount={setAccount}
           onStart={() => { setCoach(false); setConnect(() => () => quickPlay(account.display, account.avatar)); }}
-          onStartCoach={() => { setCoach(true); setConnect(() => () => quickPlay(account.display, account.avatar)); }}
+          onStartCoach={() => { setCoach(true); setConnect(() => () => startCoachGame(account.display, account.avatar)); }}
           onMultiplayer={() => setView('browser')}
           onLogout={() => { clearToken(); setAccount(null); }}
         />
