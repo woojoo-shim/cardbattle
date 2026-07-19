@@ -210,14 +210,13 @@ const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
 const goldChip: React.CSSProperties = {
-  padding: '7px 14px', fontSize: 13, fontWeight: 800, color: '#ffe08a', cursor: 'pointer',
-  borderRadius: 999, border: '1px solid #6a5620', fontFamily: sans,
-  background: 'linear-gradient(180deg, rgba(70,56,16,0.9), rgba(40,32,10,0.9))',
-  boxShadow: '0 6px 16px rgba(180,140,30,0.25)',
+  padding: '7px 14px', fontSize: 13, fontWeight: 700, color: '#e6cf96', cursor: 'pointer',
+  borderRadius: 4, border: '1px solid #5a4820', fontFamily: sans,
+  background: 'rgba(42,33,14,0.85)',
 };
 const nameChip: React.CSSProperties = {
   padding: '7px 14px', fontSize: 13, fontWeight: 700, color: C.dim,
-  borderRadius: 999, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
 };
 
 const creditsBackdrop: React.CSSProperties = {
@@ -225,20 +224,19 @@ const creditsBackdrop: React.CSSProperties = {
   background: 'rgba(4,3,5,0.72)', backdropFilter: 'blur(4px)',
 };
 const creditsCard: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 34px',
-  borderRadius: 16, width: 'min(420px, 90vw)', textAlign: 'center',
-  background: 'linear-gradient(180deg, #1a1013, #100a0c)', border: `1px solid ${C.border}`,
-  boxShadow: '0 30px 70px rgba(0,0,0,0.6)',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '30px 34px',
+  borderRadius: 4, width: 'min(420px, 90vw)', textAlign: 'center',
+  background: '#150e10', border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
+  boxShadow: '0 18px 40px rgba(0,0,0,0.5)',
 };
-const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 34, fontWeight: 700, margin: '2px 0 8px', color: '#f3eee6', letterSpacing: 2 };
+const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 32, fontWeight: 700, margin: '2px 0 8px', color: '#f3eee6', letterSpacing: 1 };
 const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
-const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.4 };
+const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.5 };
 const creditsClose: React.CSSProperties = {
-  marginTop: 12, padding: '10px 24px', fontSize: 14, fontWeight: 800, color: '#f4e9cb', cursor: 'pointer',
-  border: 'none', borderRadius: 10, fontFamily: sans,
-  background: 'linear-gradient(100deg, #b8492f, #9c3b28 56%, #7f2f1f)', boxShadow: '0 6px 18px rgba(0,0,0,0.5)',
+  marginTop: 14, padding: '10px 24px', fontSize: 14, fontWeight: 700, color: '#f4e9cb', cursor: 'pointer',
+  border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans, background: '#9c3b28',
 };
 const inviteGhost: React.CSSProperties = {
   marginTop: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
-  border: `1px solid ${C.border}`, borderRadius: 10, fontFamily: sans, background: 'transparent',
+  border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: sans, background: 'transparent',
 };
