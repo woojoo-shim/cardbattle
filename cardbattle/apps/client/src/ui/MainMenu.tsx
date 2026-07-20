@@ -58,9 +58,6 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
 
   return (
     <div style={wrap}>
-      {/* a fanned hand of real cards on the right — the menu reads as a CARD game at a glance */}
-      <HeroFan />
-
       {/* account chip, top-right */}
       <div style={topBar}>
         <MuteButton />
@@ -106,6 +103,9 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
         </nav>
       </div>
 
+      {/* a fanned hand of real cards filling the right half — the menu reads as a CARD game at a glance */}
+      <HeroFan />
+
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
       {inviteOpen && <CoachInvite onClose={() => setInviteOpen(false)} onStart={() => { setInviteOpen(false); onStartCoach(); }} />}
@@ -126,9 +126,9 @@ function HeroFan() {
       <div style={fanFloat} className="cb-hero-float">
         {FAN_CARDS.map((id, i) => {
           const off = i - mid;
-          const rot = off * 12;
-          const x = off * 72;
-          const y = Math.abs(off) * 26 - 4; // arc: outer cards dip lower
+          const rot = off * 13;
+          const x = off * 94;
+          const y = Math.abs(off) * 34 - 6; // arc: outer cards dip lower
           return (
             <div
               key={id}
@@ -138,7 +138,7 @@ function HeroFan() {
                 zIndex: 10 - Math.abs(off),
               }}
             >
-              <CardArt id={id} size={132} />
+              <CardArt id={id} size={170} />
             </div>
           );
         })}
@@ -194,17 +194,20 @@ function Credits({ onClose }: { onClose: () => void }) {
   );
 }
 
-// A clean, flat dark backdrop — no back-room diorama, no falling cards. Just the title + menu.
+// A clean, flat dark backdrop — no back-room diorama, no falling cards. The title + menu column sits
+// on the left, the hero card fan fills the right, and the two are pushed to opposite edges so the
+// whole width is in play instead of everything hugging the left margin.
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
-  display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontFamily: sans, color: C.text,
-  padding: '0 clamp(28px, 8vw, 120px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(24px, 5vw, 90px)',
+  fontFamily: sans, color: C.text,
+  padding: '0 clamp(28px, 7vw, 130px)',
   background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
 };
 
 const content: React.CSSProperties = {
-  position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-  textAlign: 'left',
+  position: 'relative', zIndex: 2, flex: '0 1 auto', maxWidth: 660,
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left',
 };
 const kicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 5, color: C.faint, textTransform: 'uppercase',
@@ -250,19 +253,21 @@ const flourishGem: React.CSSProperties = {
   fontSize: 10, color: '#e0a53c', lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(224,165,60,0.5))',
 };
 
-// The hero card fan, anchored to the right edge and vertically centred (translateY on this wrapper,
-// so the inner float animation's transform doesn't clobber the centring).
+// The hero card fan — an in-flow right column (space-between pushes it to the right edge; the wrap's
+// alignItems:center handles vertical centring). Grid-centres the float stage so the fan fills the
+// right half of the screen instead of floating as a small badge in the corner.
 const fanPos: React.CSSProperties = {
-  position: 'absolute', right: 'clamp(-70px, 4vw, 90px)', top: '50%', transform: 'translateY(-50%)',
-  zIndex: 1, pointerEvents: 'none',
+  position: 'relative', flex: '0 0 auto', zIndex: 1, pointerEvents: 'none',
+  display: 'grid', placeItems: 'center',
 };
 const fanGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 520, height: 520, transform: 'translate(-50%, -50%)',
-  borderRadius: '50%', filter: 'blur(20px)',
-  background: 'radial-gradient(circle, rgba(224,165,60,0.16), rgba(150,44,32,0.08) 46%, transparent 72%)',
+  position: 'absolute', left: '50%', top: '50%', width: 'clamp(520px, 46vw, 760px)', height: 'clamp(520px, 46vw, 760px)',
+  transform: 'translate(-50%, -50%)',
+  borderRadius: '50%', filter: 'blur(24px)',
+  background: 'radial-gradient(circle, rgba(224,165,60,0.18), rgba(150,44,32,0.09) 46%, transparent 72%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
-const fanFloat: React.CSSProperties = { position: 'relative', width: 300, height: 380 };
+const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(300px, 34vw, 460px)', height: 'clamp(380px, 40vw, 540px)' };
 const fanCard: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%',
   display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
