@@ -58,6 +58,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
 
   return (
     <div style={wrap}>
+      <style>{heroCss}</style>
       {/* account chip, top-right */}
       <div style={topBar}>
         <MuteButton />
@@ -121,14 +122,14 @@ const FAN_CARDS = ['snipe', 'shield', 'bomb', 'sword', 'potion'] as const;
 function HeroFan() {
   const mid = (FAN_CARDS.length - 1) / 2;
   return (
-    <div style={fanPos} aria-hidden>
+    <div style={fanPos} className="cb-hero-fan" aria-hidden>
       <div style={fanGlow} />
       <div style={fanFloat} className="cb-hero-float">
         {FAN_CARDS.map((id, i) => {
           const off = i - mid;
           const rot = off * 13;
-          const x = off * 94;
-          const y = Math.abs(off) * 34 - 6; // arc: outer cards dip lower
+          const x = off * 112;
+          const y = Math.abs(off) * 42 - 8; // arc: outer cards dip lower
           return (
             <div
               key={id}
@@ -138,7 +139,7 @@ function HeroFan() {
                 zIndex: 10 - Math.abs(off),
               }}
             >
-              <CardArt id={id} size={170} />
+              <CardArt id={id} size={216} />
             </div>
           );
         })}
@@ -199,7 +200,7 @@ function Credits({ onClose }: { onClose: () => void }) {
 // whole width is in play instead of everything hugging the left margin.
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(24px, 5vw, 90px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 'clamp(20px, 4vw, 100px)',
   fontFamily: sans, color: C.text,
   padding: '0 clamp(28px, 7vw, 130px)',
   background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
@@ -257,17 +258,20 @@ const flourishGem: React.CSSProperties = {
 // alignItems:center handles vertical centring). Grid-centres the float stage so the fan fills the
 // right half of the screen instead of floating as a small badge in the corner.
 const fanPos: React.CSSProperties = {
-  position: 'relative', flex: '0 0 auto', zIndex: 1, pointerEvents: 'none',
+  // flex:1 so the fan claims ALL the space to the right of the title column and centres itself in it —
+  // the card fan lands in the middle of the previously-empty right region rather than jammed against
+  // the right edge (space-between) or leaving a big gap on the far right (flex-start).
+  position: 'relative', flex: '1 1 0', minWidth: 0, zIndex: 1, pointerEvents: 'none',
   display: 'grid', placeItems: 'center',
 };
 const fanGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 'clamp(520px, 46vw, 760px)', height: 'clamp(520px, 46vw, 760px)',
+  position: 'absolute', left: '50%', top: '50%', width: 'clamp(560px, 52vw, 840px)', height: 'clamp(560px, 52vw, 840px)',
   transform: 'translate(-50%, -50%)',
-  borderRadius: '50%', filter: 'blur(24px)',
+  borderRadius: '50%', filter: 'blur(26px)',
   background: 'radial-gradient(circle, rgba(224,165,60,0.18), rgba(150,44,32,0.09) 46%, transparent 72%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
-const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(300px, 34vw, 460px)', height: 'clamp(380px, 40vw, 540px)' };
+const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(260px, 22vw, 340px)', height: 'clamp(420px, 44vw, 600px)' };
 const fanCard: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%',
   display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
@@ -275,6 +279,16 @@ const fanCard: React.CSSProperties = {
   border: '1px solid rgba(120,96,56,0.55)',
   boxShadow: '0 22px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,225,170,0.12)',
 };
+// The cards are a fixed pixel size (CardArt size is an SVG width prop, not CSS-clampable), so the
+// big fan that looks right on a wide 2000px screen overflows / overlaps the title on narrower
+// desktops. Scale the whole fan DOWN in width buckets — the scale rides on fanPos (no inline
+// transform there) so it composes cleanly with the fanFloat child's cb-hero-float idle animation.
+const heroCss = `
+.cb-hero-fan { transform-origin: center center; }
+@media (max-width: 1600px) { .cb-hero-fan { transform: scale(0.85); } }
+@media (max-width: 1360px) { .cb-hero-fan { transform: scale(0.7); } }
+@media (max-width: 1150px) { .cb-hero-fan { transform: scale(0.58); } }
+`;
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
   marginTop: 12, textTransform: 'uppercase',
