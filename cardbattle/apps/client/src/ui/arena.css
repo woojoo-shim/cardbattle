@@ -318,6 +318,12 @@
   50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.08); }
 }
 .cb-gate-glow { animation: cb-gate-glow 6.5s ease-in-out infinite; }
+/* The battle light shaft over the table breathes and sways as the firelight flickers. */
+@keyframes cb-batt-shaft {
+  0%, 100% { opacity: 0.7;  transform: translateX(-50%) skewX(-2.4deg); }
+  50%      { opacity: 1;    transform: translateX(-50%) skewX(2.4deg); }
+}
+.cb-batt-shaft { animation: cb-batt-shaft 9s ease-in-out infinite; }
 /* Newest combat-log line slides in from the left and fades up as it's appended. */
 @keyframes cb-log-line {
   0%   { transform: translateX(-14px); opacity: 0; }

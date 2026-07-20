@@ -296,7 +296,10 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
 function SceneLife() {
   return (
     <div style={lifeWrap} aria-hidden>
+      <div style={coolRim} />
+      <div style={lightShaft} className="cb-batt-shaft" />
       <div style={keyBreath} />
+      <div style={floorPool} />
       {MOTES.map((m, i) => (
         <span
           key={i}
@@ -332,8 +335,29 @@ const lifeWrap: React.CSSProperties = {
 const keyBreath: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '43%', width: '58%', height: '46%',
   borderRadius: '50%', filter: 'blur(46px)',
-  background: 'radial-gradient(ellipse at 50% 45%, rgba(230,172,84,0.14), transparent 66%)',
+  background: 'radial-gradient(ellipse at 50% 45%, rgba(238,178,88,0.18), transparent 66%)',
   animation: 'cb-breathe 7.5s ease-in-out infinite',
+};
+// A cool dusty-plum wash raking down the far wall — the cold counterpoint that makes the warm
+// firelight read as colour, not just brightness.
+const coolRim: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-6%', width: '120%', height: '54%',
+  transform: 'translateX(-50%)', borderRadius: '50%', filter: 'blur(60px)',
+  background: 'radial-gradient(ellipse at 50% 30%, rgba(96,64,116,0.16), transparent 64%)',
+};
+// A tall cone of warm light falling from the unseen ceiling onto the table — breathes and sways.
+const lightShaft: React.CSSProperties = {
+  position: 'absolute', top: '-18%', left: '50%', width: 'min(640px, 62vw)', height: '112%',
+  transform: 'translateX(-50%)',
+  clipPath: 'polygon(40% 0%, 60% 0%, 84% 100%, 16% 100%)',
+  background: 'linear-gradient(180deg, rgba(244,190,96,0.20) 0%, rgba(228,168,72,0.08) 44%, transparent 80%)',
+  filter: 'blur(7px)',
+};
+// A warm pool of firelight blooming off the floor beneath the table.
+const floorPool: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '-8%', width: '80%', height: '40%',
+  transform: 'translateX(-50%)', borderRadius: '50%', filter: 'blur(52px)',
+  background: 'radial-gradient(ellipse at 50% 60%, rgba(198,86,48,0.18), transparent 68%)',
 };
 const mote: React.CSSProperties = {
   position: 'absolute', borderRadius: '50%',
@@ -346,10 +370,17 @@ const mote: React.CSSProperties = {
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
+  // Painted like a candlelit fighting pit: a hot amber core pools on the table, an oxblood halo
+  // bleeds out around it, a warm burgundy glow rises off the floor, and a dusty plum shadow washes
+  // the far wall up top for cool/warm colour contrast. A vignette pulls the corners to black. This
+  // is layered PIGMENT — muted printed tones, no neon — so the board reads coloured, not grey.
   background:
-    'radial-gradient(56% 42% at 50% 43%, rgba(230,170,80,0.11), transparent 66%),' +  // warm key light on the table
-    'radial-gradient(80% 72% at 50% 46%, transparent 52%, rgba(0,0,0,0.55) 100%),' +  // vignette frames the corners
-    'linear-gradient(180deg, #140b0e 0%, #0a0609 58%, #050205 100%)',
+    'radial-gradient(44% 32% at 50% 42%, rgba(242,184,94,0.18), transparent 60%),' +   // hot amber core on the table
+    'radial-gradient(72% 58% at 50% 44%, rgba(158,58,40,0.16), transparent 70%),' +    // oxblood halo around it
+    'radial-gradient(118% 84% at 50% 4%, rgba(74,48,86,0.14), transparent 58%),' +     // dusty plum wash up the far wall
+    'radial-gradient(92% 78% at 50% 110%, rgba(132,44,32,0.18), transparent 60%),' +   // warm burgundy floor glow
+    'radial-gradient(86% 80% at 50% 46%, transparent 46%, rgba(0,0,0,0.62) 100%),' +   // vignette frames the corners
+    'linear-gradient(180deg, #1c1016 0%, #0d0709 56%, #050205 100%)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
