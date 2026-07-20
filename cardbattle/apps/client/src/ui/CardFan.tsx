@@ -202,12 +202,15 @@ const card: React.CSSProperties = {
   // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
   width: 'clamp(92px, 9vw, 132px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
-  // Layered "cardstock" material: a lit embossed top edge, a fine woven cross-hatch grain,
-  // then the rarity-neutral body. Pure CSS — no image, no extra DOM per card.
+  // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
+  // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the
+  // rarity-neutral body. Pure CSS — no image, no extra DOM per card.
   background: [
-    'linear-gradient(180deg, rgba(255,255,255,0.055), transparent 22%)',
-    'repeating-linear-gradient(45deg, rgba(255,255,255,0.014) 0 1.5px, transparent 1.5px 3.5px)',
-    'repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0 1.5px, transparent 1.5px 3.5px)',
+    'linear-gradient(180deg, rgba(255,238,208,0.07), transparent 20%)',                 // warm lit top edge
+    'radial-gradient(70% 46% at 32% 10%, rgba(226,182,112,0.06), transparent 60%)',      // faint warm bloom, off-centre = hand-made feel
+    'radial-gradient(120% 104% at 50% 46%, transparent 55%, rgba(0,0,0,0.44) 100%)',     // aged edge vignette — corners darken like a handled card
+    'repeating-linear-gradient(45deg, rgba(255,238,208,0.02) 0 1.5px, transparent 1.5px 3.5px)',  // warm woven thread
+    'repeating-linear-gradient(-45deg, rgba(0,0,0,0.07) 0 1.5px, transparent 1.5px 3.5px)',        // cross-hatch shadow
     `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
   ].join(','),
   border: `1px solid ${C.border}`,
@@ -231,6 +234,7 @@ const artWindow: React.CSSProperties = {
   position: 'relative', width: '84%', aspectRatio: '1', marginTop: 2, borderRadius: 10,
   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   background: [
+    'radial-gradient(ellipse 80% 40% at 50% 6%, rgba(240,206,150,0.10), transparent 62%)',  // warm rim catch-light at the top of the well
     'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px)',
     'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
   ].join(','),
