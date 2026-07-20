@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
 import { Icon } from './art/Icon.js';
+import { CardArt } from './art/CardArt.js';
 import { C, mono, sans } from './theme.js';
 import { playSfx } from '../audio/sfx.js';
 import { MuteButton } from './MuteButton.js';
@@ -57,6 +58,9 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
 
   return (
     <div style={wrap}>
+      {/* a fanned hand of real cards on the right — the menu reads as a CARD game at a glance */}
+      <HeroFan />
+
       {/* account chip, top-right */}
       <div style={topBar}>
         <MuteButton />
@@ -105,6 +109,40 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
       {inviteOpen && <CoachInvite onClose={() => setInviteOpen(false)} onStart={() => { setInviteOpen(false); onStartCoach(); }} />}
+    </div>
+  );
+}
+
+// A held hand of real cards fanned out on the right of the menu — the single strongest signal that
+// this is a CARD game. Five card faces arc around a pivot (middle card highest, outers splay & dip),
+// each in a dark cardstock frame with a warm rim. A soft candlelit glow pools behind the fan and the
+// whole spread drifts on a slow idle float (cb-hero-float). Purely decorative — aria-hidden.
+const FAN_CARDS = ['snipe', 'shield', 'bomb', 'sword', 'potion'] as const;
+function HeroFan() {
+  const mid = (FAN_CARDS.length - 1) / 2;
+  return (
+    <div style={fanPos} aria-hidden>
+      <div style={fanGlow} />
+      <div style={fanFloat} className="cb-hero-float">
+        {FAN_CARDS.map((id, i) => {
+          const off = i - mid;
+          const rot = off * 12;
+          const x = off * 72;
+          const y = Math.abs(off) * 26 - 4; // arc: outer cards dip lower
+          return (
+            <div
+              key={id}
+              style={{
+                ...fanCard,
+                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`,
+                zIndex: 10 - Math.abs(off),
+              }}
+            >
+              <CardArt id={id} size={132} />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -210,6 +248,27 @@ const flourishRule: React.CSSProperties = {
 };
 const flourishGem: React.CSSProperties = {
   fontSize: 10, color: '#e0a53c', lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(224,165,60,0.5))',
+};
+
+// The hero card fan, anchored to the right edge and vertically centred (translateY on this wrapper,
+// so the inner float animation's transform doesn't clobber the centring).
+const fanPos: React.CSSProperties = {
+  position: 'absolute', right: 'clamp(-70px, 4vw, 90px)', top: '50%', transform: 'translateY(-50%)',
+  zIndex: 1, pointerEvents: 'none',
+};
+const fanGlow: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: 520, height: 520, transform: 'translate(-50%, -50%)',
+  borderRadius: '50%', filter: 'blur(20px)',
+  background: 'radial-gradient(circle, rgba(224,165,60,0.16), rgba(150,44,32,0.08) 46%, transparent 72%)',
+};
+// A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
+const fanFloat: React.CSSProperties = { position: 'relative', width: 300, height: 380 };
+const fanCard: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%',
+  display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
+  background: 'linear-gradient(180deg, #2a1f13, #1c140b)',
+  border: '1px solid rgba(120,96,56,0.55)',
+  boxShadow: '0 22px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,225,170,0.12)',
 };
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
