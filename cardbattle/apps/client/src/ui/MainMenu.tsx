@@ -69,9 +69,14 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
       <div style={content} className="cb-gate-in">
         <span style={kicker}>심연의 투기장 · 온라인 카드 배틀</span>
         <h1 style={titleWrap}>
-          <span style={titleLine}>ABYSSAL</span>
-          <span style={{ ...titleLine, ...titleLine2 }}>ARENA</span>
+          <LogoLine text="ABYSSAL" style={titleLine} />
+          <LogoLine text="ARENA" style={{ ...titleLine, ...titleLine2 }} />
         </h1>
+        <div style={flourish} aria-hidden>
+          <span style={flourishRule} />
+          <span style={flourishGem}>◆</span>
+          <span style={flourishRule} />
+        </div>
         <span style={byline}>A CARD BATTLE IN THE BACK ROOM</span>
 
         <nav style={menu}>
@@ -101,6 +106,18 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
       {inviteOpen && <CoachInvite onClose={() => setInviteOpen(false)} onStart={() => { setInviteOpen(false); onStartCoach(); }} />}
     </div>
+  );
+}
+
+// One line of the wordmark, rendered as engraved gold leaf: a base gold-bevel span with an oxblood
+// drop-shadow + amber underglow, plus an identical overlay span carrying only a bright light band that
+// sweeps across the letters (mix-blend screen) — the specular glint that sells struck metal.
+function LogoLine({ text, style }: { text: string; style: React.CSSProperties }) {
+  return (
+    <span style={{ position: 'relative', display: 'inline-block' }}>
+      <span style={style}>{text}</span>
+      <span aria-hidden style={{ ...style, ...logoSheen }} className="cb-logo-sheen">{text}</span>
+    </span>
   );
 }
 
@@ -160,11 +177,39 @@ const titleWrap: React.CSSProperties = {
 };
 const titleLine: React.CSSProperties = {
   display: 'block', fontFamily: serif, fontWeight: 700, lineHeight: 0.92, letterSpacing: 'clamp(4px, 1.2vw, 12px)',
-  fontSize: 'clamp(50px, 11vw, 118px)', color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10, 0 8px 24px rgba(0,0,0,0.6)',
+  fontSize: 'clamp(50px, 11vw, 118px)',
+  // Engraved gold leaf: a vertical bevel (lit crown → dark foot) clipped to the letterforms.
+  background: 'linear-gradient(178deg, #fbf1d0 0%, #ecd07d 30%, #cf9a34 60%, #8f6a24 88%, #6f5220 100%)',
+  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
+  // drop-shadow (not text-shadow) follows the visible gold pixels: a hard oxblood emboss lip,
+  // a soft cast shadow for lift, and a warm candlelit halo so the metal glows in the dark room.
+  filter:
+    'drop-shadow(0 2px 0 #1a0f10) drop-shadow(0 6px 20px rgba(0,0,0,0.62)) drop-shadow(0 0 26px rgba(224,165,60,0.30))',
 };
 const titleLine2: React.CSSProperties = {
-  color: '#e7d8c6', letterSpacing: 'clamp(8px, 2.4vw, 26px)', marginTop: '-0.06em',
+  letterSpacing: 'clamp(8px, 2.4vw, 26px)', marginTop: '-0.06em',
+};
+// Overlay twin of a logo line: only a narrow light band is opaque, so a specular glint travels
+// across the letters. No drop-shadow (it would ghost the whole silhouette); screen-blends onto gold.
+const logoSheen: React.CSSProperties = {
+  position: 'absolute', left: 0, top: 0, pointerEvents: 'none',
+  background:
+    'linear-gradient(105deg, transparent 40%, rgba(255,246,220,0.55) 47%, rgba(255,255,255,0.95) 50%, rgba(255,246,220,0.55) 53%, transparent 60%)',
+  backgroundSize: '260% 100%', backgroundRepeat: 'no-repeat',
+  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
+  filter: 'none', mixBlendMode: 'screen',
+};
+// A slim gold rule with a centred gem, set under the wordmark like an engraved crest divider.
+const flourish: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, marginLeft: 2,
+  width: 'clamp(220px, 34vw, 380px)',
+};
+const flourishRule: React.CSSProperties = {
+  flex: 1, height: 1,
+  background: 'linear-gradient(90deg, transparent, rgba(224,165,60,0.55) 30%, rgba(224,165,60,0.55) 70%, transparent)',
+};
+const flourishGem: React.CSSProperties = {
+  fontSize: 10, color: '#e0a53c', lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(224,165,60,0.5))',
 };
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,

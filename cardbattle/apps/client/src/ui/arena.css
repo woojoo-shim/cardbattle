@@ -457,6 +457,14 @@
    rarest cards shimmer even at rest — a constant tell that they're special. */
 @keyframes cb-foil { 0% { background-position: 210% 0; } 100% { background-position: -70% 0; } }
 .cb-foil { background-size: 230% 100%; background-position: 210% 0; animation: cb-foil 5s linear infinite; }
+/* Specular glint sweeping across the ABYSSAL ARENA wordmark: a quick pass, then a long hold off-screen
+   so the metal catches the light periodically rather than shimmering constantly. */
+@keyframes cb-logo-sheen {
+  0%   { background-position: 260% 0; }
+  32%  { background-position: -60% 0; }
+  100% { background-position: -60% 0; }
+}
+.cb-logo-sheen { background-position: 260% 0; animation: cb-logo-sheen 6.5s cubic-bezier(.5,0,.2,1) infinite; }
 .cb-field { transition: border-color .2s ease; }
 .cb-field:focus-within {
   border-color: rgba(176,70,47,0.55);
