@@ -74,6 +74,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   return (
     <div style={wrap}>
       <style>{hoverCss}</style>
+      <Atmosphere />
       <div style={topBar}>
         {onBack && <button style={logout} onClick={() => { playSfx('back'); onBack(); }}>← 나가기</button>}
         <button style={goldChip} onClick={() => { playSfx('coin'); setShopOpen(true); }} title="상점 열기"><Icon name="coin" size={16} />&nbsp;{account.gold}&nbsp;&nbsp;상점</button>
@@ -82,7 +83,13 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
       <div style={inner}>
         <header style={head}>
+          <span style={kicker}>심연의 투기장 · 대기실</span>
           <h1 style={heading}>대전 목록</h1>
+          <div style={flourish} aria-hidden>
+            <span style={flourishRule} />
+            <span style={flourishGem}>◆</span>
+            <span style={flourishRule} />
+          </div>
           <p style={sub}>{name} · <span style={{ color: C.rare }}>◆ {account.gold} GOLD</span></p>
         </header>
 
@@ -97,13 +104,13 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
               {open.length === 0 && <p style={empty}>열린 방이 없습니다.<br />오른쪽에서 새 방을 만들어 보세요.</p>}
               {open.map((r) => (
                 <button key={r.roomId} className="cb-room" style={roomRow} onClick={() => join(r.roomId)}>
-                  <span style={rTitle}>
-                    <span style={rMode} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
-                      <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={16} color={C.rare} />
-                    </span>
-                    {r.metadata?.title || '제목 없음'}
+                  <span style={rMedallion} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
+                    <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={18} color={C.rare} />
                   </span>
-                  <span style={rCode}>#{r.metadata?.code}</span>
+                  <span style={rTitleCol}>
+                    <span style={rTitle}>{r.metadata?.title || '제목 없음'}</span>
+                    <span style={rMeta}><span style={rCode}>#{r.metadata?.code}</span> · {GAME_MODES[r.metadata?.mode ?? 'standard']?.name}</span>
+                  </span>
                   <span style={rCount}>{headcount(r)}/{r.maxClients}</span>
                   <span className="cb-go" style={rGo}>참가&nbsp;<Icon name="arrowRight" size={13} /></span>
                 </button>
@@ -221,32 +228,98 @@ const hoverCss = `
   border-color: ${C.borderHi} !important; color: ${C.text} !important;
   background: rgba(224,170,70,0.05) !important;
 }
+@keyframes cb-rb-ember {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  12%  { opacity: 0.9; }
+  85%  { opacity: 0.5; }
+  100% { transform: translateY(-102vh) scale(0.5); opacity: 0; }
+}
 `;
 
+// A candlelit waiting-hall glow behind the browser — warm amber key light pooling from above,
+// an oxblood halo, a cool plum wall-wash up top, all closing into a vignette. SHOW layer only.
+function Atmosphere() {
+  return (
+    <div aria-hidden style={atmos}>
+      <div style={atmosGlow} />
+      <div style={atmosVignette} />
+      <div style={emberField} className="cb-rb-embers">
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute', left: `${e.x}%`, bottom: '-4%',
+              width: e.s, height: e.s, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(240,200,120,0.9), rgba(224,165,60,0) 70%)',
+              animation: `cb-rb-ember ${e.d}s linear ${e.delay}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+const EMBERS = [
+  { x: 12, s: 3, d: 13, delay: 0 }, { x: 24, s: 2, d: 17, delay: 3 },
+  { x: 38, s: 4, d: 11, delay: 6 }, { x: 52, s: 2, d: 15, delay: 1 },
+  { x: 66, s: 3, d: 19, delay: 4 }, { x: 78, s: 2, d: 12, delay: 8 },
+  { x: 88, s: 3, d: 16, delay: 2 }, { x: 45, s: 2, d: 21, delay: 9 },
+];
+
+const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
-  minHeight: '100vh', width: '100%', boxSizing: 'border-box',
-  fontFamily: sans, color: C.text,
-  background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
+  position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
+  fontFamily: sans, color: C.text, overflow: 'hidden',
+  background: 'linear-gradient(180deg, #170d0d 0%, #0c0709 60%, #050304 100%)',
 };
+const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
+const atmosGlow: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background:
+    'radial-gradient(120% 70% at 50% -8%, rgba(242,184,94,0.16), transparent 55%),' +
+    'radial-gradient(90% 60% at 50% 0%, rgba(158,58,40,0.14), transparent 60%),' +
+    'radial-gradient(80% 50% at 50% 4%, rgba(74,48,86,0.12), transparent 62%),' +
+    'radial-gradient(100% 80% at 50% 110%, rgba(132,44,32,0.10), transparent 60%)',
+};
+const atmosVignette: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background: 'radial-gradient(115% 100% at 50% 42%, transparent 52%, rgba(0,0,0,0.62) 100%)',
+};
+const emberField: React.CSSProperties = { position: 'absolute', inset: 0, mixBlendMode: 'screen' };
 const inner: React.CSSProperties = {
+  position: 'relative', zIndex: 1,
   width: '100%', maxWidth: 1200, margin: '0 auto', boxSizing: 'border-box',
   padding: '72px clamp(20px, 5vw, 56px) 56px',
   display: 'flex', flexDirection: 'column', gap: 28,
 };
-const head: React.CSSProperties = { textAlign: 'left' };
-const heading: React.CSSProperties = {
-  margin: 0, fontFamily: sans, fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 800,
-  letterSpacing: 1, color: '#f3eee6',
+const head: React.CSSProperties = { textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 };
+const kicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 12, letterSpacing: 4, textTransform: 'uppercase',
+  color: 'rgba(224,165,60,0.72)',
 };
-const sub: React.CSSProperties = { margin: '8px 0 0', fontSize: 15, color: C.dim, fontFamily: mono, letterSpacing: 0.5 };
+const heading: React.CSSProperties = {
+  margin: 0, fontFamily: serif, fontSize: 'clamp(30px, 5.4vw, 46px)', fontWeight: 700,
+  letterSpacing: 2, color: '#f3eee6',
+  textShadow: '0 2px 0 #1a0f10, 0 6px 22px rgba(0,0,0,0.6)',
+};
+const flourish: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, width: 'clamp(200px, 30vw, 340px)', margin: '2px 0' };
+const flourishRule: React.CSSProperties = {
+  flex: 1, height: 1,
+  background: 'linear-gradient(90deg, transparent, rgba(224,165,60,0.5) 30%, rgba(224,165,60,0.5) 70%, transparent)',
+};
+const flourishGem: React.CSSProperties = { fontSize: 11, color: '#e0a53c', textShadow: '0 0 10px rgba(224,165,60,0.6)' };
+const sub: React.CSSProperties = { margin: '4px 0 0', fontSize: 15, color: C.dim, fontFamily: mono, letterSpacing: 0.5 };
 const cols: React.CSSProperties = { display: 'flex', gap: 22, width: '100%', alignItems: 'flex-start', flexWrap: 'wrap' };
 const panel: React.CSSProperties = {
   flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', borderRadius: 4, overflow: 'hidden',
-  background: 'rgba(12,7,5,0.6)', border: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(38,28,17,0.82), rgba(20,13,9,0.78))',
+  border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,225,170,0.05)',
 };
 const winBar: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', padding: '16px 20px', fontFamily: sans, fontSize: 16, fontWeight: 700,
-  color: '#f3eee6', letterSpacing: 1, borderBottom: `1px solid ${C.border}`,
+  display: 'flex', alignItems: 'center', padding: '16px 20px', fontFamily: serif, fontSize: 18, fontWeight: 700,
+  color: '#f3eee6', letterSpacing: 1.5, borderBottom: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(60,32,20,0.35), transparent)',
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
@@ -256,12 +329,18 @@ const cap: React.CSSProperties = {
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 280, maxHeight: '56vh', overflowY: 'auto', padding: '14px 18px 18px' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 15, fontFamily: sans, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
-  display: 'grid', gridTemplateColumns: '1fr auto auto auto', alignItems: 'center', gap: 14,
-  padding: '14px 16px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
+  display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', alignItems: 'center', gap: 14,
+  padding: '12px 14px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
   background: 'rgba(224,170,70,0.02)', border: `1px solid ${C.border}`, color: C.text, fontFamily: sans,
 };
-const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 };
-const rMode: React.CSSProperties = { fontSize: 18, flexShrink: 0 };
+const rMedallion: React.CSSProperties = {
+  width: 38, height: 38, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: '50%',
+  background: 'radial-gradient(circle at 50% 35%, rgba(90,64,30,0.9), rgba(28,18,10,0.9))',
+  border: '1px solid rgba(164,118,47,0.55)', boxShadow: 'inset 0 1px 0 rgba(255,225,170,0.14)',
+};
+const rTitleCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' };
+const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rMeta: React.CSSProperties = { fontSize: 12, color: C.faint, fontFamily: mono, letterSpacing: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
   flex: 1, padding: '13px 14px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
@@ -290,7 +369,7 @@ const modeCardOn: React.CSSProperties = {
 const modeIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
 const modeName: React.CSSProperties = { fontWeight: 700, fontSize: 15 };
 const modeTag: React.CSSProperties = { fontSize: 12.5, color: C.dim, lineHeight: 1.3 };
-const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 15, color: C.rare, letterSpacing: 1 };
+const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.rare, letterSpacing: 1 };
 const rCount: React.CSSProperties = { fontFamily: mono, fontSize: 15, color: C.dim };
 const rGo: React.CSSProperties = { fontSize: 14, color: C.rare, fontWeight: 700, letterSpacing: 0.5, display: 'flex', alignItems: 'center' };
 const field: React.CSSProperties = {
