@@ -427,22 +427,19 @@
   transition: opacity .18s ease;
 }
 .cb-hand-card:hover .cb-hand-sheen { opacity: 1; animation: cb-hand-sheen .62s ease-out; }
-.cb-field { transition: border-color .25s ease, box-shadow .25s ease; }
+.cb-field { transition: border-color .2s ease; }
 .cb-field:focus-within {
-  border-color: rgba(216,180,90,0.6);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,240,210,0.08),
-              0 0 0 3px rgba(224,165,60,0.16), 0 0 26px rgba(224,165,60,0.24);
+  border-color: rgba(176,70,47,0.55);
 }
 
 .cb-nick {
-  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+  transition: border-color .2s ease, background .2s ease;
 }
 .cb-nick:focus {
-  border-color: rgba(216,180,90,0.6);
-  background: rgba(224, 165, 60, 0.08);
-  box-shadow: 0 0 0 3px rgba(224, 165, 60, 0.2), 0 0 24px rgba(224, 165, 60, 0.3);
+  border-color: rgba(176,70,47,0.55);
+  background: rgba(10,7,4,0.8);
 }
-.cb-nick::placeholder { color: #7c7059; }
+.cb-nick::placeholder { color: #6f6047; }
 
 .cb-enter {
   transition: transform .2s cubic-bezier(.22,.61,.36,1), box-shadow .2s ease, filter .2s ease;
@@ -453,8 +450,8 @@
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6), 0 0 22px rgba(156, 59, 40, 0.4);
 }
 .cb-enter:active { transform: translateY(0); }
-/* Ticket-themed login submit — brass hover glow, overrides the shared oxblood .cb-enter:hover. */
-.cb-enter.cb-ticket:hover { box-shadow: 0 12px 34px rgba(20, 12, 2, 0.6), 0 0 24px rgba(224, 165, 60, 0.5); }
+/* Ticket-themed login submit — flat oxblood, just a subtle lift on hover (de-AI: no glow). */
+.cb-enter.cb-ticket:hover { box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5); }
 
 /* The hung bulb never sits perfectly still — a slow amber breathe with the odd dirty flick,
    so the whole gate feels lit by one failing lamp rather than a static gradient. */
