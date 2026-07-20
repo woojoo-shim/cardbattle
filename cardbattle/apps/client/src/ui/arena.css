@@ -306,6 +306,18 @@
   animation-direction: alternate;
   will-change: transform;
 }
+/* The overhead light shaft breathes and sways gently, as if the flame feeding it flickers. */
+@keyframes cb-gate-shaft {
+  0%, 100% { opacity: 0.72; transform: translateX(-50%) skewX(-2deg); }
+  50%      { opacity: 1;    transform: translateX(-50%) skewX(2deg); }
+}
+.cb-gate-shaft { animation: cb-gate-shaft 8s ease-in-out infinite; }
+/* The warm halo behind the form slowly pulses. */
+@keyframes cb-gate-glow {
+  0%, 100% { opacity: 0.7;  transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.08); }
+}
+.cb-gate-glow { animation: cb-gate-glow 6.5s ease-in-out infinite; }
 /* Newest combat-log line slides in from the left and fades up as it's appended. */
 @keyframes cb-log-line {
   0%   { transform: translateX(-14px); opacity: 0; }

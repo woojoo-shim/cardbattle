@@ -188,15 +188,22 @@ const EMBERS = [
 ] as const;
 
 // Real card faces drifting through the dark arena behind the login glass. Deterministic
-// scatter with per-card depth (scale / opacity / blur) so near cards read sharp, far ones recede.
+// scatter with per-card depth (scale / opacity / blur / glow) so near cards read sharp and
+// lit, far ones recede into the murk — a deep, layered field, not a flat backdrop.
 const DRIFT_CARDS = [
-  { id: 'snipe',   left: 7,  top: 14, size: 60, scale: 1.0,  rot: -14, op: 0.5,  blur: 0,   delay: 0,   dur: 23 },
-  { id: 'bomb',    left: 79, top: 9,  size: 66, scale: 1.05, rot: 12,  op: 0.46, blur: 0.4, delay: 3,   dur: 27 },
-  { id: 'bolt',    left: 83, top: 60, size: 58, scale: 1.0,  rot: -10, op: 0.5,  blur: 0,   delay: 1.6, dur: 29 },
-  { id: 'shield',  left: 12, top: 63, size: 52, scale: 0.94, rot: 9,   op: 0.4,  blur: 1.1, delay: 6,   dur: 25 },
-  { id: 'reverse', left: 62, top: 80, size: 48, scale: 0.9,  rot: 16,  op: 0.34, blur: 1.5, delay: 4.2, dur: 28 },
-  { id: 'potion',  left: 44, top: 5,  size: 44, scale: 0.84, rot: -6,  op: 0.3,  blur: 1.8, delay: 8,   dur: 31 },
-  { id: 'drain',   left: 26, top: 38, size: 40, scale: 0.8,  rot: -20, op: 0.26, blur: 2.2, delay: 10,  dur: 33 },
+  // near, bright, sharp — catch the light
+  { id: 'snipe',   left: 5,  top: 12, size: 74, scale: 1.06, rot: -13, op: 0.82, blur: 0,   glow: 0.7, delay: 0,   dur: 24 },
+  { id: 'bomb',    left: 80, top: 7,  size: 80, scale: 1.1,  rot: 12,  op: 0.8,  blur: 0,   glow: 0.7, delay: 3,   dur: 27 },
+  { id: 'bolt',    left: 84, top: 58, size: 70, scale: 1.02, rot: -9,  op: 0.82, blur: 0,   glow: 0.8, delay: 1.6, dur: 29 },
+  { id: 'shield',  left: 9,  top: 62, size: 64, scale: 0.98, rot: 10,  op: 0.72, blur: 0.3, glow: 0.5, delay: 6,   dur: 25 },
+  // mid
+  { id: 'reverse', left: 63, top: 78, size: 56, scale: 0.9,  rot: 16,  op: 0.56, blur: 0.9, glow: 0.3, delay: 4.2, dur: 28 },
+  { id: 'sword',   left: 20, top: 82, size: 54, scale: 0.88, rot: -18, op: 0.54, blur: 1,   glow: 0.3, delay: 12,  dur: 30 },
+  { id: 'potion',  left: 45, top: 3,  size: 50, scale: 0.82, rot: -5,  op: 0.46, blur: 1.4, glow: 0.2, delay: 8,   dur: 31 },
+  { id: 'peek',    left: 71, top: 33, size: 46, scale: 0.78, rot: 8,   op: 0.4,  blur: 1.6, glow: 0,   delay: 14,  dur: 34 },
+  // far, dim, blurred — depth
+  { id: 'drain',   left: 27, top: 36, size: 42, scale: 0.74, rot: -20, op: 0.34, blur: 2,   glow: 0,   delay: 10,  dur: 33 },
+  { id: 'bind',    left: 52, top: 52, size: 38, scale: 0.7,  rot: 22,  op: 0.28, blur: 2.4, glow: 0,   delay: 16,  dur: 36 },
 ] as const;
 
 function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
@@ -266,11 +273,23 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             style={{ left: `${c.left}%`, top: `${c.top}%`, animationDelay: `${c.delay}s`, animationDuration: `${c.dur}s` }}
           >
             <span style={{ display: 'block', transform: `rotate(${c.rot}deg) scale(${c.scale})`, opacity: c.op, filter: c.blur ? `blur(${c.blur}px)` : undefined }}>
-              <span style={driftCardFace}><CardArt id={c.id} size={c.size} /></span>
+              <span
+                style={{
+                  ...driftCardFace,
+                  boxShadow: c.glow
+                    ? `0 18px 40px rgba(0,0,0,0.55), 0 0 ${34 * c.glow}px rgba(224,165,60,${0.5 * c.glow}), inset 0 1px 0 rgba(255,225,170,0.14)`
+                    : driftCardFace.boxShadow,
+                }}
+              >
+                <CardArt id={c.id} size={c.size} />
+              </span>
             </span>
           </span>
         ))}
       </div>
+      {/* A shaft of warm light spills down onto the login from the unseen ceiling of the arena. */}
+      <div style={lightShaft} className="cb-gate-shaft" aria-hidden />
+      <div style={gateGlow} className="cb-gate-glow" aria-hidden />
       <div style={gateVignette} aria-hidden />
 
       {/* The login floats over the arena — a minimal frosted-glass pass. */}
@@ -413,10 +432,10 @@ const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
   background:
-    'radial-gradient(56% 40% at 50% 14%, rgba(224,165,60,0.12), transparent 64%),' +
-    'radial-gradient(90% 60% at 50% 120%, rgba(120,30,26,0.10), transparent 60%),' +
-    'linear-gradient(180deg, #14100c 0%, #0d0a08 54%, #070605 100%),' +
-    '#070605',
+    'radial-gradient(60% 46% at 50% 8%, rgba(240,180,70,0.20), transparent 62%),' +
+    'radial-gradient(80% 50% at 50% 116%, rgba(150,40,30,0.16), transparent 60%),' +
+    'linear-gradient(180deg, #1a140d 0%, #100b08 52%, #060504 100%),' +
+    '#060504',
 };
 // Full-height field the embers drift up through; sits behind the gate content (z below it).
 const emberField: React.CSSProperties = {
@@ -426,8 +445,23 @@ const gateMute: React.CSSProperties = {
   position: 'fixed', top: 16, left: 16, zIndex: 40,
 };
 const gateVignette: React.CSSProperties = {
-  position: 'absolute', inset: 0, pointerEvents: 'none',
-  background: 'radial-gradient(125% 115% at 50% 40%, transparent 55%, rgba(4,3,2,0.94) 100%)',
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+  background: 'radial-gradient(120% 110% at 50% 42%, transparent 48%, rgba(3,2,1,0.96) 100%)',
+};
+// A tall cone of warm light raking down from the top of the arena onto the login glass.
+const lightShaft: React.CSSProperties = {
+  position: 'absolute', top: '-14%', left: '50%', width: 'min(560px, 92vw)', height: '128%',
+  transform: 'translateX(-50%)', pointerEvents: 'none', zIndex: 1,
+  clipPath: 'polygon(38% 0%, 62% 0%, 88% 100%, 12% 100%)',
+  background: 'linear-gradient(180deg, rgba(240,186,86,0.24) 0%, rgba(224,165,60,0.10) 40%, transparent 82%)',
+  mixBlendMode: 'screen', filter: 'blur(6px)',
+};
+// A soft warm halo pooled behind the form so it lifts off the dark field.
+const gateGlow: React.CSSProperties = {
+  position: 'absolute', top: '50%', left: '50%', width: 520, height: 520,
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1, borderRadius: '50%',
+  background: 'radial-gradient(circle, rgba(224,165,60,0.16), rgba(150,40,30,0.06) 46%, transparent 70%)',
+  mixBlendMode: 'screen', filter: 'blur(10px)',
 };
 
 // The login form floats over the drifting arena — a minimal frosted-glass panel with one oxblood accent rule.
@@ -451,12 +485,13 @@ const driftCardFace: React.CSSProperties = {
 // The crest sits inside a flat seal medallion.
 const crestMedallion: React.CSSProperties = {
   display: 'grid', placeItems: 'center', width: 92, height: 92, borderRadius: '50%', margin: '2px 0 8px',
-  background: 'rgba(60,44,20,0.32)',
-  border: `1px solid rgba(74,59,39,0.6)`,
+  background: 'radial-gradient(circle at 50% 38%, rgba(240,180,70,0.22), rgba(60,44,20,0.34) 62%)',
+  border: `1px solid rgba(150,110,50,0.55)`,
+  boxShadow: '0 0 40px rgba(224,165,60,0.28), inset 0 1px 0 rgba(255,225,170,0.16)',
 };
 const ticketTitle: React.CSSProperties = {
   margin: 0, fontFamily: sans, fontSize: 26, fontWeight: 800, letterSpacing: 1, color: TICKET.ink, textAlign: 'center',
-  textShadow: '0 2px 0 rgba(10,7,4,0.6)',
+  textShadow: '0 2px 0 rgba(10,7,4,0.6), 0 0 26px rgba(224,165,60,0.28)',
 };
 const ticketSub: React.CSSProperties = {
   marginTop: 5, marginBottom: 18, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.seal,
