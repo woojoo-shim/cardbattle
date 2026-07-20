@@ -39,28 +39,28 @@ function Crest({ size }: { size: number }) {
           <stop offset="1" stopColor="#b98a3e" />
         </linearGradient>
         <radialGradient id="cbAbyss" cx="0.5" cy="0.4" r="0.75">
-          <stop offset="0" stopColor="#1a2340" />
-          <stop offset="0.6" stopColor="#0c1120" />
-          <stop offset="1" stopColor="#060812" />
+          <stop offset="0" stopColor="#3a2015" />
+          <stop offset="0.6" stopColor="#1c0f0a" />
+          <stop offset="1" stopColor="#0a0504" />
         </radialGradient>
         <radialGradient id="cbGem" cx="0.5" cy="0.4" r="0.7">
-          <stop offset="0" stopColor="#eafff9" />
-          <stop offset="0.4" stopColor="#7cf0dc" />
-          <stop offset="1" stopColor="#2aa9b8" />
+          <stop offset="0" stopColor="#fff3d8" />
+          <stop offset="0.4" stopColor="#f0b45a" />
+          <stop offset="1" stopColor="#b0642a" />
         </radialGradient>
         <linearGradient id="cbBlade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f2f6ff" />
-          <stop offset="1" stopColor="#8a94b4" />
+          <stop offset="0" stopColor="#fbf3e2" />
+          <stop offset="1" stopColor="#a8917a" />
         </linearGradient>
       </defs>
 
       {/* halo behind the crest — slowly breathes so the badge never feels frozen */}
-      <ellipse className="cb-crest-halo" cx="64" cy="62" rx="52" ry="52" fill="#5b8cff" opacity="0.14" />
+      <ellipse className="cb-crest-halo" cx="64" cy="62" rx="52" ry="52" fill="#e0a53c" opacity="0.16" />
 
       {/* badge body */}
       <path d={BADGE} fill="url(#cbAbyss)" stroke="url(#cbRing)" strokeWidth="3.2" strokeLinejoin="round" />
       {/* inner engraved ring */}
-      <path d={BADGE} fill="none" stroke="#3a5da0" strokeWidth="1" strokeLinejoin="round" opacity="0.7"
+      <path d={BADGE} fill="none" stroke="#8a5a2c" strokeWidth="1" strokeLinejoin="round" opacity="0.7"
         transform="translate(64 66) scale(0.82) translate(-64 -66)" />
 
       {/* crown spikes at the top */}
@@ -75,8 +75,8 @@ function Crest({ size }: { size: number }) {
       <Sword rot={-26} />
 
       {/* rune gem over the cross */}
-      <polygon points="64,46 73,63 64,82 55,63" fill="url(#cbGem)" stroke="#eafff9" strokeWidth="1" strokeLinejoin="round" />
-      <polygon points="64,46 73,63 64,63 55,63" fill="#eafff9" opacity="0.55" />
+      <polygon points="64,46 73,63 64,82 55,63" fill="url(#cbGem)" stroke="#fff3d8" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="64,46 73,63 64,63 55,63" fill="#fff3d8" opacity="0.55" />
       <circle className="cb-crest-spark" cx="64" cy="61" r="2.6" fill="#ffffff" opacity="0.95" />
 
       {/* bottom point highlight */}
@@ -89,7 +89,7 @@ function Sword({ rot }: { rot: number }) {
   return (
     <g transform={`translate(64 66) rotate(${rot})`}>
       {/* blade */}
-      <polygon points="0,-44 3.6,-33 3,7 -3,7 -3.6,-33" fill="url(#cbBlade)" stroke="#c8d2ea" strokeWidth="0.6" strokeLinejoin="round" />
+      <polygon points="0,-44 3.6,-33 3,7 -3,7 -3.6,-33" fill="url(#cbBlade)" stroke="#d8c8ac" strokeWidth="0.6" strokeLinejoin="round" />
       <polygon points="0,-44 1.2,-33 0,7 -1.2,-33" fill="#ffffff" opacity="0.5" />
       {/* crossguard */}
       <rect x="-11" y="6" width="22" height="4.4" rx="1.6" fill="#c9a24a" stroke="#8a6a24" strokeWidth="0.5" />
