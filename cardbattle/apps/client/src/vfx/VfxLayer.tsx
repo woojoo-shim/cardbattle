@@ -62,15 +62,20 @@ function shake(id: string): void {
 }
 
 /** A whole-screen camera kick on impact — the entire arena jolts and settles, so a hit shoves the
- *  world, not just the little portrait. A faint scale masks the edges the translate exposes. Bigger
- *  hits kick harder. The animation is cleared+restarted so back-to-back hits always re-fire. */
-function cameraKick(big: boolean): void {
+ *  world, not just the little portrait. A faint scale masks the edges the translate exposes. BALATRO
+ *  RULE: shake amplitude scales continuously with the blow's magnitude (via the --cbk custom prop the
+ *  single keyframe multiplies its offsets by), clamped so chip damage still registers and a huge hit
+ *  doesn't fling the screen off. Cleared+restarted so back-to-back hits always re-fire. */
+function cameraKick(amount: number): void {
   const el = document.querySelector<HTMLElement>('[data-arena]');
   if (!el) return;
+  const mag = Math.max(0.4, Math.min(1.7, amount / 9));
+  const dur = 0.3 + mag * 0.12;
+  el.style.setProperty('--cbk', mag.toFixed(2));
   el.style.animation = 'none';
   void el.offsetWidth; // reflow so a repeat hit restarts the shake from 0
-  el.style.animation = `${big ? 'cb-camera-big' : 'cb-camera'} ${big ? 0.4 : 0.32}s cubic-bezier(.36,.07,.4,1)`;
-  setTimeout(() => { el.style.animation = ''; }, big ? 420 : 340);
+  el.style.animation = `cb-camera ${dur.toFixed(2)}s cubic-bezier(.36,.07,.4,1)`;
+  setTimeout(() => { el.style.animation = ''; }, dur * 1000 + 60);
 }
 
 /** The acting portrait swells up then eases back as it plays a card — a slow, deliberate glow. */
@@ -190,7 +195,7 @@ export function VfxLayer({ events, players }: Props) {
             setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2000);
           }
           shake(e.targetId);
-          cameraKick(big);
+          cameraKick(e.amount);
         }, IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
