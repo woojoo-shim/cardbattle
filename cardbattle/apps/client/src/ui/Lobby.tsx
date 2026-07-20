@@ -50,6 +50,8 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
 
   return (
     <div style={wrap}>
+      <style>{lobbyCss}</style>
+      <Atmosphere />
       {onExit && (
         <button style={backBtn} onClick={() => { playSfx('back'); onExit(); }} title="방을 나가고 목록으로">
           ←&nbsp;나가기
@@ -59,6 +61,11 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
       <div style={content} className="cb-gate-in">
         <span style={kicker}>대기실 · WAITING ROOM</span>
         <h1 style={title}>{ui.title || '심연의 투기장'}</h1>
+        <div style={flourish} aria-hidden>
+          <span style={flourishRule} />
+          <span style={flourishGem}>◆</span>
+          <span style={flourishRule} />
+        </div>
 
         <div style={panel}>
           <div style={modeBadge} title={gm.desc}>
@@ -142,12 +149,68 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
   );
 }
 
+// A candlelit waiting-hall glow — same warm-core/cool-edge pit as the room browser. SHOW layer only.
+function Atmosphere() {
+  return (
+    <div aria-hidden style={atmos}>
+      <div style={atmosGlow} />
+      <div style={atmosVignette} />
+      <div style={emberField} className="cb-lb-embers">
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute', left: `${e.x}%`, bottom: '-4%',
+              width: e.s, height: e.s, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(240,200,120,0.9), rgba(224,165,60,0) 70%)',
+              animation: `cb-lb-ember ${e.d}s linear ${e.delay}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+const EMBERS = [
+  { x: 14, s: 3, d: 14, delay: 0 }, { x: 28, s: 2, d: 18, delay: 4 },
+  { x: 42, s: 4, d: 12, delay: 7 }, { x: 58, s: 2, d: 16, delay: 2 },
+  { x: 72, s: 3, d: 20, delay: 5 }, { x: 86, s: 2, d: 13, delay: 9 },
+];
+const lobbyCss = `
+@keyframes cb-lb-ember {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  12%  { opacity: 0.9; }
+  85%  { opacity: 0.5; }
+  100% { transform: translateY(-102vh) scale(0.5); opacity: 0; }
+}
+`;
+
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   fontFamily: sans, color: C.text,
-  background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
+  background: 'linear-gradient(180deg, #170d0d 0%, #0c0709 60%, #050304 100%)',
 };
+const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
+const atmosGlow: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background:
+    'radial-gradient(120% 70% at 50% -8%, rgba(242,184,94,0.16), transparent 55%),' +
+    'radial-gradient(90% 60% at 50% 0%, rgba(158,58,40,0.14), transparent 60%),' +
+    'radial-gradient(80% 50% at 50% 4%, rgba(74,48,86,0.12), transparent 62%),' +
+    'radial-gradient(100% 80% at 50% 110%, rgba(132,44,32,0.10), transparent 60%)',
+};
+const atmosVignette: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background: 'radial-gradient(115% 100% at 50% 42%, transparent 52%, rgba(0,0,0,0.62) 100%)',
+};
+const emberField: React.CSSProperties = { position: 'absolute', inset: 0, mixBlendMode: 'screen' };
+const flourish: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, width: 'clamp(180px, 26vw, 300px)', margin: '0 0 2px' };
+const flourishRule: React.CSSProperties = {
+  flex: 1, height: 1,
+  background: 'linear-gradient(90deg, transparent, rgba(224,165,60,0.5) 30%, rgba(224,165,60,0.5) 70%, transparent)',
+};
+const flourishGem: React.CSSProperties = { fontSize: 11, color: '#e0a53c', textShadow: '0 0 10px rgba(224,165,60,0.6)' };
 const content: React.CSSProperties = {
   position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
   gap: 14, padding: '0 20px', textAlign: 'center',
@@ -160,12 +223,14 @@ const title: React.CSSProperties = {
   fontSize: 'clamp(34px, 6vw, 64px)', color: '#f3eee6',
   textShadow: '0 2px 0 #1a0f10, 0 8px 24px rgba(0,0,0,0.6)',
 };
-// A framed slab holding the room details.
+// A framed walnut slab holding the room details — warm cardstock with a candlelit top accent.
 const panel: React.CSSProperties = {
+  position: 'relative', zIndex: 2,
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
   width: 'min(400px, 92vw)', padding: '22px 22px 24px', borderRadius: 4,
-  background: 'rgba(12,7,5,0.6)',
-  border: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(38,28,17,0.82), rgba(20,13,9,0.78))',
+  border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,225,170,0.05)',
 };
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
