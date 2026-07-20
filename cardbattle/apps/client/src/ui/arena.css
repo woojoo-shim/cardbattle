@@ -292,6 +292,20 @@
   animation: cb-ember linear infinite;
   will-change: transform, opacity;
 }
+
+/* Login background: card faces perpetually drifting on a slow diagonal float. */
+@keyframes cb-drift {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-15px, -22px); }
+}
+.cb-drift {
+  position: absolute;
+  animation-name: cb-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  will-change: transform;
+}
 /* Newest combat-log line slides in from the left and fades up as it's appended. */
 @keyframes cb-log-line {
   0%   { transform: translateX(-14px); opacity: 0; }

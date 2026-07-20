@@ -11,6 +11,7 @@ import { C, mono, sans } from './ui/theme.js';
 import { BrandMark } from './ui/BrandMark.js';
 import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
+import { CardArt } from './ui/art/CardArt.js';
 import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
 import { playSfx } from './audio/sfx.js';
 import { startBgm } from './audio/bgm.js';
@@ -186,6 +187,18 @@ const EMBERS = [
   { left: 72, size: 3, delay: 7.5, dur: 10.5 },
 ] as const;
 
+// Real card faces drifting through the dark arena behind the login glass. Deterministic
+// scatter with per-card depth (scale / opacity / blur) so near cards read sharp, far ones recede.
+const DRIFT_CARDS = [
+  { id: 'snipe',   left: 7,  top: 14, size: 60, scale: 1.0,  rot: -14, op: 0.5,  blur: 0,   delay: 0,   dur: 23 },
+  { id: 'bomb',    left: 79, top: 9,  size: 66, scale: 1.05, rot: 12,  op: 0.46, blur: 0.4, delay: 3,   dur: 27 },
+  { id: 'bolt',    left: 83, top: 60, size: 58, scale: 1.0,  rot: -10, op: 0.5,  blur: 0,   delay: 1.6, dur: 29 },
+  { id: 'shield',  left: 12, top: 63, size: 52, scale: 0.94, rot: 9,   op: 0.4,  blur: 1.1, delay: 6,   dur: 25 },
+  { id: 'reverse', left: 62, top: 80, size: 48, scale: 0.9,  rot: 16,  op: 0.34, blur: 1.5, delay: 4.2, dur: 28 },
+  { id: 'potion',  left: 44, top: 5,  size: 44, scale: 0.84, rot: -6,  op: 0.3,  blur: 1.8, delay: 8,   dur: 31 },
+  { id: 'drain',   left: 26, top: 38, size: 40, scale: 0.8,  rot: -20, op: 0.26, blur: 2.2, delay: 10,  dur: 33 },
+] as const;
+
 function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
@@ -244,19 +257,24 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
           />
         ))}
       </div>
+      {/* Living arena behind the glass — real card faces drifting through the dark. */}
+      <div style={cardDrift} aria-hidden>
+        {DRIFT_CARDS.map((c, i) => (
+          <span
+            key={i}
+            className="cb-drift"
+            style={{ left: `${c.left}%`, top: `${c.top}%`, animationDelay: `${c.delay}s`, animationDuration: `${c.dur}s` }}
+          >
+            <span style={{ display: 'block', transform: `rotate(${c.rot}deg) scale(${c.scale})`, opacity: c.op, filter: c.blur ? `blur(${c.blur}px)` : undefined }}>
+              <span style={driftCardFace}><CardArt id={c.id} size={c.size} /></span>
+            </span>
+          </span>
+        ))}
+      </div>
       <div style={gateVignette} aria-hidden />
 
-      {/* The whole login lives inside ONE object: a premium admission ticket to the arena. */}
+      {/* The login floats over the arena — a minimal frosted-glass pass. */}
       <div style={ticketShell} className="cb-gate-in">
-        <span style={ticketFrame} aria-hidden />
-
-        {/* TOP STUB — the punched admission line */}
-        <div style={stubTop}>
-          <span style={admitTag}><span style={admitDot} aria-hidden />ADMIT&nbsp;ONE</span>
-          <span style={serial}>No.&nbsp;008&nbsp;·&nbsp;FFA</span>
-        </div>
-        <div style={perf} aria-hidden />
-
         {/* HEADER — crest seal + title */}
         <div style={crestMedallion}><BrandMark size={62} markOnly /></div>
         <h1 style={ticketTitle}>심연의 투기장</h1>
@@ -336,8 +354,6 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
 
         <button type="button" style={guestLink} onClick={goGuest} disabled={busy}>계정 없이 게스트로 둘러보기</button>
 
-        {/* BOTTOM STUB — the flavour tear-off */}
-        <div style={perf} aria-hidden />
         <span style={stubTagline}>여덟이 앉고, 하나가 살아남는다</span>
       </div>
     </div>
@@ -414,32 +430,23 @@ const gateVignette: React.CSSProperties = {
   background: 'radial-gradient(125% 115% at 50% 40%, transparent 55%, rgba(4,3,2,0.94) 100%)',
 };
 
-// The single admission-ticket card that holds the whole login. Flat dark stock, one oxblood accent rule.
+// The login form floats over the drifting arena — a minimal frosted-glass panel with one oxblood accent rule.
 const ticketShell: React.CSSProperties = {
-  position: 'relative', zIndex: 2, width: 'min(384px, 92vw)', padding: '18px 26px 22px',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 4,
-  background: TICKET.paper,
-  border: `1px solid ${TICKET.edge}`, borderTop: `2px solid ${TICKET.seal}`,
-  boxShadow: '0 24px 54px rgba(0,0,0,0.55)',
+  position: 'relative', zIndex: 2, width: 'min(372px, 92vw)', padding: '24px 26px 22px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 10,
+  background: 'rgba(22,16,9,0.72)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+  border: `1px solid rgba(90,74,45,0.5)`, borderTop: `2px solid ${TICKET.seal}`,
+  boxShadow: '0 30px 70px rgba(0,0,0,0.62)',
 };
-// An engraved inner hairline that frames the ticket a few px inside its edge.
-const ticketFrame: React.CSSProperties = {
-  position: 'absolute', inset: 6, borderRadius: 3, pointerEvents: 'none',
-  border: `1px solid rgba(74,59,39,0.45)`,
+// Full-bleed layer of card faces drifting behind the glass.
+const cardDrift: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden',
 };
-// Top control stub — the ADMIT ONE / serial line.
-const stubTop: React.CSSProperties = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%',
-  fontFamily: mono, fontSize: 9.5, letterSpacing: 3, color: TICKET.faint, textTransform: 'uppercase',
-};
-const admitTag: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, color: TICKET.dim };
-const admitDot: React.CSSProperties = {
-  width: 5, height: 5, borderRadius: '50%', background: TICKET.seal,
-};
-const serial: React.CSSProperties = { letterSpacing: 2 };
-// A punched perforation line between stub and body.
-const perf: React.CSSProperties = {
-  width: '100%', margin: '13px 0', borderTop: `1.5px dashed ${TICKET.edge}`,
+// Each drifting card sits in a small dark frame so it reads as a real card, not a floating icon.
+const driftCardFace: React.CSSProperties = {
+  display: 'grid', placeItems: 'center', padding: '10px 9px', borderRadius: 8,
+  background: '#221910', border: '1px solid rgba(90,74,45,0.55)',
+  boxShadow: '0 14px 32px rgba(0,0,0,0.5)',
 };
 // The crest sits inside a flat seal medallion.
 const crestMedallion: React.CSSProperties = {
