@@ -275,14 +275,20 @@ const seat: React.CSSProperties = {
 };
 const portrait: React.CSSProperties = {
   borderRadius: 16, position: 'relative', overflow: 'hidden',
-  background: `linear-gradient(160deg, ${C.panelHi}, ${C.panel})`, border: `1px solid ${C.border}`,
+  // A recessed portrait well: a warm catch-light rakes the top, the base sinks into shadow, and
+  // the avatar sits lit inside a framed medallion rather than pasted on a flat swatch.
+  background:
+    'radial-gradient(ellipse 92% 58% at 50% 8%, rgba(240,206,150,0.16), transparent 60%),' +  // warm top catch-light
+    'radial-gradient(ellipse 100% 70% at 50% 118%, rgba(0,0,0,0.52), transparent 64%),' +      // base sinks to shadow
+    `linear-gradient(160deg, ${C.panelHi}, ${C.panel})`,
+  border: `1px solid ${C.border}`,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   transition: 'box-shadow .3s cubic-bezier(.22,.61,.36,1), border-color .3s ease',
 };
 const badge: React.CSSProperties = {
   position: 'absolute', top: 5, minWidth: 24, height: 20, padding: '0 4px', borderRadius: 7, display: 'flex',
   alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: mono, fontWeight: 700,
-  border: `1px solid ${C.border}`, background: 'rgba(10,12,20,0.85)', zIndex: 2,
+  border: `1px solid ${C.border}`, background: 'rgba(20,13,9,0.85)', zIndex: 2,
 };
 const badgeDef: React.CSSProperties = { left: 5, color: '#8fb0a6' };
 const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
@@ -297,7 +303,7 @@ const statusRow: React.CSSProperties = {
 };
 const statusChip: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 2, height: 16, padding: '0 4px', borderRadius: 6,
-  fontSize: 9, fontFamily: mono, fontWeight: 700, border: '1px solid', background: 'rgba(10,12,20,0.82)',
+  fontSize: 9, fontFamily: mono, fontWeight: 700, border: '1px solid', background: 'rgba(20,13,9,0.82)',
 };
 const statusTurns: React.CSSProperties = {
   fontSize: 9, opacity: 0.7, fontStyle: 'normal', marginLeft: 1,
