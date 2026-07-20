@@ -459,6 +459,10 @@
   transition: opacity .18s ease;
 }
 .cb-hand-card:hover .cb-hand-sheen { opacity: 1; animation: cb-hand-sheen .62s ease-out; }
+/* Epic/legendary cards carry a slow travelling holographic foil sweep (Balatro-style), so the
+   rarest cards shimmer even at rest — a constant tell that they're special. */
+@keyframes cb-foil { 0% { background-position: 210% 0; } 100% { background-position: -70% 0; } }
+.cb-foil { background-size: 230% 100%; background-position: 210% 0; animation: cb-foil 5s linear infinite; }
 .cb-field { transition: border-color .2s ease; }
 .cb-field:focus-within {
   border-color: rgba(176,70,47,0.55);

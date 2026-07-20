@@ -102,10 +102,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
 
         const tint = RARITY_TINT[def.rarity] ?? RARITY_TINT.common;
 
+        // Lifted cards stand up toward the viewer with a slight 3D tilt (Balatro-style physicality),
+        // not just a flat slide — the fan's perspective makes them read as real objects picked up.
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
-        if (isPending) { transform = 'translateY(-30px) scale(1.1)'; z = 6; }
-        else if (isHover) { transform = 'translateY(-22px) scale(1.08)'; z = 5; }
+        if (isPending) { transform = 'perspective(720px) translateY(-30px) rotateX(-7deg) scale(1.1)'; z = 6; }
+        else if (isHover) { transform = 'perspective(720px) translateY(-22px) rotateX(-6deg) scale(1.08)'; z = 5; }
 
         return (
           <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 260}ms`, zIndex: z }}>
@@ -144,7 +146,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               {hasCos && <div style={cosmeticRing(cos!.border)} />}
               {tint.sheen !== 'transparent' && (
                 <div
-                  style={{ ...foilSheen, background: `linear-gradient(128deg, transparent 34%, ${tint.sheen} 50%, transparent 66%)` }}
+                  className="cb-foil"
+                  style={{ ...foilSheen, background: `linear-gradient(128deg, transparent 30%, ${tint.sheen} 50%, transparent 70%)` }}
                   aria-hidden
                 />
               )}
