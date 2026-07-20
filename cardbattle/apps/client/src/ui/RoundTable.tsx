@@ -203,13 +203,15 @@ const felt: React.CSSProperties = {
   transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
   width: '62%', height: '60%', borderRadius: '50%', overflow: 'hidden',
   background:
-    'radial-gradient(ellipse 58% 52% at 50% 38%, rgba(230,180,96,0.17), transparent 60%),' + // warm overhead light pool
-    'radial-gradient(ellipse at 50% 42%, #3a1c1e 0%, #26100f 52%, #100607 100%)',            // deep burgundy felt tied to the oxblood room: lit centre → black rim
-  border: '2px solid rgba(200,152,70,0.30)',
+    'radial-gradient(ellipse 56% 50% at 50% 36%, rgba(240,188,102,0.22), transparent 58%),' + // warm overhead light pool
+    'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(255,226,168,0.10), transparent 54%),' + // hot centre catch-light on the baize
+    'radial-gradient(ellipse 94% 88% at 50% 48%, transparent 58%, rgba(72,46,86,0.24) 100%),' + // cool plum edge tint (ties to the bg wall wash)
+    'radial-gradient(ellipse at 50% 42%, #4a2325 0%, #2c1214 50%, #120709 100%)',              // richer burgundy felt body: lit centre → black rim
+  border: '2px solid rgba(206,158,76,0.36)',
   boxShadow:
-    'inset 0 0 5px 1px rgba(236,202,126,0.24),' + // brass rim highlight
-    'inset 0 0 92px 30px rgba(0,0,0,0.72),' +     // felt edge falls to black
-    '0 28px 62px rgba(0,0,0,0.6)',                // table floats above the floor
+    'inset 0 0 6px 1px rgba(240,208,132,0.30),' + // brass rim highlight
+    'inset 0 0 96px 30px rgba(0,0,0,0.72),' +     // felt edge falls to black
+    '0 30px 66px rgba(0,0,0,0.62)',               // table floats above the floor
 };
 // The engraved house medallion at the table centre. Laid flat on the felt plane (same rotateX
 // as the card piles) and low-opacity so it feels branded INTO the baize — an anchor for the
