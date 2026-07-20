@@ -230,8 +230,8 @@ const tabRow: React.CSSProperties = {
 function tabBtn(on: boolean): React.CSSProperties {
   return {
     padding: '9px 18px', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: sans,
-    color: on ? C.you : C.dim, background: 'transparent', border: 'none',
-    borderBottom: on ? `2px solid ${C.you}` : '2px solid transparent', marginBottom: -1,
+    color: on ? C.rare : C.dim, background: 'transparent', border: 'none',
+    borderBottom: on ? `2px solid ${C.rare}` : '2px solid transparent', marginBottom: -1,
   };
 }
 const body: React.CSSProperties = { display: 'flex', gap: 20, padding: 20, overflow: 'auto' };
@@ -290,8 +290,8 @@ function swatch(on: boolean, glow: string): React.CSSProperties {
   return {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', cursor: 'pointer',
     borderRadius: 4, color: C.text, fontFamily: sans, minHeight: 66, justifyContent: 'center',
-    background: on ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)',
-    border: on ? `2px solid ${C.you}` : `1px solid ${C.border}`,
+    background: on ? 'rgba(224,170,70,0.07)' : 'rgba(255,255,255,0.02)',
+    border: on ? `2px solid ${C.rare}` : `1px solid ${C.border}`,
     boxShadow: on ? `0 0 14px ${glow}` : 'none',
   };
 }
