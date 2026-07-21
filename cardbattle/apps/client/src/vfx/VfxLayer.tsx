@@ -346,20 +346,21 @@ function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
     fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
   };
   if (f.variant === 'hit') {
-    // A struck-in damage number: heavy italic, dark stroke so it reads on any felt, an
-    // element-coloured bloom, and a slam-in that punches big then recoils to rest. Big hits
-    // land larger and hotter for a crit-style emphasis.
-    const size = f.big ? 60 : 42;
+    // A struck-in damage number, treated like engraved bone-white type — NOT a glowing arcade
+    // "+N". Upright (no italic), heavy, with a thick dark stroke so it bites into any felt and a
+    // pair of hard drop-shadows for weight. No element-coloured neon halo (that read cheap); the
+    // element tint lives in the impact flash instead. Big hits land larger for crit emphasis.
+    const size = f.big ? 58 : 40;
     return {
       ...base,
-      fontWeight: 900, fontStyle: 'italic', fontSize: size, letterSpacing: '-0.04em',
-      WebkitTextStroke: '1.4px rgba(8,8,7,0.9)',
+      color: '#f4ecdc',
+      fontWeight: 900, fontSize: size, letterSpacing: '-0.03em',
+      WebkitTextStroke: '1.6px rgba(8,7,5,0.94)',
       textShadow: [
-        `0 0 ${f.big ? 26 : 16}px ${f.color}`,
-        `0 0 6px ${f.color}`,
-        '0 4px 8px rgba(0,0,0,0.85)',
+        '0 2px 0 rgba(0,0,0,0.55)',
+        '0 5px 14px rgba(0,0,0,0.72)',
       ].join(','),
-      animation: `cb-slam ${f.big ? 1.5 : 1.35}s cubic-bezier(.14,.9,.32,1) ${f.delay}s backwards`,
+      animation: `cb-slam ${f.big ? 1.4 : 1.25}s cubic-bezier(.14,.9,.32,1) ${f.delay}s backwards`,
     };
   }
   // Heal / shield gains: a lighter, buoyant rise.
