@@ -14,9 +14,11 @@ const STEEL_D = '#7b8398';
 const WOOD = '#8a5a32';
 const WOOD_D = '#5c3a1f';
 
-/** soft radial glow disc behind the artwork */
-function Glow({ color, o = 0.45 }: { color: string; o?: number }) {
-  return <circle cx="32" cy="32" r="22" fill={color} opacity={o} style={{ filter: 'blur(8px)' }} />;
+/** The per-art blurred glow disc was the cheap "AI bloom" look (same tell we stripped from the
+ *  portraits). The scene window's backlit horizon now separates the subject, so this is a no-op —
+ *  kept as a component so the 37 art fns don't each need editing. */
+function Glow(_p: { color: string; o?: number }) {
+  return null;
 }
 
 function Sword() {
@@ -84,8 +86,8 @@ function Bomb() {
       <rect x="26" y="18" width="8" height="8" rx="1.5" fill="#2a2f3e" stroke="#454c63" strokeWidth="1" />
       {/* fuse */}
       <path d="M30 18 Q38 10 44 14" fill="none" stroke="#a07b4a" strokeWidth="2.5" strokeLinecap="round" />
-      {/* spark */}
-      <circle cx="45" cy="13" r="5" fill="#ffd84a" opacity="0.9" style={{ filter: 'blur(2px)' }} />
+      {/* spark — crisp ember disc + hard four-point flare */}
+      <circle cx="45" cy="13" r="3.4" fill="#ffce5a" stroke="#7a3a12" strokeWidth="0.7" />
       <path d="M45 7 L46 12 L51 13 L46 14 L45 19 L44 14 L39 13 L44 12 Z" fill="#fff1a8" />
     </>
   );
@@ -145,8 +147,9 @@ function Reverse() {
       {/* arrowheads */}
       <path d="M44 21 L38 18 L45 14 Z" fill="#e2d0ff" stroke="#fff" strokeWidth="0.6" />
       <path d="M20 43 L26 46 L19 50 Z" fill="#e2d0ff" stroke="#fff" strokeWidth="0.6" />
-      {/* core spark */}
-      <circle cx="32" cy="32" r="4" fill="#efe6ff" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+      {/* core hub — crisp inked pip */}
+      <circle cx="32" cy="32" r="3.4" fill="#efe6ff" stroke="#3a2c5e" strokeWidth="0.8" />
+      <circle cx="30.9" cy="30.9" r="1" fill="#fff" />
     </>
   );
 }
@@ -448,8 +451,9 @@ function Fireball() {
       {/* trailing flames */}
       <path d="M32 20 Q24 8 20 4 Q26 14 22 16 Q30 12 32 20 Z" fill="#ff8a3c" opacity="0.9" />
       <path d="M40 24 Q48 14 52 10 Q46 20 50 22 Q42 20 40 24 Z" fill="#ffb45a" opacity="0.8" />
-      {/* inner spark */}
-      <circle cx="28" cy="32" r="4" fill="#fff1a8" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+      {/* inner hotspot — crisp molten catch-light */}
+      <circle cx="28" cy="32" r="3.4" fill="#fff1a8" />
+      <circle cx="26.9" cy="30.9" r="1.1" fill="#fff" />
     </>
   );
 }
@@ -559,7 +563,8 @@ function HolyNova() {
           <stop offset="1" stopColor="#f4c44a" />
         </radialGradient>
       </defs>
-      <circle cx="32" cy="32" r="5" fill="#fffef0" opacity="0.95" style={{ filter: 'blur(1px)' }} />
+      <circle cx="32" cy="32" r="4" fill="#fffef0" />
+      <circle cx="30.6" cy="30.6" r="1.3" fill="#fff" />
     </>
   );
 }
@@ -604,8 +609,9 @@ function Charge() {
       {/* charging lightning sparks */}
       <path d="M12 14 L18 20 L14 22 L20 30" fill="none" stroke="#ffe46a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
       <path d="M52 16 L46 22 L50 24 L44 32" fill="none" stroke="#ffe46a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
-      {/* rising energy motes */}
-      <circle cx="32" cy="32" r="4" fill="#eaf4ff" opacity="0.9" style={{ filter: 'blur(1px)' }} />
+      {/* core facet catch-light — crisp */}
+      <circle cx="32" cy="32" r="3.4" fill="#eaf4ff" />
+      <circle cx="30.9" cy="30.9" r="1" fill="#fff" />
       <circle cx="26" cy="14" r="1.6" fill="#bfe0ff" opacity="0.8" />
       <circle cx="40" cy="18" r="1.4" fill="#bfe0ff" opacity="0.7" />
     </>
