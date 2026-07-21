@@ -218,17 +218,17 @@
   64%  { transform: translate(-50%, -140%) scale(1);   opacity: 1; }
   100% { transform: translate(-50%, -196%) scale(0.94); opacity: 0; }
 }
-/* Damage number that SLAMS in: it drops from oversized, cracks down past its target size,
-   snaps back with a small recoil, holds legibly, then drifts up and burns out. Reads as a
-   struck blow rather than a gentle float. */
+/* A struck number that LANDS and holds — not floating combat text. A hard punch in from
+   slightly oversized to full size (no big elastic zoom, no cocked rotation), a tiny settle,
+   then it HOLDS dead-still at full opacity (the readable weight beat) before a short, clean
+   fade with only a hair of upward drift. Upright throughout. */
 @keyframes cb-slam {
-  0%   { transform: translate(-50%, -58%) scale(2.6) rotate(-9deg); opacity: 0; }
-  10%  { transform: translate(-50%, -58%) scale(2.6) rotate(-9deg); opacity: 0; }
-  22%  { transform: translate(-50%, -62%) scale(0.82) rotate(-3deg); opacity: 1; }
-  32%  { transform: translate(-50%, -64%) scale(1.12) rotate(-6deg); opacity: 1; }
-  44%  { transform: translate(-50%, -66%) scale(1)    rotate(-4deg); opacity: 1; }
-  70%  { transform: translate(-50%, -92%) scale(1)    rotate(-4deg); opacity: 1; }
-  100% { transform: translate(-50%, -150%) scale(0.9) rotate(-4deg); opacity: 0; }
+  0%   { transform: translate(-50%, -60%) scale(1.42); opacity: 0; }
+  8%   { transform: translate(-50%, -62%) scale(1);    opacity: 1; }
+  16%  { transform: translate(-50%, -63%) scale(1.06); opacity: 1; }
+  24%  { transform: translate(-50%, -63%) scale(1);    opacity: 1; }
+  72%  { transform: translate(-50%, -63%) scale(1);    opacity: 1; }
+  100% { transform: translate(-50%, -76%) scale(0.96); opacity: 0; }
 }
 /* Shop modal springs up as it opens instead of snapping into place. */
 @keyframes cb-shop-pop {
