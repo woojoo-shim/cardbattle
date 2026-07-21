@@ -52,13 +52,22 @@ function tableCenter(): { x: number; y: number } | null {
   return { x: x / els.length, y: y / els.length };
 }
 
-/** Jolt the struck portrait with a heavy, damped recoil that settles slowly in place —
- *  a weighty blow, not a quick flinch. */
-function shake(id: string): void {
+/** The struck portrait takes a real, directional blow: it's SHOVED away from the attacker (kx/ky =
+ *  unit vector pointing FROM the attacker TO the victim), freezes for a beat at the peak of the
+ *  knockback (the hitstop that sells mass), then damped-recoils back to rest. Shove distance and
+ *  settle time scale with the blow's magnitude, so a chip tap barely rocks and a crusher throws the
+ *  seat. The seat is centred with translate(-50%,-50%) so that offset is baked into every key. */
+function impactHit(id: string, kx: number, ky: number, magNorm: number): void {
   const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
   if (!el) return;
-  el.style.animation = 'cb-shake .66s cubic-bezier(.33,.06,.28,.98)';
-  setTimeout(() => { el.style.animation = ''; }, 680);
+  const px = 7 + magNorm * 7; // ~10px chip → ~19px crusher shove
+  el.style.setProperty('--kx', `${(kx * px).toFixed(1)}px`);
+  el.style.setProperty('--ky', `${(ky * px).toFixed(1)}px`);
+  const dur = 0.5 + magNorm * 0.18;
+  el.style.animation = 'none';
+  void el.offsetWidth; // reflow so back-to-back AoE hits always re-fire from 0
+  el.style.animation = `cb-hit ${dur.toFixed(2)}s cubic-bezier(.3,.5,.25,1)`;
+  setTimeout(() => { el.style.animation = ''; }, dur * 1000 + 40);
 }
 
 /** A whole-screen camera kick on impact — the entire arena jolts and settles, so a hit shoves the
@@ -70,7 +79,7 @@ function cameraKick(amount: number): void {
   const el = document.querySelector<HTMLElement>('[data-arena]');
   if (!el) return;
   const mag = Math.max(0.4, Math.min(1.7, amount / 9));
-  const dur = 0.3 + mag * 0.12;
+  const dur = 0.36 + mag * 0.14;
   el.style.setProperty('--cbk', mag.toFixed(2));
   el.style.animation = 'none';
   void el.offsetWidth; // reflow so a repeat hit restarts the shake from 0
@@ -137,7 +146,6 @@ export function VfxLayer({ events, players }: Props) {
     if (fresh.length === 0) return;
 
     const add: Fx[] = [];
-    let damaged = false;
 
     for (const e of fresh) {
       if (e.type === 'card_played') {
@@ -174,15 +182,16 @@ export function VfxLayer({ events, players }: Props) {
         }
       } else if (e.type === 'damage_dealt') {
         // Only bail if the target truly isn't on screen. Everything else is DEFERRED to the exact
-        // moment of impact and the face is RE-MEASURED then — so the hit lands dead-centre on the
-        // portrait even after the mouse-parallax has drifted the seat since the card was played.
+        // moment of impact and both faces are RE-MEASURED then — so the hit lands dead-centre and
+        // the knockback aims true even after the mouse-parallax has drifted the seats.
         if (!centerOf(e.targetId)) continue;
-        damaged = true;
         const color = ELEM[e.element] ?? ELEM.none;
         const big = e.amount >= 8;
-        // The hit is now ONE cohesive, centred burst — no diagonal slashes or scattered spark dots
-        // slapped on. The slamming damage number is the hero, sitting on a single tight flash that
-        // detonates from the exact centre of the face; the seat recoils and the camera kicks.
+        const magNorm = Math.max(0.4, Math.min(1.7, e.amount / 9));
+        // The hit is ONE cohesive, centred burst — no diagonal slashes or scattered spark dots. The
+        // slamming damage number is the hero on a single tight flash; then the whole weight lands:
+        // the seat is SHOVED away from the attacker, the camera kicks, and the screen bleeds crimson
+        // — all synced to this instant and all scaled to how hard the blow hit.
         setTimeout(() => {
           const t = centerOf(e.targetId);
           if (t) {
@@ -193,9 +202,24 @@ export function VfxLayer({ events, players }: Props) {
             setFx((cur) => [...cur, ...spawn]);
             const ids = new Set(spawn.map((s) => s.id));
             setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2000);
+            // Knockback aimed straight away from the attacker. Self-inflicted / area damage with no
+            // distinct source (e.g. poison) falls back to a downward slump.
+            const s = centerOf(e.sourceId);
+            let kx = 0, ky = 1;
+            if (s && (s.x !== t.x || s.y !== t.y)) {
+              const dx = t.x - s.x, dy = t.y - s.y, len = Math.hypot(dx, dy) || 1;
+              kx = dx / len; ky = dy / len;
+            }
+            impactHit(e.targetId, kx, ky, magNorm);
+            cameraKick(e.amount);
+            // Crimson concussion at the screen edge — synced to the landing, deeper for a bigger hit.
+            if (flashRef.current) {
+              const a = Math.min(0.72, 0.34 + e.amount / 42);
+              const spread = 24 + Math.min(34, e.amount);
+              flashRef.current.style.boxShadow = `inset 0 0 ${200 + spread * 2}px ${spread}px rgba(196,42,74,${a.toFixed(2)})`;
+              setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 320);
+            }
           }
-          shake(e.targetId);
-          cameraKick(e.amount);
         }, IMPACT_DELAY * 1000);
       } else if (e.type === 'card_stolen') {
         // A card is yanked from the victim's hand and flies across to the thief.
@@ -214,12 +238,6 @@ export function VfxLayer({ events, players }: Props) {
         if (!tgt) continue;
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield', variant: 'gain' });
       }
-    }
-
-    if (damaged && flashRef.current) {
-      // A deep, unhurried crimson bloom at the screen edge — the hit sinks in, then recedes.
-      flashRef.current.style.boxShadow = 'inset 0 0 200px 30px rgba(196,42,74,0.62)';
-      setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 300);
     }
 
     if (add.length) {
@@ -291,13 +309,15 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
 /** A single TIGHT contact flash at the point of impact — a hard, brief white spark, not a big soft
  *  expanding bubble. The slash carries the shape; this just marks the moment of contact. */
 function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
-  const size = f.big ? 74 : 50;
+  const size = f.big ? 84 : 56;
   return {
     position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
-    background: `radial-gradient(circle, #fff 0%, ${f.color}aa 32%, transparent 62%)`,
-    boxShadow: `0 0 18px ${f.color}`,
+    // A hard white-hot core that punches on instantly, ringed by a tight element bloom — a
+    // concussion at the point of contact, not a soft expanding bubble.
+    background: `radial-gradient(circle, #fff 0%, #fff 16%, ${f.color}dd 40%, transparent 66%)`,
+    boxShadow: `0 0 22px ${f.color}, 0 0 8px #fff`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    animation: `cb-impact ${f.big ? 0.3 : 0.24}s cubic-bezier(.15,.7,.3,1) ${f.delay}s backwards`,
+    animation: `cb-impact ${f.big ? 0.32 : 0.26}s cubic-bezier(.12,.75,.3,1) ${f.delay}s backwards`,
   };
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
