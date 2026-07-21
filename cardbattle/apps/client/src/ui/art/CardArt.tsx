@@ -1,5 +1,8 @@
-/** Hand-drawn SVG card illustrations — replaces emoji icons. Dark-fantasy neon style,
- * each tinted by its element. 64x64 viewBox; scale via `size`. */
+/** Hand-drawn SVG card illustrations — replaces emoji icons. Godfield-bold subjects read
+ * inside a Yu-Gi-Oh-style illustrated scene window: each card's element paints an
+ * atmospheric backdrop (sky + backlit horizon + ground plane) behind the item, and the
+ * subject is stamped with a chunky ink outline so it pops off the diorama.
+ * 64x64 viewBox; scale via `size`. */
 
 interface Props {
   id: string;
@@ -775,39 +778,71 @@ const ART: Record<string, () => JSX.Element> = {
   backstab: Backstab,
 };
 
+/** Card id → element, so each illustration gets its element's illustrated backdrop. */
+type Elem = 'physical' | 'fire' | 'holy' | 'lightning' | 'poison' | 'ice' | 'none';
+const ELEMENT: Record<string, Elem> = {
+  sword: 'physical', bow: 'physical', spear: 'physical', twinstrike: 'physical', snipe: 'physical',
+  dagger: 'physical', windfury: 'physical', execute: 'physical', laststand: 'physical', thornmail: 'physical',
+  bomb: 'fire', fireball: 'fire',
+  potion: 'holy', greatheal: 'holy', shield: 'holy', sacrifice: 'holy', firstaid: 'holy',
+  judgment: 'holy', bulwark: 'holy', holynova: 'holy', regenward: 'holy',
+  reverse: 'lightning', bolt: 'lightning', charge: 'lightning', mindsiphon: 'lightning', tempest: 'lightning',
+  drain: 'poison', shatter: 'poison', plunder: 'poison', bloodwave: 'poison', backstab: 'poison',
+  venomdart: 'poison', plaguemist: 'poison',
+  bind: 'ice', frostbolt: 'ice', gale: 'ice',
+  peek: 'none', gambit: 'none', meditate: 'none', fateswap: 'none',
+};
+
+/** Per-element illustrated scene: a dusk sky, a backlit horizon light-source, and a ground plane —
+ *  muted candlelit pigments (the horizon glow is atmospheric light, not neon chrome). */
+interface Scene { sky1: string; sky2: string; horizon: string; g1: string; g2: string; haze: string }
+const SCENE: Record<Elem, Scene> = {
+  physical:  { sky1: '#23293a', sky2: '#3d3a3f', horizon: '#e0a866', g1: '#2a2118', g2: '#120d0a', haze: '#c99a63' },
+  fire:      { sky1: '#2e1710', sky2: '#5a2414', horizon: '#ff9a3c', g1: '#301410', g2: '#140806', haze: '#ff8a42' },
+  holy:      { sky1: '#2c2414', sky2: '#5a4720', horizon: '#ffe0a0', g1: '#2e2415', g2: '#150f09', haze: '#ffcf7a' },
+  lightning: { sky1: '#1e1830', sky2: '#3a2c52', horizon: '#ecd05a', g1: '#231a2c', g2: '#0e0a16', haze: '#d8c060' },
+  poison:    { sky1: '#1a2016', sky2: '#33401f', horizon: '#b6c85a', g1: '#1c2413', g2: '#0b0f07', haze: '#a6b34e' },
+  ice:       { sky1: '#1a242c', sky2: '#324a54', horizon: '#cfeaf0', g1: '#1e2a30', g2: '#0a1014', haze: '#bfe2ea' },
+  none:      { sky1: '#241d2c', sky2: '#443850', horizon: '#e0b878', g1: '#241b18', g2: '#120c0a', haze: '#d8b06a' },
+};
+
 export function CardArt({ id, size = 44 }: Props) {
   const Art = ART[id];
   if (!Art) return null;
   const dim = typeof size === 'number' ? `${size}px` : size;
+  const el = ELEMENT[id] ?? 'none';
+  const s = SCENE[el];
+  // Scene gradients are keyed by element (not per-card): url() resolves to the first match in the
+  // document, and every card of an element shares an identical palette, so this stays correct.
   return (
     <svg viewBox="0 0 64 64" aria-hidden style={{ display: 'block', width: dim, height: dim }}>
       <defs>
-        {/* Shared "trading-card sticker" treatment applied to every illustration — no per-card
-            work. Clash-Royale-style bold read: a warm stage spotlight, a chunky dark ink outline
-            stamped around the whole subject (feMorphology dilate), a grounding drop shadow so the
-            piece pops off a lit pedestal, and a cool top-down light wash from the lamp above. */}
-        <radialGradient id="ca-mood" cx="0.5" cy="0.4" r="0.66">
-          <stop offset="0.62" stopColor="#05070a" stopOpacity="0" />
-          <stop offset="1" stopColor="#04060a" stopOpacity="0.55" />
+        {/* Yu-Gi-Oh illustrated window: a dusk sky, a glowing horizon that backlights the subject,
+            and a ground plane — a painted diorama rather than a flat spotlight-on-void. */}
+        <linearGradient id={`ca-sky-${el}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={s.sky1} />
+          <stop offset="1" stopColor={s.sky2} />
+        </linearGradient>
+        <radialGradient id={`ca-horizon-${el}`} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor={s.horizon} stopOpacity="0.7" />
+          <stop offset="0.5" stopColor={s.horizon} stopOpacity="0.28" />
+          <stop offset="1" stopColor={s.horizon} stopOpacity="0" />
         </radialGradient>
-        {/* warm spotlight lifting the hero off the dark backdrop */}
-        <radialGradient id="ca-spot" cx="0.5" cy="0.42" r="0.5">
-          <stop offset="0" stopColor="#fff3df" stopOpacity="0.14" />
-          <stop offset="0.55" stopColor="#ffd9a0" stopOpacity="0.05" />
-          <stop offset="1" stopColor="#ffd9a0" stopOpacity="0" />
+        <linearGradient id={`ca-ground-${el}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={s.g1} />
+          <stop offset="1" stopColor={s.g2} />
+        </linearGradient>
+        {/* framing vignette to keep the illustration reading as a windowed scene */}
+        <radialGradient id="ca-vig" cx="0.5" cy="0.44" r="0.72">
+          <stop offset="0.58" stopColor="#04060a" stopOpacity="0" />
+          <stop offset="1" stopColor="#03040a" stopOpacity="0.6" />
         </radialGradient>
         <radialGradient id="ca-floor" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#000" stopOpacity="0.6" />
+          <stop offset="0" stopColor="#000" stopOpacity="0.62" />
           <stop offset="1" stopColor="#000" stopOpacity="0" />
         </radialGradient>
-        {/* thin lit rim on the pedestal so the ground reads as a little stage disc */}
-        <radialGradient id="ca-stage" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0.62" stopColor="#ffe6bd" stopOpacity="0" />
-          <stop offset="0.9" stopColor="#ffe6bd" stopOpacity="0.16" />
-          <stop offset="1" stopColor="#ffe6bd" stopOpacity="0" />
-        </radialGradient>
         <linearGradient id="ca-toplight" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.1" />
+          <stop offset="0" stopColor="#fff" stopOpacity="0.09" />
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
         {/* stamp a chunky dark outline around the art, then cast a soft grounding shadow */}
@@ -822,17 +857,19 @@ export function CardArt({ id, size = 44 }: Props) {
           <feDropShadow dx="0" dy="1.7" stdDeviation="1.4" floodColor="#000" floodOpacity="0.55" />
         </filter>
       </defs>
-      {/* backdrop vignette pulls the subject out of the dark */}
-      <rect x="0" y="0" width="64" height="64" fill="url(#ca-mood)" />
-      {/* warm stage spotlight behind the hero */}
-      <ellipse cx="32" cy="33" rx="30" ry="30" fill="url(#ca-spot)" />
-      {/* grounding contact shadow + a faint lit stage disc so nothing floats */}
-      <ellipse cx="32" cy="57" rx="18" ry="4.5" fill="url(#ca-floor)" />
-      <ellipse cx="32" cy="56" rx="16" ry="4" fill="url(#ca-stage)" />
+      {/* painted scene: sky, ground plane, and a backlit horizon glow at the seam */}
+      <rect x="0" y="0" width="64" height="41" fill={`url(#ca-sky-${el})`} />
+      <rect x="0" y="39" width="64" height="25" fill={`url(#ca-ground-${el})`} />
+      <ellipse cx="32" cy="40" rx="36" ry="15" fill={`url(#ca-horizon-${el})`} />
+      {/* thin luminous horizon line where sky meets ground */}
+      <rect x="0" y="38.4" width="64" height="1.6" fill={s.haze} opacity="0.32" style={{ mixBlendMode: 'screen' }} />
+      {/* framing vignette + grounding contact shadow so the subject sits in the scene */}
+      <rect x="0" y="0" width="64" height="64" fill="url(#ca-vig)" />
+      <ellipse cx="32" cy="56" rx="17" ry="4.2" fill="url(#ca-floor)" />
       {/* the illustration, stamped with a bold ink outline and a soft cast shadow */}
       <g filter="url(#ca-pop)"><Art /></g>
       {/* faint overhead light wash across the top half */}
-      <rect x="0" y="0" width="64" height="30" fill="url(#ca-toplight)" style={{ mixBlendMode: 'screen' }} />
+      <rect x="0" y="0" width="64" height="28" fill="url(#ca-toplight)" style={{ mixBlendMode: 'screen' }} />
     </svg>
   );
 }
