@@ -237,7 +237,7 @@ export class BattleRoom extends Room<BattleState> {
     if (this.gs.phase !== 'playing') return;
     const cur = this.gs.turnOrder[this.gs.currentTurnIndex];
     if (this.bots.has(cur)) {
-      this.turnTimer = setTimeout(() => this.botTurn(), 1500);
+      this.turnTimer = setTimeout(() => this.botTurn(), 900);
     } else {
       this.armTimer();
     }
@@ -257,11 +257,12 @@ export class BattleRoom extends Room<BattleState> {
       this.gs = r.state; this.publish(r.events);
       if (this.gs.phase === 'ended') { this.clearTimer(); return; }
       // Loop: keep taking affordable actions this same turn, then end when nothing's worth playing.
-      // Deliberately slow — each play should land with weight before the next, not rattle off.
-      this.turnTimer = setTimeout(() => this.botTurn(), 1250);
+      // Paced so each play still lands with weight (the client hurl+impact reads in ~850ms) — but
+      // no longer than that, so a multi-card bot turn stays snappy instead of dragging.
+      this.turnTimer = setTimeout(() => this.botTurn(), 900);
     } else {
-      // A held beat before the turn passes, so the table isn't yanked to the next seat.
-      this.turnTimer = setTimeout(() => this.botEndTurn(), 700);
+      // A short held beat before the turn passes, so the table isn't yanked to the next seat.
+      this.turnTimer = setTimeout(() => this.botEndTurn(), 450);
     }
   }
 
