@@ -310,17 +310,23 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
  *  expanding bubble. The slash carries the shape; this just marks the moment of contact. */
 function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
   const size = f.big ? 96 : 64;
-  // Not a flat disc — a STARBURST spark: a white-hot core with light spikes radiating out (the
-  // repeating-conic rays), the whole thing masked to fade off radially so it reads as an energetic
-  // flash of light at the point of contact, not a plain circle. Single, centred, cohesive.
-  const fade = 'radial-gradient(circle, #000 20%, rgba(0,0,0,0.55) 42%, transparent 72%)';
+  // Not a flat disc — a STARBURST spark: a white-hot core, four dominant lens-flare STAR ARMS, and a
+  // finer sparkle of light spikes between them, all masked to fade off radially so it reads as an
+  // energetic flash of light at the point of contact, not a plain circle. Layering a coarse (90°) and
+  // a fine (18°) conic gives uneven ray lengths — a real sparkle, not uniform spokes. The core keeps
+  // a tight white hot-spot ringed by the element tint. Single, centred, cohesive.
+  const fade = 'radial-gradient(circle, #000 16%, rgba(0,0,0,0.6) 40%, transparent 74%)';
+  const background = [
+    `radial-gradient(circle, #fff 0%, #fff 14%, ${f.color}f0 30%, ${f.color}55 48%, transparent 66%)`,
+    'repeating-conic-gradient(from 45deg, rgba(255,255,255,0.85) 0deg 1.1deg, transparent 1.1deg 90deg)',
+    'repeating-conic-gradient(from 12deg, rgba(255,255,255,0.5) 0deg 1.8deg, transparent 1.8deg 22.5deg)',
+  ].join(',');
   return {
-    position: 'fixed', left: f.x, top: f.y, width: size, height: size,
-    background: `radial-gradient(circle, #fff 0%, #fff 15%, ${f.color}e0 36%, transparent 66%), repeating-conic-gradient(from 9deg, rgba(255,255,255,0.6) 0deg 2.4deg, transparent 2.4deg 18deg)`,
+    position: 'fixed', left: f.x, top: f.y, width: size, height: size, background,
     maskImage: fade, WebkitMaskImage: fade,
-    filter: `drop-shadow(0 0 18px ${f.color}) drop-shadow(0 0 6px #fff)`,
+    filter: `drop-shadow(0 0 20px ${f.color}) drop-shadow(0 0 7px #fff)`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    animation: `cb-impact ${f.big ? 0.34 : 0.28}s cubic-bezier(.12,.75,.3,1) ${f.delay}s backwards`,
+    animation: `cb-impact ${f.big ? 0.36 : 0.3}s cubic-bezier(.1,.78,.28,1) ${f.delay}s backwards`,
   };
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {

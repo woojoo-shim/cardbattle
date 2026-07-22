@@ -197,9 +197,10 @@
 /* Impact when an attack lands: one tight white-hot contact flash synced to the streak's arrival —
    a hard, brief pop on the face rather than an expanding ring. The slash carries the drama. */
 @keyframes cb-impact {
-  0%   { transform: translate(-50%, -50%) scale(0.14) rotate(-22deg); opacity: 0; }
-  10%  { transform: translate(-50%, -50%) scale(0.92) rotate(-6deg);  opacity: 1; }   /* hard snap on — the concussion hits at once */
-  100% { transform: translate(-50%, -50%) scale(1.6)  rotate(10deg);  opacity: 0; }   /* the starburst spikes twist as they burn off */
+  0%   { transform: translate(-50%, -50%) scale(0.14) rotate(-24deg); opacity: 0; }
+  9%   { transform: translate(-50%, -50%) scale(0.9)  rotate(-8deg);  opacity: 1; }   /* hard snap on — the concussion hits at once */
+  20%  { transform: translate(-50%, -50%) scale(0.98) rotate(-3deg);  opacity: 1; }   /* brief hold at peak — the flash reads crisp, not a smear */
+  100% { transform: translate(-50%, -50%) scale(1.62) rotate(12deg);  opacity: 0; }   /* the starburst spikes twist as they burn off */
 }
 /* Energy gathering at the caster during the wind-up: a core orb blooms then implodes as the strike
    releases, so the attack reads as charged rather than casually tossed. */
