@@ -309,15 +309,18 @@ function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
 /** A single TIGHT contact flash at the point of impact — a hard, brief white spark, not a big soft
  *  expanding bubble. The slash carries the shape; this just marks the moment of contact. */
 function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
-  const size = f.big ? 84 : 56;
+  const size = f.big ? 96 : 64;
+  // Not a flat disc — a STARBURST spark: a white-hot core with light spikes radiating out (the
+  // repeating-conic rays), the whole thing masked to fade off radially so it reads as an energetic
+  // flash of light at the point of contact, not a plain circle. Single, centred, cohesive.
+  const fade = 'radial-gradient(circle, #000 20%, rgba(0,0,0,0.55) 42%, transparent 72%)';
   return {
-    position: 'fixed', left: f.x, top: f.y, width: size, height: size, borderRadius: '50%',
-    // A hard white-hot core that punches on instantly, ringed by a tight element bloom — a
-    // concussion at the point of contact, not a soft expanding bubble.
-    background: `radial-gradient(circle, #fff 0%, #fff 16%, ${f.color}dd 40%, transparent 66%)`,
-    boxShadow: `0 0 22px ${f.color}, 0 0 8px #fff`,
+    position: 'fixed', left: f.x, top: f.y, width: size, height: size,
+    background: `radial-gradient(circle, #fff 0%, #fff 15%, ${f.color}e0 36%, transparent 66%), repeating-conic-gradient(from 9deg, rgba(255,255,255,0.6) 0deg 2.4deg, transparent 2.4deg 18deg)`,
+    maskImage: fade, WebkitMaskImage: fade,
+    filter: `drop-shadow(0 0 18px ${f.color}) drop-shadow(0 0 6px #fff)`,
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
-    animation: `cb-impact ${f.big ? 0.32 : 0.26}s cubic-bezier(.12,.75,.3,1) ${f.delay}s backwards`,
+    animation: `cb-impact ${f.big ? 0.34 : 0.28}s cubic-bezier(.12,.75,.3,1) ${f.delay}s backwards`,
   };
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
