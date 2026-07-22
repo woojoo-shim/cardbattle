@@ -257,7 +257,7 @@ export function VfxLayer({ events, players }: Props) {
             <span key={f.id} style={boltStyle(f)} />
           ) : f.kind === 'hurl' ? (
             <span key={f.id} style={hurlStyle(f)}>
-              {f.defId ? <CardArt id={f.defId} size={30} /> : <Icon name="card" size={28} color={f.color} />}
+              {f.defId ? <CardArt id={f.defId} size={44} /> : <Icon name="card" size={28} color={f.color} />}
             </span>
           ) : f.kind === 'impact' ? (
             <span key={f.id} style={impactStyle(f)} />
@@ -297,7 +297,7 @@ function boltStyle(f: Extract<Fx, { kind: 'bolt' }>): React.CSSProperties {
 function hurlStyle(f: Extract<Fx, { kind: 'hurl' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, fontSize: 28, lineHeight: 1, zIndex: 61,
-    filter: `drop-shadow(0 0 10px ${f.color}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))`,
+    filter: `drop-shadow(0 0 14px ${f.color}) drop-shadow(0 8px 16px rgba(0,0,0,0.72))`,
     willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
     animation: `${f.spin ? 'cb-hurl' : 'cb-hurl-glide'} ${(f.dur ?? 0.64).toFixed(2)}s cubic-bezier(.34,.32,.2,1) forwards`,

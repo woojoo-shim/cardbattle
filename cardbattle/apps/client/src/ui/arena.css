@@ -151,11 +151,16 @@
   18%  { opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.08); opacity: 0.95; }
 }
-/* A thrown weapon (blade) — flies caster->target while tumbling end over end. */
+/* A HURLED card — not a flat slide. It's flung from the caster with a punch (bursts in oversized),
+   ARCS up and over the table (the 50%/78% keys lift it above the straight line via the extra -Y so
+   it reads as a real thrown parabola), tumbles hard end-over-end, then SLAMS down onto the target's
+   face as the impact takes over. The arrival scale-down + fade hands off to the hit flash. */
 @keyframes cb-hurl {
-  0%   { transform: translate(-50%, -50%) rotate(-40deg) scale(0.6); opacity: 0; }
-  14%  { opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(680deg) scale(1); opacity: 0; }
+  0%   { transform: translate(-50%, -50%) rotate(-70deg) scale(0.5); opacity: 0; }
+  10%  { transform: translate(calc(-50% + var(--dx) * 0.08), calc(-50% + var(--dy) * 0.08 - 10px)) rotate(-20deg) scale(1.22); opacity: 1; }   /* release: snaps forward, oversized */
+  50%  { transform: translate(calc(-50% + var(--dx) * 0.5),  calc(-50% + var(--dy) * 0.5 - 74px))  rotate(300deg) scale(1.02); opacity: 1; }  /* arc apex — lifted high, tumbling */
+  78%  { transform: translate(calc(-50% + var(--dx) * 0.82), calc(-50% + var(--dy) * 0.82 - 30px)) rotate(560deg) scale(1.1);  opacity: 1; }  /* diving in */
+  100% { transform: translate(calc(-50% + var(--dx)),        calc(-50% + var(--dy)))               rotate(760deg) scale(0.85); opacity: 0; }  /* SLAMS onto the target */
 }
 /* A comet lancing caster->target: it translates WHOLE from origin to the target's face (oriented
    along --ang so its head leads), rather than stretching via scaleX — the head child stays a crisp
