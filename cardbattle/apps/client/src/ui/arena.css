@@ -121,13 +121,13 @@
    every offset is multiplied by it so a light tap barely nudges and a heavy hit slams. A tiny scale
    (grows with --cbk) keeps the translated edges from exposing the black void behind the screen. */
 @keyframes cb-camera {
-  0%   { transform: translate(calc(-9px * var(--cbk, 1)), calc(6px * var(--cbk, 1)))  scale(calc(1 + 0.022 * var(--cbk, 1))); }  /* SNAP to peak displacement instantly — the jolt hits on frame 1 */
-  9%   { transform: translate(calc(-9px * var(--cbk, 1)), calc(6px * var(--cbk, 1)))  scale(calc(1 + 0.022 * var(--cbk, 1))); }  /* HOLD = the hitstop freeze — the whole arena stops dead for a beat */
-  24%  { transform: translate(calc(8px * var(--cbk, 1)),   calc(-6px * var(--cbk, 1))) scale(calc(1 + 0.016 * var(--cbk, 1))); }
-  42%  { transform: translate(calc(-6px * var(--cbk, 1)),  calc(4px * var(--cbk, 1)))  scale(calc(1 + 0.012 * var(--cbk, 1))); }
-  60%  { transform: translate(calc(4px * var(--cbk, 1)),   calc(-3px * var(--cbk, 1))) scale(calc(1 + 0.008 * var(--cbk, 1))); }
-  78%  { transform: translate(calc(-2px * var(--cbk, 1)),  calc(1.5px * var(--cbk, 1))) scale(1.005); }
-  100% { transform: translate(0, 0) scale(1); }
+  0%   { transform: translate(calc(-9px * var(--cbk, 1)), calc(6px * var(--cbk, 1)))  scale(calc(1 + 0.024 * var(--cbk, 1))) rotate(calc(0.55deg * var(--cbk, 1))); }  /* SNAP to peak displacement + tilt instantly — the jolt hits on frame 1 */
+  9%   { transform: translate(calc(-9px * var(--cbk, 1)), calc(6px * var(--cbk, 1)))  scale(calc(1 + 0.024 * var(--cbk, 1))) rotate(calc(0.55deg * var(--cbk, 1))); }  /* HOLD = the hitstop freeze — the whole arena stops dead, cocked, for a beat */
+  24%  { transform: translate(calc(8px * var(--cbk, 1)),   calc(-6px * var(--cbk, 1))) scale(calc(1 + 0.018 * var(--cbk, 1))) rotate(calc(-0.36deg * var(--cbk, 1))); }
+  42%  { transform: translate(calc(-6px * var(--cbk, 1)),  calc(4px * var(--cbk, 1)))  scale(calc(1 + 0.013 * var(--cbk, 1))) rotate(calc(0.2deg * var(--cbk, 1))); }
+  60%  { transform: translate(calc(4px * var(--cbk, 1)),   calc(-3px * var(--cbk, 1))) scale(calc(1 + 0.009 * var(--cbk, 1))) rotate(calc(-0.1deg * var(--cbk, 1))); }
+  78%  { transform: translate(calc(-2px * var(--cbk, 1)),  calc(1.5px * var(--cbk, 1))) scale(1.006) rotate(calc(0.04deg * var(--cbk, 1))); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
 }
 /* The table lamp powering on at game start: a few stutters, then settles to full glow. */
 @keyframes cb-lampon {
