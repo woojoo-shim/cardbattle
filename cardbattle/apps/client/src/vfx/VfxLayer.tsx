@@ -13,7 +13,7 @@ interface Props {
 
 type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
-  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName; variant: 'hit' | 'gain'; big?: boolean }
+  | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean; dur?: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
@@ -188,16 +188,16 @@ export function VfxLayer({ events, players }: Props) {
         const color = ELEM[e.element] ?? ELEM.none;
         const big = e.amount >= 8;
         const magNorm = Math.max(0.4, Math.min(1.7, e.amount / 9));
-        // The hit is ONE cohesive, centred burst — no diagonal slashes or scattered spark dots. The
-        // slamming damage number is the hero on a single tight flash; then the whole weight lands:
-        // the seat is SHOVED away from the attacker, the camera kicks, and the screen bleeds crimson
-        // — all synced to this instant and all scaled to how hard the blow hit.
+        // No floating damage NUMBER — a big glowing "+N" is the classic cheap free-to-play tell, and
+        // it read cheap no matter how the motion was tuned. The blow is sold entirely by PHYSICS the
+        // way fighting games / Godfield do it: one tight contact flash, the seat SHOVED away from the
+        // attacker, the camera kick, and the crimson screen-bleed — all synced to this instant and all
+        // scaled to how hard the blow hit. The HP bar draining does the counting.
         setTimeout(() => {
           const t = centerOf(e.targetId);
           if (t) {
             const spawn: Fx[] = [
               { id: nextId.current++, kind: 'impact', x: t.x, y: t.y, color, delay: 0, big },
-              { id: nextId.current++, kind: 'num', x: t.x, y: t.y, text: `${e.amount}`, color, delay: 0, variant: 'hit', big },
             ];
             setFx((cur) => [...cur, ...spawn]);
             const ids = new Set(spawn.map((s) => s.id));
@@ -232,11 +232,11 @@ export function VfxLayer({ events, players }: Props) {
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0, variant: 'gain' });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: HEAL, delay: 0 });
       } else if (e.type === 'shielded') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
-        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield', variant: 'gain' });
+        add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
       }
     }
 
@@ -339,33 +339,13 @@ function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
     animation: 'cb-deal 1.45s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
 }
+/** Heal / shield gains only — a lighter, buoyant rise. (Damage no longer floats a number; the hit
+ *  is sold by physics: flash + knockback + camera + crimson + the draining HP bar.) */
 function numStyle(f: Extract<Fx, { kind: 'num' }>): React.CSSProperties {
-  const base: React.CSSProperties = {
-    position: 'fixed', left: f.x, top: f.y, color: f.color, whiteSpace: 'nowrap',
-    display: 'flex', alignItems: 'center', lineHeight: 1,
-    fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
-  };
-  if (f.variant === 'hit') {
-    // A struck-in damage number, treated like engraved bone-white type — NOT a glowing arcade
-    // "+N". Upright (no italic), heavy, with a thick dark stroke so it bites into any felt and a
-    // pair of hard drop-shadows for weight. No element-coloured neon halo (that read cheap); the
-    // element tint lives in the impact flash instead. Big hits land larger for crit emphasis.
-    const size = f.big ? 58 : 40;
-    return {
-      ...base,
-      color: '#f4ecdc',
-      fontWeight: 900, fontSize: size, letterSpacing: '-0.03em',
-      WebkitTextStroke: '1.6px rgba(8,7,5,0.94)',
-      textShadow: [
-        '0 2px 0 rgba(0,0,0,0.55)',
-        '0 5px 14px rgba(0,0,0,0.72)',
-      ].join(','),
-      animation: `cb-slam ${f.big ? 1.4 : 1.25}s cubic-bezier(.14,.9,.32,1) ${f.delay}s backwards`,
-    };
-  }
-  // Heal / shield gains: a lighter, buoyant rise.
   return {
-    ...base, gap: 3,
+    position: 'fixed', left: f.x, top: f.y, color: f.color, whiteSpace: 'nowrap',
+    display: 'flex', alignItems: 'center', gap: 3, lineHeight: 1,
+    fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
     fontWeight: 800, fontSize: 30, letterSpacing: '-0.02em',
     textShadow: `0 0 10px ${f.color}, 0 2px 5px rgba(0,0,0,0.75)`,
     animation: `cb-rise 1.5s cubic-bezier(.16,.84,.44,1) ${f.delay}s backwards`,
