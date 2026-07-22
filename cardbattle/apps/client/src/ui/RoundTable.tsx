@@ -167,9 +167,12 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
                   ? 'linear-gradient(90deg,#d24a35,#a5301f)'
                   : isMe ? `linear-gradient(90deg,#aeb877,${C.you})` : `linear-gradient(90deg,#c96a52,${C.enemy})`;
                 return (
-                  <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
-                    <span style={hpGloss} />
-                  </i>
+                  <>
+                    <i style={{ ...hpGhost, width: `${hpPct}%` }} />
+                    <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
+                      <span style={hpGloss} />
+                    </i>
+                  </>
                 );
               })()}
             </div>
@@ -316,9 +319,25 @@ const spot: React.CSSProperties = {
   width: 120, height: 42, borderRadius: '50%',
 };
 const hpBar: React.CSSProperties = {
+  position: 'relative',
   width: '86%', height: 8, borderRadius: 6, background: '#0c0f18', border: `1px solid ${C.border}`, overflow: 'hidden',
 };
-const hpFill: React.CSSProperties = { display: 'block', height: '100%', borderRadius: 6, position: 'relative', overflow: 'hidden', transition: 'width .5s cubic-bezier(.22,.61,.36,1)' };
+// The real fill drops FAST so the ghost bleed behind it is briefly exposed on a hit.
+const hpFill: React.CSSProperties = {
+  position: 'absolute', left: 0, top: 0, zIndex: 2,
+  height: '100%', borderRadius: 6, overflow: 'hidden',
+  transition: 'width .2s cubic-bezier(.4,0,.2,1)',
+};
+// The lagging "ghost" bleed behind the real fill. On damage it holds at the old HP for a
+// beat (transition-delay) then drains slowly, so the chunk just lost flashes hot crimson
+// and bleeds off — this carries the "how much damage" read now that the number is gone.
+// On heal the real fill covers it instantly, so no artifact appears.
+const hpGhost: React.CSSProperties = {
+  position: 'absolute', left: 0, top: 0, zIndex: 1,
+  height: '100%', borderRadius: 6,
+  background: 'linear-gradient(90deg,#ff7a52,#e5482c)',
+  transition: 'width .6s cubic-bezier(.5,0,.5,1) .28s',
+};
 // A slim specular strip across the top of the fill — the bar reads as a lit glass tube, not a flat block.
 const hpGloss: React.CSSProperties = {
   position: 'absolute', left: 0, right: 0, top: 0, height: '45%', borderRadius: '6px 6px 40% 40%',
