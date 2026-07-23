@@ -97,7 +97,7 @@ export type GameEvent =
   | { type: 'turn_ended'; playerId: string }
   | { type: 'card_drawn'; playerId: string; cardInstanceId: string; defId: string }
   | { type: 'card_played'; playerId: string; defId: string; targetId?: string }
-  | { type: 'damage_dealt'; sourceId: string; targetId: string; amount: number; element: Element; targetHpAfter: number }
+  | { type: 'damage_dealt'; sourceId: string; targetId: string; amount: number; element: Element; targetHpAfter: number; absorbed?: number }
   | { type: 'healed'; targetId: string; amount: number; targetHpAfter: number }
   | { type: 'shielded'; targetId: string; amount: number; defenseAfter: number }
   | { type: 'direction_reversed'; direction: 1 | -1 }

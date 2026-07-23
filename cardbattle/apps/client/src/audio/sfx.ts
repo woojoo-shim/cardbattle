@@ -6,7 +6,7 @@
 type Cue =
   | 'hover' | 'select' | 'back' | 'toggle'
   | 'deal' | 'play' | 'draw'
-  | 'damage' | 'heal' | 'shield' | 'reverse' | 'coin'
+  | 'damage' | 'block' | 'heal' | 'shield' | 'reverse' | 'coin'
   | 'poison' | 'regen' | 'reflect'
   | 'win' | 'lose' | 'turn';
 
@@ -111,6 +111,17 @@ export function playSfx(cue: Cue, opts?: { mag?: number }) {
       tone(ac, master, 'sine', 150 - m * 28, 42, t + 0.004, 0.18 + m * 0.14, 0.13 + m * 0.09);
       break;
     }
+    case 'block': {
+      // A shield eats the blow: a bright metallic CLANG (steel meeting steel) rather than a
+      // fleshy thud — a dull thud transient under a ringing square ping + a crisp noise clink,
+      // scaled by magnitude so a soaked-up crusher rings harder than a chip.
+      const m = mag;
+      noise(ac, master, t, 0.02 + m * 0.006, 0.10 + m * 0.04, 2600, false);
+      tone(ac, master, 'square', 720, 500, t, 0.10 + m * 0.03, 0.10 + m * 0.05);
+      tone(ac, master, 'triangle', 1500, 1500, t, 0.16, 0.05 + m * 0.03);
+      noise(ac, master, t, 0.05, 0.09 + m * 0.03, 6400, true);
+      break;
+    }
     case 'heal':
       tone(ac, master, 'sine', 520, 780, t, 0.16, 0.13);
       tone(ac, master, 'sine', 780, 1040, t + 0.05, 0.18, 0.1); break;
@@ -154,7 +165,7 @@ export function playSfx(cue: Cue, opts?: { mag?: number }) {
  * cursor of how many were already sounded; returns the new cursor. Win/lose is personalised to
  * the local player. Frequent, low-signal events (draws, mana ticks) are intentionally silent. */
 export function soundEvents(
-  events: { type: string; targetId?: string; playerId?: string; winnerId?: string; status?: string; element?: string; amount?: number }[],
+  events: { type: string; targetId?: string; playerId?: string; winnerId?: string; status?: string; element?: string; amount?: number; absorbed?: number }[],
   seen: number,
   myId: string,
 ): number {
@@ -170,12 +181,17 @@ export function soundEvents(
       case 'card_played': playSfx('play'); break;
       case 'status_applied':
         playSfx(e.status === 'regen' ? 'regen' : e.status === 'reflect' ? 'reflect' : 'poison'); break;
-      case 'damage_dealt':
+      case 'damage_dealt': {
         // Poison damage-over-time ticks get the corrosive hiss instead of the blunt hit. Both ride
         // the impact delay so the sound lands exactly with the deferred visual.
-        if (e.element === 'poison') setTimeout(() => playSfx('poison'), IMPACT_MS);
-        else { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
+        if (e.element === 'poison') { setTimeout(() => playSfx('poison'), IMPACT_MS); break; }
+        // A shield that soaks part (or all) of the blow rings a metallic CLANG; only the HP actually
+        // lost gets the fleshy thud. A fully-blocked hit (amount 0) is clang-only — no blood thud.
+        const blocked = e.absorbed ?? 0;
+        if (blocked > 0) { const mag = magOf(blocked); setTimeout(() => playSfx('block', { mag }), IMPACT_MS); }
+        if (e.amount && e.amount > 0) { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
         break;
+      }
       case 'healed': playSfx('heal'); break;
       case 'shielded': playSfx('shield'); break;
       case 'direction_reversed': playSfx('reverse'); break;

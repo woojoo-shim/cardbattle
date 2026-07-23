@@ -41,7 +41,7 @@ export function damageOne(target: PlayerState, amount: number, element: Element,
   target.defense -= absorbed;
   const dealt = amount - absorbed;
   target.hp = Math.max(0, target.hp - dealt);
-  emit({ type: 'damage_dealt', sourceId: source.id, targetId: target.id, amount: dealt, element, targetHpAfter: target.hp });
+  emit({ type: 'damage_dealt', sourceId: source.id, targetId: target.id, amount: dealt, element, targetHpAfter: target.hp, absorbed });
   if (target.hp === 0) {
     target.alive = false;
     target.statuses = []; // the dead carry no lingering effects

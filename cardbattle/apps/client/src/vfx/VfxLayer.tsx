@@ -31,6 +31,8 @@ const ELEM: Record<Element, string> = {
 };
 const HEAL = '#8f9d4f';
 const SHIELD = '#7f95aa';
+// Cold steel for a blow that a shield swallows whole — the guard flashes silver, not blood-warm.
+const STEEL = '#b8c4d0';
 
 /** Viewport-centre of a player's portrait (the face), so hits land on the person and not the
  *  nameplate below. Prefers the dedicated portrait anchor; falls back to the whole seat card. */
@@ -185,9 +187,14 @@ export function VfxLayer({ events, players }: Props) {
         // moment of impact and both faces are RE-MEASURED then — so the hit lands dead-centre and
         // the knockback aims true even after the mouse-parallax has drifted the seats.
         if (!centerOf(e.targetId)) continue;
-        const color = ELEM[e.element] ?? ELEM.none;
+        const blocked = e.absorbed ?? 0;
+        const fullyBlocked = e.amount === 0 && blocked > 0; // the shield swallowed the whole blow
+        // A landed hit flashes the element tint; a fully-guarded one flashes cold steel instead.
+        const color = fullyBlocked ? STEEL : (ELEM[e.element] ?? ELEM.none);
         const big = e.amount >= 8;
-        const magNorm = Math.max(0.4, Math.min(1.7, e.amount / 9));
+        // Shove/kick scale with the HP actually lost; a fully-blocked blow still gives a light rock.
+        const kickAmt = e.amount || blocked * 0.4;
+        const magNorm = Math.max(0.4, Math.min(1.7, kickAmt / 9));
         // No floating damage NUMBER — a big glowing "+N" is the classic cheap free-to-play tell, and
         // it read cheap no matter how the motion was tuned. The blow is sold entirely by PHYSICS the
         // way fighting games / Godfield do it: one tight contact flash, the seat SHOVED away from the
@@ -211,9 +218,10 @@ export function VfxLayer({ events, players }: Props) {
               kx = dx / len; ky = dy / len;
             }
             impactHit(e.targetId, kx, ky, magNorm);
-            cameraKick(e.amount);
-            // Crimson concussion at the screen edge — synced to the landing, deeper for a bigger hit.
-            if (flashRef.current) {
+            cameraKick(kickAmt);
+            // Crimson concussion at the screen edge — ONLY when real HP is lost. A shield that eats
+            // the whole blow draws no blood; the steel flash + guard clang carry the block instead.
+            if (e.amount > 0 && flashRef.current) {
               const a = Math.min(0.72, 0.34 + e.amount / 42);
               const spread = 24 + Math.min(34, e.amount);
               flashRef.current.style.boxShadow = `inset 0 0 ${200 + spread * 2}px ${spread}px rgba(196,42,74,${a.toFixed(2)})`;
