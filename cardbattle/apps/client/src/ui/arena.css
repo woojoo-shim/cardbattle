@@ -116,6 +116,21 @@
   70%  { transform: translate(calc(-50% + var(--kx, 0px) * 0.03), calc(-50% + var(--ky, 0px) * 0.03)) scale(1); }
   100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
 }
+/* KNOCKOUT reel — the finisher when a blow actually ELIMINATES a player, not just chips HP. A harder,
+   spinning version of cb-hit: the seat is thrown further (--kx/--ky set to a big finisher shove), a
+   white blowout snaps on the kill, it REELS with a rotation (--kr, spun away from the blow) as it goes
+   down, then damps out. The persistent grayscale + skull dead-state (RoundTable) carries the "stays
+   down" read after the reel settles, so this only has to sell the moment of going out. Baked
+   translate(-50%,-50%) centring, same as cb-hit. */
+@keyframes cb-ko {
+  0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: brightness(1); }
+  5%   { transform: translate(calc(-50% + var(--kx, 0px)), calc(-50% + var(--ky, 0px))) scale(1.24) rotate(var(--kr, 10deg)); filter: brightness(2.8) contrast(1.2) drop-shadow(0 0 22px rgba(196,42,74,0.98)); }  /* the killing blow lands — violent overshoot + white blowout */
+  16%  { transform: translate(calc(-50% + var(--kx, 0px)), calc(-50% + var(--ky, 0px))) scale(1.18) rotate(var(--kr, 10deg)); filter: brightness(1.75) drop-shadow(0 0 14px rgba(196,42,74,0.7)); }  /* HOLD — the knockout hitstop, cocked at full reel */
+  34%  { transform: translate(calc(-50% - var(--kx, 0px) * 0.4), calc(-50% - var(--ky, 0px) * 0.4)) scale(1.02) rotate(calc(var(--kr, 10deg) * -0.5)); filter: brightness(1.2) saturate(0.7); }  /* recoils past rest, desaturating as it goes out */
+  52%  { transform: translate(calc(-50% + var(--kx, 0px) * 0.18), calc(-50% + var(--ky, 0px) * 0.18)) scale(1) rotate(calc(var(--kr, 10deg) * 0.3)); filter: brightness(1) saturate(0.85); }
+  72%  { transform: translate(calc(-50% - var(--kx, 0px) * 0.07), calc(-50% - var(--ky, 0px) * 0.07)) scale(1) rotate(calc(var(--kr, 10deg) * -0.12)); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: brightness(1); }
+}
 /* Whole-arena camera kick when a blow lands — the entire screen jolts and settles. BALATRO RULE:
    the shake amplitude scales with the blow via --cbk (set per-hit in JS, ~0.4 chip → 1.7 crusher);
    every offset is multiplied by it so a light tap barely nudges and a heavy hit slams. A tiny scale

@@ -72,6 +72,23 @@ function impactHit(id: string, kx: number, ky: number, magNorm: number): void {
   setTimeout(() => { el.style.animation = ''; }, dur * 1000 + 40);
 }
 
+/** A KNOCKOUT reel — the finisher when a blow actually ELIMINATES a player (not just chips HP). The
+ *  audio already lands a heavy finisher thud on player_eliminated; this is the missing VISUAL half.
+ *  A harder, spinning version of the hit recoil: the seat is thrown further and REELS with a rotation
+ *  as it goes down; the persistent grayscale/skull dead-state carries the "stays down" read after. */
+function knockout(id: string, kx: number, ky: number): void {
+  const el = document.querySelector<HTMLElement>(`[data-pid="${CSS.escape(id)}"]`);
+  if (!el) return;
+  const px = 20; // thrown hard — a finisher, not a chip shove
+  el.style.setProperty('--kx', `${(kx * px).toFixed(1)}px`);
+  el.style.setProperty('--ky', `${(ky * px).toFixed(1)}px`);
+  el.style.setProperty('--kr', `${kx >= 0 ? 12 : -12}deg`); // reel spun away from the blow
+  el.style.animation = 'none';
+  void el.offsetWidth; // reflow so the reel always fires from rest
+  el.style.animation = 'cb-ko 0.95s cubic-bezier(.32,.62,.24,1)';
+  setTimeout(() => { el.style.animation = ''; }, 990);
+}
+
 /** A whole-screen camera kick on impact — the entire arena jolts and settles, so a hit shoves the
  *  world, not just the little portrait. A faint scale masks the edges the translate exposes. BALATRO
  *  RULE: shake amplitude scales continuously with the blow's magnitude (via the --cbk custom prop the
@@ -245,6 +262,28 @@ export function VfxLayer({ events, players }: Props) {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
         add.push({ id: nextId.current++, kind: 'num', x: tgt.x, y: tgt.y, text: `+${e.amount}`, color: SHIELD, delay: 0, icon: 'shield' });
+      } else if (e.type === 'player_eliminated') {
+        // A finisher deserves a finisher's motion. The killing damage_dealt landed this same instant
+        // (its impact flash + hit recoil fire at IMPACT_DELAY); DEFER the knockout to the same beat so
+        // it overrides that light recoil with a hard spinning reel + a max-mag camera kick, landing
+        // together with the heavy finisher thud the audio already plays. Direction comes from the last
+        // blow that struck this seat in the batch; a sourceless kill (e.g. poison) slumps straight down.
+        if (!centerOf(e.playerId)) continue;
+        const kill = [...fresh].reverse().find(
+          (k) => k.type === 'damage_dealt' && k.targetId === e.playerId,
+        ) as Extract<GameEvent, { type: 'damage_dealt' }> | undefined;
+        setTimeout(() => {
+          const t = centerOf(e.playerId);
+          if (!t) return;
+          let kx = 0, ky = 1;
+          const s = kill ? centerOf(kill.sourceId) : null;
+          if (s && (s.x !== t.x || s.y !== t.y)) {
+            const dx = t.x - s.x, dy = t.y - s.y, len = Math.hypot(dx, dy) || 1;
+            kx = dx / len; ky = dy / len;
+          }
+          knockout(e.playerId, kx, ky);
+          cameraKick(18); // max-mag (clamps to 1.7) — the whole arena rocks on the kill
+        }, IMPACT_DELAY * 1000);
       }
     }
 
