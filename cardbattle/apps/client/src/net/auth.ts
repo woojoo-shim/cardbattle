@@ -33,14 +33,33 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// Render's free tier sleeps after ~15min; the first request while it cold-starts can return an
+// empty body or a non-JSON 502 page. Parse defensively so `res.json()` never throws the cryptic
+// "Unexpected end of JSON input" at the user — return null and let callers show a friendly retry.
+async function readJson(res: Response): Promise<any> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 async function post(path: string, body: unknown): Promise<Account> {
-  const res = await fetch(`${apiBase}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error ?? '요청에 실패했습니다.');
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error('서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }
+  const data = await readJson(res);
+  if (!res.ok) throw new Error(data?.error ?? (res.status >= 500 ? '서버를 깨우는 중입니다. 잠시 후 다시 시도해주세요.' : '요청에 실패했습니다.'));
+  if (!data) throw new Error('서버 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.');
   return data as Account;
 }
 
@@ -62,21 +81,29 @@ export async function fetchMe(): Promise<Account | null> {
   if (!token) return null;
   try {
     const res = await fetch(`${apiBase}/api/me`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) { clearToken(); return null; }
-    return (await res.json()) as Account;
+    // Only a real 401 means the session expired — clear the token then. A cold-start 5xx/empty
+    // body is transient, so KEEP the token (wiping it here logged the user out on every wake).
+    if (!res.ok) { if (res.status === 401) clearToken(); return null; }
+    return (await readJson(res)) as Account | null;
   } catch {
     return null;
   }
 }
 
 async function shop(path: string, itemId: string): Promise<Account> {
-  const res = await fetch(`${apiBase}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken() ?? ''}` },
-    body: JSON.stringify({ itemId }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error ?? '요청에 실패했습니다.');
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken() ?? ''}` },
+      body: JSON.stringify({ itemId }),
+    });
+  } catch {
+    throw new Error('서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }
+  const data = await readJson(res);
+  if (!res.ok) throw new Error(data?.error ?? (res.status >= 500 ? '서버를 깨우는 중입니다. 잠시 후 다시 시도해주세요.' : '요청에 실패했습니다.'));
+  if (!data) throw new Error('서버 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.');
   return data as Account;
 }
 
