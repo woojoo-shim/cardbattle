@@ -72,12 +72,15 @@ function noise(ac: AudioContext, dest: AudioNode, t0: number, dur: number, peak:
   src.stop(t0 + dur + 0.02);
 }
 
-/** Fire a named sound cue. Silent (and cheap) when muted or when Web Audio is unavailable. */
-export function playSfx(cue: Cue) {
+/** Fire a named sound cue. Silent (and cheap) when muted or when Web Audio is unavailable.
+ * `opts.mag` (~0.4 chip → ~1.6 crusher) scales the impact weight so the sound tracks the hit,
+ * mirroring the magnitude-scaled knockback / camera / flash on the visual side. */
+export function playSfx(cue: Cue, opts?: { mag?: number }) {
   if (muted) return;
   const ac = ensure();
   if (!ac || !master) return;
   const t = ac.currentTime;
+  const mag = opts?.mag ?? 1;
   switch (cue) {
     case 'hover':
       tone(ac, master, 'sine', 660, 720, t, 0.05, 0.06); break;
@@ -96,9 +99,18 @@ export function playSfx(cue: Cue) {
     case 'play':
       noise(ac, master, t, 0.1, 0.16, 4200, true);
       tone(ac, master, 'triangle', 380, 620, t, 0.12, 0.14); break;
-    case 'damage':
-      noise(ac, master, t, 0.16, 0.32, 1400);
-      tone(ac, master, 'sawtooth', 200, 70, t, 0.16, 0.2); break;
+    case 'damage': {
+      // A layered impact, scaled by magnitude so a chip taps and a crusher slams:
+      // 1) a sharp high transient CRACK (the leading edge of the strike),
+      // 2) a filtered-noise + pitched BODY thump (the meat of the blow),
+      // 3) a low SUB boom that drops deeper and rings longer the harder the hit lands.
+      const m = mag;
+      noise(ac, master, t, 0.012 + m * 0.006, 0.10 + m * 0.05, 5200 + m * 1400, true);
+      noise(ac, master, t + 0.004, 0.13 + m * 0.05, 0.20 + m * 0.10, 1200);
+      tone(ac, master, 'sawtooth', 220, 68, t + 0.004, 0.14 + m * 0.05, 0.14 + m * 0.06);
+      tone(ac, master, 'sine', 150 - m * 28, 42, t + 0.004, 0.18 + m * 0.14, 0.13 + m * 0.09);
+      break;
+    }
     case 'heal':
       tone(ac, master, 'sine', 520, 780, t, 0.16, 0.13);
       tone(ac, master, 'sine', 780, 1040, t + 0.05, 0.18, 0.1); break;
@@ -142,10 +154,16 @@ export function playSfx(cue: Cue) {
  * cursor of how many were already sounded; returns the new cursor. Win/lose is personalised to
  * the local player. Frequent, low-signal events (draws, mana ticks) are intentionally silent. */
 export function soundEvents(
-  events: { type: string; targetId?: string; playerId?: string; winnerId?: string; status?: string; element?: string }[],
+  events: { type: string; targetId?: string; playerId?: string; winnerId?: string; status?: string; element?: string; amount?: number }[],
   seen: number,
   myId: string,
 ): number {
+  // Normalise a damage amount into the impact-weight range the visual side uses.
+  const magOf = (a?: number) => (a == null ? 1 : Math.max(0.4, Math.min(1.6, a / 9)));
+  // VfxLayer defers every damage impact by IMPACT_DELAY (the hurl travel time) so the flash + kick
+  // land as the thrown card connects. The impact SOUND must ride the same delay or the thud cracks
+  // ~0.55s before the card arrives — the single worst desync for felt punch.
+  const IMPACT_MS = 550;
   for (let i = seen; i < events.length; i++) {
     const e = events[i];
     switch (e.type) {
@@ -153,13 +171,16 @@ export function soundEvents(
       case 'status_applied':
         playSfx(e.status === 'regen' ? 'regen' : e.status === 'reflect' ? 'reflect' : 'poison'); break;
       case 'damage_dealt':
-        // Poison damage-over-time ticks get the corrosive hiss instead of the blunt hit.
-        playSfx(e.element === 'poison' ? 'poison' : 'damage'); break;
+        // Poison damage-over-time ticks get the corrosive hiss instead of the blunt hit. Both ride
+        // the impact delay so the sound lands exactly with the deferred visual.
+        if (e.element === 'poison') setTimeout(() => playSfx('poison'), IMPACT_MS);
+        else { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
+        break;
       case 'healed': playSfx('heal'); break;
       case 'shielded': playSfx('shield'); break;
       case 'direction_reversed': playSfx('reverse'); break;
       case 'card_stolen': playSfx('draw'); break;
-      case 'player_eliminated': playSfx('damage'); break;
+      case 'player_eliminated': setTimeout(() => playSfx('damage', { mag: 1.6 }), IMPACT_MS); break;
       case 'game_over': playSfx(e.winnerId === myId ? 'win' : 'lose'); break;
     }
   }
