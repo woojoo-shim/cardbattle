@@ -63,7 +63,7 @@ const wrap: React.CSSProperties = {
 const grid: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
   padding: 12, borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(18,26,46,0.98), rgba(10,15,28,0.98))',
+  background: 'linear-gradient(180deg, rgba(40,30,18,0.98), rgba(19,12,7,0.98))',
   border: `1.5px solid ${C.border}`, boxShadow: '0 14px 34px rgba(0,0,0,0.5)',
   animation: 'cb-emote-pop 0.2s ease',
 };

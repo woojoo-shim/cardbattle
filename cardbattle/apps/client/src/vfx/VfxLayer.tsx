@@ -394,7 +394,7 @@ function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: 2, padding: '6px 7px', borderRadius: 8, width: 48,
-    background: 'linear-gradient(170deg,#1c2233,#11151f)', border: `1px solid ${f.color}`,
+    background: 'linear-gradient(170deg,#2a2013,#160f08)', border: `1px solid ${f.color}`,
     boxShadow: `0 0 14px ${f.color}, 0 8px 18px rgba(0,0,0,0.6)`,
     fontFamily: '"Geist", system-ui, sans-serif', willChange: 'transform, opacity',
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,

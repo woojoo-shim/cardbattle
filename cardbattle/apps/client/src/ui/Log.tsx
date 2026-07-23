@@ -68,7 +68,7 @@ export function Log({ events, ui }: Props) {
       {lines.map(({ l, idx }, i) => {
         const color = TONE[l.tone];
         return (
-          <div key={idx} className="cb-log-line" style={{ ...row, color, borderTop: i === 0 ? 'none' : `1px solid #1b1f2c` }}>
+          <div key={idx} className="cb-log-line" style={{ ...row, color, borderTop: i === 0 ? 'none' : `1px solid #2b2114` }}>
             <span style={{ ...tick, background: color }} />
             <Icon name={l.icon} size={13} style={{ marginRight: 5 }} />{l.text}
           </div>
@@ -84,7 +84,7 @@ export function Log({ events, ui }: Props) {
 const box: React.CSSProperties = {
   position: 'absolute', left: 16, bottom: 12, width: 'clamp(180px, 22vw, 230px)', zIndex: 3,
   pointerEvents: 'none',
-  background: 'linear-gradient(180deg, rgba(22,26,38,0.82), rgba(14,16,24,0.82))',
+  background: 'linear-gradient(180deg, rgba(42,32,19,0.85), rgba(20,13,9,0.85))',
   border: `1px solid ${C.border}`, borderRadius: 12, padding: '10px 12px',
   boxShadow: '0 18px 40px rgba(0,0,0,0.5)', fontFamily: sans,
 };

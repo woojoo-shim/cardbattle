@@ -302,7 +302,7 @@ const RARITY_META: Record<string, { label: string; color: string }> = {
 const tip: React.CSSProperties = {
   position: 'absolute', bottom: '108%', left: '50%', transform: 'translateX(-50%)',
   width: 'clamp(168px, 16vw, 216px)', padding: '11px 12px 10px', borderRadius: 11, zIndex: 20,
-  background: 'linear-gradient(180deg, rgba(26,30,42,0.985), rgba(12,14,22,0.985))',
+  background: 'linear-gradient(180deg, rgba(42,32,19,0.99), rgba(20,13,9,0.99))',
   border: '1px solid', pointerEvents: 'none', textAlign: 'left', overflow: 'hidden',
 };
 // A thin rarity-tinted light seam along the top rim of the panel.

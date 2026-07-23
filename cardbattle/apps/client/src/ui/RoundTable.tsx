@@ -320,7 +320,7 @@ const spot: React.CSSProperties = {
 };
 const hpBar: React.CSSProperties = {
   position: 'relative',
-  width: '86%', height: 8, borderRadius: 6, background: '#0c0f18', border: `1px solid ${C.border}`, overflow: 'hidden',
+  width: '86%', height: 8, borderRadius: 6, background: '#160f08', border: `1px solid ${C.border}`, overflow: 'hidden',
 };
 // The real fill drops FAST so the ghost bleed behind it is briefly exposed on a hit.
 const hpFill: React.CSSProperties = {

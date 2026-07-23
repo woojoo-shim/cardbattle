@@ -58,10 +58,10 @@ const wrap: React.CSSProperties = {
 const card: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
   padding: '22px 30px', borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(22,30,44,0.97), rgba(12,16,24,0.97))',
-  border: '1px solid #2a5a78', boxShadow: '0 0 0 1px #8be3ff, 0 30px 70px rgba(0,0,0,0.65)',
+  background: 'linear-gradient(180deg, rgba(42,32,19,0.97), rgba(20,13,8,0.97))',
+  border: `1px solid ${C.border}`, boxShadow: '0 0 0 1px rgba(113,145,138,0.6), 0 30px 70px rgba(0,0,0,0.65)',
   animation: 'revealPop .26s ease',
 };
-const head: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: '#8be3ff', letterSpacing: 2 };
+const head: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.magic, letterSpacing: 2 };
 const name: React.CSSProperties = { fontSize: 20, fontWeight: 800, color: C.text };
 const desc: React.CSSProperties = { fontSize: 13, color: C.dim, maxWidth: 220, textAlign: 'center' };
