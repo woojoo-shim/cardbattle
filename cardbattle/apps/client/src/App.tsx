@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useRoom, readResumeToken } from './state/useRoom.js';
 import { Lobby } from './ui/Lobby.js';
 import { Battle } from './ui/Battle.js';
@@ -206,6 +206,55 @@ const DRIFT_CARDS = [
   { id: 'bind',    left: 52, top: 52, size: 38, scale: 0.7,  rot: 22,  op: 0.28, blur: 2.4, glow: 0,   delay: 16,  dur: 36 },
 ] as const;
 
+// The login gate's atmosphere — embers + drifting card faces (10 CardArt SVGs) + light shafts.
+// These take no props and never change, so they're split into their own memoized component:
+// typing in the login fields re-renders AuthGate on every keystroke, and without this the whole
+// heavy backdrop (SVGs included) re-rendered each time, blocking the input for ~400ms (INP).
+const GateBackdrop = memo(function GateBackdrop() {
+  return (
+    <>
+      {/* Dust motes / embers drifting up through the dead air of the back room — one restrained
+          atmospheric layer behind the content. */}
+      <div style={emberField} aria-hidden>
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            className="cb-ember"
+            style={{ left: `${e.left}%`, width: e.size, height: e.size, animationDelay: `${e.delay}s`, animationDuration: `${e.dur}s` }}
+          />
+        ))}
+      </div>
+      {/* Living arena behind the glass — real card faces drifting through the dark. */}
+      <div style={cardDrift} aria-hidden>
+        {DRIFT_CARDS.map((c, i) => (
+          <span
+            key={i}
+            className="cb-drift"
+            style={{ left: `${c.left}%`, top: `${c.top}%`, animationDelay: `${c.delay}s`, animationDuration: `${c.dur}s` }}
+          >
+            <span style={{ display: 'block', transform: `rotate(${c.rot}deg) scale(${c.scale})`, opacity: c.op, filter: c.blur ? `blur(${c.blur}px)` : undefined }}>
+              <span
+                style={{
+                  ...driftCardFace,
+                  boxShadow: c.glow
+                    ? `0 18px 40px rgba(0,0,0,0.55), 0 0 ${34 * c.glow}px rgba(224,165,60,${0.5 * c.glow}), inset 0 1px 0 rgba(255,225,170,0.14)`
+                    : driftCardFace.boxShadow,
+                }}
+              >
+                <CardArt id={c.id} size={c.size} />
+              </span>
+            </span>
+          </span>
+        ))}
+      </div>
+      {/* A shaft of warm light spills down onto the login from the unseen ceiling of the arena. */}
+      <div style={lightShaft} className="cb-gate-shaft" aria-hidden />
+      <div style={gateGlow} className="cb-gate-glow" aria-hidden />
+      <div style={gateVignette} aria-hidden />
+    </>
+  );
+});
+
 function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
@@ -253,44 +302,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
     <div style={gateWrap}>
       <InstallButton />
       <div style={gateMute}><MuteButton /></div>
-      {/* Dust motes / embers drifting up through the dead air of the back room — one restrained
-          atmospheric layer behind the content. */}
-      <div style={emberField} aria-hidden>
-        {EMBERS.map((e, i) => (
-          <span
-            key={i}
-            className="cb-ember"
-            style={{ left: `${e.left}%`, width: e.size, height: e.size, animationDelay: `${e.delay}s`, animationDuration: `${e.dur}s` }}
-          />
-        ))}
-      </div>
-      {/* Living arena behind the glass — real card faces drifting through the dark. */}
-      <div style={cardDrift} aria-hidden>
-        {DRIFT_CARDS.map((c, i) => (
-          <span
-            key={i}
-            className="cb-drift"
-            style={{ left: `${c.left}%`, top: `${c.top}%`, animationDelay: `${c.delay}s`, animationDuration: `${c.dur}s` }}
-          >
-            <span style={{ display: 'block', transform: `rotate(${c.rot}deg) scale(${c.scale})`, opacity: c.op, filter: c.blur ? `blur(${c.blur}px)` : undefined }}>
-              <span
-                style={{
-                  ...driftCardFace,
-                  boxShadow: c.glow
-                    ? `0 18px 40px rgba(0,0,0,0.55), 0 0 ${34 * c.glow}px rgba(224,165,60,${0.5 * c.glow}), inset 0 1px 0 rgba(255,225,170,0.14)`
-                    : driftCardFace.boxShadow,
-                }}
-              >
-                <CardArt id={c.id} size={c.size} />
-              </span>
-            </span>
-          </span>
-        ))}
-      </div>
-      {/* A shaft of warm light spills down onto the login from the unseen ceiling of the arena. */}
-      <div style={lightShaft} className="cb-gate-shaft" aria-hidden />
-      <div style={gateGlow} className="cb-gate-glow" aria-hidden />
-      <div style={gateVignette} aria-hidden />
+      <GateBackdrop />
 
       {/* The login floats over the arena — a minimal frosted-glass pass. */}
       <div style={ticketShell} className="cb-gate-in">
