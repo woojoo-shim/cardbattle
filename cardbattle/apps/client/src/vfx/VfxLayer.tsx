@@ -9,6 +9,9 @@ interface Props {
   events: GameEvent[];
   /** Every seat, so the caster's equipped play-effect can be looked up on card_played. */
   players?: UiPlayer[];
+  /** The local player's seat id — so the crimson pain-bleed fires ONLY when *I* take the blow, not
+   *  when I land one on a foe. Dealing damage shouldn't paint my own screen red. */
+  myId?: string;
 }
 
 type Fx =
@@ -149,7 +152,7 @@ function burstParticles(spawn: () => number, cx: number, cy: number, effect: str
   return out;
 }
 
-export function VfxLayer({ events, players }: Props) {
+export function VfxLayer({ events, players, myId }: Props) {
   const flashRef = useRef<HTMLDivElement>(null);
   const seen = useRef(0);
   const nextId = useRef(1);
@@ -236,11 +239,14 @@ export function VfxLayer({ events, players }: Props) {
             }
             impactHit(e.targetId, kx, ky, magNorm);
             cameraKick(kickAmt);
-            // Crimson concussion at the screen edge — ONLY when real HP is lost. A shield that eats
-            // the whole blow draws no blood; the steel flash + guard clang carry the block instead.
-            if (e.amount > 0 && flashRef.current) {
-              const a = Math.min(0.72, 0.34 + e.amount / 42);
-              const spread = 24 + Math.min(34, e.amount);
+            // Crimson concussion at the screen edge — ONLY when *I* lose real HP. A full screen-edge
+            // blood vignette is the "I'm taking the hit / danger" language; it read wrong firing on
+            // EVERY blow, painting my own screen red even as I struck a foe. Now it's reserved for my
+            // own pain (targetId === my seat). Landing a hit on an enemy is sold by their reeling seat
+            // + the whole-arena camera kick, no self-blood. A shield that eats the blow draws none.
+            if (e.amount > 0 && e.targetId === myId && flashRef.current) {
+              const a = Math.min(0.8, 0.4 + e.amount / 38);
+              const spread = 28 + Math.min(38, e.amount);
               flashRef.current.style.boxShadow = `inset 0 0 ${200 + spread * 2}px ${spread}px rgba(196,42,74,${a.toFixed(2)})`;
               setTimeout(() => { if (flashRef.current) flashRef.current.style.boxShadow = 'inset 0 0 0 rgba(196,42,74,0)'; }, 320);
             }

@@ -92,7 +92,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     const placeColor = placement === 2 ? '#dbe2ea' : placement === 3 ? '#cf9155' : C.dim;
     return (
       <div style={{ ...endWrap, background: iWon ? endBgWin : endBgLose }}>
-        <VfxLayer events={events} players={ui.players} />
+        <VfxLayer events={events} players={ui.players} myId={myId} />
         {iWon && <div style={endRays} className="cb-rays" aria-hidden />}
         <div style={{ ...endHalo, background: iWon ? haloWin : haloLose }} aria-hidden />
 
@@ -153,7 +153,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   return (
     <div style={screen} data-arena>
       <SceneLife />
-      <VfxLayer events={events} players={ui.players} />
+      <VfxLayer events={events} players={ui.players} myId={myId} />
       <EmoteLayer emotes={emotes} />
       <RevealOverlay events={events} myId={myId} ui={ui} />
       {turnFlash > 0 && (
