@@ -1,8 +1,11 @@
-// Auth HTTP client. Uses same-origin relative paths: in prod the server serves the page,
-// and in dev Vite proxies /api to the :2567 server (see vite.config.ts), so no CORS either
-// way. The token lives in localStorage for auto-login and is attached to Colyseus joins
-// (see net/client.ts) so the server can seat the account, not a spoofed name.
-const apiBase = '';
+// Auth HTTP client. In dev, Vite proxies /api to the :2567 server (see vite.config.ts).
+// In prod, if VITE_SERVER_URL is set (Vercel frontend → Render backend) the /api calls go
+// cross-origin to that server (the server sends CORS headers); otherwise same-origin (the
+// single-host Render deploy serves both page and API). The token lives in localStorage for
+// auto-login and rides Colyseus joins (net/client.ts) so the server seats the account.
+const apiBase = import.meta.env.DEV
+  ? ''
+  : ((import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '') ?? '');
 
 const TOKEN_KEY = 'cb_token';
 

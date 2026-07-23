@@ -3,11 +3,16 @@ import type { CardInstance, GameEvent, GameModeId } from '@cardbattle/shared';
 import { getToken } from './auth.js';
 
 // Dev: the Vite page (:5173) and the Colyseus server (:2567) run on separate ports.
-// Prod: the server serves the built client, so the websocket lives on the page's own
-// origin — use wss when the page is https so secure pages don't get mixed-content errors.
+// Prod: if VITE_SERVER_URL is set at build time (e.g. a Vercel-hosted frontend pointing at
+// the Render Colyseus backend), aim the websocket at that cross-origin server — https→wss,
+// http→ws. Otherwise the server serves the built client from its own origin (single-host
+// Render deploy), so the websocket lives on the page's own host.
+const SERVER_URL = (import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '');
 const endpoint = import.meta.env.DEV
   ? `ws://${location.hostname}:2567`
-  : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+  : SERVER_URL
+    ? SERVER_URL.replace(/^http/, 'ws')
+    : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
 
 export interface BattleConnection {
   room: Room;
