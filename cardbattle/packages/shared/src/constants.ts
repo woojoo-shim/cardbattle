@@ -1,5 +1,5 @@
 export const MIN_PLAYERS = 2;
-export const MAX_PLAYERS = 8;
+export const MAX_PLAYERS = 6;
 export const START_HP = 40;
 export const START_DEFENSE = 0;
 export const START_HAND = 4;

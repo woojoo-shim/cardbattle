@@ -11,14 +11,11 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-// Ellipse the seats ride on, as % of the table area. cy sits a touch below centre so the
-// top arc clears the bar and the near (my) seat tucks just above the hand. RY is squashed
-// well below RX so the ring reads as a table tilted away from us into the chamber's perspective
-// (foreshortened depth), matching the receding side-wall gear and the perspective floor.
-// Seat ring flattened to hug the steeply-tilted felt: its projected rim is much shorter than
-// wide now, so RY is well below RX and the whole ring is a touch higher (CY) than the felt centre
-// so the far seats tuck onto the back rim instead of floating up the wall.
-const CX = 50, CY = 57, RX = 34, RY = 21;
+// Ellipse the seats ride on, as % of the table area. TOP-DOWN view: the table is now seen
+// from directly above, so the ring is a nearly full circle (RY close to RX, only slightly
+// squashed because the play area is wider than tall). cy is centred so seats fan evenly all
+// the way around; my seat still anchors at the bottom-front (90°).
+const CX = 50, CY = 54, RX = 34, RY = 30;
 
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
@@ -197,31 +194,31 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
 }
 
 const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: sans, pointerEvents: 'none' };
-// A single premium table oval, tilted into the scene so the seats read as sitting around it.
-// One clean element, but finished like a real object: a warm overhead pool lights the felt
-// centre, the baize deepens to black at the rim, a brass bezel catches a hairline of light,
-// and a soft drop shadow floats the whole table above the floor. No grid, lamp, or grime.
+// A single premium table oval seen from DIRECTLY ABOVE (top-down). One clean element, but
+// finished like a real object: a warm overhead pool lights the felt centre, the baize deepens
+// to black at the rim, a brass bezel catches a hairline of light, and a soft drop shadow floats
+// the whole table off the floor. No perspective tilt now — it reads as looking straight down.
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
-  transform: 'translate(-50%,-50%) perspective(620px) rotateX(62deg)',
-  width: '62%', height: '60%', borderRadius: '50%', overflow: 'hidden',
+  transform: 'translate(-50%,-50%)',
+  width: '66%', height: '66%', borderRadius: '50%', overflow: 'hidden',
   background:
-    'radial-gradient(ellipse 56% 50% at 50% 36%, rgba(240,188,102,0.22), transparent 58%),' + // warm overhead light pool
-    'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(255,226,168,0.10), transparent 54%),' + // hot centre catch-light on the baize
-    'radial-gradient(ellipse 94% 88% at 50% 48%, transparent 58%, rgba(72,46,86,0.24) 100%),' + // cool plum edge tint (ties to the bg wall wash)
-    'radial-gradient(ellipse at 50% 42%, #4a2325 0%, #2c1214 50%, #120709 100%)',              // richer burgundy felt body: lit centre → black rim
+    'radial-gradient(circle at 50% 46%, rgba(240,188,102,0.22), transparent 56%),' + // warm overhead light pool
+    'radial-gradient(circle at 50% 44%, rgba(255,226,168,0.10), transparent 50%),' + // hot centre catch-light on the baize
+    'radial-gradient(circle at 50% 50%, transparent 60%, rgba(72,46,86,0.24) 100%),' + // cool plum edge tint (ties to the bg wall wash)
+    'radial-gradient(circle at 50% 48%, #4a2325 0%, #2c1214 52%, #120709 100%)',       // richer burgundy felt body: lit centre → black rim
   border: '2px solid rgba(206,158,76,0.36)',
   boxShadow:
     'inset 0 0 6px 1px rgba(240,208,132,0.30),' + // brass rim highlight
-    'inset 0 0 96px 30px rgba(0,0,0,0.72),' +     // felt edge falls to black
-    '0 30px 66px rgba(0,0,0,0.62)',               // table floats above the floor
+    'inset 0 0 110px 34px rgba(0,0,0,0.72),' +    // felt edge falls to black
+    '0 24px 60px rgba(0,0,0,0.6)',                // table floats above the floor
 };
-// The engraved house medallion at the table centre. Laid flat on the felt plane (same rotateX
-// as the card piles) and low-opacity so it feels branded INTO the baize — an anchor for the
-// dead middle, never competing with the seats or VFX.
+// The engraved house medallion at the table centre. Face-on now (top-down view) and low-opacity
+// so it feels branded INTO the baize — an anchor for the dead middle, never competing with the
+// seats or VFX.
 const emblem: React.CSSProperties = {
   position: 'absolute', left: `${CX}%`, top: `${CY}%`, zIndex: 2, pointerEvents: 'none',
-  transform: 'translate(-50%,-50%) perspective(520px) rotateX(58deg)',
+  transform: 'translate(-50%,-50%)',
   width: 96, height: 96, borderRadius: '50%',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: 'radial-gradient(circle at 50% 42%, rgba(198,150,72,0.10), rgba(0,0,0,0) 68%)',
@@ -242,16 +239,15 @@ const emblemNum: React.CSSProperties = {
 const emblemDir: React.CSSProperties = {
   marginTop: 2, color: 'rgba(198,168,120,0.6)', display: 'flex',
 };
-// The face-down pile each player has laid on the table. Tilted onto the felt's own plane
-// (perspective + rotateX) so the cards lie FLAT on the baize seen from above, not standing
-// upright like billboards — matching the looking-down-at-a-desk framing.
+// The face-down pile each player has laid on the table. Seen from directly above (top-down),
+// so the cards read as flat rectangles on the baize — no perspective tilt.
 const tableFan: React.CSSProperties = {
-  position: 'absolute', transform: 'translate(-50%,-50%) perspective(520px) rotateX(58deg)', width: 0, height: 0,
-  transformStyle: 'preserve-3d', pointerEvents: 'none', zIndex: 3,
+  position: 'absolute', transform: 'translate(-50%,-50%)', width: 0, height: 0,
+  pointerEvents: 'none', zIndex: 3,
 };
 const miniBack: React.CSSProperties = {
   position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
-  transformOrigin: 'center bottom', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  transformOrigin: 'center center', display: 'flex', alignItems: 'center', justifyContent: 'center',
   background: 'linear-gradient(160deg,#2a2013,#171009)', border: `1px solid ${C.border}`,
   boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(143,157,79,0.06)',
 };

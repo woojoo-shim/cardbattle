@@ -263,6 +263,10 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   const [avatar, setAvatar] = useState(AVATAR_CHOICES[0].id);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The Render free tier sleeps after ~15min idle, so the first auth request can take 30–50s to
+  // spin the server back up. If a request runs past a few seconds it's almost certainly a cold
+  // start — surface a "waking the server" hint so the wait doesn't read as a frozen button.
+  const [waking, setWaking] = useState(false);
 
   const go = () => {
     if (busy) return;
@@ -276,9 +280,13 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
     if (!u || !password) { setError('아이디와 비밀번호를 입력하세요.'); playSfx('back'); return; }
     setError(null);
     setBusy(true);
+    setWaking(false);
     playSfx('select');
+    const wakeTimer = setTimeout(() => setWaking(true), 4000);
+    const done = () => { clearTimeout(wakeTimer); setWaking(false); };
     const req = mode === 'login' ? login(u, password) : register(u, password, avatar);
-    req.then((a) => { playSfx('win'); onAuthed(a); }).catch((e: unknown) => {
+    req.then((a) => { done(); playSfx('win'); onAuthed(a); }).catch((e: unknown) => {
+      done();
       setError(e instanceof Error ? e.message : '요청에 실패했습니다.');
       playSfx('back');
       setBusy(false);
@@ -378,14 +386,16 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             </button>
           </div>
           <button className="cb-enter cb-ticket" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
-            {busy ? '…' : mode === 'login' ? '입장하기' : '가입하기'}&nbsp;<Icon name="arrowRight" size={16} />
+            {busy ? (waking ? '서버 깨우는 중…' : '…') : mode === 'login' ? '입장하기' : '가입하기'}&nbsp;{!busy && <Icon name="arrowRight" size={16} />}
           </button>
         </div>
-        {error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
+        {waking
+          ? <p style={hint}>서버가 절전 모드였어요. 처음 접속은 최대 1분까지 걸릴 수 있어요.</p>
+          : error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
 
         <button type="button" style={guestLink} onClick={goGuest} disabled={busy}>계정 없이 게스트로 둘러보기</button>
 
-        <span style={stubTagline}>여덟이 앉고, 하나가 살아남는다</span>
+        <span style={stubTagline}>여섯이 앉고, 하나가 살아남는다</span>
       </div>
     </div>
   );
