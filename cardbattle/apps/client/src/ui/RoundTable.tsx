@@ -177,11 +177,11 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                         opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
                       }}
                     >
-                      <span style={minionArtWrap}><CardArt id={m.defId} size={30} /></span>
+                      <span style={minionArtWrap}><CardArt id={m.defId} size={54} /></span>
                       <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                       <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
                       {m.taunt && <span style={minionKw} title="도발">🛡</span>}
-                      {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -3, top: -4 }} title="천상의 보호막">✦</span>}
+                      {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="천상의 보호막">✦</span>}
                     </div>
                   );
                 })}
@@ -341,24 +341,24 @@ const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
 // The minion field: a compact row of summoned bodies under the portrait. Each carries its
 // attack (bottom-left) and current health (bottom-right); taunt/divine-shield show as corner marks.
 const fieldRow: React.CSSProperties = {
-  display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 4, maxWidth: 132,
+  display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 6, maxWidth: 232,
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 34, height: 40, borderRadius: 6,
-  background: 'linear-gradient(160deg,#2a2013,#150d07)', border: '1.5px solid',
+  position: 'relative', width: 60, height: 70, borderRadius: 9,
+  background: 'linear-gradient(160deg,#2a2013,#150d07)', border: '2px solid',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
-const minionArtWrap: React.CSSProperties = { display: 'grid', placeItems: 'center', marginTop: -2 };
+const minionArtWrap: React.CSSProperties = { display: 'grid', placeItems: 'center', marginTop: -3 };
 const minionStat: React.CSSProperties = {
-  position: 'absolute', bottom: -5, minWidth: 13, height: 14, padding: '0 2px', borderRadius: 4,
-  fontSize: 10, fontFamily: mono, fontWeight: 900, lineHeight: '14px', textAlign: 'center',
+  position: 'absolute', bottom: -8, minWidth: 20, height: 21, padding: '0 3px', borderRadius: 6,
+  fontSize: 14, fontFamily: mono, fontWeight: 900, lineHeight: '21px', textAlign: 'center',
   background: '#0c0705', border: '1px solid rgba(0,0,0,0.6)',
 };
-const minionAtk: React.CSSProperties = { left: -4, color: '#f2c14a' };
-const minionHp: React.CSSProperties = { right: -4 };
+const minionAtk: React.CSSProperties = { left: -6, color: '#f2c14a' };
+const minionHp: React.CSSProperties = { right: -6 };
 const minionKw: React.CSSProperties = {
-  position: 'absolute', top: -4, right: -3, fontSize: 10, lineHeight: 1,
+  position: 'absolute', top: -6, right: -4, fontSize: 15, lineHeight: 1,
   filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.8))',
 };
 // Ongoing turn-start effects, shown as a compact chip row under the portrait.
