@@ -248,7 +248,7 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
   transform: 'translate(-50%,-50%)',
-  width: '94%', height: '94%', borderRadius: '50%', overflow: 'hidden',
+  width: '94%', height: '94%', borderRadius: 28, overflow: 'hidden',
   background:
     'radial-gradient(circle at 50% 46%, rgba(240,188,102,0.22), transparent 56%),' + // warm overhead light pool
     'radial-gradient(circle at 50% 44%, rgba(255,226,168,0.10), transparent 50%),' + // hot centre catch-light on the baize
