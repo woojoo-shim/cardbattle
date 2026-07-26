@@ -3,7 +3,7 @@ import {
   initGame, startGame, reduce, endTurn, spawnPlayer,
   CARD_DEFS, requiresTarget, resolveMode,
   heroPowerFor, heroPowerNeedsTarget,
-  type GameState, type Action, type GameEvent, type PlayerState, type GameModeId, type CardDef,
+  type GameState, type Action, type GameEvent, type PlayerState, type MinionInstance, type GameModeId, type CardDef,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS,
   BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
 } from '@cardbattle/shared';
@@ -274,199 +274,171 @@ export class BattleRoom extends Room<BattleState> {
     this.afterCurrent();
   }
 
-  /** Tactical bot policy. Priority ladder, one action per call (the caller loops until null):
-   *    1) LETHAL   — finish any opponent it can outright kill (accounts for shield & pierce)
-   *    2) SURVIVE  — badly hurt → the biggest self-heal it can afford
-   *    3) STRIKE   — focus-fire the weakest foe for the most removed HP; value AoE by how many it hits;
-   *                  disrupt the strongest foe (bind/steal/manaburn); swap HP when frail
-   *    4) BANK     — nothing worth doing → ramp mana (charge/meditate)
-   *  This makes a solo game feel like a real opponent: it never wastes a nuke, never scatters damage,
-   *  and it WILL close the gap and finish you off when you drop low. */
+  /** Board-model bot policy (하스스톤식). One action per call; the caller loops until null.
+   *  Priority: lethal (burst a reachable hero) → removal/AoE clear → develop the board (summon) →
+   *  buff → self-heal when hurt → attack with ready minions (respect 도발, trade well, else go face) →
+   *  ramp/draw value → hero power → end. Every returned action is validated against the reducer's
+   *  legality (mana, field slot, 도발) so the bot loop never stalls on a rejected move. */
   private chooseBotAction(bot: PlayerState): Action | null {
     const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
     if (opponents.length === 0) return null;
     const manaMax = this.gs.rules.manaMax;
+    const fieldCap = this.gs.rules.fieldCap;
     const play = (id: string, targetId?: string): Action =>
       targetId ? { type: 'play_card', cardInstanceId: id, targetId } : { type: 'play_card', cardInstanceId: id };
+    const atk = (attackerId: string, targetId: string): Action => ({ type: 'attack', attackerId, targetId });
 
-    const byWeak = [...opponents].sort((a, b) => (a.hp + a.defense) - (b.hp + b.defense) || a.hp - b.hp);
-    const weakest = byWeak[0];
-    const strongest = [...opponents].sort((a, b) => (b.hp + b.defense) - (a.hp + a.defense) || b.hp - a.hp)[0];
+    const weakestHero = [...opponents].sort((a, b) => a.hp - b.hp)[0];
+    // Every enemy minion tagged with its owner (for 도발 checks and trade scoring).
+    const enemyMinions: { m: MinionInstance; owner: PlayerState }[] = [];
+    for (const o of opponents) for (const m of o.field) enemyMinions.push({ m, owner: o });
+    // An opponent hero is reachable by a direct hit only if that opponent has NO 도발 minion up.
+    const reachable = (o: PlayerState) => o.field.every((m) => !m.taunt);
 
-    const sumBy = (def: CardDef, kind: string, chosenOnly = false) =>
-      def.effects.filter((e) => e.kind === kind && (!chosenOnly || (e as any).target === 'chosen'))
-                 .reduce((s, e) => s + ((e as any).amount ?? 0), 0);
-    const hasKind = (def: CardDef, kind: string) => def.effects.some((e) => e.kind === kind);
-    // HP actually removed from `opp` by single-targeting this card (defense soaks normal, pierce bypasses,
-    // desperation scales with our own missing HP).
-    // Bonus chosen-target damage a 전투의 함성 (battlecry) unleashes IF its condition holds for
-    // us right now — mirrors the engine's cond check so the bot values warcry/berserk correctly.
-    const battlecryDmg = (def: CardDef) => {
-      let bonus = 0;
-      for (const e of def.effects) {
-        if (e.kind !== 'battlecry') continue;
-        const met = (e as any).cond === 'last_card' ? bot.hand.length <= 1
-          : (e as any).cond === 'wounded' ? bot.hp * 2 <= bot.maxHp
-          : opponents.length >= 2; // outnumbered
-        if (met) bonus += ((e as any).effects as any[]).filter((x) => x.kind === 'damage' && x.target === 'chosen').reduce((s, x) => s + (x.amount ?? 0), 0);
-      }
-      return bonus;
-    };
-    const removedFrom = (def: CardDef, opp: PlayerState) => {
-      let normal = sumBy(def, 'damage', true) + battlecryDmg(def);
-      const desp = def.effects.filter((e) => e.kind === 'desperation').reduce((s, e) => s + (e as any).amount, 0);
-      if (desp) normal += desp + (bot.maxHp - bot.hp);
-      const pierce = sumBy(def, 'pierce');
-      return pierce + Math.max(0, normal - opp.defense);
-    };
-    // HP removed from `opp` by an AoE (damage all / leech) that hits everyone.
-    const aoeRemovedFrom = (def: CardDef, opp: PlayerState) => {
-      const all = def.effects.filter((e) => e.kind === 'damage' && (e as any).target === 'all').reduce((s, e) => s + (e as any).amount, 0);
-      const raw = all + sumBy(def, 'leech');
-      return raw > 0 ? Math.max(0, raw - opp.defense) : 0;
-    };
+    const affordable = bot.hand
+      .map((c) => ({ inst: c, def: CARD_DEFS[c.defId]! }))
+      .filter((h) => h.def && h.def.cost <= bot.mana);
+    const has = (def: CardDef, k: string) => def.effects.some((e) => e.kind === k);
+    const dmgOf = (def: CardDef, target: string) =>
+      def.effects.filter((e) => e.kind === 'damage' && (e as any).target === target).reduce((s, e) => s + (e as any).amount, 0);
 
-    // The avatar's signature ability. It reuses the Effect union, so score it with the same
-    // removedFrom/sumBy helpers by treating its effect list as a pseudo-card.
-    const power = heroPowerFor(bot.avatar);
-    const powerDef = { effects: power.effects, cost: power.cost } as unknown as CardDef;
-    const canPower = !bot.heroPowerUsed && bot.mana >= power.cost;
-    const powerTargeted = heroPowerNeedsTarget(power);
-    const usePower = (targetId?: string): Action =>
-      targetId ? { type: 'use_hero_power', targetId } : { type: 'use_hero_power' };
-    // Fallback: fire the hero power when there's nothing better (or no hand at all) and it does
-    // something useful — chip the weakest, poison the strongest, nuke, heal, shield, or reflect.
-    const powerFallback = (): Action | null => {
-      if (!canPower) return null;
-      if (powerTargeted) {
-        if (removedFrom(powerDef, weakest) > 0) return usePower(weakest.id);
-        if (hasKind(powerDef, 'poison')) {
-          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
-          return usePower(victim.id);
-        }
-        return null;
-      }
-      if (aoeRemovedFrom(powerDef, weakest) > 0) return usePower();
-      if (sumBy(powerDef, 'heal') > 0 && bot.hp < bot.maxHp * 0.85) return usePower();
-      if (sumBy(powerDef, 'shield') > 0 && bot.defense < 8) return usePower();
-      if (hasKind(powerDef, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.85) return usePower();
-      if (sumBy(powerDef, 'mana') > 0 && bot.mana <= manaMax - 3) return usePower();
-      return null;
-    };
-
-    const hand = bot.hand.map((c) => ({ inst: c, def: CARD_DEFS[c.defId]! })).filter((h) => h.def && h.def.cost <= bot.mana);
-    if (hand.length === 0) return powerFallback();
-
-    // 1) LETHAL — the smart kill. Take the cheapest card that finishes a foe.
-    let lethal: { action: Action; cost: number } | null = null;
-    for (const h of hand) {
-      if (requiresTarget(h.def)) {
-        if (!(hasKind(h.def, 'damage') || hasKind(h.def, 'pierce') || hasKind(h.def, 'desperation'))) continue;
-        const victim = opponents.filter((o) => removedFrom(h.def, o) >= o.hp).sort((a, b) => a.hp - b.hp)[0];
-        if (victim && (!lethal || h.def.cost < lethal.cost)) lethal = { action: play(h.inst.id, victim.id), cost: h.def.cost };
-      } else if (aoeRemovedFrom(h.def, weakest) >= weakest.hp && aoeRemovedFrom(h.def, weakest) > 0) {
-        if (!lethal || h.def.cost < lethal.cost) lethal = { action: play(h.inst.id), cost: h.def.cost };
-      }
+    // 1) LETHAL — a chosen-damage spell to a reachable hero it kills.
+    for (const h of affordable) {
+      if (h.def.kind !== 'spell') continue;
+      const face = dmgOf(h.def, 'chosen');
+      if (face <= 0) continue;
+      const victim = opponents.find((o) => reachable(o) && face >= o.hp);
+      if (victim) return play(h.inst.id, victim.id);
     }
-    if (lethal) return lethal.action;
-
-    // 1b) POWER-LETHAL — the signature ability can also close the gap (e.g. mage bolt / dragon breath).
-    if (canPower) {
-      if (powerTargeted) {
-        const victim = opponents.filter((o) => removedFrom(powerDef, o) >= o.hp && removedFrom(powerDef, o) > 0).sort((a, b) => a.hp - b.hp)[0];
-        if (victim) return usePower(victim.id);
-      } else if (aoeRemovedFrom(powerDef, weakest) >= weakest.hp && aoeRemovedFrom(powerDef, weakest) > 0) {
-        return usePower();
-      }
+    // 1b) LETHAL — an AoE-to-heroes spell (서리 충격) that finishes someone.
+    for (const h of affordable) {
+      if (h.def.kind !== 'spell') continue;
+      const all = dmgOf(h.def, 'allEnemies');
+      if (all > 0 && opponents.some((o) => all >= o.hp)) return play(h.inst.id);
+    }
+    // 1c) LETHAL — a ready minion straight to a reachable hero.
+    for (const m of bot.field) {
+      if (m.attacksLeft <= 0 || m.attack <= 0) continue;
+      const victim = opponents.find((o) => reachable(o) && m.attack >= o.hp);
+      if (victim) return atk(m.id, victim.id);
     }
 
-    // 2) SURVIVE — badly hurt: the strongest self-heal available (else a lifesteal on the weakest).
-    if (bot.hp < bot.maxHp * 0.45) {
-      const heal = hand.filter((h) => sumBy(h.def, 'heal') > 0 && !requiresTarget(h.def) && !hasKind(h.def, 'selfskip'))
-                       .sort((a, b) => sumBy(b.def, 'heal') - sumBy(a.def, 'heal'))[0];
-      if (heal) return play(heal.inst.id);
-      // The hero power heal is a reliable top-up when the hand has none.
-      if (canPower && sumBy(powerDef, 'heal') > 0 && !powerTargeted) return usePower();
-      const drain = hand.find((h) => sumBy(h.def, 'heal') > 0 && requiresTarget(h.def) && removedFrom(h.def, weakest) > 0);
-      if (drain) return play(drain.inst.id, weakest.id);
+    // 2) REMOVAL / clears.
+    // 암살 — destroy the biggest enemy body outright.
+    const assn = affordable.find((h) => has(h.def, 'destroy'));
+    if (assn && enemyMinions.length) {
+      const big = [...enemyMinions].sort((a, b) => (b.m.attack + b.m.health) - (a.m.attack + a.m.health))[0];
+      if (big.m.attack + big.m.health >= 6) return play(assn.inst.id, big.m.id);
+    }
+    // 화염 폭풍 / 화염룡 전투의 함성 — AoE the enemy board when it clears value.
+    const aoe = affordable.find((h) => h.def.kind === 'spell' && dmgOf(h.def, 'allEnemyMinions') > 0);
+    if (aoe) {
+      const amt = dmgOf(aoe.def, 'allEnemyMinions');
+      const kills = enemyMinions.filter((e) => e.m.health <= amt && !e.m.divineShield).length;
+      if (enemyMinions.length >= 3 || kills >= 2) return play(aoe.inst.id);
+    }
+    // 강타/화염 화살 — burn down a valuable enemy minion my hand can finish.
+    for (const h of affordable) {
+      if (h.def.kind !== 'spell') continue;
+      const face = dmgOf(h.def, 'chosen');
+      if (face <= 0) continue;
+      const kill = [...enemyMinions]
+        .filter((e) => e.m.health <= face && !e.m.divineShield && e.m.attack >= 3)
+        .sort((a, b) => b.m.attack - a.m.attack)[0];
+      if (kill) return play(h.inst.id, kill.m.id);
     }
 
-    // 3) STRIKE / control — score every affordable play, take the best.
-    const cands: { score: number; action: Action }[] = [];
-    const consider = (score: number, action: Action) => { if (score > 0) cands.push({ score, action }); };
-    for (const h of hand) {
-      const d = h.def;
-      if (requiresTarget(d)) {
-        const removed = removedFrom(d, weakest);
-        if (removed > 0) consider(removed * 3 - d.cost, play(h.inst.id, weakest.id));       // focus-fire
-        if (hasKind(d, 'skip')) consider(9 - d.cost, play(h.inst.id, strongest.id));        // lock down the threat
-        if (hasKind(d, 'steal') || hasKind(d, 'discard')) {
-          const rich = [...opponents].sort((a, b) => b.hand.length - a.hand.length)[0];
-          if (rich.hand.length > 0) consider(6 - d.cost, play(h.inst.id, rich.id));
-        }
-        if (hasKind(d, 'manaburn')) {
-          const mrich = [...opponents].sort((a, b) => b.mana - a.mana)[0];
-          if (mrich.mana >= 2) consider(5 - d.cost, play(h.inst.id, mrich.id));
-        }
-        if (hasKind(d, 'swap') && strongest.hp > bot.hp + 12) consider(strongest.hp - bot.hp, play(h.inst.id, strongest.id));
-        if (hasKind(d, 'poison')) {
-          // A lingering toxin pays off on a durable foe (each tick bypasses shield); aim the
-          // healthiest target that isn't already rotting so all its ticks land.
-          const pe = d.effects.find((e) => e.kind === 'poison') as any;
-          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
-          consider(sumBy(d, 'poison') * (pe?.turns ?? 1) - d.cost, play(h.inst.id, victim.id));
-        }
-      } else {
-        const aoe = aoeRemovedFrom(d, weakest);
-        if (aoe > 0) consider(aoe * opponents.length * 2 - d.cost + (sumBy(d, 'leech') ? 4 : 0), play(h.inst.id));
-        if (sumBy(d, 'heal') > 0 && !hasKind(d, 'selfskip') && bot.hp < bot.maxHp * 0.8) consider(sumBy(d, 'heal') - d.cost, play(h.inst.id));
-        if (sumBy(d, 'shield') > 0 && bot.defense < 8 && bot.hp < bot.maxHp * 0.75) consider(sumBy(d, 'shield') / 2 - d.cost, play(h.inst.id));
-        // '역병안개' — AoE poison every foe (bypasses shield); scale by heads and duration.
-        if (hasKind(d, 'poison')) {
-          const pe = d.effects.find((e) => e.kind === 'poison') as any;
-          consider(sumBy(d, 'poison') * (pe?.turns ?? 1) * opponents.length / 2 - d.cost, play(h.inst.id));
-        }
-        // '재생축복' — stack a heal-over-time when wounded and not already regenerating.
-        if (hasKind(d, 'regen') && !bot.statuses.some((s) => s.kind === 'regen') && bot.hp < bot.maxHp * 0.85) {
-          const re = d.effects.find((e) => e.kind === 'regen') as any;
-          consider((re?.amount ?? 0) * (re?.turns ?? 1) / 2 - d.cost, play(h.inst.id));
-        }
-        // '가시갑옷' — raise a reflector when hurt and unguarded, so the next hit bites back.
-        if (hasKind(d, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.7) {
-          consider(6 - d.cost, play(h.inst.id));
-        }
-        // '순교' — arm a 죽음의 메아리 parting blow; worth more the closer we are to death.
-        if (hasKind(d, 'deathrattle') && bot.deathrattle.length === 0) {
-          const woundBonus = bot.hp < bot.maxHp * 0.5 ? 4 : 0;
-          consider(3 + woundBonus - d.cost, play(h.inst.id));
-        }
+    // 3) DEVELOP — put a body on the board (biggest affordable that fits an open slot).
+    if (bot.field.length < fieldCap) {
+      // 궁수-type: a minion whose battlecry damages a chosen target — aim a kill, else the weakest hero.
+      const archer = affordable.find((h) => h.def.kind === 'minion' && requiresTarget(h.def) && dmgOf(h.def, 'chosen') > 0);
+      if (archer) {
+        const amt = dmgOf(archer.def, 'chosen');
+        const kill = [...enemyMinions].filter((e) => e.m.health <= amt && !e.m.divineShield).sort((a, b) => b.m.attack - a.m.attack)[0];
+        return play(archer.inst.id, kill ? kill.m.id : weakestHero.id);
       }
+      const summon = affordable
+        .filter((h) => h.def.kind === 'minion' && !requiresTarget(h.def))
+        .sort((a, b) => b.def.cost - a.def.cost)[0];
+      if (summon) return play(summon.inst.id);
     }
-    // Score the hero power alongside the cards so a good turn spends it too (not just as a fallback).
-    if (canPower) {
-      if (powerTargeted) {
-        const removed = removedFrom(powerDef, weakest);
-        if (removed > 0) consider(removed * 3 - power.cost, usePower(weakest.id));
-        if (hasKind(powerDef, 'poison')) {
-          const pe = powerDef.effects.find((e) => e.kind === 'poison') as any;
-          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
-          consider(sumBy(powerDef, 'poison') * (pe?.turns ?? 1) - power.cost, usePower(victim.id));
-        }
-      } else {
-        const aoe = aoeRemovedFrom(powerDef, weakest);
-        if (aoe > 0) consider(aoe * opponents.length * 2 - power.cost, usePower());
-        if (sumBy(powerDef, 'heal') > 0 && bot.hp < bot.maxHp * 0.8) consider(sumBy(powerDef, 'heal') - power.cost, usePower());
-        if (sumBy(powerDef, 'shield') > 0 && bot.defense < 8 && bot.hp < bot.maxHp * 0.75) consider(sumBy(powerDef, 'shield') / 2 - power.cost, usePower());
-        if (hasKind(powerDef, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.7) consider(6 - power.cost, usePower());
-      }
-    }
-    if (cands.length) return cands.sort((a, b) => b.score - a.score)[0].action;
 
-    // 4) BANK — nothing worth attacking with: ramp mana toward a bigger turn if not near the cap.
-    const ramp = hand.find((h) => sumBy(h.def, 'mana') > 0 && bot.mana <= manaMax - 3);
+    // 4) BUFF — pump my board once it's worth it.
+    const buffAll = affordable.find((h) => h.def.kind === 'spell' && h.def.effects.some((e) => e.kind === 'buff' && (e as any).target === 'allFriendlyMinions'));
+    if (buffAll && bot.field.length >= 2) return play(buffAll.inst.id);
+    const buffOne = affordable.find((h) => h.def.kind === 'spell' && h.def.effects.some((e) => e.kind === 'buff' && (e as any).target === 'chosen'));
+    if (buffOne && bot.field.length) {
+      const best = [...bot.field].sort((a, b) => b.attack - a.attack)[0];
+      return play(buffOne.inst.id, best.id);
+    }
+
+    // 5) HEAL — top the hero up when badly hurt.
+    if (bot.hp < bot.maxHp * 0.5) {
+      const healHero = affordable.find((h) => h.def.effects.some((e) => e.kind === 'heal' && (e as any).target === 'hero'));
+      if (healHero) return play(healHero.inst.id);
+      const healChosen = affordable.find((h) => h.def.kind === 'spell' && h.def.effects.some((e) => e.kind === 'heal' && (e as any).target === 'chosen'));
+      if (healChosen) return play(healChosen.inst.id, bot.id);
+    }
+
+    // 6) ATTACK — one ready minion trades well or applies face pressure.
+    const attacker = bot.field.find((m) => m.attacksLeft > 0 && m.attack > 0);
+    if (attacker) {
+      // A 도발 minion anywhere forces a trade — smash the softest one.
+      const taunts = enemyMinions.filter((e) => e.m.taunt);
+      if (taunts.length) {
+        const t = [...taunts].sort((a, b) => (a.m.divineShield ? 1 : 0) - (b.m.divineShield ? 1 : 0) || a.m.health - b.m.health)[0];
+        return atk(attacker.id, t.m.id);
+      }
+      // Favorable trade: kill an enemy body and survive (poisonous kills anything it touches).
+      const trade = [...enemyMinions]
+        .filter((e) => !e.m.divineShield && attacker.attack >= e.m.health && (attacker.poisonous || e.m.attack < attacker.health))
+        .sort((a, b) => (b.m.attack + b.m.health) - (a.m.attack + a.m.health))[0];
+      if (trade && trade.m.attack >= 3) return atk(attacker.id, trade.m.id);
+      // Otherwise pile onto the weakest reachable hero.
+      const face = opponents.find((o) => reachable(o)) ?? null;
+      if (face) return atk(attacker.id, [...opponents].filter(reachable).sort((a, b) => a.hp - b.hp)[0].id);
+      // Every hero is guarded — take the best available trade even if unfavorable.
+      const any = [...enemyMinions].filter((e) => !e.m.divineShield).sort((a, b) => b.m.attack - a.m.attack)[0];
+      if (any) return atk(attacker.id, any.m.id);
+    }
+
+    // 7) VALUE — spend leftover mana on chip / ramp / draw instead of wasting it.
+    const chip = affordable.find((h) => h.def.kind === 'spell' && dmgOf(h.def, 'allEnemies') > 0);
+    if (chip && opponents.length >= 2) return play(chip.inst.id);
+    const ramp = affordable.find((h) => has(h.def, 'gainMana') && bot.mana <= manaMax - 2);
     if (ramp) return play(ramp.inst.id);
+    const draw = affordable.find((h) => has(h.def, 'draw') && bot.hand.length <= 4);
+    if (draw) return play(draw.inst.id);
+    if (bot.field.length < fieldCap) {
+      const anyMin = affordable.find((h) => h.def.kind === 'minion' && !requiresTarget(h.def));
+      if (anyMin) return play(anyMin.inst.id);
+    }
 
-    return powerFallback();
+    // 8) HERO POWER — a finisher or steady value when there's nothing better.
+    const power = heroPowerFor(bot.avatar);
+    if (!bot.heroPowerUsed && bot.mana >= power.cost) {
+      if (heroPowerNeedsTarget(power)) {
+        const face = power.effects.filter((e) => e.kind === 'damage' && (e as any).target === 'chosen').reduce((s, e) => s + (e as any).amount, 0);
+        if (face > 0) {
+          const victim = opponents.find((o) => reachable(o) && face >= o.hp);
+          if (victim) return { type: 'use_hero_power', targetId: victim.id };
+          const killM = [...enemyMinions].filter((e) => !e.m.divineShield && e.m.health <= face).sort((a, b) => b.m.attack - a.m.attack)[0];
+          if (killM) return { type: 'use_hero_power', targetId: killM.m.id };
+          const reach = [...opponents].filter(reachable).sort((a, b) => a.hp - b.hp)[0];
+          if (reach) return { type: 'use_hero_power', targetId: reach.id };
+        }
+      } else {
+        const useIt = (): Action => ({ type: 'use_hero_power' });
+        if (power.effects.some((e) => e.kind === 'damage' && (e as any).target === 'allEnemies')) return useIt();
+        if (power.effects.some((e) => e.kind === 'summon') && bot.field.length < fieldCap) return useIt();
+        if (power.effects.some((e) => e.kind === 'heal') && bot.hp < bot.maxHp * 0.85) return useIt();
+        if (power.effects.some((e) => e.kind === 'shield') && bot.defense < 8) return useIt();
+        if (power.effects.some((e) => e.kind === 'gainMana') && bot.mana <= manaMax - 2) return useIt();
+        if (power.effects.some((e) => e.kind === 'draw') && bot.hand.length <= 4) return useIt();
+      }
+    }
+
+    return null; // nothing worth doing — end the turn
   }
 
   private handleAction(client: Client, action: Action): void {
@@ -541,17 +513,9 @@ export class BattleRoom extends Room<BattleState> {
     }
   }
 
-  /**
-   * Broadcast the event stream, but keep private reveals (card_revealed) hidden from
-   * everyone except their viewer — otherwise '간파' would leak the peeked card to the table.
-   * Each client receives the public events plus only the reveals addressed to them, in order.
-   */
+  /** Broadcast the event stream to the whole table (board model has no hidden reveals). */
   private sendEvents(events: GameEvent[]): void {
-    if (!events.some((e) => e.type === 'card_revealed')) { this.broadcast('events', events); return; }
-    for (const client of this.clients) {
-      const visible = events.filter((e) => e.type !== 'card_revealed' || e.viewerId === client.sessionId);
-      if (visible.length) client.send('events', visible);
-    }
+    this.broadcast('events', events);
   }
 
   /** Send each connected client only their own hand contents (hidden information). */

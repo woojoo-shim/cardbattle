@@ -6,7 +6,6 @@ import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
 import { Log } from './Log.js';
-import { RevealOverlay } from './RevealOverlay.js';
 import { EmoteBar } from './EmoteBar.js';
 import { EmoteLayer } from './EmoteLayer.js';
 import { ManaBar } from './ManaBar.js';
@@ -23,7 +22,7 @@ interface Props {
   hand: CardInstance[];
   events: GameEvent[];
   error: RoomError | null;
-  send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'use_hero_power'; targetId?: string } | { type: 'end_turn' }) => void;
+  send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'attack'; attackerId: string; targetId: string } | { type: 'use_hero_power'; targetId?: string } | { type: 'end_turn' }) => void;
   onExit: () => void;
   borderCosmetic?: string;
   emotes: LiveEmote[];
@@ -37,6 +36,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   // True while the hero power is armed and waiting for its target (its own targeting mode,
   // separate from a card's `pending` so the two can't both be live).
   const [powerPending, setPowerPending] = useState(false);
+  // The id of my own minion armed to attack, waiting for the enemy it should strike.
+  const [attacker, setAttacker] = useState<string | null>(null);
   // Learn-by-playing coach: tracks whether the newcomer has taken their first play / ended a turn,
   // so the guidance advances in step with what they actually do at the table.
   const [coachPlayed, setCoachPlayed] = useState(false);
@@ -54,7 +55,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const canUsePower = isMyTurn && !powerUsed && myMana >= power.cost;
 
   // Clear a half-finished target selection whenever the turn passes away from me.
-  useEffect(() => { if (!isMyTurn) { setPending(null); setPowerPending(false); } }, [isMyTurn]);
+  useEffect(() => { if (!isMyTurn) { setPending(null); setPowerPending(false); setAttacker(null); } }, [isMyTurn]);
 
   // Fire the "당신의 턴" telegraph on the RISING edge of my turn — a bump to a nonce key remounts
   // the banner so its one-shot animation replays each time the turn lands back on me.
@@ -74,12 +75,21 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     const def = CARD_DEFS[card.defId];
     if (!def) return;
     setPowerPending(false); // playing a card cancels an armed hero power
+    setAttacker(null);      // …and cancels an armed minion attack
     if (requiresTarget(def)) {
       setPending((cur) => (cur?.id === card.id ? null : card)); // toggle target mode
       return;
     }
     send({ type: 'play_card', cardInstanceId: card.id });
     setCoachPlayed(true);
+  };
+
+  // Arm (or toggle off) one of my minions to attack. Clicking a second minion switches the pick.
+  const selectAttacker = (minionId: string) => {
+    if (!isMyTurn) return;
+    setPending(null);
+    setPowerPending(false);
+    setAttacker((cur) => (cur === minionId ? null : minionId));
   };
 
   // Fire (or arm) the avatar's signature ability. Non-targeted powers resolve immediately;
@@ -95,6 +105,11 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   };
 
   const selectTarget = (targetId: string) => {
+    if (attacker) {
+      send({ type: 'attack', attackerId: attacker, targetId });
+      setAttacker(null);
+      return;
+    }
     if (powerPending) {
       send({ type: 'use_hero_power', targetId });
       setPowerPending(false);
@@ -182,7 +197,6 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       <SceneLife />
       <VfxLayer events={events} players={ui.players} myId={myId} />
       <EmoteLayer emotes={emotes} />
-      <RevealOverlay events={events} myId={myId} ui={ui} />
       {turnFlash > 0 && (
         <div key={turnFlash} style={turnBanner} aria-hidden>
           <span style={turnEdge} />
@@ -192,12 +206,22 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
-        <RoundTable ui={ui} myId={myId} selectable={isMyTurn && (!!pending || powerPending)} onSelect={selectTarget} />
+        <RoundTable
+          ui={ui}
+          myId={myId}
+          selectable={isMyTurn && (!!pending || powerPending || !!attacker)}
+          onSelect={selectTarget}
+          attackMode={isMyTurn && !pending && !powerPending}
+          attackerId={attacker}
+          onSelectAttacker={selectAttacker}
+        />
         <Log events={events} ui={ui} />
-        {(pending || powerPending) && (
+        {(pending || powerPending || attacker) && (
           <div style={targetHint}>
             <Icon name="target" size={15} />&nbsp;
-            {powerPending ? '영웅 능력의 대상을 선택하세요 (능력 버튼 다시 클릭 시 취소)' : '대상을 선택하세요 (카드 다시 클릭 시 취소)'}
+            {attacker ? '공격할 대상을 선택하세요 (하수인 다시 클릭 시 취소)'
+              : powerPending ? '영웅 능력의 대상을 선택하세요 (능력 버튼 다시 클릭 시 취소)'
+              : '대상을 선택하세요 (카드 다시 클릭 시 취소)'}
           </div>
         )}
         {error && <div style={errToast}>{error.message}</div>}

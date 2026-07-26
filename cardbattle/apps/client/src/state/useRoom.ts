@@ -35,6 +35,24 @@ export interface UiStatus {
   turns: number;
 }
 
+/** A minion on a player's field, mirrored for the board UI. */
+export interface UiMinion {
+  id: string;
+  defId: string;
+  ownerId: string;
+  attack: number;
+  health: number;
+  maxHealth: number;
+  taunt: boolean;
+  charge: boolean;
+  divineShield: boolean;
+  poisonous: boolean;
+  lifesteal: boolean;
+  summonedThisTurn: boolean;
+  attacksLeft: number;
+  hasDeathrattle: boolean;
+}
+
 export interface UiPlayer {
   id: string;
   name: string;
@@ -51,6 +69,7 @@ export interface UiPlayer {
   heroPowerUsed: boolean;
   hasDeathrattle: boolean;
   statuses: UiStatus[];
+  field: UiMinion[];
   /** Equipped cosmetics, broadcast from the server so every player sees them. */
   border: string;
   title: string;
@@ -133,6 +152,14 @@ function snapshot(state: any): UiState {
       heroPowerUsed: p.heroPowerUsed ?? false,
       hasDeathrattle: p.hasDeathrattle ?? false,
       statuses: p.statuses ? Array.from(p.statuses, (st: any) => ({ kind: st.kind, amount: st.amount, turns: st.turns })) : [],
+      field: p.field ? Array.from(p.field, (m: any) => ({
+        id: m.id, defId: m.defId, ownerId: m.ownerId,
+        attack: m.attack, health: m.health, maxHealth: m.maxHealth,
+        taunt: m.taunt, charge: m.charge, divineShield: m.divineShield,
+        poisonous: m.poisonous, lifesteal: m.lifesteal,
+        summonedThisTurn: m.summonedThisTurn, attacksLeft: m.attacksLeft,
+        hasDeathrattle: m.hasDeathrattle,
+      })) : [],
       border: p.border ?? 'none',
       title: p.titleCosmetic ?? 'title_none',
       effect: p.effectCosmetic ?? 'fx_none',

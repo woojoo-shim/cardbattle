@@ -1,65 +1,114 @@
 import { describe, it, expect } from 'vitest';
 import { reduce } from '../engine/reducer.js';
 import { DEFAULT_RULES } from '../modes.js';
-import type { GameState, PlayerState, ReduceCtx } from '../types.js';
+import type { GameState, PlayerState, MinionInstance, ReduceCtx } from '../types.js';
 
 function player(id: string, seat: number, over: Partial<PlayerState> = {}): PlayerState {
-  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], deathrattle: [], buffs: [], alive: true, skipTurns: 0, gamble: false, empower: 1, mana: 20, ...over };
+  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], field: [], statuses: [], deathrattle: [], alive: true, skipTurns: 0, mana: 20, heroPowerUsed: false, ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
-  return { phase: 'playing', mode: 'standard', rules: DEFAULT_RULES, players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
+  return { phase: 'playing', mode: 'standard', rules: DEFAULT_RULES, players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, nextMinionId: 0, log: [], winnerId: null, ...over };
 }
-const ctx: ReduceCtx = { nextCardId: () => 'c-x', now: 1000 };
+function minion(id: string, ownerId: string, over: Partial<MinionInstance> = {}): MinionInstance {
+  return { id, defId: 'knight', ownerId, attack: 3, health: 3, maxHealth: 3, summonedThisTurn: false, attacksLeft: 1, taunt: false, charge: false, divineShield: false, poisonous: false, lifesteal: false, deathrattle: [], ...over };
+}
+let n = 0;
+const ctx: ReduceCtx = { nextCardId: () => `c-${n++}`, now: 1000 };
 
-describe('reduce: play_card', () => {
-  it('deals damage to a chosen target', () => {
+describe('reduce: play_card (spells)', () => {
+  it('strike deals 3 damage to a chosen hero and consumes the card + mana', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }];
+    s.players[0].hand = [{ id: 'c1', defId: 'strike' }];
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].hp).toBe(30);
-    expect(state.players[0].hand).toHaveLength(0); // card consumed
-    expect(events).toContainEqual(expect.objectContaining({ type: 'damage_dealt', targetId: 'b', amount: 10 }));
+    expect(state.players[1].hp).toBe(37);
+    expect(state.players[0].hand).toHaveLength(0);
+    expect(state.players[0].mana).toBe(19); // 20 - cost 1
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage_dealt', targetId: 'b', amount: 3 }));
   });
 
   it('does not mutate the input state (purity)', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }];
+    s.players[0].hand = [{ id: 'c1', defId: 'strike' }];
     reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(s.players[1].hp).toBe(40); // original untouched
+    expect(s.players[1].hp).toBe(40);
+    expect(s.players[0].hand).toHaveLength(1);
   });
 
-  it('heals self capped at maxHp', () => {
+  it('holylight heals a chosen hero capped at maxHp', () => {
     const s = game();
-    s.players[0].hp = 35;
-    s.players[0].hand = [{ id: 'c1', defId: 'potion' }];
-    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(state.players[0].hp).toBe(40); // 35+12 capped
+    s.players[0].hp = 36;
+    s.players[0].hand = [{ id: 'c1', defId: 'holylight' }]; // heal 6
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'a' }, ctx);
+    expect(state.players[0].hp).toBe(40); // 36 + 6 capped at 40
   });
 
-  it('eliminates a player at 0 hp', () => {
+  it('eliminates a hero brought to 0 hp', () => {
     const s = game();
-    s.players[1].hp = 8;
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }];
+    s.players[1].hp = 3;
+    s.players[0].hand = [{ id: 'c1', defId: 'strike' }]; // 3 dmg
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
     expect(state.players[1].alive).toBe(false);
     expect(events).toContainEqual({ type: 'player_eliminated', playerId: 'b' });
   });
 
-  it('bomb hits all others but not self', () => {
-    const s = game({ players: [player('a', 0), player('b', 1), player('c', 2)] });
-    s.turnOrder = ['a', 'b', 'c'];
-    s.players[0].hand = [{ id: 'c1', defId: 'bomb' }];
+  it('frostshock hits all enemy heroes but not self', () => {
+    const s = game({ players: [player('a', 0), player('b', 1), player('c', 2)], turnOrder: ['a', 'b', 'c'] });
+    s.players[0].hand = [{ id: 'c1', defId: 'frostshock' }]; // 3 dmg allEnemies
     const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
     expect(state.players[0].hp).toBe(40);
-    expect(state.players[1].hp).toBe(28);
-    expect(state.players[2].hp).toBe(28);
+    expect(state.players[1].hp).toBe(37);
+    expect(state.players[2].hp).toBe(37);
+  });
+
+  it('shield (defense) is consumed by incoming damage', () => {
+    const s = game();
+    s.players[1].defense = 2;
+    s.players[0].hand = [{ id: 'c1', defId: 'firebolt' }]; // 4 dmg
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[1].defense).toBe(0); // 2 absorbed
+    expect(state.players[1].hp).toBe(38);     // 4 - 2 through
+  });
+
+  it('assassinate destroys a chosen minion outright', () => {
+    const s = game();
+    s.players[1].field = [minion('m1', 'b', { health: 8, maxHealth: 8 })];
+    s.players[0].hand = [{ id: 'c1', defId: 'assassinate' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
+    expect(state.players[1].field).toHaveLength(0);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'minion_died', minionId: 'm1' }));
+  });
+
+  it('manasurge nets +1 mana (cost 1, grants 2)', () => {
+    const s = game();
+    s.players[0].mana = 5;
+    s.players[0].hand = [{ id: 'c1', defId: 'manasurge' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].mana).toBe(6); // 5 - 1 + 2
+    expect(events).toContainEqual(expect.objectContaining({ type: 'mana_gained', playerId: 'a', manaAfter: 6 }));
+  });
+
+  it('spends mana equal to the card cost', () => {
+    const s = game();
+    s.players[0].mana = 5;
+    s.players[0].hand = [{ id: 'c1', defId: 'firebolt' }]; // cost 2
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(state.players[0].mana).toBe(3);
+  });
+
+  it('rejects a card the actor cannot afford', () => {
+    const s = game();
+    s.players[0].mana = 1;
+    s.players[0].hand = [{ id: 'c1', defId: 'firebolt' }]; // cost 2 > 1
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    expect(events).toHaveLength(0);
+    expect(state).toEqual(s);
   });
 
   it('rejects playing when it is not your turn', () => {
     const s = game();
-    s.players[1].hand = [{ id: 'c9', defId: 'sword' }];
+    s.players[1].hand = [{ id: 'c9', defId: 'strike' }];
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c9', targetId: 'a' }, ctx);
-    expect(state).toEqual(s);       // unchanged
+    expect(state).toEqual(s);
     expect(events).toHaveLength(0);
   });
 
@@ -70,97 +119,92 @@ describe('reduce: play_card', () => {
     expect(state).toEqual(s);
   });
 
-  it('rejects a dead/invalid chosen target', () => {
+  it('rejects a dead chosen target', () => {
     const s = game();
     s.players[1].alive = false;
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }];
+    s.players[0].hand = [{ id: 'c1', defId: 'strike' }];
     const { events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
     expect(events).toHaveLength(0);
   });
+});
 
-  it('shield is consumed by incoming damage (not a passive)', () => {
+describe('reduce: play_card (minions)', () => {
+  it('summons a minion onto the field', () => {
     const s = game();
-    s.players[1].defense = 8;
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // 10 dmg
-    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].defense).toBe(0); // shield fully spent
-    expect(state.players[1].hp).toBe(38);     // only 2 dmg got through (10 - 8 absorbed)
+    s.players[0].hand = [{ id: 'c1', defId: 'knight' }]; // 4/3
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].field).toHaveLength(1);
+    expect(state.players[0].field[0].attack).toBe(4);
+    expect(state.players[0].field[0].health).toBe(3);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'minion_summoned', playerId: 'a', defId: 'knight' }));
   });
 
-  it('peek privately reveals one of a target\'s cards to the caster', () => {
+  it('a fresh minion has summoning sickness (no charge → no attack this turn)', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'peek' }];
-    s.players[1].hand = [{ id: 't1', defId: 'sword' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    const reveal = events.find((e) => e.type === 'card_revealed');
-    expect(reveal).toMatchObject({ type: 'card_revealed', viewerId: 'a', targetId: 'b', defId: 'sword' });
-    expect(state.players[1].hand).toHaveLength(1); // peek does not remove the card
+    s.players[0].hand = [{ id: 'c1', defId: 'knight' }];
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].field[0].summonedThisTurn).toBe(true);
+    expect(state.players[0].field[0].attacksLeft).toBe(0);
   });
 
-  it('discard destroys one of a target\'s cards', () => {
+  it('a charge minion can swing the turn it lands', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'shatter' }];
-    s.players[1].hand = [{ id: 't1', defId: 'sword' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].hand).toHaveLength(0);
-    expect(events).toContainEqual(expect.objectContaining({ type: 'card_discarded', targetId: 'b', defId: 'sword' }));
+    s.players[0].hand = [{ id: 'c1', defId: 'wolf' }]; // 3/2 charge
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].field[0].charge).toBe(true);
+    expect(state.players[0].field[0].attacksLeft).toBe(1);
   });
 
-  it('bind makes a chosen target skip their next turn', () => {
+  it('rejects a minion when the field is full', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'bind' }];
-    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].skipTurns).toBe(1);
+    s.players[0].field = Array.from({ length: DEFAULT_RULES.fieldCap }, (_, i) => minion(`f${i}`, 'a'));
+    s.players[0].hand = [{ id: 'c1', defId: 'knight' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(events).toHaveLength(0);
+    expect(state).toEqual(s);
+  });
+});
+
+describe('reduce: attack', () => {
+  it('a minion swings at the enemy hero (no retaliation)', () => {
+    const s = game();
+    s.players[0].field = [minion('m1', 'a', { attack: 3, attacksLeft: 1 })];
+    const { state, events } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'b' }, ctx);
+    expect(state.players[1].hp).toBe(37);
+    expect(state.players[0].field[0].health).toBe(3); // hero can't hit back
+    expect(state.players[0].field[0].attacksLeft).toBe(0);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'minion_attacked', attackerId: 'm1', targetId: 'b' }));
   });
 
-  it('sacrifice heals, empowers this turn, and forfeits the next turn', () => {
+  it('minion trades are simultaneous', () => {
     const s = game();
-    s.players[0].hp = 25;
-    s.players[0].hand = [{ id: 'c1', defId: 'sacrifice' }, { id: 'c2', defId: 'sword' }];
-    const r1 = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(r1.state.players[0].hp).toBe(35);       // +10 heal
-    expect(r1.state.players[0].empower).toBe(1.5);
-    expect(r1.state.players[0].skipTurns).toBe(1);
-    // the empowered sword now deals round(10 * 1.5) = 15
-    const r2 = reduce(r1.state, { type: 'play_card', cardInstanceId: 'c2', targetId: 'b' }, ctx);
-    expect(r2.state.players[1].hp).toBe(25);       // 40 - 15
+    s.players[0].field = [minion('m1', 'a', { attack: 3, health: 3, attacksLeft: 1 })];
+    s.players[1].field = [minion('m2', 'b', { attack: 2, health: 4 })];
+    const { state } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'm2' }, ctx);
+    expect(state.players[1].field[0].health).toBe(1); // 4 - 3
+    expect(state.players[0].field[0].health).toBe(1); // 3 - 2 retaliation
   });
 
-  it('spends mana equal to the card cost', () => {
+  it('rejects hitting an enemy hero while a taunt minion guards it', () => {
     const s = game();
-    s.players[0].mana = 5;
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // cost 2
-    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[0].mana).toBe(3);
-  });
-
-  it('rejects a card the actor cannot afford', () => {
-    const s = game();
-    s.players[0].mana = 1;
-    s.players[0].hand = [{ id: 'c1', defId: 'sword' }]; // cost 2 > 1
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
+    s.players[0].field = [minion('m1', 'a', { attack: 3, attacksLeft: 1 })];
+    s.players[1].field = [minion('t1', 'b', { taunt: true })];
+    const { state, events } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'b' }, ctx);
     expect(events).toHaveLength(0);
     expect(state).toEqual(s);
   });
 
-  it('charge nets +2 mana (cost 1, grants 3) and emits mana_gained', () => {
+  it('rejects attacking with a minion that has no attacks left', () => {
     const s = game();
-    s.players[0].mana = 5;
-    s.players[0].hand = [{ id: 'c1', defId: 'charge' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(state.players[0].mana).toBe(7); // 5 - 1 + 3
-    expect(events).toContainEqual(expect.objectContaining({ type: 'mana_gained', playerId: 'a', manaAfter: 7 }));
+    s.players[0].field = [minion('m1', 'a', { attacksLeft: 0 })];
+    const { events } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'b' }, ctx);
+    expect(events).toHaveLength(0);
   });
 
-  it('gamble makes the next attack either double or whiff (and emits a resolution)', () => {
-    const s = game({ rngSeed: 7 });
-    s.players[0].hand = [{ id: 'c1', defId: 'gambit' }, { id: 'c2', defId: 'sword' }];
-    const r1 = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(r1.state.players[0].gamble).toBe(true);
-    const r2 = reduce(r1.state, { type: 'play_card', cardInstanceId: 'c2', targetId: 'b' }, ctx);
-    expect(r2.state.players[0].gamble).toBe(false); // consumed
-    const resolved = r2.events.find((e) => e.type === 'gamble_resolved');
-    expect(resolved).toBeTruthy();
-    expect([40, 20]).toContain(r2.state.players[1].hp); // whiff -> 40, double 20dmg -> 20
+  it('rejects friendly fire', () => {
+    const s = game();
+    s.players[0].field = [minion('m1', 'a', { attacksLeft: 1 }), minion('m2', 'a')];
+    const { events } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'm2' }, ctx);
+    expect(events).toHaveLength(0);
   });
 });

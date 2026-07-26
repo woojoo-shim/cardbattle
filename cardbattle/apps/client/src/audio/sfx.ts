@@ -179,8 +179,11 @@ export function soundEvents(
     const e = events[i];
     switch (e.type) {
       case 'card_played': playSfx('play'); break;
-      case 'status_applied':
-        playSfx(e.status === 'regen' ? 'regen' : e.status === 'reflect' ? 'reflect' : 'poison'); break;
+      case 'minion_summoned': playSfx('deal'); break;
+      case 'minion_damaged': {
+        if (e.amount && e.amount > 0) { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
+        break;
+      }
       case 'damage_dealt': {
         // Poison damage-over-time ticks get the corrosive hiss instead of the blunt hit. Both ride
         // the impact delay so the sound lands exactly with the deferred visual.
@@ -194,8 +197,7 @@ export function soundEvents(
       }
       case 'healed': playSfx('heal'); break;
       case 'shielded': playSfx('shield'); break;
-      case 'direction_reversed': playSfx('reverse'); break;
-      case 'card_stolen': playSfx('draw'); break;
+      case 'minion_buffed': playSfx('shield'); break;
       case 'player_eliminated': setTimeout(() => playSfx('damage', { mag: 1.6 }), IMPACT_MS); break;
       case 'game_over': playSfx(e.winnerId === myId ? 'win' : 'lose'); break;
     }

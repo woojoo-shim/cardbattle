@@ -1,7 +1,8 @@
-import type { UiState } from '../state/useRoom.js';
-import { COSMETIC_BY_ID, TITLE_BY_ID } from '@cardbattle/shared';
+import type { UiState, UiMinion } from '../state/useRoom.js';
+import { COSMETIC_BY_ID, TITLE_BY_ID, CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
+import { CardArt } from './art/CardArt.js';
 import { Icon } from './art/Icon.js';
 
 interface Props {
@@ -9,6 +10,11 @@ interface Props {
   myId: string;
   selectable: boolean;
   onSelect: (id: string) => void;
+  /** My turn and free to pick one of my minions to attack with. */
+  attackMode?: boolean;
+  /** The id of my minion currently armed to attack (highlighted). */
+  attackerId?: string | null;
+  onSelectAttacker?: (id: string) => void;
 }
 
 // Ellipse the seats ride on, as % of the table area. TOP-DOWN view: the table is now seen
@@ -20,7 +26,7 @@ const CX = 50, CY = 54, RX = 34, RY = 30;
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
  * is acting. Each seat keeps its data-pid anchor for the VFX layer + needle. */
-export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
+export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attackerId, onSelectAttacker }: Props) {
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const ring = [...ui.players].sort((a, b) => a.seat - b.seat);
   const n = ring.length;
@@ -140,6 +146,47 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
+
+            {p.alive && p.field.length > 0 && (
+              <div style={fieldRow}>
+                {p.field.map((m) => {
+                  const mine = p.id === myId;
+                  const canAttack = mine && !!attackMode && m.attacksLeft > 0 && m.attack > 0;
+                  const canHit = !mine && selectable;
+                  const armed = attackerId === m.id;
+                  const clickable = canAttack || canHit;
+                  const def = CARD_DEFS[m.defId];
+                  return (
+                    <div
+                      key={m.id}
+                      data-pid={m.id}
+                      onClick={(e) => {
+                        if (!clickable) return;
+                        e.stopPropagation();
+                        if (canAttack) onSelectAttacker?.(m.id);
+                        else onSelect(m.id);
+                      }}
+                      title={def?.name ?? ''}
+                      style={{
+                        ...minionChip,
+                        borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
+                        boxShadow: armed
+                          ? '0 0 12px rgba(224,184,74,0.7)'
+                          : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
+                        cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
+                        opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
+                      }}
+                    >
+                      <span style={minionArtWrap}><CardArt id={m.defId} size={30} /></span>
+                      <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
+                      <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
+                      {m.taunt && <span style={minionKw} title="도발">🛡</span>}
+                      {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -3, top: -4 }} title="천상의 보호막">✦</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {p.alive && p.statuses.length > 0 && (
               <div style={statusRow}>
@@ -291,6 +338,29 @@ const badge: React.CSSProperties = {
 };
 const badgeDef: React.CSSProperties = { left: 5, color: '#8fb0a6' };
 const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
+// The minion field: a compact row of summoned bodies under the portrait. Each carries its
+// attack (bottom-left) and current health (bottom-right); taunt/divine-shield show as corner marks.
+const fieldRow: React.CSSProperties = {
+  display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 4, maxWidth: 132,
+};
+const minionChip: React.CSSProperties = {
+  position: 'relative', width: 34, height: 40, borderRadius: 6,
+  background: 'linear-gradient(160deg,#2a2013,#150d07)', border: '1.5px solid',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  transition: 'box-shadow .18s, border-color .18s, opacity .18s',
+};
+const minionArtWrap: React.CSSProperties = { display: 'grid', placeItems: 'center', marginTop: -2 };
+const minionStat: React.CSSProperties = {
+  position: 'absolute', bottom: -5, minWidth: 13, height: 14, padding: '0 2px', borderRadius: 4,
+  fontSize: 10, fontFamily: mono, fontWeight: 900, lineHeight: '14px', textAlign: 'center',
+  background: '#0c0705', border: '1px solid rgba(0,0,0,0.6)',
+};
+const minionAtk: React.CSSProperties = { left: -4, color: '#f2c14a' };
+const minionHp: React.CSSProperties = { right: -4 };
+const minionKw: React.CSSProperties = {
+  position: 'absolute', top: -4, right: -3, fontSize: 10, lineHeight: 1,
+  filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.8))',
+};
 // Ongoing turn-start effects, shown as a compact chip row under the portrait.
 const STATUS_META: Record<string, { color: string; icon: 'poison' | 'reflect' | 'regen' | 'zzz' }> = {
   poison: { color: '#9aa863', icon: 'poison' },

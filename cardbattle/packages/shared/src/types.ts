@@ -3,38 +3,32 @@ import type { GameModeId, RuleSet } from './modes.js';
 export type Phase = 'lobby' | 'playing' | 'ended';
 export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'poison' | 'holy' | 'none';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
-export type CardKind = 'weapon' | 'magic' | 'heal' | 'special' | 'equipment';
+export type CardKind = 'minion' | 'spell';
 
+/** Passive minion abilities (Hearthstone-flavoured, adapted to our FFA board). */
+export type Keyword =
+  | 'taunt'         // 도발: enemies must attack this minion before the hero or other minions
+  | 'charge'        // 돌진: can attack the turn it's summoned (no summoning sickness)
+  | 'divineShield'  // 신성 보호막: the first damage this minion takes is negated
+  | 'poisonous'     // 독성: any minion this damages is destroyed outright
+  | 'lifesteal';    // 흡혈: damage this deals also heals its owner's hero
+
+/** Who a damage/heal/buff effect reaches. Entity targets (`chosen`) resolve to a hero OR a minion. */
+export type DamageTarget = 'chosen' | 'allEnemies' | 'allEnemyMinions' | 'allMinions' | 'randomEnemy';
+export type HealTarget = 'hero' | 'chosen' | 'allFriendly';
+export type BuffTarget = 'chosen' | 'allFriendlyMinions' | 'randomFriendlyMinion';
+
+/** The board-model effect union. A spell card's effects fire on play; a minion card's effects
+ *  are its 전투의 함성 (battlecry, fire on summon); a minion's `deathrattle` fires on its death. */
 export type Effect =
-  | { kind: 'damage'; amount: number; target: 'chosen' | 'all' | 'random' }
-  | { kind: 'heal'; amount: number }
-  | { kind: 'shield'; amount: number }
-  | { kind: 'reverse' }
-  | { kind: 'peek' }       // privately reveal one of a chosen player's hand cards to the caster
-  | { kind: 'discard' }    // destroy one random card from a chosen player's hand
-  | { kind: 'skip' }       // make a chosen player skip their next turn
-  | { kind: 'gamble' }     // the caster's next attack this turn is doubled or nullified (50/50)
-  | { kind: 'empower'; amount: number } // multiply the caster's damage this turn (e.g. 1.5x)
-  | { kind: 'selfskip' }   // the caster forfeits their own next turn
-  | { kind: 'steal' }      // take one random card from a chosen player's hand into mine
-  | { kind: 'mana'; amount: number } // refill the caster's mana (the '충전' ramp card)
-  | { kind: 'pierce'; amount: number; target: 'chosen' } // damage that ignores shield/defense entirely
-  | { kind: 'swap' }       // swap the caster's current HP with a chosen player's HP
-  | { kind: 'manaburn'; amount: number }    // drain up to `amount` mana from a chosen player
-  | { kind: 'leech'; amount: number }       // hit every other living player, healing the caster by the HP actually removed
-  | { kind: 'desperation'; amount: number } // hit a chosen player for `amount` + the caster's missing HP (comeback finisher)
-  | { kind: 'poison'; amount: number; turns: number; target: 'chosen' | 'all' } // damage-over-time: ticks at the victim's turn start, ignores shield
-  | { kind: 'regen'; amount: number; turns: number }   // heal-over-time on the caster: ticks at their own turn start
-  | { kind: 'reflect'; pct: number; turns: number }    // a reflector: bounces `pct` of incoming HP damage back at the attacker until the caster's next turn
-  | { kind: 'battlecry'; cond: 'last_card' | 'wounded' | 'outnumbered'; effects: Effect[] } // 전투의 함성: if the battle condition holds at play time, unleash the bonus effects
-  | { kind: 'deathrattle'; effects: Effect[] };        // 죽음의 메아리: arm parting effects on the caster that fire the moment they're eliminated
-
-/** An ongoing effect riding on a player, ticked at that player's turn start (loop.ts). */
-export type Status =
-  | { kind: 'poison'; amount: number; turns: number; sourceId: string }
-  | { kind: 'regen'; amount: number; turns: number }
-  | { kind: 'reflect'; pct: number; turns: number };
-export type StatusKind = Status['kind'];
+  | { kind: 'damage'; amount: number; target: DamageTarget }
+  | { kind: 'heal'; amount: number; target: HealTarget }
+  | { kind: 'buff'; attack: number; health: number; target: BuffTarget } // permanent +atk/+hp
+  | { kind: 'summon'; token: string; count: number }  // summon `count` copies of a token minion for the caster
+  | { kind: 'draw'; amount: number }
+  | { kind: 'gainMana'; amount: number }
+  | { kind: 'shield'; amount: number }                // hero armor (adds to defense)
+  | { kind: 'destroy'; target: 'chosen' };            // destroy a chosen minion outright
 
 export interface CardDef {
   id: string;
@@ -43,7 +37,14 @@ export interface CardDef {
   cost: number;
   element: Element;
   kind: CardKind;
+  /** Base stats for a minion card (undefined for spells). */
+  minion?: { attack: number; health: number };
+  /** Passive keywords a summoned minion carries. */
+  keywords?: Keyword[];
+  /** Spell: fired on play. Minion: its battlecry (fired on summon). */
   effects: Effect[];
+  /** Minion parting effects, fired when it dies. */
+  deathrattle?: Effect[];
   cooldown: number;
   vfxKey: string;
   sfxKey: string;
@@ -54,6 +55,26 @@ export interface CardDef {
 
 export interface CardInstance { id: string; defId: string; }
 
+/** A minion in play on a player's field. Combat stats live here (not on the def) so buffs and
+ *  damage persist. `attacksLeft` gates one swing per turn; summoning sickness is `summonedThisTurn`
+ *  unless the minion has charge. divineShield/poisonous/lifesteal mirror the def's keywords. */
+export interface MinionInstance {
+  id: string;
+  defId: string;
+  ownerId: string;
+  attack: number;
+  health: number;
+  maxHealth: number;
+  summonedThisTurn: boolean;
+  attacksLeft: number;
+  taunt: boolean;
+  charge: boolean;
+  divineShield: boolean;
+  poisonous: boolean;
+  lifesteal: boolean;
+  deathrattle: Effect[];
+}
+
 export interface PlayerState {
   id: string;
   name: string;
@@ -62,16 +83,13 @@ export interface PlayerState {
   seat: number;
   hp: number;
   maxHp: number;
-  defense: number;
+  defense: number;           // hero armor: soaks damage to the hero before HP
   hand: CardInstance[];
-  equipment: CardInstance[]; // S1: always []
-  statuses: Status[];        // ongoing poison/regen/reflect effects, ticked at this player's turn start
-  deathrattle: Effect[];     // 죽음의 메아리: parting effects that fire when this player is eliminated (empty = none)
-  buffs: unknown[];          // S1: always []
+  field: MinionInstance[];   // minions this player controls, left→right summon order
+  statuses: Status[];        // ongoing turn-start effects (unused by the current card set, kept for badges)
+  deathrattle: Effect[];     // legacy hero deathrattle slot (unused by the current card set)
   alive: boolean;
-  skipTurns: number;         // pending turns to skip (from '결박' / '희생'); decremented on arrival
-  gamble: boolean;           // a '도박' is armed: the next attack this turn is doubled or whiffs
-  empower: number;           // damage multiplier for this turn (1 = none, 1.5 = '희생')
+  skipTurns: number;         // pending turns to skip
   mana: number;              // bankable resource spent to play cards; refills (ramping) each turn
   heroPowerUsed: boolean;    // has this player used their avatar's signature ability this turn?
 }
@@ -83,19 +101,27 @@ export interface GameState {
   players: PlayerState[];
   turnOrder: string[];
   currentTurnIndex: number;
-  turnDir: 1 | -1;     // +1 = forward through turnOrder, -1 = reversed (flipped by '역류')
+  turnDir: 1 | -1;     // +1 = forward through turnOrder, -1 = reversed
   roundCount: number;  // increments each time the turn token completes a full lap
   turnDeadline: number;
   rngSeed: number;
+  nextMinionId: number; // server-owned counter for unique MinionInstance ids
   log: GameEvent[];
   winnerId: string | null;
 }
 
 export type Action =
   | { type: 'play_card'; cardInstanceId: string; targetId?: string }
+  | { type: 'attack'; attackerId: string; targetId: string } // attackerId = own minion, targetId = enemy hero or minion
   | { type: 'use_hero_power'; targetId?: string }
   | { type: 'end_turn' };
-// Reserved for S2: | { type: 'defend'; ... }
+
+/** An ongoing turn-start status (kept for schema/UI compatibility; no current card applies one). */
+export type Status =
+  | { kind: 'poison'; amount: number; turns: number; sourceId: string }
+  | { kind: 'regen'; amount: number; turns: number }
+  | { kind: 'reflect'; pct: number; turns: number };
+export type StatusKind = Status['kind'];
 
 export type GameEvent =
   | { type: 'turn_started'; playerId: string; deadline: number }
@@ -106,23 +132,21 @@ export type GameEvent =
   | { type: 'damage_dealt'; sourceId: string; targetId: string; amount: number; element: Element; targetHpAfter: number; absorbed?: number }
   | { type: 'healed'; targetId: string; amount: number; targetHpAfter: number }
   | { type: 'shielded'; targetId: string; amount: number; defenseAfter: number }
-  | { type: 'direction_reversed'; direction: 1 | -1 }
   | { type: 'round_advanced'; round: number }
-  | { type: 'card_revealed'; viewerId: string; targetId: string; cardInstanceId: string; defId: string } // PRIVATE: server sends only to viewerId
-  | { type: 'card_discarded'; targetId: string; cardInstanceId: string; defId: string }
-  | { type: 'card_stolen'; thiefId: string; targetId: string } // PUBLIC: identity stays hidden; thief learns it via hand sync
   | { type: 'turn_skipped'; playerId: string }
-  | { type: 'gamble_resolved'; playerId: string; doubled: boolean }
   | { type: 'mana_gained'; playerId: string; amount: number; manaAfter: number }
-  | { type: 'mana_burned'; targetId: string; amount: number; manaAfter: number } // a chosen player's mana was drained
-  | { type: 'hp_swapped'; aId: string; bId: string; aHp: number; bHp: number }    // two players traded current HP
-  | { type: 'status_applied'; targetId: string; status: StatusKind; amount: number; turns: number } // poison/regen/reflect landed on a player
-  | { type: 'battlecry_triggered'; playerId: string; cond: string } // 전투의 함성 condition met: bonus effects fired
-  | { type: 'deathrattle_triggered'; playerId: string }             // 죽음의 메아리 fired on this player's elimination
+  // Board / minion events
+  | { type: 'minion_summoned'; playerId: string; minionId: string; defId: string }
+  | { type: 'minion_attacked'; attackerId: string; targetId: string }             // targetId = hero playerId or minion id
+  | { type: 'minion_damaged'; minionId: string; amount: number; healthAfter: number }
+  | { type: 'minion_buffed'; minionId: string; attack: number; health: number }   // new totals after the buff
+  | { type: 'minion_died'; minionId: string; playerId: string }
+  | { type: 'deathrattle_triggered'; playerId: string }             // a minion's 죽음의 메아리 fired
+  | { type: 'battlecry_triggered'; playerId: string; cond: string } // a minion's 전투의 함성 fired
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 
-/** Context passed into the reducer; supplies authority-owned services (RNG, clock). */
+/** Context passed into the reducer; supplies authority-owned services (RNG, clock, id gen). */
 export interface ReduceCtx {
   nextCardId: () => string;   // unique CardInstance id generator (server-owned)
   now: number;                // epoch ms used to compute deadlines

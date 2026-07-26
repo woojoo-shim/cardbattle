@@ -14,6 +14,24 @@ export class StatusSchema extends Schema {
   @type('number') turns = 0;
 }
 
+/** A minion standing on a player's field (하스스톤식 하수인). Full stats are public. */
+export class MinionSchema extends Schema {
+  @type('string') id = '';
+  @type('string') defId = '';
+  @type('string') ownerId = '';
+  @type('number') attack = 0;
+  @type('number') health = 0;
+  @type('number') maxHealth = 0;
+  @type('boolean') taunt = false;
+  @type('boolean') charge = false;
+  @type('boolean') divineShield = false;
+  @type('boolean') poisonous = false;
+  @type('boolean') lifesteal = false;
+  @type('boolean') summonedThisTurn = false;
+  @type('number') attacksLeft = 0;
+  @type('boolean') hasDeathrattle = false;
+}
+
 export class PlayerSchema extends Schema {
   @type('string') id = '';
   @type('string') name = '';
@@ -36,6 +54,7 @@ export class PlayerSchema extends Schema {
   @type('string') effectCosmetic = 'fx_none';
   @type([CardInstanceSchema]) hand = new ArraySchema<CardInstanceSchema>();
   @type([StatusSchema]) statuses = new ArraySchema<StatusSchema>();
+  @type([MinionSchema]) field = new ArraySchema<MinionSchema>();
 }
 
 export class BattleState extends Schema {
@@ -94,6 +113,18 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
       ss.amount = st.kind === 'reflect' ? Math.round(st.pct * 100) : st.amount;
       ss.turns = st.turns;
       ps.statuses.push(ss);
+    }
+    // Rebuild the field (minions come and go each turn) so the board stays in sync.
+    while (ps.field.length > 0) ps.field.pop();
+    for (const m of p.field) {
+      const ms = new MinionSchema();
+      ms.id = m.id; ms.defId = m.defId; ms.ownerId = m.ownerId;
+      ms.attack = m.attack; ms.health = m.health; ms.maxHealth = m.maxHealth;
+      ms.taunt = m.taunt; ms.charge = m.charge; ms.divineShield = m.divineShield;
+      ms.poisonous = m.poisonous; ms.lifesteal = m.lifesteal;
+      ms.summonedThisTurn = m.summonedThisTurn; ms.attacksLeft = m.attacksLeft;
+      ms.hasDeathrattle = m.deathrattle.length > 0;
+      ps.field.push(ms);
     }
   }
 }

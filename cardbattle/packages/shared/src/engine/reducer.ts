@@ -1,6 +1,6 @@
 import type { Action, GameEvent, GameState, ReduceCtx, ReduceResult, PlayerState } from '../types.js';
 import { CARD_DEFS, requiresTarget } from '../cards/defs.js';
-import { effectHandlers, EffectCtx } from '../cards/effects.js';
+import { effectHandlers, EffectCtx, summonMinion, resolveAttack, findEntity } from '../cards/effects.js';
 import { heroPowerFor, heroPowerNeedsTarget } from '../heroes.js';
 import { weightedPick } from './rng.js';
 
@@ -12,7 +12,7 @@ function currentPlayerId(state: GameState): string {
   return state.turnOrder[state.currentTurnIndex];
 }
 
-/** Deterministic shuffle of living others for 'random'-target effects. */
+/** Deterministic shuffle of living others for 'randomEnemy'-target effects. */
 function randomOrder(state: GameState, sourceId: string): PlayerState[] {
   const pool = state.players.filter((p) => p.alive && p.id !== sourceId);
   let seed = state.rngSeed;
@@ -25,7 +25,20 @@ function randomOrder(state: GameState, sourceId: string): PlayerState[] {
   return pool;
 }
 
-export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): ReduceResult {
+/** True if `defender`'s controller has a 도발 (taunt) minion — enemies must strike a taunt first.
+ *  The taunt minion itself is always a legal target. */
+function tauntBlocks(state: GameState, targetId: string): boolean {
+  const ent = findEntity(state, targetId);
+  if (!ent) return false;
+  const controllerId = ent.kind === 'hero' ? ent.hero.id : ent.owner.id;
+  const controller = state.players.find((p) => p.id === controllerId);
+  if (!controller) return false;
+  const hasTaunt = controller.field.some((m) => m.taunt);
+  if (!hasTaunt) return false;
+  return !(ent.kind === 'minion' && ent.minion.taunt); // ok only if the chosen target is itself a taunt
+}
+
+export function reduce(input: GameState, action: Action, ctx: ReduceCtx): ReduceResult {
   if (input.phase !== 'playing') return { state: input, events: [] };
 
   if (action.type === 'play_card') {
@@ -37,12 +50,14 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
     const card = actor.hand[cardIdx];
     const def = CARD_DEFS[card.defId];
     if (!def) return { state: input, events: [] };
-    // can't afford it: not enough banked mana for this card's cost
-    if (actor.mana < def.cost) return { state: input, events: [] };
-    // target validation for 'chosen' damage
+    if (actor.mana < def.cost) return { state: input, events: [] }; // can't afford it
+    // a minion needs an open field slot to be summoned
+    if (def.kind === 'minion' && actor.field.length >= input.rules.fieldCap) return { state: input, events: [] };
+    // target validation for effects that pick an entity
     if (requiresTarget(def)) {
-      const t = input.players.find((p) => p.id === action.targetId);
-      if (!t || !t.alive) return { state: input, events: [] };
+      const ent = findEntity(input, action.targetId);
+      if (!ent) return { state: input, events: [] };
+      if (ent.kind === 'hero' && !ent.hero.alive) return { state: input, events: [] };
     }
 
     const state = clone(input);
@@ -50,14 +65,48 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
     const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
     const sActor = state.players.find((p) => p.id === actorId)!;
     sActor.hand.splice(cardIdx, 1); // consume
-    sActor.mana -= def.cost;        // pay the cost BEFORE effects (so '충전' nets correctly)
+    sActor.mana -= def.cost;        // pay the cost before effects (so 마나 샘 nets correctly)
     emit({ type: 'card_played', playerId: actorId, defId: def.id, targetId: action.targetId });
 
     const effCtx: EffectCtx = {
       state, source: sActor, chosenTargetId: action.targetId,
-      element: def.element, randomOrder: randomOrder(state, actorId), emit,
+      element: def.element, randomOrder: randomOrder(state, actorId), emit, nextCardId: ctx.nextCardId,
     };
-    for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx);
+
+    if (def.kind === 'minion') {
+      summonMinion(state, sActor, def.id, emit);
+      if (def.effects.length) { // 전투의 함성 (battlecry): the summon's effects fire on entry
+        emit({ type: 'battlecry_triggered', playerId: actorId, cond: def.id });
+        for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx);
+      }
+    } else {
+      for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx); // spell fires on play
+    }
+
+    checkWin(state, emit);
+    return { state, events };
+  }
+
+  if (action.type === 'attack') {
+    const actorId = currentPlayerId(input);
+    const actor = input.players.find((p) => p.id === actorId);
+    if (!actor || !actor.alive) return { state: input, events: [] };
+    const attacker = actor.field.find((m) => m.id === action.attackerId);
+    if (!attacker) return { state: input, events: [] };          // must be your own minion
+    if (attacker.attacksLeft <= 0) return { state: input, events: [] };
+    if (attacker.attack <= 0) return { state: input, events: [] };
+    const target = findEntity(input, action.targetId);
+    if (!target) return { state: input, events: [] };
+    const targetOwnerId = target.kind === 'hero' ? target.hero.id : target.owner.id;
+    if (targetOwnerId === actorId) return { state: input, events: [] };  // no friendly fire
+    if (target.kind === 'hero' && !target.hero.alive) return { state: input, events: [] };
+    if (tauntBlocks(input, action.targetId)) return { state: input, events: [] };
+
+    const state = clone(input);
+    const events: GameEvent[] = [];
+    const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
+    const sAttacker = state.players.find((p) => p.id === actorId)!.field.find((m) => m.id === action.attackerId)!;
+    resolveAttack(state, sAttacker, action.targetId, emit, ctx.nextCardId);
 
     checkWin(state, emit);
     return { state, events };
@@ -71,8 +120,9 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
     const power = heroPowerFor(actor.avatar);
     if (actor.mana < power.cost) return { state: input, events: [] };
     if (heroPowerNeedsTarget(power)) {
-      const t = input.players.find((p) => p.id === action.targetId);
-      if (!t || !t.alive) return { state: input, events: [] };
+      const ent = findEntity(input, action.targetId);
+      if (!ent) return { state: input, events: [] };
+      if (ent.kind === 'hero' && !ent.hero.alive) return { state: input, events: [] };
     }
 
     const state = clone(input);
@@ -85,7 +135,7 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
 
     const effCtx: EffectCtx = {
       state, source: sActor, chosenTargetId: action.targetId,
-      element: power.element, randomOrder: randomOrder(state, actorId), emit,
+      element: power.element, randomOrder: randomOrder(state, actorId), emit, nextCardId: ctx.nextCardId,
     };
     for (const eff of power.effects) effectHandlers[eff.kind](eff, effCtx);
 
@@ -94,7 +144,7 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
   }
 
   if (action.type === 'end_turn') {
-    return endTurn(input, _ctx);
+    return endTurn(input, ctx);
   }
 
   return { state: input, events: [] };

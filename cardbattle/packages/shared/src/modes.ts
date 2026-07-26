@@ -20,7 +20,9 @@ export interface RuleSet {
   manaRegenBase: number;
   manaRegenStep: number;
   manaRegenCap: number;
-  /** '도박장' mode: every attack is forced into a double-or-nothing coin flip. */
+  /** Max minions a player may have on their field at once. */
+  fieldCap: number;
+  /** Legacy '도박장' flag (no-op under the board model; kept for schema/mode compatibility). */
   forceGamble: boolean;
   /** When set, the draw pool is restricted to these card ids (used by the coach/tutorial so a
    *  newcomer only ever sees a small, easy-to-grasp set of cards). Undefined = full deck. */
@@ -50,6 +52,7 @@ export const DEFAULT_RULES: RuleSet = {
   manaRegenBase: MANA_REGEN_BASE,
   manaRegenStep: MANA_REGEN_STEP,
   manaRegenCap: MANA_REGEN_CAP,
+  fieldCap: 6,
   forceGamble: false,
 };
 
@@ -77,7 +80,7 @@ export const GAME_MODES: Record<GameModeId, GameMode> = {
     rules: {
       ...DEFAULT_RULES,
       startHand: 6, handTarget: 6, handCap: 10, drawPerTurn: 2,
-      startMana: 8, manaMax: 18, manaRegenBase: 4, manaRegenStep: 1, manaRegenCap: 8,
+      startMana: 8, manaMax: 18, manaRegenBase: 4, manaRegenStep: 1, manaRegenCap: 8, fieldCap: 7,
     },
   },
   tank: {
@@ -90,12 +93,12 @@ export const GAME_MODES: Record<GameModeId, GameMode> = {
     },
   },
   casino: {
-    id: 'casino', name: '도박장', icon: '🎲',
-    tagline: '모든 공격이 두 배 아니면 꽝',
-    desc: '모든 공격이 강제로 도박이 된다. 50% 확률로 피해 2배, 50% 확률로 완전 빗나감. 운명에 맡겨라.',
+    id: 'casino', name: '광란전', icon: '🎲',
+    tagline: '넉넉한 마나로 하수인을 쏟아붓는 물량전',
+    desc: '체력 30, 마나 8로 시작해 초반부터 하수인을 대량으로 소환한다. 넓은 필드에서 벌어지는 물량 난타전.',
     rules: {
       ...DEFAULT_RULES,
-      startHp: 44, startMana: 6, forceGamble: true,
+      startHp: 30, startMana: 8, manaRegenBase: 3, manaRegenCap: 8, fieldCap: 7,
     },
   },
   // Learn-by-playing tutorial mode. Not shown in the room browser (filtered out of MODE_LIST);
@@ -108,7 +111,7 @@ export const GAME_MODES: Record<GameModeId, GameMode> = {
     rules: {
       ...DEFAULT_RULES,
       turnSeconds: 60,
-      cardPool: ['dagger', 'sword', 'bomb', 'potion', 'shield'],
+      cardPool: ['recruit', 'guard', 'wolf', 'strike', 'holylight'],
     },
   },
 };

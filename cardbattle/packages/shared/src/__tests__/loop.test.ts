@@ -79,14 +79,4 @@ describe('loop', () => {
     expect(r.state.players[1].skipTurns).toBe(0); // consumed
     expect(r.events.some((e) => e.type === 'turn_skipped' && e.playerId === 'b')).toBe(true);
   });
-
-  it('endTurn clears the ending player per-turn buffs (empower/gamble)', () => {
-    counter = 0;
-    const started = startGame(initGame([{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }]), ctx());
-    started.state.players[0].empower = 1.5;
-    started.state.players[0].gamble = true;
-    const r = endTurn(started.state, ctx());
-    expect(r.state.players[0].empower).toBe(1);
-    expect(r.state.players[0].gamble).toBe(false);
-  });
 });

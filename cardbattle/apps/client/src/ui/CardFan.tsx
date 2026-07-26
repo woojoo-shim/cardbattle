@@ -62,36 +62,24 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
         const lift = Math.abs(i - mid) * 8;
-        const isAtk = (k: string) => k === 'damage' || k === 'pierce' || k === 'leech' || k === 'desperation';
-        const hasDamage = def.effects.some((e) => isAtk(e.kind));
+        // Minion cards carry attack/health stats; spell cards fire an effect on play.
+        const isMinion = !!def.minion;
+        const hasDamage = def.effects.some((e) => e.kind === 'damage');
         const hasShield = def.effects.some((e) => e.kind === 'shield');
-        const isReverse = def.effects.some((e) => e.kind === 'reverse');
-        const isPeek = def.effects.some((e) => e.kind === 'peek');
-        const isDiscard = def.effects.some((e) => e.kind === 'discard');
-        const isSkip = def.effects.some((e) => e.kind === 'skip');
-        const isGamble = def.effects.some((e) => e.kind === 'gamble');
-        const isSacrifice = def.effects.some((e) => e.kind === 'selfskip');
-        const isMana = def.effects.some((e) => e.kind === 'mana');
-        const isSwap = def.effects.some((e) => e.kind === 'swap');
-        const dmgValue = def.effects.reduce((m, e) => (isAtk(e.kind) && 'amount' in e ? Math.max(m, e.amount) : m), 0);
+        const isDestroy = def.effects.some((e) => e.kind === 'destroy');
+        const isDraw = def.effects.some((e) => e.kind === 'draw');
+        const isMana = def.effects.some((e) => e.kind === 'gainMana');
+        const dmgValue = def.effects.reduce((m, e) => (e.kind === 'damage' ? Math.max(m, e.amount) : m), 0);
         const value = def.effects.reduce((m, e) => ('amount' in e ? Math.max(m, e.amount) : m), 0);
         // Affordability: on my turn, cards I can't currently pay for are dimmed and unclickable.
         const affordable = def.cost <= mana;
         const playable = enabled && affordable;
-        const pill: { style: React.CSSProperties; label: React.ReactNode } = isReverse
-          ? { style: revVal, label: <Icon name="arrowSwap" size={13} /> }
-          : isPeek
-          ? { style: peekVal, label: <Icon name="eye" size={13} /> }
-          : isDiscard
-          ? { style: shatterVal, label: <Icon name="close" size={12} /> }
-          : isSkip
-          ? { style: skipVal, label: <Icon name="chain" size={13} /> }
-          : isGamble
-          ? { style: gambleVal, label: <Icon name="dice" size={13} /> }
-          : isSacrifice
-          ? { style: sacrificeVal, label: <Icon name="fire" size={13} /> }
-          : isSwap
-          ? { style: revVal, label: <Icon name="heart" size={13} /> }
+        const pill: { style: React.CSSProperties; label: React.ReactNode } = isMinion
+          ? { style: minionStat, label: `${def.minion!.attack}/${def.minion!.health}` }
+          : isDestroy
+          ? { style: dmgVal, label: <Icon name="close" size={12} /> }
+          : isDraw
+          ? { style: manaValPill, label: `+${value}` }
           : isMana
           ? { style: manaValPill, label: `+${value}` }
           : hasDamage
@@ -275,12 +263,8 @@ const costBadgeShort: React.CSSProperties = {
 const dmgVal: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.18)', border: '1px solid #5a2c22' };
 const healVal: React.CSSProperties = { color: '#cdd3a0', background: 'rgba(143,157,79,0.18)', border: '1px solid #4a5230' };
 const shieldVal: React.CSSProperties = { color: '#b9cdc4', background: 'rgba(113,145,138,0.16)', border: '1px solid #44605a' };
-const revVal: React.CSSProperties = { color: '#c3b0d0', background: 'rgba(150,120,160,0.15)', border: '1px solid #574a5e' };
-const peekVal: React.CSSProperties = { color: '#a9c4bf', background: 'rgba(113,145,138,0.15)', border: '1px solid #44605a' };
-const shatterVal: React.CSSProperties = { color: '#d8b79a', background: 'rgba(150,100,60,0.15)', border: '1px solid #5e4630' };
-const skipVal: React.CSSProperties = { color: '#a9c4bf', background: 'rgba(113,145,138,0.15)', border: '1px solid #44605a' };
-const gambleVal: React.CSSProperties = { color: '#e8cf96', background: 'rgba(195,154,76,0.16)', border: '1px solid #6a5528' };
-const sacrificeVal: React.CSSProperties = { color: '#e6b393', background: 'rgba(176,80,47,0.16)', border: '1px solid #6a3a24' };
+// Minion attack/health, bottom-right — reads as the unit's battle stats.
+const minionStat: React.CSSProperties = { color: '#f0e0b4', background: 'rgba(120,90,40,0.22)', border: '1px solid #6a5528', fontWeight: 800 };
 // Korean label + accent colour per element / rarity, so the detail panel can chip them. Elements
 // keep individual identity but as muted printed pigments (not fluorescent), coherent with the room.
 const ELEM_META: Record<string, { label: string; color: string }> = {

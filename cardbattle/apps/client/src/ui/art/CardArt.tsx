@@ -745,7 +745,448 @@ function Backstab() {
   );
 }
 
+/* ── Board-model art (20 minions + 10 spells) ─────────────────────────────
+   Compact, ink-outlined subjects. Each pairs with its element's SCENE backdrop
+   (see ELEMENT below), so palette + backdrop carry a lot of the character. */
+
+// shared humanoid tones
+const SKIN = '#e6b487', SKIN_D = '#a9754a';
+const PLATE = '#cdd6e6', PLATE_D = '#79839a';
+const GOLD = '#f0c860', GOLD_D = '#b8862c';
+
+/** A small floating wisp of light (꼬마 정령). */
+function Sprite() {
+  return (
+    <>
+      <ellipse cx="32" cy="34" rx="9" ry="11" fill="#bfe9ff" />
+      <ellipse cx="32" cy="32" rx="5" ry="6.5" fill="#f2fbff" />
+      <circle cx="29.5" cy="30" r="1.3" fill="#1a2a3a" />
+      <circle cx="34.5" cy="30" r="1.3" fill="#1a2a3a" />
+      <path d="M24 40 Q20 46 24 50" stroke="#8fd6f0" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+      <path d="M40 40 Q44 46 40 50" stroke="#8fd6f0" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+    </>
+  );
+}
+
+/** Bust of an armored soldier holding a short blade (신병). */
+function Recruit() {
+  return (
+    <>
+      <path d="M22 52 Q22 40 32 40 Q42 40 42 52 Z" fill="#5b6a4a" />
+      <circle cx="32" cy="30" r="8" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M24 28 Q32 18 40 28 L40 24 Q32 16 24 24 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" />
+      <rect x="43" y="30" width="2.4" height="20" fill={STEEL} stroke={STEEL_D} strokeWidth="0.7" transform="rotate(12 44 40)" />
+      <circle cx="29" cy="31" r="1.1" fill="#26303e" />
+      <circle cx="35" cy="31" r="1.1" fill="#26303e" />
+    </>
+  );
+}
+
+/** A footman behind a broad shield (수비병 · 도발). */
+function Guard() {
+  return (
+    <>
+      <circle cx="36" cy="28" r="7" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M28 26 Q36 18 44 26 L44 22 Q36 15 28 22 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" />
+      <path d="M14 24 L30 24 L30 44 Q22 52 14 44 Z" fill="#7c5a30" stroke="#40260f" strokeWidth="1.4" />
+      <path d="M22 24 L22 48" stroke="#c8922f" strokeWidth="1.6" />
+      <circle cx="22" cy="35" r="2.4" fill={GOLD} stroke={GOLD_D} strokeWidth="0.8" />
+    </>
+  );
+}
+
+/** A lunging wolf (늑대 · 돌진). */
+function Wolf() {
+  return (
+    <>
+      <path d="M16 46 Q24 30 40 32 L52 30 L48 38 Q46 48 34 48 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1.4" />
+      <path d="M50 28 L54 22 L54 30 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1" />
+      <path d="M45 30 L48 24 L50 31 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1" />
+      <path d="M52 32 L60 33 L52 36 Z" fill="#3a3d44" />
+      <circle cx="50" cy="31" r="1.3" fill="#ffd24a" />
+      <path d="M20 46 L18 54 M28 47 L27 55 M36 47 L36 55" stroke="#2b2e35" strokeWidth="2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A young squire raising a banner (종자). */
+function Squire() {
+  return (
+    <>
+      <rect x="30" y="14" width="2" height="38" fill="#6b4a26" />
+      <path d="M32 15 L48 19 L44 26 L48 33 L32 29 Z" fill="#a83b2c" stroke="#5f1f16" strokeWidth="1" />
+      <circle cx="24" cy="32" r="7" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M18 52 Q18 40 24 40 Q31 40 31 52 Z" fill="#456089" />
+      <circle cx="22" cy="32" r="1.1" fill="#26303e" />
+      <circle cx="27" cy="32" r="1.1" fill="#26303e" />
+    </>
+  );
+}
+
+/** An archer drawing a bow (궁수). */
+function Archer() {
+  return (
+    <>
+      <path d="M20 16 Q40 32 20 48" stroke="#7c5a30" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M20 16 L20 48" stroke="#e8e2d0" strokeWidth="1" />
+      <path d="M20 32 L46 32" stroke="#cfd8e6" strokeWidth="1.4" />
+      <path d="M44 30 L50 32 L44 34 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="0.6" />
+      <circle cx="30" cy="26" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M25 50 Q25 40 31 40 Q37 40 37 50 Z" fill="#3f5a3a" />
+    </>
+  );
+}
+
+/** A knight in full plate with a longsword (기사). */
+function Knight() {
+  return (
+    <>
+      <path d="M22 52 Q22 38 32 38 Q42 38 42 52 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
+      <path d="M25 40 L39 40" stroke={STEEL_D} strokeWidth="1" />
+      <path d="M24 30 Q32 20 40 30 L40 34 L24 34 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1" />
+      <rect x="30" y="30" width="4" height="6" fill="#1c2430" />
+      <rect x="45" y="16" width="2.6" height="30" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" transform="rotate(8 46 30)" />
+      <rect x="42" y="30" width="9" height="2.4" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" transform="rotate(8 46 31)" />
+    </>
+  );
+}
+
+/** A robed cleric raising a holy staff (사제). */
+function Cleric() {
+  return (
+    <>
+      <rect x="44" y="14" width="2.2" height="36" fill="#c8922f" />
+      <path d="M45 14 L45 8 M42 11 L48 11" stroke={GOLD} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="45" cy="11" r="3.4" fill="none" stroke={GOLD} strokeWidth="1.4" />
+      <path d="M20 52 Q20 30 30 30 Q40 30 40 52 Z" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="1.2" />
+      <circle cx="30" cy="26" r="6.5" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M23 26 Q30 18 37 26 L37 22 Q30 16 23 22 Z" fill="#d9cfae" />
+    </>
+  );
+}
+
+/** An enormous tower shield (방패병 · 도발). */
+function Shieldbearer() {
+  return (
+    <>
+      <path d="M18 14 L46 14 L46 42 Q32 54 18 42 Z" fill="#8a6636" stroke="#3e2510" strokeWidth="1.8" />
+      <path d="M32 14 L32 50" stroke="#c8922f" strokeWidth="2" />
+      <path d="M18 26 L46 26" stroke="#c8922f" strokeWidth="2" />
+      <circle cx="32" cy="26" r="4" fill={GOLD} stroke={GOLD_D} strokeWidth="1" />
+    </>
+  );
+}
+
+/** A raging berserker with twin axes (광전사). */
+function Berserker() {
+  return (
+    <>
+      <circle cx="32" cy="30" r="8" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M24 40 Q24 52 32 52 Q40 52 40 40 Z" fill="#7a2e22" />
+      <path d="M16 20 L22 26 L20 30 L12 24 Z" fill="#b03428" stroke="#5f1710" strokeWidth="0.8" />
+      <rect x="20" y="26" width="2" height="16" fill="#6b4a26" transform="rotate(-40 21 34)" />
+      <path d="M48 20 L42 26 L44 30 L52 24 Z" fill="#b03428" stroke="#5f1710" strokeWidth="0.8" />
+      <rect x="42" y="26" width="2" height="16" fill="#6b4a26" transform="rotate(40 43 34)" />
+      <path d="M28 29 L31 30 M36 29 L33 30" stroke="#3a1410" strokeWidth="1.4" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A venomous spider (맹독거미 · 독성). */
+function Venomspider() {
+  return (
+    <>
+      <ellipse cx="32" cy="36" rx="10" ry="8" fill="#3a4a24" stroke="#1a220f" strokeWidth="1.2" />
+      <circle cx="32" cy="27" r="5" fill="#4a5c2e" stroke="#1a220f" strokeWidth="1" />
+      <path d="M22 32 L12 26 M22 36 L11 36 M22 40 L13 46" stroke="#2a331a" strokeWidth="2" strokeLinecap="round" />
+      <path d="M42 32 L52 26 M42 36 L53 36 M42 40 L51 46" stroke="#2a331a" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="30" cy="26" r="1.3" fill="#c4f04a" />
+      <circle cx="34" cy="26" r="1.3" fill="#c4f04a" />
+      <ellipse cx="32" cy="38" rx="3" ry="4" fill="#a6c84a" opacity="0.7" />
+    </>
+  );
+}
+
+/** A mounted lancer charging (창기병 · 돌진). */
+function Cavalier() {
+  return (
+    <>
+      <path d="M14 44 Q22 34 38 36 L46 34 L44 44 Q40 50 30 50 Z" fill="#6b5236" stroke="#33260f" strokeWidth="1.2" />
+      <path d="M18 44 L16 52 M28 46 L27 53 M36 45 L36 52" stroke="#33260f" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="30" cy="26" r="5.5" fill={STEEL} stroke={STEEL_D} strokeWidth="1" />
+      <path d="M34 24 L60 18" stroke="#cfd8e6" strokeWidth="2" strokeLinecap="round" />
+      <path d="M58 16 L62 18 L58 20 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.6" />
+    </>
+  );
+}
+
+/** A radiant paladin (성기사 · 신성한 보호막). */
+function Paladin() {
+  return (
+    <>
+      <circle cx="32" cy="32" r="16" fill="none" stroke="#fff2c0" strokeWidth="1" opacity="0.5" />
+      <path d="M22 52 Q22 36 32 36 Q42 36 42 52 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
+      <path d="M24 30 Q32 20 40 30 L40 34 L24 34 Z" fill="#eef2fa" stroke={STEEL_D} strokeWidth="1" />
+      <rect x="30" y="30" width="4" height="6" fill="#1c2430" />
+      <path d="M32 40 L32 50 M27 44 L37 44" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A caped vampire lord (흡혈귀 · 흡혈). */
+function Vampirelord() {
+  return (
+    <>
+      <path d="M14 50 Q20 30 32 30 Q44 30 50 50 Z" fill="#2a1420" stroke="#120810" strokeWidth="1.4" />
+      <circle cx="32" cy="26" r="7.5" fill="#e8dcd4" stroke="#b09a92" strokeWidth="1" />
+      <path d="M24 24 Q32 14 40 24 L40 20 Q32 13 24 20 Z" fill="#1a0c14" />
+      <circle cx="29" cy="26" r="1.4" fill="#c4182c" />
+      <circle cx="35" cy="26" r="1.4" fill="#c4182c" />
+      <path d="M29 30 L30 33 M35 30 L34 33" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A bomb-hurling grenadier (폭탄병 · 죽음의 메아리). */
+function Bomber() {
+  return (
+    <>
+      <circle cx="38" cy="36" r="9" fill="#2a2e36" stroke="#0e1014" strokeWidth="1.4" />
+      <ellipse cx="35" cy="33" rx="3" ry="2" fill="#5a6068" opacity="0.7" />
+      <path d="M38 27 Q42 20 46 22" stroke="#8a6636" strokeWidth="1.6" fill="none" />
+      <circle cx="46" cy="21" r="2.2" fill="#ffb43a" />
+      <circle cx="46" cy="21" r="3.4" fill="none" stroke="#ff6a1a" strokeWidth="0.8" opacity="0.7" />
+      <circle cx="20" cy="30" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <path d="M15 50 Q15 40 21 40 Q27 40 27 50 Z" fill="#4a3a24" />
+    </>
+  );
+}
+
+/** A warlord raising a banner and blade (전쟁군주). */
+function Warlord() {
+  return (
+    <>
+      <rect x="46" y="12" width="2" height="40" fill="#6b4a26" />
+      <path d="M48 13 L60 16 L56 22 L60 28 L48 25 Z" fill="#7a1f18" stroke="#3e0f0a" strokeWidth="1" />
+      <path d="M20 52 Q20 36 30 36 Q40 36 40 52 Z" fill="#54341f" stroke={GOLD_D} strokeWidth="1" />
+      <circle cx="30" cy="26" r="7" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
+      <path d="M30 18 L27 13 L30 15 L33 13 Z" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" />
+      <rect x="12" y="18" width="2.4" height="28" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" transform="rotate(-10 13 32)" />
+    </>
+  );
+}
+
+/** A hulking rock golem (바위 골렘 · 도발). */
+function Golem() {
+  return (
+    <>
+      <rect x="20" y="30" width="24" height="22" rx="3" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.6" />
+      <rect x="24" y="20" width="16" height="14" rx="3" fill="#7a776a" stroke="#2f2c24" strokeWidth="1.4" />
+      <rect x="14" y="32" width="7" height="16" rx="2" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.2" />
+      <rect x="43" y="32" width="7" height="16" rx="2" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.2" />
+      <circle cx="29" cy="27" r="1.6" fill="#8be3ff" />
+      <circle cx="35" cy="27" r="1.6" fill="#8be3ff" />
+      <path d="M24 40 L40 40 M32 34 L32 50" stroke="#2f2c24" strokeWidth="1" opacity="0.5" />
+    </>
+  );
+}
+
+/** A hooded necromancer with a floating skull (강령술사 · 죽음의 메아리). */
+function Necromancer() {
+  return (
+    <>
+      <path d="M20 52 Q20 26 32 26 Q44 26 44 52 Z" fill="#2a2440" stroke="#120e22" strokeWidth="1.4" />
+      <path d="M24 30 Q32 18 40 30 L40 26 Q32 16 24 26 Z" fill="#1a1630" />
+      <ellipse cx="32" cy="30" rx="5" ry="6" fill="#0c0a16" />
+      <circle cx="30" cy="29" r="1.3" fill="#a45cff" />
+      <circle cx="34" cy="29" r="1.3" fill="#a45cff" />
+      <circle cx="48" cy="20" r="4" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="0.8" />
+      <circle cx="46.5" cy="19" r="1" fill="#2a2440" />
+      <circle cx="49.5" cy="19" r="1" fill="#2a2440" />
+    </>
+  );
+}
+
+/** A fire dragon (화염룡). */
+function Dragon() {
+  return (
+    <>
+      <path d="M14 44 Q24 26 42 30 L54 24 L50 34 Q52 44 38 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1.4" />
+      <path d="M52 22 L58 16 L57 26 Z" fill="#c24327" stroke="#521309" strokeWidth="0.8" />
+      <path d="M46 26 L50 18 L52 27 Z" fill="#c24327" stroke="#521309" strokeWidth="0.8" />
+      <path d="M20 34 Q28 22 38 30 L34 40 Q26 44 20 38 Z" fill="#c24327" opacity="0.8" />
+      <circle cx="52" cy="26" r="1.5" fill="#ffd24a" />
+      <path d="M55 30 Q62 30 60 34 Q58 32 55 33 Z" fill="#ffb43a" />
+      <path d="M16 42 L14 50 M26 44 L25 52 M34 44 L34 52" stroke="#521309" strokeWidth="2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A winged archangel (대천사 · 신성한 보호막). */
+function Archangel() {
+  return (
+    <>
+      <path d="M32 20 Q14 22 12 40 Q24 34 32 40 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1" />
+      <path d="M32 20 Q50 22 52 40 Q40 34 32 40 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1" />
+      <path d="M26 52 Q26 32 32 32 Q38 32 38 52 Z" fill="#eef2fa" stroke="#c2c9d6" strokeWidth="1.2" />
+      <circle cx="32" cy="24" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
+      <ellipse cx="32" cy="15" rx="6" ry="2" fill="none" stroke={GOLD} strokeWidth="1.6" />
+      <path d="M32 40 L32 50 M28 44 L36 44" stroke={GOLD} strokeWidth="2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/* ── Spells ── */
+
+/** A slashing blade arc (강타). */
+function StrikeArt() {
+  return (
+    <>
+      <path d="M14 46 Q34 12 54 22" stroke="#eef2fa" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M14 46 Q34 16 52 24" stroke="#8fa0c0" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.7" />
+      <path d="M50 20 L58 20 L52 26 Z" fill="#eef2fa" />
+    </>
+  );
+}
+
+/** A hurled firebolt (화염 화살). */
+function FireboltArt() {
+  return (
+    <>
+      <path d="M14 44 Q26 36 40 30" stroke="#ff7a2a" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.6" />
+      <circle cx="44" cy="28" r="8" fill="#ff9a3c" />
+      <circle cx="44" cy="28" r="4.5" fill="#ffe08a" />
+      <path d="M44 20 Q50 24 48 30 Q52 26 50 20 Z" fill="#ff6a1a" />
+    </>
+  );
+}
+
+/** A descending shaft of holy light (성스러운 빛). */
+function HolylightArt() {
+  return (
+    <>
+      <path d="M26 8 L38 8 L34 40 L30 40 Z" fill="#fff2c0" opacity="0.5" />
+      <path d="M28 8 L36 8 L33 40 L31 40 Z" fill="#fffbe8" opacity="0.8" />
+      <circle cx="32" cy="44" r="6" fill="#ffe08a" />
+      <path d="M32 36 L32 52 M24 44 L40 44" stroke={GOLD} strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+    </>
+  );
+}
+
+/** A sweeping wall of flame (화염 폭풍). */
+function FlamestrikeArt() {
+  return (
+    <>
+      <path d="M12 50 Q16 32 20 44 Q24 26 28 44 Q32 28 36 44 Q40 26 44 44 Q48 32 52 50 Z" fill="#ff7a2a" stroke="#a8331f" strokeWidth="1" />
+      <path d="M18 48 Q22 38 26 48 Q30 36 34 48 Q38 38 42 48 Z" fill="#ffe08a" opacity="0.9" />
+    </>
+  );
+}
+
+/** An upward blessing sigil (축복). */
+function BlessArt() {
+  return (
+    <>
+      <path d="M32 12 L32 44 M20 24 L32 12 L44 24" stroke="#ffe08a" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="32" cy="48" r="4" fill="#fff2c0" />
+      <circle cx="20" cy="20" r="1.6" fill="#ffe08a" />
+      <circle cx="44" cy="20" r="1.6" fill="#ffe08a" />
+    </>
+  );
+}
+
+/** Bursting frost shards (서리 충격). */
+function FrostshockArt() {
+  return (
+    <>
+      <path d="M32 14 L32 50 M18 22 L46 42 M46 22 L18 42" stroke="#bfe9ff" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 14 L29 19 L35 19 Z M32 50 L29 45 L35 45 Z" fill="#eafaff" />
+      <circle cx="32" cy="32" r="3.4" fill="#eafaff" />
+    </>
+  );
+}
+
+/** A poised assassin's dagger (암살). */
+function AssassinateArt() {
+  return (
+    <>
+      <path d="M40 12 L46 18 L26 46 L22 42 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="1" />
+      <path d="M40 12 L44 16 L26 44 L24 42 Z" fill="#eef2fa" />
+      <rect x="18" y="42" width="10" height="4" rx="1" fill="#8a1f18" transform="rotate(45 23 44)" />
+      <circle cx="18" cy="50" r="3" fill="#c4182c" opacity="0.8" />
+    </>
+  );
+}
+
+/** A rallying war horn (전투의 뿔피리). */
+function WarhornArt() {
+  return (
+    <>
+      <path d="M14 34 Q34 22 50 34 Q44 44 30 42 Q20 42 14 34 Z" fill="#d9b878" stroke="#8a6636" strokeWidth="1.4" />
+      <path d="M48 30 Q54 30 54 36 Q50 36 48 38 Z" fill="#e8d8a8" />
+      <path d="M22 40 Q28 46 40 46" stroke="#c8922f" strokeWidth="1.4" fill="none" />
+      <path d="M50 26 L54 24 M52 30 L57 30 M50 34 L54 38" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" opacity="0.8" />
+    </>
+  );
+}
+
+/** An open tome of arcane insight (비전 지식). */
+function InsightArt() {
+  return (
+    <>
+      <path d="M14 24 Q24 20 32 24 L32 46 Q24 42 14 46 Z" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="1.2" />
+      <path d="M50 24 Q40 20 32 24 L32 46 Q40 42 50 46 Z" fill="#d9cfae" stroke="#b6ad92" strokeWidth="1.2" />
+      <path d="M18 28 L28 28 M18 32 L28 32 M36 28 L46 28 M36 32 L46 32" stroke="#a89a72" strokeWidth="1" />
+      <circle cx="32" cy="18" r="4" fill="#a45cff" opacity="0.85" />
+      <path d="M32 12 L32 15 M28 16 L30 18 M36 16 L34 18" stroke="#c8a0ff" strokeWidth="1.2" strokeLinecap="round" />
+    </>
+  );
+}
+
+/** A surging mana crystal (마나샘). */
+function ManasurgeArt() {
+  return (
+    <>
+      <path d="M32 12 L42 30 L32 52 L22 30 Z" fill="#5aa0ff" stroke="#2a4a8a" strokeWidth="1.4" />
+      <path d="M32 12 L37 30 L32 52 L32 12 Z" fill="#8ec4ff" opacity="0.8" />
+      <path d="M32 12 L27 30 L32 52" stroke="#2a4a8a" strokeWidth="0.8" opacity="0.6" />
+      <circle cx="18" cy="40" r="1.6" fill="#bfe0ff" />
+      <circle cx="46" cy="22" r="1.6" fill="#bfe0ff" />
+    </>
+  );
+}
+
 const ART: Record<string, () => JSX.Element> = {
+  sprite: Sprite,
+  recruit: Recruit,
+  guard: Guard,
+  wolf: Wolf,
+  squire: Squire,
+  archer: Archer,
+  knight: Knight,
+  cleric: Cleric,
+  shieldbearer: Shieldbearer,
+  berserker: Berserker,
+  venomspider: Venomspider,
+  cavalier: Cavalier,
+  paladin: Paladin,
+  vampirelord: Vampirelord,
+  bomber: Bomber,
+  warlord: Warlord,
+  golem: Golem,
+  necromancer: Necromancer,
+  dragon: Dragon,
+  archangel: Archangel,
+  strike: StrikeArt,
+  firebolt: FireboltArt,
+  holylight: HolylightArt,
+  flamestrike: FlamestrikeArt,
+  bless: BlessArt,
+  frostshock: FrostshockArt,
+  assassinate: AssassinateArt,
+  warhorn: WarhornArt,
+  insight: InsightArt,
+  manasurge: ManasurgeArt,
   sword: Sword,
   bow: Bow,
   spear: Spear,
@@ -797,6 +1238,20 @@ const ELEMENT: Record<string, Elem> = {
   venomdart: 'poison', plaguemist: 'poison',
   bind: 'ice', frostbolt: 'ice', gale: 'ice',
   peek: 'none', gambit: 'none', meditate: 'none', fateswap: 'none',
+  // ── board-model minions ──
+  recruit: 'physical', squire: 'physical', archer: 'physical', knight: 'physical',
+  shieldbearer: 'physical', berserker: 'physical', cavalier: 'physical',
+  warlord: 'physical', golem: 'physical', guard: 'physical', wolf: 'physical',
+  cleric: 'holy', paladin: 'holy', archangel: 'holy',
+  venomspider: 'poison', vampirelord: 'poison', necromancer: 'poison',
+  bomber: 'fire', dragon: 'fire',
+  sprite: 'none',
+  // ── board-model spells ──
+  strike: 'physical', assassinate: 'physical', warhorn: 'physical',
+  firebolt: 'fire', flamestrike: 'fire',
+  holylight: 'holy', bless: 'holy',
+  frostshock: 'ice',
+  insight: 'none', manasurge: 'lightning',
 };
 
 /** Per-element illustrated scene: a dusk sky, a backlit horizon light-source, and a ground plane —

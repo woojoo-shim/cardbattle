@@ -12,15 +12,15 @@ export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: stri
   return {
     id, name, avatar, connected: true, seat,
     hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
-    hand: [], equipment: [], statuses: [], deathrattle: [], buffs: [], alive: true,
-    skipTurns: 0, gamble: false, empower: 1, mana: rules.startMana, heroPowerUsed: false,
+    hand: [], field: [], statuses: [], deathrattle: [], alive: true,
+    skipTurns: 0, mana: rules.startMana, heroPowerUsed: false,
   };
 }
 
 export function initGame(seats: { id: string; name: string }[], mode: GameModeId = DEFAULT_MODE): GameState {
   const m = resolveMode(mode);
   const players: PlayerState[] = seats.map((s, i) => spawnPlayer(m.rules, i, s.id, s.name, DEFAULT_AVATAR));
-  return { phase: 'lobby', mode: m.id, rules: m.rules, players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, log: [], winnerId: null };
+  return { phase: 'lobby', mode: m.id, rules: m.rules, players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, nextMinionId: 0, log: [], winnerId: null };
 }
 
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
@@ -53,12 +53,14 @@ export function startGame(input: GameState, ctx: ReduceCtx): ReduceResult {
   return { state, events };
 }
 
-/** Set deadline, auto-draw for the current player, emit turn_started. */
+/** Set deadline, refresh the current player's board + hero power, ramp mana, auto-draw, emit turn_started. */
 function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   const cur = state.players.find((p) => p.id === state.turnOrder[state.currentTurnIndex]);
   if (!cur) return;
   state.turnDeadline = ctx.now + state.rules.turnSeconds * 1000;
   cur.heroPowerUsed = false; // the signature ability refreshes at the start of each of your turns
+  // Every minion you control wakes up: summoning sickness clears and it gets its one swing this turn.
+  for (const m of cur.field) { m.summonedThisTurn = false; m.attacksLeft = 1; }
   // Refill mana by the round-scaled amount (ramps up as the match goes longer), then draw.
   const regained = manaRegenFor(state.rules, state.roundCount);
   cur.mana = Math.min(state.rules.manaMax, cur.mana + regained);
@@ -67,7 +69,7 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
   emit({ type: 'turn_started', playerId: cur.id, deadline: state.turnDeadline });
 }
 
-/** Top every living player's hand back up to HAND_TARGET (cards are added, never removed). */
+/** Top every living player's hand back up to handTarget (cards are added, never removed). */
 function refillHands(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   for (const p of state.players) {
     if (!p.alive) continue;
@@ -75,18 +77,17 @@ function refillHands(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => v
   }
 }
 
-/** Tick a player's ongoing statuses at THEIR turn start: poison bites (ignoring shield),
- *  regen mends, reflect counts down. Each survivor loses one turn of duration; expired
- *  effects drop off. A poison kill flips alive/emits elimination — caller re-advances. */
-function tickStatuses(state: GameState, p: PlayerState, emit: (e: GameEvent) => void): void {
+/** Tick a player's ongoing statuses at THEIR turn start (legacy: no current card applies one, kept
+ *  for schema/UI compatibility). Poison bites through shield, regen mends; a poison kill eliminates. */
+function tickStatuses(state: GameState, p: PlayerState, emit: (e: GameEvent) => void, nextCardId: () => string): void {
   if (!p.alive || p.statuses.length === 0) return;
   const kept: PlayerState['statuses'] = [];
   for (const st of p.statuses) {
     if (st.kind === 'poison') {
       if (p.alive) {
-        p.hp = Math.max(0, p.hp - st.amount); // damage-over-time bypasses shield entirely
+        p.hp = Math.max(0, p.hp - st.amount);
         emit({ type: 'damage_dealt', sourceId: st.sourceId, targetId: p.id, amount: st.amount, element: 'poison', targetHpAfter: p.hp });
-        if (p.hp === 0 && p.alive) eliminate(state, p, emit);
+        if (p.hp === 0 && p.alive) eliminate(state, p, emit, nextCardId);
       }
     } else if (st.kind === 'regen') {
       if (p.alive) {
@@ -107,16 +108,11 @@ export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
   const events: GameEvent[] = [];
   const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
   const endingId = state.turnOrder[state.currentTurnIndex];
-  // Per-turn buffs ('도박' arm, '희생' empower) expire when the turn ends, even if unused.
-  const ending = state.players.find((p) => p.id === endingId);
-  if (ending) { ending.gamble = false; ending.empower = 1; }
   emit({ type: 'turn_ended', playerId: endingId });
 
-  // advance to the next living player in the current direction; crossing the wrap
-  // point (seam) means the token completed a full lap -> a new round begins. A player
-  // carrying skipTurns is passed over (consuming one skip) and we keep advancing. The
-  // player we settle on has their turn-start statuses ticked here; if poison kills them
-  // we keep advancing past the corpse to the next taker.
+  // advance to the next living player in the current direction; crossing the wrap point (seam) means
+  // the token completed a full lap -> a new round begins. Skipped players are passed over (consuming
+  // one skip); a player we settle on has their turn-start statuses ticked; a poison kill keeps advancing.
   const n = state.turnOrder.length;
   const dir = state.turnDir;
   let lapped = false;
@@ -140,7 +136,7 @@ export function endTurn(input: GameState, ctx: ReduceCtx): ReduceResult {
       emit({ type: 'turn_skipped', playerId: landed.id });
       continue; // keep advancing past the skipped player
     }
-    if (landed) tickStatuses(state, landed, emit);
+    if (landed) tickStatuses(state, landed, emit, ctx.nextCardId);
     if (landed && !landed.alive) continue; // poison finished them -> find the next taker
     break;
   }

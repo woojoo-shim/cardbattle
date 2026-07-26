@@ -1,75 +1,105 @@
 import { describe, it, expect } from 'vitest';
 import { reduce } from '../engine/reducer.js';
-import { endTurn } from '../engine/loop.js';
 import { DEFAULT_RULES } from '../modes.js';
-import type { GameState, PlayerState, ReduceCtx } from '../types.js';
+import type { GameState, PlayerState, MinionInstance, ReduceCtx } from '../types.js';
 
 function player(id: string, seat: number, over: Partial<PlayerState> = {}): PlayerState {
-  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], equipment: [], statuses: [], deathrattle: [], buffs: [], alive: true, skipTurns: 0, gamble: false, empower: 1, mana: 20, ...over };
+  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], field: [], statuses: [], deathrattle: [], alive: true, skipTurns: 0, mana: 20, heroPowerUsed: false, ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
-  return { phase: 'playing', mode: 'standard', rules: DEFAULT_RULES, players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, log: [], winnerId: null, ...over };
+  return { phase: 'playing', mode: 'standard', rules: DEFAULT_RULES, players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, nextMinionId: 0, log: [], winnerId: null, ...over };
 }
-const ctx: ReduceCtx = { nextCardId: () => 'c-x', now: 1000 };
+function minion(id: string, ownerId: string, over: Partial<MinionInstance> = {}): MinionInstance {
+  return { id, defId: 'knight', ownerId, attack: 3, health: 3, maxHealth: 3, summonedThisTurn: false, attacksLeft: 1, taunt: false, charge: false, divineShield: false, poisonous: false, lifesteal: false, deathrattle: [], ...over };
+}
+let n = 0;
+const ctx: ReduceCtx = { nextCardId: () => `d-${n++}`, now: 1000 };
 
-describe('battlecry (전투의 함성)', () => {
-  it('warcry deals only its base damage when the caster still holds other cards', () => {
+describe('battlecry (전투의 함성) fires on summon', () => {
+  it('squire draws a card', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'warcry' }, { id: 'c2', defId: 'sword' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].hp).toBe(34); // 6 base only, bonus NOT met (still holds c2)
-    expect(events.some((e) => e.type === 'battlecry_triggered')).toBe(false);
+    s.players[0].hand = [{ id: 'c1', defId: 'squire' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].field).toHaveLength(1);
+    expect(state.players[0].hand).toHaveLength(1); // squire consumed, 1 drawn
+    expect(events).toContainEqual(expect.objectContaining({ type: 'battlecry_triggered', playerId: 'a', cond: 'squire' }));
   });
 
-  it('warcry adds its last_card bonus when it is the caster\'s final card', () => {
+  it('archer deals 2 damage to a chosen enemy hero', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'warcry' }];
+    s.players[0].hand = [{ id: 'c1', defId: 'archer' }];
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(state.players[1].hp).toBe(26); // 6 base + 8 bonus = 14
-    expect(events).toContainEqual(expect.objectContaining({ type: 'battlecry_triggered', playerId: 'a', cond: 'last_card' }));
+    expect(state.players[1].hp).toBe(38);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage_dealt', targetId: 'b', amount: 2 }));
   });
 
-  it('berserk adds its wounded bonus only when the caster is at half HP or below', () => {
-    const healthy = game();
-    healthy.players[0].hand = [{ id: 'c1', defId: 'berserk' }];
-    expect(reduce(healthy, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx).state.players[1].hp).toBe(33); // 7 base only
+  it('cleric heals its own hero', () => {
+    const s = game();
+    s.players[0].hp = 30;
+    s.players[0].hand = [{ id: 'c1', defId: 'cleric' }]; // heal 4 hero
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    expect(state.players[0].hp).toBe(34);
+  });
 
-    const hurt = game();
-    hurt.players[0].hp = 20; // exactly half of 40 -> wounded
-    hurt.players[0].hand = [{ id: 'c1', defId: 'berserk' }, { id: 'c2', defId: 'sword' }];
-    const r = reduce(hurt, { type: 'play_card', cardInstanceId: 'c1', targetId: 'b' }, ctx);
-    expect(r.state.players[1].hp).toBe(26); // 7 base + 7 wounded bonus = 14
-    expect(r.events).toContainEqual(expect.objectContaining({ type: 'battlecry_triggered', cond: 'wounded' }));
+  it('warlord buffs all friendly minions (+1/+1), including itself', () => {
+    const s = game();
+    s.players[0].field = [minion('m1', 'a', { attack: 3, health: 3, maxHealth: 3 })];
+    s.players[0].hand = [{ id: 'c1', defId: 'warlord' }]; // 5/5, +1/+1 allFriendlyMinions
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
+    const m1 = state.players[0].field.find((m) => m.id === 'm1')!;
+    const wl = state.players[0].field.find((m) => m.defId === 'warlord')!;
+    expect([m1.attack, m1.health]).toEqual([4, 4]);
+    expect([wl.attack, wl.health]).toEqual([6, 6]);
   });
 });
 
-describe('deathrattle (죽음의 메아리)', () => {
-  it('martyr arms a parting blow that only fires on the caster\'s death', () => {
+describe('deathrattle (죽음의 메아리) fires on minion death', () => {
+  it('bomber deals 2 to all enemy heroes when it dies', () => {
+    // b's turn; b assassinates a's bomber -> bomber deathrattle hits a's enemies (b)
+    const s = game({ currentTurnIndex: 1 });
+    s.players[0].field = [minion('m1', 'a', { defId: 'bomber', health: 2, deathrattle: [{ kind: 'damage', amount: 2, target: 'allEnemies' }] })];
+    s.players[1].hand = [{ id: 'c1', defId: 'assassinate' }];
+    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
+    expect(state.players[0].field).toHaveLength(0);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'deathrattle_triggered', playerId: 'a' }));
+    expect(state.players[1].hp).toBe(38); // b took 2 from bomber's parting blow
+  });
+
+  it('necromancer summons 2 sprites when it dies', () => {
+    const s = game({ currentTurnIndex: 1 });
+    s.players[0].field = [minion('m1', 'a', { defId: 'necromancer', health: 4, deathrattle: [{ kind: 'summon', token: 'sprite', count: 2 }] })];
+    s.players[1].hand = [{ id: 'c1', defId: 'assassinate' }];
+    const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
+    expect(state.players[0].field).toHaveLength(2); // necromancer died, 2 sprites summoned
+    expect(state.players[0].field.every((m) => m.defId === 'sprite')).toBe(true);
+  });
+});
+
+describe('board keywords', () => {
+  it('divine shield negates the first hit and pops', () => {
     const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'martyr' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(state.players[0].defense).toBe(6);         // shield applied immediately
-    expect(state.players[0].deathrattle).toHaveLength(1); // parting effect armed
-    expect(events.some((e) => e.type === 'deathrattle_triggered')).toBe(false); // not yet
+    s.players[0].field = [minion('m1', 'a', { attack: 3, attacksLeft: 1 })];
+    s.players[1].field = [minion('m2', 'b', { attack: 2, health: 4, divineShield: true })];
+    const { state } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'm2' }, ctx);
+    const m2 = state.players[1].field[0];
+    expect(m2.health).toBe(4);          // damage negated
+    expect(m2.divineShield).toBe(false); // shield popped
   });
 
-  it('the caster\'s death fires the armed deathrattle on all others', () => {
-    const s = game({ players: [player('a', 0, { hp: 8, deathrattle: [{ kind: 'damage', amount: 8, target: 'all' }] }), player('b', 1), player('c', 2)], turnOrder: ['b', 'a', 'c'], currentTurnIndex: 0 });
-    s.players[1].hand = [{ id: 'c1', defId: 'sword' }]; // b's turn, sword hits a for 10 -> lethal (a hp 8)
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'a' }, ctx);
-    expect(state.players[0].alive).toBe(false);
-    expect(events).toContainEqual({ type: 'deathrattle_triggered', playerId: 'a' });
-    expect(state.players[0].deathrattle).toHaveLength(0); // spent
-    expect(state.players[1].hp).toBe(32); // b took 8 from the parting AoE
-    expect(state.players[2].hp).toBe(32); // c took 8 too
+  it('poisonous destroys any minion it damages', () => {
+    const s = game();
+    s.players[0].field = [minion('m1', 'a', { attack: 1, health: 5, poisonous: true, attacksLeft: 1 })];
+    s.players[1].field = [minion('m2', 'b', { attack: 1, health: 8 })];
+    const { state } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'm2' }, ctx);
+    expect(state.players[1].field).toHaveLength(0); // big minion destroyed by 1 poison damage
   });
 
-  it('poison death also triggers the deathrattle (centralized elimination)', () => {
-    const s = game({ players: [player('a', 0), player('b', 1, { hp: 3, deathrattle: [{ kind: 'damage', amount: 5, target: 'all' }], statuses: [{ kind: 'poison', amount: 5, turns: 2, sourceId: 'a' }] }), player('c', 2)], turnOrder: ['a', 'b', 'c'] });
-    const r = endTurn(s, ctx); // a -> b: poison kills b -> deathrattle hits a and c
-    expect(r.state.players[1].alive).toBe(false);
-    expect(r.events).toContainEqual({ type: 'deathrattle_triggered', playerId: 'b' });
-    expect(r.state.players[0].hp).toBe(35); // a took 5 from b's parting blow
-    expect(r.state.players[2].hp).toBe(35); // c took 5 too
+  it('lifesteal heals the attacking hero for damage dealt', () => {
+    const s = game();
+    s.players[0].hp = 30;
+    s.players[0].field = [minion('m1', 'a', { attack: 4, lifesteal: true, attacksLeft: 1 })];
+    const { state } = reduce(s, { type: 'attack', attackerId: 'm1', targetId: 'b' }, ctx);
+    expect(state.players[1].hp).toBe(36); // 40 - 4
+    expect(state.players[0].hp).toBe(34); // 30 + 4 lifesteal
   });
 });

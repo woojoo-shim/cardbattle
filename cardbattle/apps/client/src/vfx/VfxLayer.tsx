@@ -175,9 +175,7 @@ export function VfxLayer({ events, players, myId }: Props) {
         const def = CARD_DEFS[e.defId];
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
-        const isAttack = def.effects.some(
-          (ef) => ef.kind === 'damage' || ef.kind === 'pierce' || ef.kind === 'leech' || ef.kind === 'desperation',
-        );
+        const isAttack = def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
         if (isAttack) {
           // GODFIELD SIGNATURE: the actual weapon/item card is HURLED at the victim — it spins
           // end-over-end across the table and lands as the blow connects, instead of an abstract
@@ -252,14 +250,27 @@ export function VfxLayer({ events, players, myId }: Props) {
             }
           }
         }, IMPACT_DELAY * 1000);
-      } else if (e.type === 'card_stolen') {
-        // A card is yanked from the victim's hand and flies across to the thief.
-        const from = centerOf(e.targetId);
-        const to = centerOf(e.thiefId);
+      } else if (e.type === 'minion_attacked') {
+        // A minion trades blows: it lunges at whatever it's striking (enemy hero or minion).
+        const from = centerOf(e.attackerId);
+        const to = centerOf(e.targetId);
         if (from && to) {
-          add.push({ id: nextId.current++, kind: 'hurl', x: from.x, y: from.y, dx: to.x - from.x, dy: to.y - from.y, defId: null, color: '#c9a0ff', spin: true });
-          castPulse(e.thiefId);
+          const dx = to.x - from.x, dy = to.y - from.y, len = Math.hypot(dx, dy) || 1;
+          lunge(e.attackerId, dx / len, dy / len);
         }
+      } else if (e.type === 'minion_damaged') {
+        // A wounded minion takes a tight contact flash + a small recoil at its chip.
+        if (!centerOf(e.minionId)) continue;
+        const magNorm = Math.max(0.4, Math.min(1.2, e.amount / 6));
+        setTimeout(() => {
+          const t = centerOf(e.minionId);
+          if (!t) return;
+          const spawn: Fx[] = [{ id: nextId.current++, kind: 'impact', x: t.x, y: t.y, color: ELEM.none, delay: 0, big: false }];
+          setFx((cur) => [...cur, ...spawn]);
+          const ids = new Set(spawn.map((s) => s.id));
+          setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2000);
+          impactHit(e.minionId, 0, 1, magNorm);
+        }, IMPACT_DELAY * 1000);
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;

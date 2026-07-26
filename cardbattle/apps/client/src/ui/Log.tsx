@@ -9,40 +9,47 @@ interface Props {
   ui: UiState;
 }
 
-type Tone = 'turn' | 'card' | 'dmg' | 'heal' | 'shield' | 'reverse' | 'round' | 'out' | 'win' | 'reveal' | 'discard' | 'skip' | 'gamble' | 'steal';
+type Tone = 'turn' | 'card' | 'dmg' | 'heal' | 'shield' | 'round' | 'out' | 'win' | 'skip' | 'summon' | 'attack' | 'buff' | 'die' | 'cry';
 type Line = { icon: IconName; text: string; tone: Tone };
 
 function nameOf(ui: UiState, id: string): string {
   return ui.players.find((p) => p.id === id)?.name ?? id.slice(0, 4);
 }
 
+/** A minion id → its card name (from any player's field), or a short fallback. */
+function minionName(ui: UiState, minionId: string): string {
+  for (const p of ui.players) {
+    const m = p.field.find((f) => f.id === minionId);
+    if (m) return CARD_DEFS[m.defId]?.name ?? m.defId;
+  }
+  return '하수인';
+}
+
+/** A minion id OR a hero playerId → a display name (attack/target can be either). */
+function unitName(ui: UiState, id: string): string {
+  const hero = ui.players.find((p) => p.id === id);
+  if (hero) return hero.name;
+  return minionName(ui, id);
+}
+
 function line(ui: UiState, e: GameEvent): Line | null {
   switch (e.type) {
     case 'turn_started': return { icon: 'arrowRight', text: `${nameOf(ui, e.playerId)} 의 턴`, tone: 'turn' };
     case 'card_played': return { icon: 'card', text: `${nameOf(ui, e.playerId)} → ${CARD_DEFS[e.defId]?.name ?? e.defId}`, tone: 'card' };
-    case 'damage_dealt': return { icon: 'burst', text: `${nameOf(ui, e.targetId)} ${e.amount} 피해 (HP ${e.targetHpAfter})`, tone: 'dmg' };
-    case 'healed': return { icon: 'heart', text: `${nameOf(ui, e.targetId)} ${e.amount} 회복 (HP ${e.targetHpAfter})`, tone: 'heal' };
+    case 'damage_dealt': return { icon: 'burst', text: `${unitName(ui, e.targetId)} ${e.amount} 피해 (HP ${e.targetHpAfter})`, tone: 'dmg' };
+    case 'healed': return { icon: 'heart', text: `${unitName(ui, e.targetId)} ${e.amount} 회복 (HP ${e.targetHpAfter})`, tone: 'heal' };
     case 'shielded': return { icon: 'shield', text: `${nameOf(ui, e.targetId)} 방어 +${e.amount} (총 ${e.defenseAfter})`, tone: 'shield' };
-    case 'direction_reversed': return { icon: 'reverse', text: `진행 방향 반전! (${e.direction === -1 ? '역방향' : '정방향'})`, tone: 'reverse' };
-    case 'card_revealed': return { icon: 'crystal', text: `${nameOf(ui, e.viewerId)} 가 ${nameOf(ui, e.targetId)} 의 손패를 엿봤다`, tone: 'reveal' };
-    case 'card_discarded': return { icon: 'trash', text: `${nameOf(ui, e.targetId)} 의 ${CARD_DEFS[e.defId]?.name ?? e.defId} 파괴됨`, tone: 'discard' };
-    case 'card_stolen': return { icon: 'hand', text: `${nameOf(ui, e.thiefId)} 가 ${nameOf(ui, e.targetId)} 의 손패 1장을 강탈`, tone: 'steal' };
     case 'turn_skipped': return { icon: 'zzz', text: `${nameOf(ui, e.playerId)} 의 턴 건너뜀`, tone: 'skip' };
-    case 'gamble_resolved': return { icon: 'dice', text: e.doubled ? `${nameOf(ui, e.playerId)} 도박 성공! 2배 피해` : `${nameOf(ui, e.playerId)} 도박 실패… 빗나감`, tone: 'gamble' };
     case 'round_advanced': return { icon: 'arrowCW', text: `ROUND ${e.round} — 손패 보충`, tone: 'round' };
+    case 'minion_summoned': return { icon: 'card', text: `${nameOf(ui, e.playerId)} 소환 — ${CARD_DEFS[e.defId]?.name ?? e.defId}`, tone: 'summon' };
+    case 'minion_attacked': return { icon: 'burst', text: `${minionName(ui, e.attackerId)} → ${unitName(ui, e.targetId)} 공격`, tone: 'attack' };
+    case 'minion_damaged': return { icon: 'burst', text: `${minionName(ui, e.minionId)} ${e.amount} 피해 (HP ${e.healthAfter})`, tone: 'dmg' };
+    case 'minion_buffed': return { icon: 'heart', text: `${minionName(ui, e.minionId)} 강화 → ${e.attack}/${e.health}`, tone: 'buff' };
+    case 'minion_died': return { icon: 'skull', text: `${minionName(ui, e.minionId)} 파괴됨`, tone: 'die' };
+    case 'battlecry_triggered': return { icon: 'burst', text: `${nameOf(ui, e.playerId)} — 전투의 함성!`, tone: 'cry' };
+    case 'deathrattle_triggered': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} — 죽음의 메아리!`, tone: 'die' };
     case 'player_eliminated': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} 탈락`, tone: 'out' };
     case 'game_over': return { icon: 'trophy', text: `${nameOf(ui, e.winnerId)} 승리!`, tone: 'win' };
-    case 'hp_swapped': return { icon: 'arrowSwap', text: `${nameOf(ui, e.aId)} ↔ ${nameOf(ui, e.bId)} 체력 교환`, tone: 'reverse' };
-    case 'mana_burned': return { icon: 'crystal', text: `${nameOf(ui, e.targetId)} 마나 -${e.amount} (남은 ${e.manaAfter})`, tone: 'reveal' };
-    case 'status_applied': {
-      const label = e.status === 'poison' ? `중독 ${e.amount}×${e.turns}턴`
-        : e.status === 'regen' ? `재생 ${e.amount}×${e.turns}턴`
-        : `반사 ${e.amount}% (${e.turns}턴)`;
-      const icon = e.status === 'poison' ? 'poison' : e.status === 'regen' ? 'regen' : 'reflect';
-      return { icon, text: `${nameOf(ui, e.targetId)} — ${label}`, tone: e.status === 'poison' ? 'discard' : e.status === 'regen' ? 'heal' : 'reverse' };
-    }
-    case 'battlecry_triggered': return { icon: 'burst', text: `${nameOf(ui, e.playerId)} — 전투의 함성 발동!`, tone: 'gamble' };
-    case 'deathrattle_triggered': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} — 죽음의 메아리!`, tone: 'discard' };
     default: return null;
   }
 }
@@ -51,8 +58,9 @@ function line(ui: UiState, e: GameEvent): Line | null {
 // faded-teal) so the combat record reads as the same candlelit palette, not neon confetti.
 const TONE: Record<Tone, string> = {
   turn: C.dim, card: C.text, dmg: '#e8b4a6', heal: '#cdd3a0',
-  shield: '#b9cdc4', reverse: '#c3b0d0', round: C.rare, out: C.faint, win: C.rare,
-  reveal: '#a9c4bf', discard: '#9aa863', skip: '#a9c4bf', gamble: '#e8cf96', steal: '#c3b0d0',
+  shield: '#b9cdc4', round: C.rare, out: C.faint, win: C.rare,
+  skip: '#a9c4bf', summon: '#c3b0d0', attack: '#e8b4a6', buff: '#cdd3a0',
+  die: '#9aa863', cry: '#e8cf96',
 };
 
 /** De-emphasized combat record floating at the field's edge — recent lines only. */
