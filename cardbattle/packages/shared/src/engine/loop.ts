@@ -2,6 +2,7 @@ import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from 
 import { DEFAULT_AVATAR } from '../constants.js';
 import { resolveMode, manaRegenFor, DEFAULT_MODE, type GameModeId, type RuleSet } from '../modes.js';
 import { ALL_DEFS } from '../cards/defs.js';
+import { eliminate } from '../cards/effects.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
 
@@ -11,7 +12,7 @@ export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: stri
   return {
     id, name, avatar, connected: true, seat,
     hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
-    hand: [], equipment: [], statuses: [], buffs: [], alive: true,
+    hand: [], equipment: [], statuses: [], deathrattle: [], buffs: [], alive: true,
     skipTurns: 0, gamble: false, empower: 1, mana: rules.startMana, heroPowerUsed: false,
   };
 }
@@ -85,7 +86,7 @@ function tickStatuses(state: GameState, p: PlayerState, emit: (e: GameEvent) => 
       if (p.alive) {
         p.hp = Math.max(0, p.hp - st.amount); // damage-over-time bypasses shield entirely
         emit({ type: 'damage_dealt', sourceId: st.sourceId, targetId: p.id, amount: st.amount, element: 'poison', targetHpAfter: p.hp });
-        if (p.hp === 0 && p.alive) { p.alive = false; emit({ type: 'player_eliminated', playerId: p.id }); }
+        if (p.hp === 0 && p.alive) eliminate(state, p, emit);
       }
     } else if (st.kind === 'regen') {
       if (p.alive) {

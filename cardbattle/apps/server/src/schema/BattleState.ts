@@ -28,6 +28,7 @@ export class PlayerSchema extends Schema {
   @type('number') skipTurns = 0;
   @type('number') mana = 0;
   @type('boolean') heroPowerUsed = false;
+  @type('boolean') hasDeathrattle = false; // 죽음의 메아리 armed — clients paint a parting-blow badge
   // Equipped cosmetics, mirrored from the room's cosmetics map so every client sees them.
   // Set in BattleRoom.publish() (not here) since they live outside the pure GameState.
   @type('string') border = 'none';
@@ -84,6 +85,7 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
     ps.skipTurns = p.skipTurns;
     ps.mana = p.mana;
     ps.heroPowerUsed = p.heroPowerUsed;
+    ps.hasDeathrattle = p.deathrattle.length > 0;
     // Rebuild the status list (small, changes rarely) so effect badges stay in sync.
     while (ps.statuses.length > 0) ps.statuses.pop();
     for (const st of p.statuses) {

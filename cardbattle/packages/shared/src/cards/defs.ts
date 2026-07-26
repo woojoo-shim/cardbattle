@@ -49,6 +49,11 @@ export const CARD_DEFS: Record<string, CardDef> = {
   plaguemist:{id: 'plaguemist',name:'역병안개',rarity:'epic',    cost: 4, element: 'poison',   kind: 'magic',  effects: [{ kind: 'poison', amount: 3, turns: 3, target: 'all' }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '☠️', desc: '나를 제외한 모두에게 3턴간 매 턴 3 중독 피해(방어 무시)', drawWeight: 4 },
   regenward:{ id: 'regenward',name: '재생축복',rarity: 'rare',   cost: 3, element: 'holy',     kind: 'heal',   effects: [{ kind: 'regen', amount: 5, turns: 3 }],         cooldown: 0, vfxKey: 'heal',    sfxKey: 'heal',    icon: '🌿', desc: '내 턴이 시작될 때마다 3턴간 5 회복', drawWeight: 6 },
   thornmail:{ id: 'thornmail',name: '가시갑옷',rarity:'epic',    cost: 3, element: 'physical', kind: 'equipment',effects:[{ kind: 'reflect', pct: 0.5, turns: 2 }],       cooldown: 0, vfxKey: 'shield',  sfxKey: 'shield',  icon: '🦔', desc: '내 다음 턴까지 받는 피해의 50%를 공격자에게 되돌린다', drawWeight: 5 },
+  // 전투의 함성 / 죽음의 메아리 — our own take: battlecries read the board the instant they land,
+  // deathrattles arm a parting blow that detonates the moment you fall.
+  warcry:   { id: 'warcry',   name: '결전의함성',rarity:'rare',  cost: 3, element: 'physical', kind: 'weapon', effects: [{ kind: 'damage', amount: 6, target: 'chosen' }, { kind: 'battlecry', cond: 'last_card', effects: [{ kind: 'damage', amount: 8, target: 'chosen' }] }], cooldown: 0, vfxKey: 'slash', sfxKey: 'slash', icon: '📣', desc: '대상에게 6 피해. 전투의 함성: 손에 남은 카드가 없었다면 8 추가 피해', drawWeight: 6 },
+  berserk:  { id: 'berserk',  name: '광전사',   rarity: 'epic',   cost: 3, element: 'fire',     kind: 'weapon', effects: [{ kind: 'damage', amount: 7, target: 'chosen' }, { kind: 'battlecry', cond: 'wounded', effects: [{ kind: 'damage', amount: 7, target: 'chosen' }] }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '😤', desc: '대상에게 7 피해. 전투의 함성: 내 체력이 절반 이하였다면 7 추가 피해', drawWeight: 5 },
+  martyr:   { id: 'martyr',   name: '순교',     rarity: 'epic',   cost: 3, element: 'holy',     kind: 'equipment',effects:[{ kind: 'shield', amount: 6 }, { kind: 'deathrattle', effects: [{ kind: 'damage', amount: 8, target: 'all' }] }], cooldown: 0, vfxKey: 'shield', sfxKey: 'shield', icon: '⚰️', desc: '방어 +6. 죽음의 메아리: 내가 쓰러지면 모든 적에게 8 피해', drawWeight: 5 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);

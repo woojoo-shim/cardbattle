@@ -25,7 +25,9 @@ export type Effect =
   | { kind: 'desperation'; amount: number } // hit a chosen player for `amount` + the caster's missing HP (comeback finisher)
   | { kind: 'poison'; amount: number; turns: number; target: 'chosen' | 'all' } // damage-over-time: ticks at the victim's turn start, ignores shield
   | { kind: 'regen'; amount: number; turns: number }   // heal-over-time on the caster: ticks at their own turn start
-  | { kind: 'reflect'; pct: number; turns: number };   // a reflector: bounces `pct` of incoming HP damage back at the attacker until the caster's next turn
+  | { kind: 'reflect'; pct: number; turns: number }    // a reflector: bounces `pct` of incoming HP damage back at the attacker until the caster's next turn
+  | { kind: 'battlecry'; cond: 'last_card' | 'wounded' | 'outnumbered'; effects: Effect[] } // 전투의 함성: if the battle condition holds at play time, unleash the bonus effects
+  | { kind: 'deathrattle'; effects: Effect[] };        // 죽음의 메아리: arm parting effects on the caster that fire the moment they're eliminated
 
 /** An ongoing effect riding on a player, ticked at that player's turn start (loop.ts). */
 export type Status =
@@ -64,6 +66,7 @@ export interface PlayerState {
   hand: CardInstance[];
   equipment: CardInstance[]; // S1: always []
   statuses: Status[];        // ongoing poison/regen/reflect effects, ticked at this player's turn start
+  deathrattle: Effect[];     // 죽음의 메아리: parting effects that fire when this player is eliminated (empty = none)
   buffs: unknown[];          // S1: always []
   alive: boolean;
   skipTurns: number;         // pending turns to skip (from '결박' / '희생'); decremented on arrival
@@ -114,6 +117,8 @@ export type GameEvent =
   | { type: 'mana_burned'; targetId: string; amount: number; manaAfter: number } // a chosen player's mana was drained
   | { type: 'hp_swapped'; aId: string; bId: string; aHp: number; bHp: number }    // two players traded current HP
   | { type: 'status_applied'; targetId: string; status: StatusKind; amount: number; turns: number } // poison/regen/reflect landed on a player
+  | { type: 'battlecry_triggered'; playerId: string; cond: string } // 전투의 함성 condition met: bonus effects fired
+  | { type: 'deathrattle_triggered'; playerId: string }             // 죽음의 메아리 fired on this player's elimination
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

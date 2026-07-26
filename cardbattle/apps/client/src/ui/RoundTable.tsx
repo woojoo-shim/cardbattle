@@ -175,7 +175,7 @@ export function RoundTable({ ui, myId, selectable, onSelect }: Props) {
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
-                {p.name}{isMe ? ' (나)' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}
+                {p.name}{isMe ? ' (나)' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}{p.alive && p.hasDeathrattle ? <span style={rattleMark} title="죽음의 메아리">⚰</span> : ''}
               </span>
               <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#d9634a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}><Icon name="crystal" size={10} />{p.mana}</span>}
@@ -343,6 +343,7 @@ const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 
 const nm: React.CSSProperties = {
   fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
+const rattleMark: React.CSSProperties = { marginLeft: 3, fontSize: 10, color: '#c8b06a', filter: 'saturate(0.8)' };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
 const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#c9ab63', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
 /** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */

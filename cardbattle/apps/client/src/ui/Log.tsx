@@ -41,6 +41,8 @@ function line(ui: UiState, e: GameEvent): Line | null {
       const icon = e.status === 'poison' ? 'poison' : e.status === 'regen' ? 'regen' : 'reflect';
       return { icon, text: `${nameOf(ui, e.targetId)} — ${label}`, tone: e.status === 'poison' ? 'discard' : e.status === 'regen' ? 'heal' : 'reverse' };
     }
+    case 'battlecry_triggered': return { icon: 'burst', text: `${nameOf(ui, e.playerId)} — 전투의 함성 발동!`, tone: 'gamble' };
+    case 'deathrattle_triggered': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} — 죽음의 메아리!`, tone: 'discard' };
     default: return null;
   }
 }

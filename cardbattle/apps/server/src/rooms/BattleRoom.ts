@@ -299,8 +299,21 @@ export class BattleRoom extends Room<BattleState> {
     const hasKind = (def: CardDef, kind: string) => def.effects.some((e) => e.kind === kind);
     // HP actually removed from `opp` by single-targeting this card (defense soaks normal, pierce bypasses,
     // desperation scales with our own missing HP).
+    // Bonus chosen-target damage a 전투의 함성 (battlecry) unleashes IF its condition holds for
+    // us right now — mirrors the engine's cond check so the bot values warcry/berserk correctly.
+    const battlecryDmg = (def: CardDef) => {
+      let bonus = 0;
+      for (const e of def.effects) {
+        if (e.kind !== 'battlecry') continue;
+        const met = (e as any).cond === 'last_card' ? bot.hand.length <= 1
+          : (e as any).cond === 'wounded' ? bot.hp * 2 <= bot.maxHp
+          : opponents.length >= 2; // outnumbered
+        if (met) bonus += ((e as any).effects as any[]).filter((x) => x.kind === 'damage' && x.target === 'chosen').reduce((s, x) => s + (x.amount ?? 0), 0);
+      }
+      return bonus;
+    };
     const removedFrom = (def: CardDef, opp: PlayerState) => {
-      let normal = sumBy(def, 'damage', true);
+      let normal = sumBy(def, 'damage', true) + battlecryDmg(def);
       const desp = def.effects.filter((e) => e.kind === 'desperation').reduce((s, e) => s + (e as any).amount, 0);
       if (desp) normal += desp + (bot.maxHp - bot.hp);
       const pierce = sumBy(def, 'pierce');
@@ -421,6 +434,11 @@ export class BattleRoom extends Room<BattleState> {
         // '가시갑옷' — raise a reflector when hurt and unguarded, so the next hit bites back.
         if (hasKind(d, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.7) {
           consider(6 - d.cost, play(h.inst.id));
+        }
+        // '순교' — arm a 죽음의 메아리 parting blow; worth more the closer we are to death.
+        if (hasKind(d, 'deathrattle') && bot.deathrattle.length === 0) {
+          const woundBonus = bot.hp < bot.maxHp * 0.5 ? 4 : 0;
+          consider(3 + woundBonus - d.cost, play(h.inst.id));
         }
       }
     }

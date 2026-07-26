@@ -30,11 +30,33 @@ function livingOthers(state: GameState, sourceId: string): PlayerState[] {
   return state.players.filter((p) => p.alive && p.id !== sourceId);
 }
 
+/** Take a player out of the game once and for all: flip them dead, shed their statuses, announce it,
+ *  then fire any armed 죽음의 메아리 (Deathrattle) — the parting effects run with the dead player as
+ *  their own source, targeting the survivors. Guarded so a chained kill never re-triggers the same
+ *  corpse's rattle. The single place a player is eliminated, so every death (strike, pierce, poison,
+ *  or a deathrattle's own AoE) gets the same treatment. */
+export function eliminate(state: GameState, victim: PlayerState, emit: (e: GameEvent) => void): void {
+  if (!victim.alive) return;
+  victim.alive = false;
+  const rattle = victim.deathrattle;
+  victim.statuses = [];      // the dead carry no lingering effects
+  victim.deathrattle = [];   // spent — a corpse can only rattle once
+  emit({ type: 'player_eliminated', playerId: victim.id });
+  if (rattle.length) {
+    emit({ type: 'deathrattle_triggered', playerId: victim.id });
+    const ctx: EffectCtx = {
+      state, source: victim, chosenTargetId: undefined,
+      element: 'none', randomOrder: livingOthers(state, victim.id), emit,
+    };
+    for (const e of rattle) effectHandlers[e.kind](e, ctx);
+  }
+}
+
 /** Deal `amount` of `element` damage from `source` to `target`. Shield soaks first; if the target
  *  wears a reflector, a fraction of the HP damage bounces straight back at the attacker (once — the
  *  bounce itself never re-reflects). `allowReflect=false` is used for that bounce and for sources
  *  (pierce) that should ignore reflectors entirely. */
-export function damageOne(target: PlayerState, amount: number, element: Element, source: PlayerState, emit: (e: GameEvent) => void, allowReflect = true): void {
+export function damageOne(state: GameState, target: PlayerState, amount: number, element: Element, source: PlayerState, emit: (e: GameEvent) => void, allowReflect = true): void {
   if (!target.alive) return;
   // Shield (defense) is a consumable buffer, not a passive: it soaks damage and is spent doing so.
   const absorbed = Math.min(target.defense, amount);
@@ -42,17 +64,13 @@ export function damageOne(target: PlayerState, amount: number, element: Element,
   const dealt = amount - absorbed;
   target.hp = Math.max(0, target.hp - dealt);
   emit({ type: 'damage_dealt', sourceId: source.id, targetId: target.id, amount: dealt, element, targetHpAfter: target.hp, absorbed });
-  if (target.hp === 0) {
-    target.alive = false;
-    target.statuses = []; // the dead carry no lingering effects
-    emit({ type: 'player_eliminated', playerId: target.id });
-  }
+  if (target.hp === 0) eliminate(state, target, emit);
   // Reflector: bounce a share of the HP damage back at the attacker (never itself reflected).
   if (allowReflect && dealt > 0 && source.alive && source.id !== target.id) {
     const refl = target.statuses.find((s) => s.kind === 'reflect');
     if (refl) {
       const back = Math.round(dealt * refl.pct);
-      if (back > 0) damageOne(source, back, element, target, emit, false);
+      if (back > 0) damageOne(state, source, back, element, target, emit, false);
     }
   }
 }
@@ -87,7 +105,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     // '희생' empowers every attack this turn; a gamble (armed by '도박', or forced in 도박장 mode)
     // then either doubles or whiffs it.
     const amount = resolveAttackAmount(ctx, effect.amount);
-    for (const t of targets) damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
+    for (const t of targets) damageOne(ctx.state, t, amount, ctx.element, ctx.source, ctx.emit);
   },
   heal: (effect: Extract<Effect, { kind: 'heal' }>, ctx) => {
     ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + effect.amount);
@@ -155,10 +173,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     const amount = resolveAttackAmount(ctx, effect.amount);
     t.hp = Math.max(0, t.hp - amount);
     ctx.emit({ type: 'damage_dealt', sourceId: ctx.source.id, targetId: t.id, amount, element: ctx.element, targetHpAfter: t.hp });
-    if (t.hp === 0) {
-      t.alive = false;
-      ctx.emit({ type: 'player_eliminated', playerId: t.id });
-    }
+    if (t.hp === 0) eliminate(ctx.state, t, ctx.emit);
   },
   // '운명교환' — trade my current HP with the chosen player's. Each side is clamped to its own
   // maxHp so a low-HP caster can offload their frailty onto a healthy foe (and vice versa).
@@ -188,7 +203,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     let healed = 0;
     for (const t of targets) {
       const before = t.hp;
-      damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
+      damageOne(ctx.state, t, amount, ctx.element, ctx.source, ctx.emit);
       healed += before - t.hp;
     }
     if (healed > 0) {
@@ -203,7 +218,7 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
     if (!t) return;
     const missing = ctx.source.maxHp - ctx.source.hp;
     const amount = resolveAttackAmount(ctx, effect.amount + missing);
-    damageOne(t, amount, ctx.element, ctx.source, ctx.emit);
+    damageOne(ctx.state, t, amount, ctx.element, ctx.source, ctx.emit);
   },
   // '독' — lay a damage-over-time on the target(s); it bites at the start of each of their turns
   // (loop.ts), bypassing shield. Empower/gamble don't apply — it's a lingering toxin, not a strike.
@@ -223,5 +238,22 @@ export const effectHandlers: Record<Effect['kind'], (effect: any, ctx: EffectCtx
   // back at whoever struck them (handled in damageOne).
   reflect: (effect: Extract<Effect, { kind: 'reflect' }>, ctx) => {
     applyStatus(ctx.source, { kind: 'reflect', pct: effect.pct, turns: effect.turns }, ctx.emit);
+  },
+  // 전투의 함성 — read the battlefield the instant the card lands. The played card has already been
+  // spliced from hand (reducer), so `last_card` means this was the caster's parting shot. When the
+  // condition holds, the bonus effects fire immediately through the SAME context (same target/element).
+  battlecry: (effect: Extract<Effect, { kind: 'battlecry' }>, ctx) => {
+    const met =
+      effect.cond === 'last_card'   ? ctx.source.hand.length === 0
+    : effect.cond === 'wounded'     ? ctx.source.hp * 2 <= ctx.source.maxHp
+    : /* outnumbered */               livingOthers(ctx.state, ctx.source.id).length >= 2;
+    if (!met) return;
+    ctx.emit({ type: 'battlecry_triggered', playerId: ctx.source.id, cond: effect.cond });
+    for (const e of effect.effects) effectHandlers[e.kind](e, ctx);
+  },
+  // 죽음의 메아리 — arm the caster with parting effects. They lie dormant until this player is
+  // eliminated, then eliminate() unleashes them on the survivors (see effects.ts eliminate).
+  deathrattle: (effect: Extract<Effect, { kind: 'deathrattle' }>, ctx) => {
+    ctx.source.deathrattle = [...ctx.source.deathrattle, ...effect.effects];
   },
 };

@@ -49,6 +49,7 @@ export interface UiPlayer {
   skipTurns: number;
   mana: number;
   heroPowerUsed: boolean;
+  hasDeathrattle: boolean;
   statuses: UiStatus[];
   /** Equipped cosmetics, broadcast from the server so every player sees them. */
   border: string;
@@ -130,6 +131,7 @@ function snapshot(state: any): UiState {
       skipTurns: p.skipTurns ?? 0,
       mana: p.mana ?? 0,
       heroPowerUsed: p.heroPowerUsed ?? false,
+      hasDeathrattle: p.hasDeathrattle ?? false,
       statuses: p.statuses ? Array.from(p.statuses, (st: any) => ({ kind: st.kind, amount: st.amount, turns: st.turns })) : [],
       border: p.border ?? 'none',
       title: p.titleCosmetic ?? 'title_none',
