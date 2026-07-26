@@ -21,7 +21,7 @@ interface Props {
 // from directly above, so the ring is a nearly full circle (RY close to RX, only slightly
 // squashed because the play area is wider than tall). cy is centred so seats fan evenly all
 // the way around; my seat still anchors at the bottom-front (90°).
-const CX = 50, CY = 54, RX = 34, RY = 30;
+const CX = 50, CY = 52, RX = 41, RY = 37;
 
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
@@ -60,8 +60,8 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
         const theta = ((90 + k * (360 / n)) * Math.PI) / 180;
         const sLeft = CX + RX * Math.cos(theta);
         const sTop = CY + RY * Math.sin(theta);
-        const spotLeft = sLeft * 0.66 + CX * 0.34; // a third of the way in toward the table centre
-        const spotTop = sTop * 0.66 + CY * 0.34;
+        const spotLeft = sLeft * 0.58 + CX * 0.42; // pulled in onto the felt, toward the table centre
+        const spotTop = sTop * 0.58 + CY * 0.42;
         const cards = Math.max(0, p.handCount);
         const spread = cards > 1 ? Math.min(11, 64 / (cards - 1)) : 0;
         // The player's equipped border cosmetic paints the back of their face-down cards, so
@@ -248,7 +248,7 @@ const area: React.CSSProperties = { position: 'absolute', inset: 0, fontFamily: 
 const felt: React.CSSProperties = {
   position: 'absolute', left: '50%', top: `${CY}%`,
   transform: 'translate(-50%,-50%)',
-  width: '66%', height: '66%', borderRadius: '50%', overflow: 'hidden',
+  width: '94%', height: '94%', borderRadius: '50%', overflow: 'hidden',
   background:
     'radial-gradient(circle at 50% 46%, rgba(240,188,102,0.22), transparent 56%),' + // warm overhead light pool
     'radial-gradient(circle at 50% 44%, rgba(255,226,168,0.10), transparent 50%),' + // hot centre catch-light on the baize
@@ -257,7 +257,7 @@ const felt: React.CSSProperties = {
   border: '2px solid rgba(206,158,76,0.36)',
   boxShadow:
     'inset 0 0 6px 1px rgba(240,208,132,0.30),' + // brass rim highlight
-    'inset 0 0 110px 34px rgba(0,0,0,0.72),' +    // felt edge falls to black
+    'inset 0 0 180px 24px rgba(0,0,0,0.58),' +    // felt edge falls to black
     '0 24px 60px rgba(0,0,0,0.6)',                // table floats above the floor
 };
 // The engraved house medallion at the table centre. Face-on now (top-down view) and low-opacity
