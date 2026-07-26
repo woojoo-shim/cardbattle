@@ -1,6 +1,7 @@
 export * from './types.js';
 export * from './constants.js';
 export * from './modes.js';
+export * from './heroes.js';
 export * from './cosmetics.js';
 export * from './emotes.js';
 export * from './cards/defs.js';

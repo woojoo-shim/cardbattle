@@ -1,6 +1,7 @@
 import type { Action, GameEvent, GameState, ReduceCtx, ReduceResult, PlayerState } from '../types.js';
 import { CARD_DEFS, requiresTarget } from '../cards/defs.js';
 import { effectHandlers, EffectCtx } from '../cards/effects.js';
+import { heroPowerFor, heroPowerNeedsTarget } from '../heroes.js';
 import { weightedPick } from './rng.js';
 
 function clone(state: GameState): GameState {
@@ -57,6 +58,36 @@ export function reduce(input: GameState, action: Action, _ctx: ReduceCtx): Reduc
       element: def.element, randomOrder: randomOrder(state, actorId), emit,
     };
     for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx);
+
+    checkWin(state, emit);
+    return { state, events };
+  }
+
+  if (action.type === 'use_hero_power') {
+    const actorId = currentPlayerId(input);
+    const actor = input.players.find((p) => p.id === actorId);
+    if (!actor || !actor.alive) return { state: input, events: [] };
+    if (actor.heroPowerUsed) return { state: input, events: [] }; // once per turn
+    const power = heroPowerFor(actor.avatar);
+    if (actor.mana < power.cost) return { state: input, events: [] };
+    if (heroPowerNeedsTarget(power)) {
+      const t = input.players.find((p) => p.id === action.targetId);
+      if (!t || !t.alive) return { state: input, events: [] };
+    }
+
+    const state = clone(input);
+    const events: GameEvent[] = [];
+    const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
+    const sActor = state.players.find((p) => p.id === actorId)!;
+    sActor.mana -= power.cost;
+    sActor.heroPowerUsed = true;
+    emit({ type: 'hero_power_used', playerId: actorId, avatar: sActor.avatar, powerId: power.id, targetId: action.targetId });
+
+    const effCtx: EffectCtx = {
+      state, source: sActor, chosenTargetId: action.targetId,
+      element: power.element, randomOrder: randomOrder(state, actorId), emit,
+    };
+    for (const eff of power.effects) effectHandlers[eff.kind](eff, effCtx);
 
     checkWin(state, emit);
     return { state, events };

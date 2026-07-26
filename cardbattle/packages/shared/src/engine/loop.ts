@@ -12,7 +12,7 @@ export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: stri
     id, name, avatar, connected: true, seat,
     hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
     hand: [], equipment: [], statuses: [], buffs: [], alive: true,
-    skipTurns: 0, gamble: false, empower: 1, mana: rules.startMana,
+    skipTurns: 0, gamble: false, empower: 1, mana: rules.startMana, heroPowerUsed: false,
   };
 }
 
@@ -57,6 +57,7 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
   const cur = state.players.find((p) => p.id === state.turnOrder[state.currentTurnIndex]);
   if (!cur) return;
   state.turnDeadline = ctx.now + state.rules.turnSeconds * 1000;
+  cur.heroPowerUsed = false; // the signature ability refreshes at the start of each of your turns
   // Refill mana by the round-scaled amount (ramps up as the match goes longer), then draw.
   const regained = manaRegenFor(state.rules, state.roundCount);
   cur.mana = Math.min(state.rules.manaMax, cur.mana + regained);

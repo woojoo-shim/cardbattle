@@ -70,6 +70,7 @@ export interface PlayerState {
   gamble: boolean;           // a '도박' is armed: the next attack this turn is doubled or whiffs
   empower: number;           // damage multiplier for this turn (1 = none, 1.5 = '희생')
   mana: number;              // bankable resource spent to play cards; refills (ramping) each turn
+  heroPowerUsed: boolean;    // has this player used their avatar's signature ability this turn?
 }
 
 export interface GameState {
@@ -89,6 +90,7 @@ export interface GameState {
 
 export type Action =
   | { type: 'play_card'; cardInstanceId: string; targetId?: string }
+  | { type: 'use_hero_power'; targetId?: string }
   | { type: 'end_turn' };
 // Reserved for S2: | { type: 'defend'; ... }
 
@@ -97,6 +99,7 @@ export type GameEvent =
   | { type: 'turn_ended'; playerId: string }
   | { type: 'card_drawn'; playerId: string; cardInstanceId: string; defId: string }
   | { type: 'card_played'; playerId: string; defId: string; targetId?: string }
+  | { type: 'hero_power_used'; playerId: string; avatar: string; powerId: string; targetId?: string }
   | { type: 'damage_dealt'; sourceId: string; targetId: string; amount: number; element: Element; targetHpAfter: number; absorbed?: number }
   | { type: 'healed'; targetId: string; amount: number; targetHpAfter: number }
   | { type: 'shielded'; targetId: string; amount: number; defenseAfter: number }

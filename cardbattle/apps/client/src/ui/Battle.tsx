@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
-import { CARD_DEFS, requiresTarget, resolveMode } from '@cardbattle/shared';
+import { CARD_DEFS, requiresTarget, resolveMode, heroPowerFor, heroPowerNeedsTarget } from '@cardbattle/shared';
 import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
 import { RoundTable } from './RoundTable.js';
@@ -23,7 +23,7 @@ interface Props {
   hand: CardInstance[];
   events: GameEvent[];
   error: RoomError | null;
-  send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'end_turn' }) => void;
+  send: (a: { type: 'play_card'; cardInstanceId: string; targetId?: string } | { type: 'use_hero_power'; targetId?: string } | { type: 'end_turn' }) => void;
   onExit: () => void;
   borderCosmetic?: string;
   emotes: LiveEmote[];
@@ -34,6 +34,9 @@ interface Props {
 
 export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosmetic, emotes, sendEmote, reward, coach }: Props) {
   const [pending, setPending] = useState<CardInstance | null>(null);
+  // True while the hero power is armed and waiting for its target (its own targeting mode,
+  // separate from a card's `pending` so the two can't both be live).
+  const [powerPending, setPowerPending] = useState(false);
   // Learn-by-playing coach: tracks whether the newcomer has taken their first play / ended a turn,
   // so the guidance advances in step with what they actually do at the table.
   const [coachPlayed, setCoachPlayed] = useState(false);
@@ -41,11 +44,17 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const [coachOff, setCoachOff] = useState(false);
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   const isMyTurn = activeId === myId && ui.phase === 'playing';
-  const myMana = ui.players.find((p) => p.id === myId)?.mana ?? 0;
+  const me = ui.players.find((p) => p.id === myId);
+  const myMana = me?.mana ?? 0;
   const manaMax = resolveMode(ui.mode).rules.manaMax;
+  // The avatar's signature ability: once per turn, costs mana, may need a target.
+  const power = heroPowerFor(me?.avatar ?? '');
+  const powerNeedsTarget = heroPowerNeedsTarget(power);
+  const powerUsed = me?.heroPowerUsed ?? false;
+  const canUsePower = isMyTurn && !powerUsed && myMana >= power.cost;
 
   // Clear a half-finished target selection whenever the turn passes away from me.
-  useEffect(() => { if (!isMyTurn) setPending(null); }, [isMyTurn]);
+  useEffect(() => { if (!isMyTurn) { setPending(null); setPowerPending(false); } }, [isMyTurn]);
 
   // Fire the "당신의 턴" telegraph on the RISING edge of my turn — a bump to a nonce key remounts
   // the banner so its one-shot animation replays each time the turn lands back on me.
@@ -64,6 +73,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
     if (!def) return;
+    setPowerPending(false); // playing a card cancels an armed hero power
     if (requiresTarget(def)) {
       setPending((cur) => (cur?.id === card.id ? null : card)); // toggle target mode
       return;
@@ -72,7 +82,24 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     setCoachPlayed(true);
   };
 
+  // Fire (or arm) the avatar's signature ability. Non-targeted powers resolve immediately;
+  // targeted ones enter their own selection mode (clicking the button again cancels it).
+  const usePower = () => {
+    if (!canUsePower) return;
+    if (powerNeedsTarget) {
+      setPending(null);
+      setPowerPending((cur) => !cur); // toggle target mode
+      return;
+    }
+    send({ type: 'use_hero_power' });
+  };
+
   const selectTarget = (targetId: string) => {
+    if (powerPending) {
+      send({ type: 'use_hero_power', targetId });
+      setPowerPending(false);
+      return;
+    }
     if (!pending) return;
     send({ type: 'play_card', cardInstanceId: pending.id, targetId });
     setPending(null);
@@ -165,9 +192,14 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
-        <RoundTable ui={ui} myId={myId} selectable={isMyTurn && !!pending} onSelect={selectTarget} />
+        <RoundTable ui={ui} myId={myId} selectable={isMyTurn && (!!pending || powerPending)} onSelect={selectTarget} />
         <Log events={events} ui={ui} />
-        {pending && <div style={targetHint}><Icon name="target" size={15} />&nbsp;대상을 선택하세요 (카드 다시 클릭 시 취소)</div>}
+        {(pending || powerPending) && (
+          <div style={targetHint}>
+            <Icon name="target" size={15} />&nbsp;
+            {powerPending ? '영웅 능력의 대상을 선택하세요 (능력 버튼 다시 클릭 시 취소)' : '대상을 선택하세요 (카드 다시 클릭 시 취소)'}
+          </div>
+        )}
         {error && <div style={errToast}>{error.message}</div>}
       </div>
       <div style={handRow}>
@@ -177,7 +209,30 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
         {isMyTurn && (
-          <button style={endTurnBtn} onClick={() => { setPending(null); send({ type: 'end_turn' }); setCoachEnded(true); }}>
+          <button
+            style={{
+              ...heroBtn,
+              opacity: canUsePower ? 1 : 0.42,
+              cursor: canUsePower ? 'pointer' : 'default',
+              borderColor: powerPending ? '#e0b84a' : '#5a4a86',
+              boxShadow: powerPending ? '0 0 14px rgba(224,184,74,0.4)' : 'none',
+            }}
+            onClick={usePower}
+            disabled={!canUsePower}
+            title={`${power.name} · ${power.desc}`}
+          >
+            <span style={heroIcon}>{power.icon}</span>
+            <span style={heroInfo}>
+              <span style={heroName}>{power.name}</span>
+              <span style={heroCost}>
+                <Icon name="crystal" size={11} />&nbsp;{power.cost}
+                {powerUsed ? ' · 사용함' : ''}
+              </span>
+            </span>
+          </button>
+        )}
+        {isMyTurn && (
+          <button style={endTurnBtn} onClick={() => { setPending(null); setPowerPending(false); send({ type: 'end_turn' }); setCoachEnded(true); }}>
             턴 종료&nbsp;<Icon name="arrowRight" size={15} />
           </button>
         )}
@@ -434,6 +489,21 @@ const endTurnBtn: React.CSSProperties = {
   color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
   background: '#9c3b28',
   transition: 'transform .15s', zIndex: 16,
+};
+// The avatar's signature ability, docked bottom-left above the mana readout. An arcane violet
+// slab so it reads as its own class of action, distinct from the oxblood 턴 종료 CTA.
+const heroBtn: React.CSSProperties = {
+  position: 'absolute', bottom: 92, left: 24, zIndex: 16,
+  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
+  background: 'linear-gradient(180deg, rgba(48,38,74,0.96), rgba(28,20,44,0.96))',
+  border: '1px solid #5a4a86', borderRadius: 4, fontFamily: sans,
+  transition: 'opacity .15s, box-shadow .15s',
+};
+const heroIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
+const heroInfo: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 };
+const heroName: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: '#e9def6', letterSpacing: 0.3 };
+const heroCost: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', fontSize: 11, fontFamily: mono, color: '#b6a6d8',
 };
 const endWrap: React.CSSProperties = {
   position: 'relative', overflow: 'hidden',

@@ -2,6 +2,7 @@ import { Room, Client, updateLobby } from '@colyseus/core';
 import {
   initGame, startGame, reduce, endTurn, spawnPlayer,
   CARD_DEFS, requiresTarget, resolveMode,
+  heroPowerFor, heroPowerNeedsTarget,
   type GameState, type Action, type GameEvent, type PlayerState, type GameModeId, type CardDef,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS,
   BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
@@ -312,8 +313,36 @@ export class BattleRoom extends Room<BattleState> {
       return raw > 0 ? Math.max(0, raw - opp.defense) : 0;
     };
 
+    // The avatar's signature ability. It reuses the Effect union, so score it with the same
+    // removedFrom/sumBy helpers by treating its effect list as a pseudo-card.
+    const power = heroPowerFor(bot.avatar);
+    const powerDef = { effects: power.effects, cost: power.cost } as unknown as CardDef;
+    const canPower = !bot.heroPowerUsed && bot.mana >= power.cost;
+    const powerTargeted = heroPowerNeedsTarget(power);
+    const usePower = (targetId?: string): Action =>
+      targetId ? { type: 'use_hero_power', targetId } : { type: 'use_hero_power' };
+    // Fallback: fire the hero power when there's nothing better (or no hand at all) and it does
+    // something useful — chip the weakest, poison the strongest, nuke, heal, shield, or reflect.
+    const powerFallback = (): Action | null => {
+      if (!canPower) return null;
+      if (powerTargeted) {
+        if (removedFrom(powerDef, weakest) > 0) return usePower(weakest.id);
+        if (hasKind(powerDef, 'poison')) {
+          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
+          return usePower(victim.id);
+        }
+        return null;
+      }
+      if (aoeRemovedFrom(powerDef, weakest) > 0) return usePower();
+      if (sumBy(powerDef, 'heal') > 0 && bot.hp < bot.maxHp * 0.85) return usePower();
+      if (sumBy(powerDef, 'shield') > 0 && bot.defense < 8) return usePower();
+      if (hasKind(powerDef, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.85) return usePower();
+      if (sumBy(powerDef, 'mana') > 0 && bot.mana <= manaMax - 3) return usePower();
+      return null;
+    };
+
     const hand = bot.hand.map((c) => ({ inst: c, def: CARD_DEFS[c.defId]! })).filter((h) => h.def && h.def.cost <= bot.mana);
-    if (hand.length === 0) return null;
+    if (hand.length === 0) return powerFallback();
 
     // 1) LETHAL — the smart kill. Take the cheapest card that finishes a foe.
     let lethal: { action: Action; cost: number } | null = null;
@@ -328,11 +357,23 @@ export class BattleRoom extends Room<BattleState> {
     }
     if (lethal) return lethal.action;
 
+    // 1b) POWER-LETHAL — the signature ability can also close the gap (e.g. mage bolt / dragon breath).
+    if (canPower) {
+      if (powerTargeted) {
+        const victim = opponents.filter((o) => removedFrom(powerDef, o) >= o.hp && removedFrom(powerDef, o) > 0).sort((a, b) => a.hp - b.hp)[0];
+        if (victim) return usePower(victim.id);
+      } else if (aoeRemovedFrom(powerDef, weakest) >= weakest.hp && aoeRemovedFrom(powerDef, weakest) > 0) {
+        return usePower();
+      }
+    }
+
     // 2) SURVIVE — badly hurt: the strongest self-heal available (else a lifesteal on the weakest).
     if (bot.hp < bot.maxHp * 0.45) {
       const heal = hand.filter((h) => sumBy(h.def, 'heal') > 0 && !requiresTarget(h.def) && !hasKind(h.def, 'selfskip'))
                        .sort((a, b) => sumBy(b.def, 'heal') - sumBy(a.def, 'heal'))[0];
       if (heal) return play(heal.inst.id);
+      // The hero power heal is a reliable top-up when the hand has none.
+      if (canPower && sumBy(powerDef, 'heal') > 0 && !powerTargeted) return usePower();
       const drain = hand.find((h) => sumBy(h.def, 'heal') > 0 && requiresTarget(h.def) && removedFrom(h.def, weakest) > 0);
       if (drain) return play(drain.inst.id, weakest.id);
     }
@@ -383,13 +424,31 @@ export class BattleRoom extends Room<BattleState> {
         }
       }
     }
+    // Score the hero power alongside the cards so a good turn spends it too (not just as a fallback).
+    if (canPower) {
+      if (powerTargeted) {
+        const removed = removedFrom(powerDef, weakest);
+        if (removed > 0) consider(removed * 3 - power.cost, usePower(weakest.id));
+        if (hasKind(powerDef, 'poison')) {
+          const pe = powerDef.effects.find((e) => e.kind === 'poison') as any;
+          const victim = [...opponents].filter((o) => !o.statuses.some((s) => s.kind === 'poison')).sort((a, b) => b.hp - a.hp)[0] ?? strongest;
+          consider(sumBy(powerDef, 'poison') * (pe?.turns ?? 1) - power.cost, usePower(victim.id));
+        }
+      } else {
+        const aoe = aoeRemovedFrom(powerDef, weakest);
+        if (aoe > 0) consider(aoe * opponents.length * 2 - power.cost, usePower());
+        if (sumBy(powerDef, 'heal') > 0 && bot.hp < bot.maxHp * 0.8) consider(sumBy(powerDef, 'heal') - power.cost, usePower());
+        if (sumBy(powerDef, 'shield') > 0 && bot.defense < 8 && bot.hp < bot.maxHp * 0.75) consider(sumBy(powerDef, 'shield') / 2 - power.cost, usePower());
+        if (hasKind(powerDef, 'reflect') && !bot.statuses.some((s) => s.kind === 'reflect') && bot.hp < bot.maxHp * 0.7) consider(6 - power.cost, usePower());
+      }
+    }
     if (cands.length) return cands.sort((a, b) => b.score - a.score)[0].action;
 
     // 4) BANK — nothing worth attacking with: ramp mana toward a bigger turn if not near the cap.
     const ramp = hand.find((h) => sumBy(h.def, 'mana') > 0 && bot.mana <= manaMax - 3);
     if (ramp) return play(ramp.inst.id);
 
-    return null;
+    return powerFallback();
   }
 
   private handleAction(client: Client, action: Action): void {
