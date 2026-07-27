@@ -503,13 +503,13 @@ const errToast: React.CSSProperties = {
   padding: '8px 16px', background: 'rgba(176,70,47,0.2)', border: `1px solid ${C.enemy}`,
   borderRadius: 4, color: '#e8b4a6', fontSize: 13, zIndex: 17,
 };
-// My mana readout, anchored bottom-left (mirrors 턴 종료 on the right). The ManaBar carries its
-// own frame; this just pins it to the corner. Bounded width keeps it clear of the card fan on iPad.
+// My mana readout, anchored bottom-RIGHT corner (Hearthstone-style — mana gems sit in the corner,
+// the 턴 종료 CTA stacks just above it). The ManaBar carries its own frame; this just pins it.
 const manaDock: React.CSSProperties = {
-  position: 'absolute', bottom: 24, left: 24, zIndex: 16,
+  position: 'absolute', bottom: 24, right: 24, zIndex: 16,
 };
 const endTurnBtn: React.CSSProperties = {
-  position: 'absolute', bottom: 30, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 700,
+  position: 'absolute', bottom: 84, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 700,
   color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
   background: '#9c3b28',
   transition: 'transform .15s', zIndex: 16,
