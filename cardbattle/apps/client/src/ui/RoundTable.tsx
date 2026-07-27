@@ -84,6 +84,58 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
         );
       })}
 
+      {/* Each player's summoned minions sit out ON THE FELT, in front of the player (toward the
+          table centre) — like a board, not stacked under the portrait. */}
+      {ring.map((p, i) => {
+        if (!p.alive || p.field.length === 0) return null;
+        const k = ((i - myRing) % n + n) % n;
+        const theta = ((90 + k * (360 / n)) * Math.PI) / 180;
+        const sLeft = CX + RX * Math.cos(theta);
+        const sTop = CY + RY * Math.sin(theta);
+        const fLeft = sLeft * 0.44 + CX * 0.56; // out in front of the player, on the felt toward centre
+        const fTop = sTop * 0.44 + CY * 0.56;
+        return (
+          <div key={`fld-${p.id}`} style={{ ...fieldRow, left: `${fLeft}%`, top: `${fTop}%` }}>
+            {p.field.map((m) => {
+              const mine = p.id === myId;
+              const canAttack = mine && !!attackMode && m.attacksLeft > 0 && m.attack > 0;
+              const canHit = !mine && selectable;
+              const armed = attackerId === m.id;
+              const clickable = canAttack || canHit;
+              const def = CARD_DEFS[m.defId];
+              return (
+                <div
+                  key={m.id}
+                  data-pid={m.id}
+                  onClick={(e) => {
+                    if (!clickable) return;
+                    e.stopPropagation();
+                    if (canAttack) onSelectAttacker?.(m.id);
+                    else onSelect(m.id);
+                  }}
+                  title={def?.name ?? ''}
+                  style={{
+                    ...minionChip,
+                    borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
+                    boxShadow: armed
+                      ? '0 0 12px rgba(224,184,74,0.7)'
+                      : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
+                    cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
+                    opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
+                  }}
+                >
+                  <span style={minionArtWrap}><CardArt id={m.defId} size={54} /></span>
+                  <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
+                  <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
+                  {m.taunt && <span style={minionKw} title="도발">🛡</span>}
+                  {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="천상의 보호막">✦</span>}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+
       {ring.map((p, i) => {
         const isMe = p.id === myId;
         const k = ((i - myRing) % n + n) % n;            // 0 = me, then clockwise around the oval
@@ -146,47 +198,6 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
-
-            {p.alive && p.field.length > 0 && (
-              <div style={fieldRow}>
-                {p.field.map((m) => {
-                  const mine = p.id === myId;
-                  const canAttack = mine && !!attackMode && m.attacksLeft > 0 && m.attack > 0;
-                  const canHit = !mine && selectable;
-                  const armed = attackerId === m.id;
-                  const clickable = canAttack || canHit;
-                  const def = CARD_DEFS[m.defId];
-                  return (
-                    <div
-                      key={m.id}
-                      data-pid={m.id}
-                      onClick={(e) => {
-                        if (!clickable) return;
-                        e.stopPropagation();
-                        if (canAttack) onSelectAttacker?.(m.id);
-                        else onSelect(m.id);
-                      }}
-                      title={def?.name ?? ''}
-                      style={{
-                        ...minionChip,
-                        borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
-                        boxShadow: armed
-                          ? '0 0 12px rgba(224,184,74,0.7)'
-                          : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
-                        cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
-                        opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
-                      }}
-                    >
-                      <span style={minionArtWrap}><CardArt id={m.defId} size={54} /></span>
-                      <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
-                      <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
-                      {m.taunt && <span style={minionKw} title="도발">🛡</span>}
-                      {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="천상의 보호막">✦</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
 
             {p.alive && p.statuses.length > 0 && (
               <div style={statusRow}>
@@ -341,7 +352,8 @@ const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
 // The minion field: a compact row of summoned bodies under the portrait. Each carries its
 // attack (bottom-left) and current health (bottom-right); taunt/divine-shield show as corner marks.
 const fieldRow: React.CSSProperties = {
-  display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 6, maxWidth: 232,
+  position: 'absolute', transform: 'translate(-50%,-50%)', zIndex: 6, pointerEvents: 'auto',
+  display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 220,
 };
 const minionChip: React.CSSProperties = {
   position: 'relative', width: 60, height: 70, borderRadius: 9,
