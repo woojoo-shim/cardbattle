@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
@@ -44,6 +45,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
   const hasCos = !!cos && cos.id !== 'none';
   const [hover, setHover] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  // Minions are summoned by DRAGGING the card up out of the hand onto the board (Hearthstone-style),
+  // not by a single click. This tracks the in-flight drag: the card id + start/current pointer pos.
+  const [drag, setDrag] = useState<{ id: string; sx: number; sy: number; x: number; y: number; moved: boolean } | null>(null);
   const n = hand.length;
   const mid = (n - 1) / 2;
 
@@ -106,17 +110,36 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
               onClick={() => {
                 if (!enabled) return;
+                if (isMinion) return; // 하수인은 클릭이 아니라 보드로 드래그해서 소환한다
                 // On touch, the first tap only previews the card; the second tap commits.
                 if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
                 if (!affordable) return; // can't pay for it — reads fine, just won't play
                 setPreview(null);
                 onPlay(c);
               }}
+              onPointerDown={(e) => {
+                if (!isMinion || !playable) return;
+                try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* older browsers */ }
+                setDrag({ id: c.id, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, moved: false });
+              }}
+              onPointerMove={(e) => {
+                if (!drag || drag.id !== c.id) return;
+                const moved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8;
+                if (moved) setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: true });
+              }}
+              onPointerUp={(e) => {
+                if (!drag || drag.id !== c.id) return;
+                const lifted = drag.sy - e.clientY; // pulled up out of the hand toward the board
+                const dropped = drag.moved && lifted > 70;
+                setDrag(null);
+                if (dropped && affordable) { playSfx('select'); onPlay(c); }
+              }}
+              onPointerCancel={() => { if (drag && drag.id === c.id) setDrag(null); }}
               style={{
                 ...card,
                 transform,
-                cursor: !enabled ? 'default' : affordable ? 'pointer' : 'not-allowed',
-                opacity: !enabled ? 0.5 : affordable ? 1 : 0.42,
+                cursor: !enabled ? 'default' : !affordable ? 'not-allowed' : isMinion ? 'grab' : 'pointer',
+                opacity: drag?.id === c.id && drag.moved ? 0.28 : !enabled ? 0.5 : affordable ? 1 : 0.42,
                 filter: playable ? 'none' : 'grayscale(0.4)',
                 borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
                 boxShadow: isPending
@@ -175,6 +198,21 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
           </div>
         );
       })}
+      {drag && drag.moved && createPortal((() => {
+        const dc = hand.find((h) => h.id === drag.id);
+        const ddef = dc && CARD_DEFS[dc.defId];
+        if (!ddef || !ddef.minion) return null;
+        return (
+          <div style={{ ...dragGhost, left: drag.x, top: drag.y }}>
+            <div style={dragGhostCard}>
+              <div style={dragGhostArt}><CardArt id={ddef.id} size={64} /></div>
+              <div style={dragGhostName}>{ddef.name}</div>
+              <div style={dragGhostStat}>{ddef.minion.attack}/{ddef.minion.health}</div>
+            </div>
+            <div style={dragHint}>↑ 놓아서 소환</div>
+          </div>
+        );
+      })(), document.body)}
     </div>
   );
 }
@@ -210,6 +248,31 @@ const card: React.CSSProperties = {
   padding: 'clamp(9px, 0.95vw, 14px) clamp(8px, 0.8vw, 12px) clamp(7px, 0.7vw, 11px)',
   transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease, border-color .24s ease',
   transformOrigin: 'bottom center', willChange: 'transform',
+  touchAction: 'none', // let a minion be dragged up onto the board without the page scrolling
+};
+// The card that floats under the cursor while a minion is being dragged out of the hand. Rendered
+// through a portal to document.body so the fan's `perspective` doesn't warp its fixed positioning.
+const dragGhost: React.CSSProperties = {
+  position: 'fixed', transform: 'translate(-50%, -62%) rotate(-4deg)', pointerEvents: 'none',
+  zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+};
+const dragGhostCard: React.CSSProperties = {
+  width: 96, borderRadius: 12, padding: '10px 8px 8px',
+  background: `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
+  border: `1px solid ${C.you}`, boxShadow: '0 0 24px rgba(143,157,79,0.5), 0 20px 40px rgba(0,0,0,0.6)',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+};
+const dragGhostArt: React.CSSProperties = {
+  width: '84%', aspectRatio: '1', borderRadius: 10, overflow: 'hidden',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
+  border: `1px solid ${C.border}`,
+};
+const dragGhostName: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: C.text, lineHeight: 1 };
+const dragGhostStat: React.CSSProperties = { fontFamily: mono, fontSize: 13, fontWeight: 800, color: '#f0e0b4' };
+const dragHint: React.CSSProperties = {
+  fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: C.you,
+  padding: '3px 8px', borderRadius: 6, background: 'rgba(20,13,9,0.92)', border: `1px solid ${C.you}66`,
 };
 // Per-rarity accents: a glow behind the art window, an optional foil sheen streak, and a
 // nameplate tint. Keeps the grimy palette but signals card power at a glance.
