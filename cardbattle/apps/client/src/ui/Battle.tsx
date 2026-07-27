@@ -47,7 +47,11 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const isMyTurn = activeId === myId && ui.phase === 'playing';
   const me = ui.players.find((p) => p.id === myId);
   const myMana = me?.mana ?? 0;
-  const manaMax = resolveMode(ui.mode).rules.manaMax;
+  const mode = resolveMode(ui.mode);
+  const manaMax = mode.rules.manaMax;
+  // The deck is an infinite weighted draw from the mode's card pool, so "남은 장수" is really the
+  // number of distinct cards this mode can serve. Show that as the deck size in the corner pile.
+  const deckCount = mode.rules.cardPool ? mode.rules.cardPool.length : Object.keys(CARD_DEFS).length;
   // The avatar's signature ability: once per turn, costs mana, may need a target.
   const power = heroPowerFor(me?.avatar ?? '');
   const powerNeedsTarget = heroPowerNeedsTarget(power);
@@ -227,7 +231,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         {error && <div style={errToast}>{error.message}</div>}
       </div>
       <div style={handRow}>
-        <div style={manaDock}>
+        <div style={cornerDock}>
+          <DeckPile count={deckCount} />
           <ManaBar mana={myMana} max={manaMax} lit={isMyTurn} />
         </div>
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
@@ -368,6 +373,21 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
   },
 };
 
+// The draw pile in the bottom-right corner: a small stack of card backs. It's decorative at rest
+// (the deck is an infinite weighted draw, so it never depletes) — hovering reveals the deck's card
+// count in a tooltip, so a curious player can check "how many cards" without cluttering the board.
+function DeckPile({ count }: { count: number }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div style={deckWrap} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      {hover && <span style={deckTip}>덱 {count}장</span>}
+      <span style={deckCard3} aria-hidden />
+      <span style={deckCard2} aria-hidden />
+      <div style={deckCardFront}><span style={deckEmblem}>◆</span></div>
+    </div>
+  );
+}
+
 // The living-air layer: what stops a clean board from reading as a frozen render. The key light
 // over the table breathes on a long slow cycle, and a handful of dust motes drift up through the
 // beam. Pointer-transparent, screen-blended, low opacity — presence, not clutter. This is the
@@ -503,10 +523,33 @@ const errToast: React.CSSProperties = {
   padding: '8px 16px', background: 'rgba(176,70,47,0.2)', border: `1px solid ${C.enemy}`,
   borderRadius: 4, color: '#e8b4a6', fontSize: 13, zIndex: 17,
 };
-// My mana readout, anchored bottom-RIGHT corner (Hearthstone-style — mana gems sit in the corner,
-// the 턴 종료 CTA stacks just above it). The ManaBar carries its own frame; this just pins it.
-const manaDock: React.CSSProperties = {
+// The bottom-RIGHT corner cluster (Hearthstone-style): the draw pile sits just left of the mana
+// gems, both bottom-aligned, so the deck and mana read as one tidy corner group.
+const cornerDock: React.CSSProperties = {
   position: 'absolute', bottom: 24, right: 24, zIndex: 16,
+  display: 'flex', alignItems: 'flex-end', gap: 16,
+};
+const deckWrap: React.CSSProperties = { position: 'relative', width: 64, height: 88, cursor: 'default' };
+// Layered card backs, each nudged & tilted a touch, so the widget reads as a physical draw pile.
+const deckCard: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 8, boxSizing: 'border-box' };
+const deckCard3: React.CSSProperties = { ...deckCard, transform: 'translate(-7px,-7px) rotate(-5deg)', background: 'linear-gradient(160deg,#2a2013,#160f08)', border: '1px solid #46381f', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
+const deckCard2: React.CSSProperties = { ...deckCard, transform: 'translate(-3px,-3px) rotate(-2.5deg)', background: 'linear-gradient(160deg,#302516,#1a120a)', border: '1px solid #52422b', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
+const deckCardFront: React.CSSProperties = {
+  ...deckCard, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'linear-gradient(160deg,#3a2a1a,#20160c)', border: '1px solid #6a5231',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,238,208,0.1)',
+};
+// A brass diamond crest on the card back — a quiet emblem so the pile reads as "cards", not a box.
+const deckEmblem: React.CSSProperties = {
+  width: 30, height: 30, display: 'grid', placeItems: 'center', borderRadius: 6,
+  border: '1px solid rgba(199,154,78,0.5)', color: '#c79a4e', fontSize: 15,
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))', background: 'radial-gradient(120% 120% at 50% 30%, rgba(199,154,78,0.14), transparent 70%)',
+};
+const deckTip: React.CSSProperties = {
+  position: 'absolute', bottom: '100%', left: '50%', transform: 'translate(-50%,-10px)',
+  whiteSpace: 'nowrap', padding: '5px 11px', background: 'rgba(20,13,9,0.96)',
+  border: '1px solid #5a4820', borderRadius: 4, color: '#e8d6ac', fontFamily: sans,
+  fontSize: 12, fontWeight: 700, boxShadow: '0 6px 14px rgba(0,0,0,0.5)', pointerEvents: 'none', zIndex: 20,
 };
 const endTurnBtn: React.CSSProperties = {
   position: 'absolute', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
