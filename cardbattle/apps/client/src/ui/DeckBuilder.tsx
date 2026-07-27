@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
-  ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, cardPrice,
+  ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, MAX_DECKS, cardPrice,
   isValidDeck, type CardDef, type Rarity,
 } from '@cardbattle/shared';
-import { buyCard, saveDeck, type Account } from '../net/auth.js';
+import { buyCard, saveDeck, setActiveDeck, deleteDeck, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
 import { C, mono, sans, RARITY_BORDER } from './theme.js';
 import { CardArt } from './art/CardArt.js';
@@ -39,16 +39,30 @@ const CATALOG: CardDef[] = [...ALL_DEFS].sort(
 /** Custom deck builder — buy cards with gold, then compose a DECK_SIZE-card draw deck
  *  (max MAX_COPIES per card) from owned cards. The saved deck is the account's match draw pool. */
 export function DeckBuilder({ account, onAccount, onClose }: Props) {
-  const [draft, setDraft] = useState<string[]>(account.deck);
+  // Which saved slot is being edited. slot === decks.length is the pending "new deck" slot.
+  const [slot, setSlot] = useState<number>(Math.min(account.activeDeck, Math.max(0, account.decks.length - 1)));
+  const [draft, setDraft] = useState<string[]>(account.decks[slot] ?? []);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [saved, setSaved] = useState(false);
 
+  const slotCount = account.decks.length;
+  const canAddSlot = slotCount < MAX_DECKS;
+  const isNewSlot = slot >= slotCount;
   const owns = (id: string) => account.ownedCards.includes(id);
   const draftCounts = useMemo(() => counts(draft), [draft]);
   const total = draft.length;
   const valid = isValidDeck(draft, account.ownedCards);
-  const dirty = draft.join(',') !== account.deck.join(',');
+  const savedDeck = account.decks[slot] ?? [];
+  const dirty = draft.join(',') !== savedDeck.join(',');
+
+  const selectSlot = (i: number) => {
+    if (busy || i === slot) return;
+    playSfx('select');
+    setSlot(i);
+    setDraft(account.decks[i] ?? []);
+    setSaved(false); setErr('');
+  };
 
   const act = (fn: () => Promise<Account>) => {
     if (busy) return;
@@ -74,8 +88,30 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
     if (!valid || busy) return;
     setBusy(true); setErr('');
     playSfx('coin');
-    saveDeck(draft)
+    saveDeck(slot, draft)
       .then((a) => { onAccount(a); setSaved(true); })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
+      .finally(() => setBusy(false));
+  };
+  const doSetActive = () => {
+    if (busy || isNewSlot || account.activeDeck === slot) return;
+    setBusy(true); setErr('');
+    playSfx('coin');
+    setActiveDeck(slot)
+      .then(onAccount)
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
+      .finally(() => setBusy(false));
+  };
+  const doDelete = () => {
+    if (busy || isNewSlot || slotCount <= 1) return;
+    setBusy(true); setErr('');
+    playSfx('back');
+    deleteDeck(slot)
+      .then((a) => {
+        onAccount(a);
+        const ns = Math.min(slot, a.decks.length - 1);
+        setSlot(ns); setDraft(a.decks[ns] ?? []); setSaved(false);
+      })
       .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
       .finally(() => setBusy(false));
   };
@@ -105,8 +141,20 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
         <div style={body}>
           {/* Deck side */}
           <div style={deckCol}>
+            <div style={slotBar}>
+              {account.decks.map((_, i) => (
+                <button key={i} style={slotChip(i === slot, account.activeDeck === i)}
+                  disabled={busy} onClick={() => selectSlot(i)}>
+                  덱 {i + 1}{account.activeDeck === i ? ' ★' : ''}
+                </button>
+              ))}
+              {canAddSlot && (
+                <button key="new" style={slotChip(isNewSlot, false)}
+                  disabled={busy} onClick={() => selectSlot(slotCount)}>+ 새 덱</button>
+              )}
+            </div>
             <div style={deckHeadRow}>
-              <span style={deckTitle}>내 덱</span>
+              <span style={deckTitle}>{isNewSlot ? '새 덱' : `덱 ${slot + 1}`}{!isNewSlot && account.activeDeck === slot ? ' · 사용 중' : ''}</span>
               <span style={deckCount(valid)}>{total} / {DECK_SIZE}</span>
             </div>
             <div style={deckList}>
@@ -121,8 +169,18 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
               ))}
             </div>
             <button style={saveBtn(valid && dirty)} disabled={!valid || !dirty || busy} onClick={doSave}>
-              {saved && !dirty ? '저장됨 ✓' : valid ? '덱 저장' : `20장 필요 (${DECK_SIZE - total}장 남음)`}
+              {saved && !dirty ? '저장됨 ✓' : valid ? (isNewSlot ? '덱 만들기' : '덱 저장') : `20장 필요 (${DECK_SIZE - total}장 남음)`}
             </button>
+            {!isNewSlot && (
+              <div style={actionRow}>
+                <button style={setActiveBtn(account.activeDeck !== slot)}
+                  disabled={busy || account.activeDeck === slot} onClick={doSetActive}>
+                  {account.activeDeck === slot ? '사용 중인 덱' : '이 덱 사용'}
+                </button>
+                <button style={deleteBtn(slotCount > 1)}
+                  disabled={busy || slotCount <= 1} onClick={doDelete} title="이 덱 삭제">삭제</button>
+              </div>
+            )}
           </div>
 
           {/* Collection side */}
@@ -203,6 +261,32 @@ const deckCol: React.CSSProperties = {
   width: 268, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
   background: 'rgba(20,13,9,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 12,
 };
+const slotBar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 5 };
+function slotChip(on: boolean, active: boolean): React.CSSProperties {
+  return {
+    padding: '5px 9px', fontFamily: mono, fontSize: 11, fontWeight: 800, cursor: on ? 'default' : 'pointer',
+    borderRadius: 3, color: on ? '#141608' : active ? C.rare : C.dim,
+    border: `1px solid ${on ? '#6f7d3a' : active ? C.rare : C.border}`,
+    background: on ? '#9fae6a' : 'rgba(255,255,255,0.02)', whiteSpace: 'nowrap',
+  };
+}
+const actionRow: React.CSSProperties = { display: 'flex', gap: 6 };
+function setActiveBtn(active: boolean): React.CSSProperties {
+  return {
+    flex: 1, padding: '8px 10px', fontSize: 12.5, fontWeight: 700, cursor: active ? 'pointer' : 'default',
+    borderRadius: 3, color: active ? C.rare : C.faint,
+    border: `1px solid ${active ? C.rare : C.border}`,
+    background: active ? 'rgba(207,154,47,0.10)' : 'rgba(255,255,255,0.02)',
+  };
+}
+function deleteBtn(active: boolean): React.CSSProperties {
+  return {
+    padding: '8px 12px', fontSize: 12.5, fontWeight: 700, cursor: active ? 'pointer' : 'default',
+    borderRadius: 3, color: active ? C.enemy : C.faint,
+    border: `1px solid ${active ? '#6e2b26' : C.border}`,
+    background: active ? 'rgba(126,38,40,0.16)' : 'rgba(255,255,255,0.02)',
+  };
+}
 const deckHeadRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' };
 const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#f3eee6' };
 function deckCount(valid: boolean): React.CSSProperties {

@@ -1,6 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'crypto';
-import { getUser, upsertUser, grantCosmetic, grantCard, setDeck, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
-import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck } from '@cardbattle/shared';
+import { getUser, upsertUser, grantCosmetic, grantCard, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
+import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck, MAX_DECKS } from '@cardbattle/shared';
 
 // Zero-dependency auth: scrypt password hashing + HMAC-signed stateless tokens.
 // The secret must be set in prod (env AUTH_SECRET); a fixed dev fallback keeps local
@@ -13,7 +13,7 @@ export interface AuthResult {
   token: string; username: string; display: string; avatar: string;
   wins: number; losses: number; gold: number; owned: string[];
   equippedBorder: string; equippedTitle: string; equippedEffect: string;
-  ownedCards: string[]; deck: string[];
+  ownedCards: string[]; decks: string[][]; activeDeck: number; deck: string[];
 }
 
 const USERNAME_RE = /^[a-zA-Z0-9_가-힣]{2,16}$/;
@@ -53,7 +53,8 @@ function toResult(rec: UserRecord, token: string): AuthResult {
     token, username: rec.username, display: rec.display, avatar: rec.avatar,
     wins: rec.wins, losses: rec.losses, gold: rec.gold, owned: rec.owned,
     equippedBorder: rec.equippedBorder, equippedTitle: rec.equippedTitle, equippedEffect: rec.equippedEffect,
-    ownedCards: rec.ownedCards, deck: rec.deck,
+    ownedCards: rec.ownedCards, decks: rec.decks, activeDeck: rec.activeDeck,
+    deck: rec.decks[rec.activeDeck] ?? [], // the resolved active deck (BattleRoom/match draw pool)
   };
 }
 
@@ -69,7 +70,7 @@ export function register(rawName: string, password: string, avatar: string): Aut
     avatar: sanitizeAvatar(avatar), createdAt: Date.now(), wins: 0, losses: 0,
     gold: 0, owned: [...DEFAULT_OWNED], equippedBorder: 'none',
     equippedTitle: 'title_none', equippedEffect: 'fx_none',
-    ownedCards: [...DEFAULT_CARDS], deck: defaultDeck(),
+    ownedCards: [...DEFAULT_CARDS], decks: [defaultDeck()], activeDeck: 0,
   };
   upsertUser(rec);
   return toResult(rec, sign(username));
@@ -140,17 +141,51 @@ export function buyCard(token: string | undefined, cardId: string): AuthResult {
   return toResult(rec, token!);
 }
 
-/** Save the account's chosen match deck. Validates legality against owned cards. */
-export function saveDeck(token: string | undefined, deck: unknown): AuthResult {
+/** Save a deck into slot `index` (0..decks.length; === length appends a new slot up to
+ *  MAX_DECKS). Validates legality against owned cards and the slot bounds. */
+export function saveDeck(token: string | undefined, index: unknown, deck: unknown): AuthResult {
   const username = verifyToken(token);
   if (!username) throw new AuthError('세션이 만료되었습니다.');
   const rec = getUser(username);
   if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index > rec.decks.length) {
+    throw new AuthError('덱 슬롯이 올바르지 않습니다.');
+  }
+  if (index === rec.decks.length && rec.decks.length >= MAX_DECKS) {
+    throw new AuthError(`덱은 최대 ${MAX_DECKS}개까지 만들 수 있습니다.`);
+  }
   if (!Array.isArray(deck) || !deck.every((id): id is string => typeof id === 'string')) {
     throw new AuthError('덱 형식이 올바르지 않습니다.');
   }
   if (!isValidDeck(deck, rec.ownedCards)) throw new AuthError('덱 구성이 올바르지 않습니다.');
-  setDeck(username, deck);
+  setDeck(username, index, deck);
+  return toResult(rec, token!);
+}
+
+/** Pick which saved deck is used for matches. Validates the index is in range. */
+export function setActiveDeck(token: string | undefined, index: unknown): AuthResult {
+  const username = verifyToken(token);
+  if (!username) throw new AuthError('세션이 만료되었습니다.');
+  const rec = getUser(username);
+  if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= rec.decks.length) {
+    throw new AuthError('덱 슬롯이 올바르지 않습니다.');
+  }
+  setActiveDeckStore(username, index);
+  return toResult(rec, token!);
+}
+
+/** Delete a saved deck slot (at least one deck always remains). */
+export function deleteDeck(token: string | undefined, index: unknown): AuthResult {
+  const username = verifyToken(token);
+  if (!username) throw new AuthError('세션이 만료되었습니다.');
+  const rec = getUser(username);
+  if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= rec.decks.length) {
+    throw new AuthError('덱 슬롯이 올바르지 않습니다.');
+  }
+  if (rec.decks.length <= 1) throw new AuthError('덱은 최소 1개는 있어야 합니다.');
+  deleteDeckStore(username, index);
   return toResult(rec, token!);
 }
 

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import express from 'express';
 import { BattleRoom } from './rooms/BattleRoom.js';
-import { register, login, me, buyCosmetic, equipCosmetic, buyCard, saveDeck, AuthError } from './auth/auth.js';
+import { register, login, me, buyCosmetic, equipCosmetic, buyCard, saveDeck, setActiveDeck, deleteDeck, AuthError } from './auth/auth.js';
 import { initStore } from './auth/store.js';
 
 const port = Number(process.env.PORT ?? 2567);
@@ -80,7 +80,24 @@ app.post('/api/cards/buy', (req, res) => {
 });
 app.post('/api/deck', (req, res) => {
   try {
-    res.json(saveDeck(bearer(req), (req.body ?? {}).deck));
+    const { index, deck } = req.body ?? {};
+    res.json(saveDeck(bearer(req), index, deck));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+app.post('/api/deck/active', (req, res) => {
+  try {
+    res.json(setActiveDeck(bearer(req), (req.body ?? {}).index));
+  } catch (err) {
+    if (err instanceof AuthError) return res.status(400).json({ error: err.message });
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+app.post('/api/deck/delete', (req, res) => {
+  try {
+    res.json(deleteDeck(bearer(req), (req.body ?? {}).index));
   } catch (err) {
     if (err instanceof AuthError) return res.status(400).json({ error: err.message });
     res.status(500).json({ error: '서버 오류' });

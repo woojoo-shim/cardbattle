@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
-import { DEFAULT_CARDS, sanitizeDeck } from '@cardbattle/shared';
+import { DEFAULT_CARDS, sanitizeDeck, defaultDeck, MAX_DECKS } from '@cardbattle/shared';
 
 // A tiny JSON-file user store — zero external deps. Records are held in memory and
 // flushed to disk (debounced) on every change. On Render's free tier the filesystem
@@ -21,7 +21,8 @@ export interface UserRecord {
   equippedTitle: string;    // currently equipped name title id
   equippedEffect: string;   // currently equipped card-play burst effect id
   ownedCards: string[];     // card ids the account has unlocked (all commons are free/default)
-  deck: string[];           // the account's chosen match deck (DECK_SIZE defIds, duplicates allowed)
+  decks: string[][];        // up to MAX_DECKS saved decks (each DECK_SIZE defIds, duplicates allowed)
+  activeDeck: number;       // index into decks — the deck used when joining a match
 }
 
 // Older records (pre-gold / pre-title) may lack the economy/cosmetic fields; backfill sane
@@ -38,7 +39,14 @@ function normalize(u: UserRecord): UserRecord {
   // Card economy: every account owns all commons for free; older records lack these fields.
   if (!Array.isArray(u.ownedCards)) u.ownedCards = [...DEFAULT_CARDS];
   for (const def of DEFAULT_CARDS) if (!u.ownedCards.includes(def)) u.ownedCards.push(def);
-  u.deck = sanitizeDeck(u.deck, u.ownedCards); // repair/seed a legal deck from the owned pool
+  // Multi-deck: older records had a single `deck` — seed the decks[] list from it. Repair every
+  // slot against the owned pool, cap at MAX_DECKS, and clamp the active index.
+  const legacy = (u as unknown as { deck?: string[] }).deck;
+  if (!Array.isArray(u.decks)) u.decks = Array.isArray(legacy) ? [legacy] : [];
+  if (u.decks.length === 0) u.decks = [defaultDeck(u.ownedCards)];
+  u.decks = u.decks.slice(0, MAX_DECKS).map((d) => sanitizeDeck(d, u.ownedCards));
+  if (typeof u.activeDeck !== 'number' || u.activeDeck < 0 || u.activeDeck >= u.decks.length) u.activeDeck = 0;
+  delete (u as unknown as { deck?: string[] }).deck; // drop the legacy single-deck field
   return u;
 }
 
@@ -167,11 +175,34 @@ export function grantCard(username: string, id: string, price: number): void {
   scheduleSave();
 }
 
-/** Save the account's chosen match deck. Caller validates legality against ownedCards. */
-export function setDeck(username: string, deck: string[]): void {
+/** Save a deck into slot `index` (replacing it, or appending a new slot when index === length
+ *  and there's room). Caller validates legality against ownedCards + the index bounds. */
+export function setDeck(username: string, index: number, deck: string[]): void {
   const rec = getUser(username);
   if (!rec) return;
-  rec.deck = deck;
+  if (index === rec.decks.length && rec.decks.length < MAX_DECKS) rec.decks.push(deck);
+  else if (index >= 0 && index < rec.decks.length) rec.decks[index] = deck;
+  else return;
+  scheduleSave();
+}
+
+/** Pick which saved deck is the active match deck. Caller validates the index is in range. */
+export function setActiveDeck(username: string, index: number): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  if (index < 0 || index >= rec.decks.length) return;
+  rec.activeDeck = index;
+  scheduleSave();
+}
+
+/** Delete a saved deck slot. Keeps at least one deck and re-clamps the active index. */
+export function deleteDeck(username: string, index: number): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  if (rec.decks.length <= 1 || index < 0 || index >= rec.decks.length) return;
+  rec.decks.splice(index, 1);
+  if (rec.activeDeck >= rec.decks.length) rec.activeDeck = rec.decks.length - 1;
+  else if (rec.activeDeck > index) rec.activeDeck -= 1;
   scheduleSave();
 }
 

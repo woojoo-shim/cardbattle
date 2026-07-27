@@ -310,7 +310,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       token: '', username: '', display: `손님${Math.floor(1000 + Math.random() * 9000)}`,
       avatar, wins: 0, losses: 0, gold: 0,
       owned: [], equippedBorder: '', equippedTitle: '', equippedEffect: '',
-      ownedCards: [], deck: [],
+      ownedCards: [], decks: [], activeDeck: 0, deck: [],
     });
   };
 

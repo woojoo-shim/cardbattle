@@ -6,6 +6,9 @@ import { CARD_DEFS, ALL_DEFS } from './defs.js';
 export const DECK_SIZE = 20;
 export const MAX_COPIES = 2;
 
+/** Each account may save up to this many decks and pick one as the active match deck. */
+export const MAX_DECKS = 5;
+
 /** Gold price to unlock a card, by rarity. Commons are free so a brand-new account can build a
  *  legal deck immediately (12 commons × 2 copies = 24 slots ≥ DECK_SIZE). */
 export const CARD_PRICE: Record<Rarity, number> = { common: 0, rare: 50, epic: 90, legendary: 160 };

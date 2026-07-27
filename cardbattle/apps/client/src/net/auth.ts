@@ -22,7 +22,9 @@ export interface Account {
   equippedTitle: string;
   equippedEffect: string;
   ownedCards: string[];
-  deck: string[];
+  decks: string[][];    // up to MAX_DECKS saved decks
+  activeDeck: number;   // index of the deck used for matches
+  deck: string[];       // resolved active deck (decks[activeDeck]) — the match draw pool
 }
 
 export function getToken(): string | null {
@@ -122,7 +124,15 @@ export function equipCosmetic(itemId: string): Promise<Account> {
 export function buyCard(cardId: string): Promise<Account> {
   return authPost('/api/cards/buy', { cardId });
 }
-/** Save the account's chosen match deck; returns the updated account. */
-export function saveDeck(deck: string[]): Promise<Account> {
-  return authPost('/api/deck', { deck });
+/** Save a deck into slot `index` (index === decks.length appends a new slot). */
+export function saveDeck(index: number, deck: string[]): Promise<Account> {
+  return authPost('/api/deck', { index, deck });
+}
+/** Pick which saved deck is used for matches; returns the updated account. */
+export function setActiveDeck(index: number): Promise<Account> {
+  return authPost('/api/deck/active', { index });
+}
+/** Delete a saved deck slot; returns the updated account. */
+export function deleteDeck(index: number): Promise<Account> {
+  return authPost('/api/deck/delete', { index });
 }
