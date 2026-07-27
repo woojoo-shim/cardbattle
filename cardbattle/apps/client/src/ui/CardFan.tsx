@@ -188,7 +188,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-                <CardArt id={def.id} size="clamp(46px, 4.8vw, 68px)" />
+                <CardArt id={def.id} size="clamp(60px, 6.2vw, 88px)" />
               </div>
               <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
                 <div style={cname}>{def.name}</div>
@@ -225,11 +225,11 @@ const fan: React.CSSProperties = {
 };
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
-const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -6px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -14px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
   // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
   // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
-  width: 'clamp(92px, 9vw, 132px)', aspectRatio: '5 / 7',
+  width: 'clamp(116px, 11.4vw, 168px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
   // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the

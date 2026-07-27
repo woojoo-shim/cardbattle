@@ -130,7 +130,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                     zIndex: hoverMinion === m.id ? 30 : undefined,
                   }}
                 >
-                  <div style={minionArtWindow}><CardArt id={m.defId} size={46} /></div>
+                  <div style={minionArtWindow}><CardArt id={m.defId} size={70} /></div>
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
@@ -186,7 +186,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
             style={{
               ...seat,
               left: `${left}%`, top: `${top}%`,
-              width: isMe ? 132 : 112,
+              width: isMe ? 174 : 150,
               cursor: canTarget ? 'crosshair' : 'default',
               filter: seatFilter,
               opacity: seatOpacity,
@@ -198,7 +198,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
               data-portrait={p.id}
               style={{
                 ...portrait,
-                width: isMe ? 92 : 80, height: isMe ? 92 : 80,
+                width: isMe ? 120 : 104, height: isMe ? 120 : 104,
                 borderColor: isActive || canTarget || isMe ? accent : C.border,
                 boxShadow: isActive
                   ? `0 0 0 2px ${accent}, 0 14px 38px ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.4)'}`
@@ -211,7 +211,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
             >
               {p.defense > 0 && <span style={{ ...badge, ...badgeDef }}><Icon name="shield" size={11} />{p.defense}</span>}
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}><Icon name="warn" size={12} /></span>}
-              <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={56} />
+              <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={74} />
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
               {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
             </div>
@@ -370,17 +370,17 @@ const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
 // attack (bottom-left) and current health (bottom-right); taunt/divine-shield show as corner marks.
 const fieldRow: React.CSSProperties = {
   position: 'absolute', transform: 'translate(-50%,-50%)', zIndex: 6, pointerEvents: 'auto',
-  display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 220,
+  display: 'flex', gap: 9, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 320,
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 62, aspectRatio: '5 / 7', borderRadius: 8,
+  position: 'relative', width: 90, aspectRatio: '5 / 7', borderRadius: 10,
   background: [
     'linear-gradient(180deg, rgba(255,238,208,0.06), transparent 22%)',
     'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
     'radial-gradient(125% 85% at 50% -8%, #2a2013, #1c140b 68%, #120709)',
   ].join(','),
   border: '2px solid',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 3px 6px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '5px 4px 8px',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
@@ -410,19 +410,19 @@ const minionArtWindow: React.CSSProperties = {
   border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(255,238,208,0.08)',
 };
 const minionName: React.CSSProperties = {
-  maxWidth: '100%', fontFamily: sans, fontSize: 9, fontWeight: 800, color: '#e8d6ac',
+  maxWidth: '100%', fontFamily: sans, fontSize: 12, fontWeight: 800, color: '#e8d6ac',
   lineHeight: 1.1, textAlign: 'center', letterSpacing: '-0.02em',
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const minionStat: React.CSSProperties = {
-  position: 'absolute', bottom: -8, minWidth: 20, height: 21, padding: '0 3px', borderRadius: 6,
-  fontSize: 14, fontFamily: mono, fontWeight: 900, lineHeight: '21px', textAlign: 'center',
+  position: 'absolute', bottom: -10, minWidth: 26, height: 26, padding: '0 4px', borderRadius: 7,
+  fontSize: 17, fontFamily: mono, fontWeight: 900, lineHeight: '26px', textAlign: 'center',
   background: '#0c0705', border: '1px solid rgba(0,0,0,0.6)',
 };
-const minionAtk: React.CSSProperties = { left: -6, color: '#f2c14a' };
-const minionHp: React.CSSProperties = { right: -6 };
+const minionAtk: React.CSSProperties = { left: -8, color: '#f2c14a' };
+const minionHp: React.CSSProperties = { right: -8 };
 const minionKw: React.CSSProperties = {
-  position: 'absolute', top: -6, right: -4, fontSize: 15, lineHeight: 1,
+  position: 'absolute', top: -8, right: -6, fontSize: 20, lineHeight: 1,
   filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.8))',
 };
 // Ongoing turn-start effects, shown as a compact chip row under the portrait.
@@ -450,7 +450,7 @@ const spot: React.CSSProperties = {
 };
 const hpBar: React.CSSProperties = {
   position: 'relative',
-  width: '86%', height: 8, borderRadius: 6, background: '#160f08', border: `1px solid ${C.border}`, overflow: 'hidden',
+  width: '86%', height: 11, borderRadius: 6, background: '#160f08', border: `1px solid ${C.border}`, overflow: 'hidden',
 };
 // The real fill drops FAST so the ghost bleed behind it is briefly exposed on a hit.
 const hpFill: React.CSSProperties = {
@@ -473,13 +473,13 @@ const hpGloss: React.CSSProperties = {
   position: 'absolute', left: 0, right: 0, top: 0, height: '45%', borderRadius: '6px 6px 40% 40%',
   background: 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0))',
 };
-const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6, maxWidth: '100%' };
+const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7, maxWidth: '100%' };
 const nm: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, maxWidth: 78, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  fontSize: 14, fontWeight: 700, maxWidth: 104, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
-const rattleMark: React.CSSProperties = { marginLeft: 3, fontSize: 10, color: '#c8b06a', filter: 'saturate(0.8)' };
-const val: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, whiteSpace: 'nowrap' };
-const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: '#c9ab63', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
+const rattleMark: React.CSSProperties = { marginLeft: 3, fontSize: 13, color: '#c8b06a', filter: 'saturate(0.8)' };
+const val: React.CSSProperties = { fontFamily: mono, fontSize: 14, color: C.dim, whiteSpace: 'nowrap' };
+const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 14, color: '#c9ab63', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
 /** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */
 function titleLine(color: string): React.CSSProperties {
   const grad = color.startsWith('linear') || color.startsWith('radial');
