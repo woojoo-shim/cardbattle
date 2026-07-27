@@ -1,19 +1,19 @@
-import type { GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
+import type { CardDef, GameEvent, GameState, PlayerState, ReduceCtx, ReduceResult } from '../types.js';
 import { DEFAULT_AVATAR } from '../constants.js';
 import { resolveMode, manaRegenFor, DEFAULT_MODE, type GameModeId, type RuleSet } from '../modes.js';
-import { ALL_DEFS } from '../cards/defs.js';
+import { ALL_DEFS, CARD_DEFS } from '../cards/defs.js';
 import { eliminate } from '../cards/effects.js';
 import { weightedPick } from './rng.js';
 import { checkWin } from './reducer.js';
 
 /** Build a fresh lobby-ready player under the given ruleset. Shared by initGame and the
  *  room's mid-lobby joins/bot adds so every seat honours the selected mode's starting stats. */
-export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: string, avatar: string): PlayerState {
+export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: string, avatar: string, deck: string[] = []): PlayerState {
   return {
     id, name, avatar, connected: true, seat,
     hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
     hand: [], field: [], statuses: [], deathrattle: [], alive: true,
-    skipTurns: 0, mana: rules.startMana, heroPowerUsed: false,
+    skipTurns: 0, mana: rules.startMana, heroPowerUsed: false, deck,
   };
 }
 
@@ -26,9 +26,12 @@ export function initGame(seats: { id: string; name: string }[], mode: GameModeId
 /** Draw one weighted card into a player's hand (mutates state, advances seed). */
 function drawCard(state: GameState, player: PlayerState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   if (player.hand.length >= state.rules.handCap) return; // a hand never overflows past the cap
-  // The coach/tutorial restricts the deck to a small curated pool; every other mode uses the full deck.
-  const pool = state.rules.cardPool
-    ? ALL_DEFS.filter((d) => state.rules.cardPool!.includes(d.id))
+  // The coach/tutorial restricts the deck to a small curated pool (rules.cardPool wins over any
+  // per-player deck); otherwise draw from THIS player's chosen deck; else the full card set.
+  // Duplicate ids in a deck are kept so each copy weights the card toward being drawn.
+  const ids = state.rules.cardPool ?? (player.deck.length ? player.deck : null);
+  const pool: CardDef[] = ids
+    ? ids.map((id) => CARD_DEFS[id]).filter((d): d is CardDef => !!d)
     : ALL_DEFS;
   const src = pool.length ? pool : ALL_DEFS; // safety: an empty/misconfigured pool falls back to the full deck
   const pick = weightedPick(state.rngSeed, src, (d) => d.drawWeight);

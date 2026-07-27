@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
+import { DeckBuilder } from './DeckBuilder.js';
 import { Icon } from './art/Icon.js';
 import { CardArt } from './art/CardArt.js';
 import { C, mono, sans } from './theme.js';
@@ -19,11 +20,12 @@ interface Props {
 // A display serif for the title — no serif is bundled, so lean on a system stack.
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
-type ItemKey = 'start' | 'multi' | 'how' | 'shop' | 'credits' | 'logout';
+type ItemKey = 'start' | 'multi' | 'how' | 'deck' | 'shop' | 'credits' | 'logout';
 const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'start', label: '시작', sub: '봇과 빠른 연습' },
   { key: 'multi', label: '멀티플레이어', sub: '방 목록 · 친구와 대전' },
   { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
+  { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기' },
   { key: 'shop', label: '상점', sub: '외형 · 칭호' },
   { key: 'credits', label: '제작진', sub: '' },
   { key: 'logout', label: '나가기', sub: '로그아웃' },
@@ -35,6 +37,7 @@ const INTRO_SEEN_KEY = 'cb_intro_v3';
 export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultiplayer, onLogout }: Props) {
   const [hover, setHover] = useState<ItemKey | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
+  const [deckOpen, setDeckOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
@@ -51,6 +54,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
     if (k === 'start') onStart();
     else if (k === 'multi') onMultiplayer();
     else if (k === 'how') onStartCoach();
+    else if (k === 'deck') setDeckOpen(true);
     else if (k === 'shop') setShopOpen(true);
     else if (k === 'credits') setCreditsOpen(true);
     else if (k === 'logout') onLogout();
@@ -108,6 +112,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
       <HeroFan />
 
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
+      {deckOpen && <DeckBuilder account={account} onAccount={onAccount} onClose={() => setDeckOpen(false)} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
       {inviteOpen && <CoachInvite onClose={() => setInviteOpen(false)} onStart={() => { setInviteOpen(false); onStartCoach(); }} />}
     </div>

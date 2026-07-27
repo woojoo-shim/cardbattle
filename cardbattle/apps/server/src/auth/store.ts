@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
+import { DEFAULT_CARDS, sanitizeDeck } from '@cardbattle/shared';
 
 // A tiny JSON-file user store — zero external deps. Records are held in memory and
 // flushed to disk (debounced) on every change. On Render's free tier the filesystem
@@ -19,6 +20,8 @@ export interface UserRecord {
   equippedBorder: string;   // currently equipped card-border cosmetic id
   equippedTitle: string;    // currently equipped name title id
   equippedEffect: string;   // currently equipped card-play burst effect id
+  ownedCards: string[];     // card ids the account has unlocked (all commons are free/default)
+  deck: string[];           // the account's chosen match deck (DECK_SIZE defIds, duplicates allowed)
 }
 
 // Older records (pre-gold / pre-title) may lack the economy/cosmetic fields; backfill sane
@@ -32,6 +35,10 @@ function normalize(u: UserRecord): UserRecord {
   if (typeof u.equippedBorder !== 'string') u.equippedBorder = 'none';
   if (typeof u.equippedTitle !== 'string') u.equippedTitle = 'title_none';
   if (typeof u.equippedEffect !== 'string') u.equippedEffect = 'fx_none';
+  // Card economy: every account owns all commons for free; older records lack these fields.
+  if (!Array.isArray(u.ownedCards)) u.ownedCards = [...DEFAULT_CARDS];
+  for (const def of DEFAULT_CARDS) if (!u.ownedCards.includes(def)) u.ownedCards.push(def);
+  u.deck = sanitizeDeck(u.deck, u.ownedCards); // repair/seed a legal deck from the owned pool
   return u;
 }
 
@@ -148,6 +155,23 @@ export function grantCosmetic(username: string, id: string, price: number): void
   if (!rec) return;
   rec.gold -= price;
   if (!rec.owned.includes(id)) rec.owned.push(id);
+  scheduleSave();
+}
+
+/** Buy a card: deduct gold and grant ownership. Caller validates price/ownership. */
+export function grantCard(username: string, id: string, price: number): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  rec.gold -= price;
+  if (!rec.ownedCards.includes(id)) rec.ownedCards.push(id);
+  scheduleSave();
+}
+
+/** Save the account's chosen match deck. Caller validates legality against ownedCards. */
+export function setDeck(username: string, deck: string[]): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  rec.deck = deck;
   scheduleSave();
 }
 

@@ -6,7 +6,7 @@ import type { GameState, PlayerState, ReduceCtx } from '../types.js';
 // Legacy status ticks (poison/regen) still run in the turn loop even though no current card applies
 // them — they are injected directly here to exercise the tick path.
 function player(id: string, seat: number, over: Partial<PlayerState> = {}): PlayerState {
-  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], field: [], statuses: [], deathrattle: [], alive: true, skipTurns: 0, mana: 20, heroPowerUsed: false, ...over };
+  return { id, name: id, avatar: 'hero', connected: true, seat, hp: 40, maxHp: 40, defense: 0, hand: [], field: [], statuses: [], deathrattle: [], alive: true, skipTurns: 0, mana: 20, heroPowerUsed: false, deck: [], ...over };
 }
 function game(over: Partial<GameState> = {}): GameState {
   return { phase: 'playing', mode: 'standard', rules: DEFAULT_RULES, players: [player('a', 0), player('b', 1)], turnOrder: ['a', 'b'], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: 1, nextMinionId: 0, log: [], winnerId: null, ...over };

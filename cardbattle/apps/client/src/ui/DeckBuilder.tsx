@@ -1,0 +1,274 @@
+import { useMemo, useState } from 'react';
+import {
+  ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, cardPrice,
+  isValidDeck, type CardDef, type Rarity,
+} from '@cardbattle/shared';
+import { buyCard, saveDeck, type Account } from '../net/auth.js';
+import { playSfx } from '../audio/sfx.js';
+import { C, mono, sans, RARITY_BORDER } from './theme.js';
+import { CardArt } from './art/CardArt.js';
+import { Icon } from './art/Icon.js';
+
+// The engraved display serif shared with the menu/lobby/shop — one back-room voice.
+const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
+const RARITY_LABEL: Record<Rarity, string> = { common: '일반', rare: '희귀', epic: '영웅', legendary: '전설' };
+const RARITY_ORDER: Record<Rarity, number> = { common: 0, rare: 1, epic: 2, legendary: 3 };
+
+/** Price tag / gold amount with the coin glyph. */
+function Gold({ amount }: { amount: number }) {
+  return <><Icon name="coin" size={14} />&nbsp;{amount}</>;
+}
+
+function counts(list: string[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const id of list) m.set(id, (m.get(id) ?? 0) + 1);
+  return m;
+}
+
+interface Props {
+  account: Account;
+  onAccount: (a: Account) => void;
+  onClose: () => void;
+}
+
+// Collection order: rarity then cost then name, so the catalogue reads low→high.
+const CATALOG: CardDef[] = [...ALL_DEFS].sort(
+  (a, b) => RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity] || a.cost - b.cost || a.name.localeCompare(b.name),
+);
+
+/** Custom deck builder — buy cards with gold, then compose a DECK_SIZE-card draw deck
+ *  (max MAX_COPIES per card) from owned cards. The saved deck is the account's match draw pool. */
+export function DeckBuilder({ account, onAccount, onClose }: Props) {
+  const [draft, setDraft] = useState<string[]>(account.deck);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const owns = (id: string) => account.ownedCards.includes(id);
+  const draftCounts = useMemo(() => counts(draft), [draft]);
+  const total = draft.length;
+  const valid = isValidDeck(draft, account.ownedCards);
+  const dirty = draft.join(',') !== account.deck.join(',');
+
+  const act = (fn: () => Promise<Account>) => {
+    if (busy) return;
+    setBusy(true); setErr('');
+    fn().then(onAccount).catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류')).finally(() => setBusy(false));
+  };
+
+  const addCard = (id: string) => {
+    const have = draftCounts.get(id) ?? 0;
+    if (total >= DECK_SIZE || have >= MAX_COPIES) return;
+    playSfx('select');
+    setDraft((d) => [...d, id]);
+    setSaved(false);
+  };
+  const removeCard = (id: string) => {
+    const idx = draft.lastIndexOf(id);
+    if (idx < 0) return;
+    playSfx('back');
+    setDraft((d) => d.filter((_, i) => i !== idx));
+    setSaved(false);
+  };
+  const doSave = () => {
+    if (!valid || busy) return;
+    setBusy(true); setErr('');
+    playSfx('coin');
+    saveDeck(draft)
+      .then((a) => { onAccount(a); setSaved(true); })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
+      .finally(() => setBusy(false));
+  };
+
+  // The deck side, grouped by card and sorted by cost, reads like a mana curve.
+  const deckRows = useMemo(() => {
+    return [...draftCounts.entries()]
+      .map(([id, n]) => ({ def: CARD_DEFS[id]!, n }))
+      .filter((r) => r.def)
+      .sort((a, b) => a.def.cost - b.def.cost || a.def.name.localeCompare(b.def.name));
+  }, [draftCounts]);
+
+  return (
+    <div style={overlay} onClick={onClose}>
+      <div style={modal} className="cb-shop-pop" onClick={(e) => e.stopPropagation()}>
+        <div style={head}>
+          <div style={hdCol}>
+            <span style={hdKicker}>◈&nbsp;&nbsp;전장의 서고 · WAR LIBRARY</span>
+            <h2 style={hd}>덱 편성</h2>
+          </div>
+          <span style={goldPill} className="cb-gold-shine"><Gold amount={account.gold} /></span>
+          <button style={closeBtn} onClick={() => { playSfx('back'); onClose(); }} aria-label="닫기"><Icon name="close" size={14} /></button>
+        </div>
+
+        {err && <p style={errLine}>{err}</p>}
+
+        <div style={body}>
+          {/* Deck side */}
+          <div style={deckCol}>
+            <div style={deckHeadRow}>
+              <span style={deckTitle}>내 덱</span>
+              <span style={deckCount(valid)}>{total} / {DECK_SIZE}</span>
+            </div>
+            <div style={deckList}>
+              {deckRows.length === 0 && <p style={emptyNote}>보유 카드를 추가해 20장 덱을 만드세요.</p>}
+              {deckRows.map(({ def, n }) => (
+                <button key={def.id} style={deckRow} onClick={() => removeCard(def.id)} title="클릭하면 1장 제거">
+                  <span style={costChip(def.rarity)}>{def.cost}</span>
+                  <span style={deckName}>{def.name}</span>
+                  {n > 1 && <span style={copyTag}>×{n}</span>}
+                  <span style={removeMark}>−</span>
+                </button>
+              ))}
+            </div>
+            <button style={saveBtn(valid && dirty)} disabled={!valid || !dirty || busy} onClick={doSave}>
+              {saved && !dirty ? '저장됨 ✓' : valid ? '덱 저장' : `20장 필요 (${DECK_SIZE - total}장 남음)`}
+            </button>
+          </div>
+
+          {/* Collection side */}
+          <div style={collCol}>
+            <span style={collTitle}>카드 수집</span>
+            <div style={grid}>
+              {CATALOG.map((def) => {
+                const owned = owns(def.id);
+                const inDeck = draftCounts.get(def.id) ?? 0;
+                const price = cardPrice(def.id) ?? 0;
+                const maxed = inDeck >= MAX_COPIES;
+                const full = total >= DECK_SIZE;
+                return (
+                  <div key={def.id} style={cardCell(def.rarity, owned)} title={def.desc}>
+                    <div style={artWrap(def.rarity)}><CardArt id={def.id} size={54} /></div>
+                    <span style={cardName}>{def.name}</span>
+                    <span style={cardMeta}>{RARITY_LABEL[def.rarity]} · {def.cost}코스트</span>
+                    {owned ? (
+                      <button style={addBtn(!maxed && !full)} disabled={maxed || full}
+                        onClick={() => addCard(def.id)}>
+                        {maxed ? `최대 ${MAX_COPIES}장` : full ? '덱 가득 참' : `덱에 추가${inDeck ? ` (${inDeck})` : ''}`}
+                      </button>
+                    ) : (
+                      <button className="cb-shop-btn" style={buyBtn} disabled={busy}
+                        onClick={() => { playSfx('coin'); act(() => buyCard(def.id)); }}>
+                        <Gold amount={price} /> 구매
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const overlay: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
+  background:
+    'radial-gradient(70% 60% at 50% 30%, rgba(126,38,62,0.22), transparent 70%),' +
+    'rgba(6,3,5,0.8)',
+  backdropFilter: 'blur(5px)', fontFamily: sans,
+};
+const modal: React.CSSProperties = {
+  width: 'min(860px, 96vw)', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+  borderRadius: 4, background: '#150e10',
+  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a4762f', color: C.text,
+  boxShadow: '0 20px 44px rgba(0,0,0,0.55)',
+};
+const head: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
+  background: 'rgba(126,38,62,0.06)',
+};
+const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
+const hdKicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
+};
+const hd: React.CSSProperties = {
+  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
+  textShadow: '0 2px 0 #1a0f10',
+};
+const goldPill: React.CSSProperties = {
+  fontFamily: mono, fontSize: 15, fontWeight: 700, color: '#e6cf96', padding: '5px 12px', borderRadius: 4,
+  border: '1px solid #5a4820', background: 'rgba(42,33,14,0.85)',
+};
+const closeBtn: React.CSSProperties = {
+  width: 34, height: 34, borderRadius: 4, cursor: 'pointer', color: C.dim, fontSize: 16,
+  border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.04)',
+};
+const errLine: React.CSSProperties = { margin: '10px 20px 0', color: C.enemy, fontSize: 12.5, textAlign: 'center' };
+const body: React.CSSProperties = { display: 'flex', gap: 18, padding: 18, overflow: 'hidden', minHeight: 0 };
+
+// Deck column
+const deckCol: React.CSSProperties = {
+  width: 268, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
+  background: 'rgba(20,13,9,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 12,
+};
+const deckHeadRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' };
+const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#f3eee6' };
+function deckCount(valid: boolean): React.CSSProperties {
+  return { fontFamily: mono, fontSize: 15, fontWeight: 800, color: valid ? C.you : C.dim };
+}
+const deckList: React.CSSProperties = {
+  flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 5, minHeight: 120,
+};
+const emptyNote: React.CSSProperties = { margin: 'auto', color: C.faint, fontSize: 12.5, textAlign: 'center', lineHeight: 1.6 };
+const deckRow: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 8, padding: '7px 9px', cursor: 'pointer',
+  background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`, borderRadius: 4,
+  color: C.text, fontFamily: sans, textAlign: 'left',
+};
+function costChip(rarity: Rarity): React.CSSProperties {
+  return {
+    width: 22, height: 22, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 3,
+    fontFamily: mono, fontSize: 12, fontWeight: 800, color: '#f3eee6',
+    background: 'rgba(30,52,74,0.5)', border: `1px solid ${RARITY_BORDER[rarity]}`,
+  };
+}
+const deckName: React.CSSProperties = { flex: 1, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const copyTag: React.CSSProperties = { fontFamily: mono, fontSize: 12, fontWeight: 800, color: C.rare };
+const removeMark: React.CSSProperties = { fontSize: 16, fontWeight: 800, color: C.enemy, width: 14, textAlign: 'center' };
+function saveBtn(active: boolean): React.CSSProperties {
+  return {
+    padding: '11px 16px', fontSize: 14, fontWeight: 700, cursor: active ? 'pointer' : 'default',
+    borderRadius: 4, color: active ? '#141608' : C.faint,
+    border: active ? '1px solid #6f7d3a' : `1px solid ${C.border}`,
+    background: active ? '#9fae6a' : 'rgba(255,255,255,0.03)',
+  };
+}
+
+// Collection column
+const collCol: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 };
+const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#f3eee6' };
+const grid: React.CSSProperties = {
+  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(122px, 1fr))',
+  gap: 10, alignContent: 'start', paddingRight: 4,
+};
+function cardCell(rarity: Rarity, owned: boolean): React.CSSProperties {
+  return {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 8px',
+    borderRadius: 4, background: owned ? 'rgba(42,33,14,0.4)' : 'rgba(255,255,255,0.02)',
+    border: `1px solid ${owned ? RARITY_BORDER[rarity] : C.border}`,
+    opacity: owned ? 1 : 0.82,
+  };
+}
+function artWrap(rarity: Rarity): React.CSSProperties {
+  return {
+    width: 60, height: 60, display: 'grid', placeItems: 'center', borderRadius: 4,
+    background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${RARITY_BORDER[rarity]}`,
+  };
+}
+const cardName: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, textAlign: 'center' };
+const cardMeta: React.CSSProperties = { fontFamily: mono, fontSize: 10, color: C.dim, textAlign: 'center' };
+function addBtn(active: boolean): React.CSSProperties {
+  return {
+    width: '100%', padding: '6px 4px', fontSize: 11.5, fontWeight: 700, cursor: active ? 'pointer' : 'default',
+    borderRadius: 3, color: active ? C.text : C.faint,
+    border: `1px solid ${active ? C.borderHi : C.border}`,
+    background: active ? 'rgba(143,157,79,0.14)' : 'rgba(255,255,255,0.02)',
+  };
+}
+const buyBtn: React.CSSProperties = {
+  width: '100%', padding: '6px 4px', fontSize: 11.5, fontWeight: 700, color: '#2a1e04', cursor: 'pointer',
+  border: '1px solid #b98a2c', borderRadius: 3, background: '#cf9a2f',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2,
+};

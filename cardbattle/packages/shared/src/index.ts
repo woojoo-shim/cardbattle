@@ -5,6 +5,7 @@ export * from './heroes.js';
 export * from './cosmetics.js';
 export * from './emotes.js';
 export * from './cards/defs.js';
+export * from './cards/deck.js';
 export * from './cards/effects.js';
 export * from './engine/rng.js';
 export * from './engine/reducer.js';

@@ -21,6 +21,8 @@ export interface Account {
   equippedBorder: string;
   equippedTitle: string;
   equippedEffect: string;
+  ownedCards: string[];
+  deck: string[];
 }
 
 export function getToken(): string | null {
@@ -90,13 +92,14 @@ export async function fetchMe(): Promise<Account | null> {
   }
 }
 
-async function shop(path: string, itemId: string): Promise<Account> {
+/** Authenticated POST (Bearer token) returning the updated account. */
+async function authPost(path: string, body: unknown): Promise<Account> {
   let res: Response;
   try {
     res = await fetch(`${apiBase}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken() ?? ''}` },
-      body: JSON.stringify({ itemId }),
+      body: JSON.stringify(body),
     });
   } catch {
     throw new Error('서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -109,9 +112,17 @@ async function shop(path: string, itemId: string): Promise<Account> {
 
 /** Buy a cosmetic; returns the updated account (new gold + owned). */
 export function buyCosmetic(itemId: string): Promise<Account> {
-  return shop('/api/shop/buy', itemId);
+  return authPost('/api/shop/buy', { itemId });
 }
 /** Equip an owned cosmetic border; returns the updated account. */
 export function equipCosmetic(itemId: string): Promise<Account> {
-  return shop('/api/shop/equip', itemId);
+  return authPost('/api/shop/equip', { itemId });
+}
+/** Buy a card with gold; returns the updated account (new gold + ownedCards). */
+export function buyCard(cardId: string): Promise<Account> {
+  return authPost('/api/cards/buy', { cardId });
+}
+/** Save the account's chosen match deck; returns the updated account. */
+export function saveDeck(deck: string[]): Promise<Account> {
+  return authPost('/api/deck', { deck });
 }

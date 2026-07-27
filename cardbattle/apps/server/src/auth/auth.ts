@@ -1,6 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'crypto';
-import { getUser, upsertUser, grantCosmetic, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
-import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice } from '@cardbattle/shared';
+import { getUser, upsertUser, grantCosmetic, grantCard, setDeck, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
+import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck } from '@cardbattle/shared';
 
 // Zero-dependency auth: scrypt password hashing + HMAC-signed stateless tokens.
 // The secret must be set in prod (env AUTH_SECRET); a fixed dev fallback keeps local
@@ -13,6 +13,7 @@ export interface AuthResult {
   token: string; username: string; display: string; avatar: string;
   wins: number; losses: number; gold: number; owned: string[];
   equippedBorder: string; equippedTitle: string; equippedEffect: string;
+  ownedCards: string[]; deck: string[];
 }
 
 const USERNAME_RE = /^[a-zA-Z0-9_가-힣]{2,16}$/;
@@ -52,6 +53,7 @@ function toResult(rec: UserRecord, token: string): AuthResult {
     token, username: rec.username, display: rec.display, avatar: rec.avatar,
     wins: rec.wins, losses: rec.losses, gold: rec.gold, owned: rec.owned,
     equippedBorder: rec.equippedBorder, equippedTitle: rec.equippedTitle, equippedEffect: rec.equippedEffect,
+    ownedCards: rec.ownedCards, deck: rec.deck,
   };
 }
 
@@ -67,6 +69,7 @@ export function register(rawName: string, password: string, avatar: string): Aut
     avatar: sanitizeAvatar(avatar), createdAt: Date.now(), wins: 0, losses: 0,
     gold: 0, owned: [...DEFAULT_OWNED], equippedBorder: 'none',
     equippedTitle: 'title_none', equippedEffect: 'fx_none',
+    ownedCards: [...DEFAULT_CARDS], deck: defaultDeck(),
   };
   upsertUser(rec);
   return toResult(rec, sign(username));
@@ -120,6 +123,34 @@ export function equipCosmetic(token: string | undefined, itemId: string): AuthRe
   if (kind === 'border') setEquippedBorder(username, itemId);
   else if (kind === 'title') setEquippedTitle(username, itemId);
   else setEquippedEffect(username, itemId);
+  return toResult(rec, token!);
+}
+
+/** Buy a card with gold. Validates token, existence, price, funds, and dup ownership. */
+export function buyCard(token: string | undefined, cardId: string): AuthResult {
+  const username = verifyToken(token);
+  if (!username) throw new AuthError('세션이 만료되었습니다.');
+  const rec = getUser(username);
+  if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  const price = cardPrice(cardId);
+  if (price === null) throw new AuthError('존재하지 않는 카드입니다.');
+  if (rec.ownedCards.includes(cardId)) throw new AuthError('이미 보유 중입니다.');
+  if (rec.gold < price) throw new AuthError('골드가 부족합니다.');
+  grantCard(username, cardId, price);
+  return toResult(rec, token!);
+}
+
+/** Save the account's chosen match deck. Validates legality against owned cards. */
+export function saveDeck(token: string | undefined, deck: unknown): AuthResult {
+  const username = verifyToken(token);
+  if (!username) throw new AuthError('세션이 만료되었습니다.');
+  const rec = getUser(username);
+  if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  if (!Array.isArray(deck) || !deck.every((id): id is string => typeof id === 'string')) {
+    throw new AuthError('덱 형식이 올바르지 않습니다.');
+  }
+  if (!isValidDeck(deck, rec.ownedCards)) throw new AuthError('덱 구성이 올바르지 않습니다.');
+  setDeck(username, deck);
   return toResult(rec, token!);
 }
 

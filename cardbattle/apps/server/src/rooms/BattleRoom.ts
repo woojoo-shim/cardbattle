@@ -19,6 +19,7 @@ interface CreateOptions { name?: string; title?: string; avatar?: string; token?
 interface Auth {
   display: string; avatar: string; username: string | null;
   border: string; title: string; effect: string;
+  deck: string[]; // the account's chosen match deck (empty for guests → default deck at spawn)
 }
 
 /** A seat's equipped cosmetics, mirrored into the schema so all clients render them. */
@@ -143,8 +144,9 @@ export class BattleRoom extends Room<BattleState> {
     if (profile) return {
       display: profile.display, avatar: profile.avatar, username: profile.username,
       border: profile.equippedBorder, title: profile.equippedTitle, effect: profile.equippedEffect,
+      deck: profile.deck,
     };
-    return { display: '', avatar: '', username: accountFromToken(options.token), ...DEFAULT_COSMETICS };
+    return { display: '', avatar: '', username: accountFromToken(options.token), ...DEFAULT_COSMETICS, deck: [] };
   }
 
   onJoin(client: Client, options: JoinOptions): void {
@@ -154,7 +156,8 @@ export class BattleRoom extends Room<BattleState> {
     this.cosmetics.set(client.sessionId, { border: auth.border, title: auth.title, effect: auth.effect });
     const name = auth.display || (options.name ?? 'Player').slice(0, 16);
     const avatar = auth.avatar || options.avatar;
-    this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, client.sessionId, name, sanitizeAvatar(avatar)));
+    // Logged-in players draw from their chosen deck; guests (empty deck) fall back to the full set.
+    this.gs.players.push(spawnPlayer(this.gs.rules, this.gs.players.length, client.sessionId, name, sanitizeAvatar(avatar), auth.deck));
     this.ready.set(client.sessionId, false);
     this.publish();
     this.evaluateAutofill(); // a new arrival un-readies the room; recheck the fill countdown

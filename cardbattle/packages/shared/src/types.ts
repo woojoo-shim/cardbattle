@@ -92,6 +92,7 @@ export interface PlayerState {
   skipTurns: number;         // pending turns to skip
   mana: number;              // bankable resource spent to play cards; refills (ramping) each turn
   heroPowerUsed: boolean;    // has this player used their avatar's signature ability this turn?
+  deck: string[];            // this player's chosen draw pool (card defIds, duplicates weight draws)
 }
 
 export interface GameState {
