@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { UiState, UiMinion } from '../state/useRoom.js';
 import { COSMETIC_BY_ID, TITLE_BY_ID, CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
@@ -28,6 +29,9 @@ const CX = 50, CY = 52, RX = 41, RY = 37;
  * is acting. Each seat keeps its data-pid anchor for the VFX layer + needle. */
 export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attackerId, onSelectAttacker }: Props) {
   const activeId = ui.turnOrder[ui.currentTurnIndex];
+  // Hovering any minion on the board reveals its name / stats / ability text — so you can read a
+  // foe's board before you commit to an attack or target.
+  const [hoverMinion, setHoverMinion] = useState<string | null>(null);
   const ring = [...ui.players].sort((a, b) => a.seat - b.seat);
   const n = ring.length;
   const myRing = Math.max(0, ring.findIndex((p) => p.id === myId));
@@ -107,13 +111,14 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                 <div
                   key={m.id}
                   data-pid={m.id}
+                  onMouseEnter={() => setHoverMinion(m.id)}
+                  onMouseLeave={() => setHoverMinion((h) => (h === m.id ? null : h))}
                   onClick={(e) => {
                     if (!clickable) return;
                     e.stopPropagation();
                     if (canAttack) onSelectAttacker?.(m.id);
                     else onSelect(m.id);
                   }}
-                  title={def?.name ?? ''}
                   style={{
                     ...minionChip,
                     borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
@@ -122,6 +127,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                       : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
                     cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
                     opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
+                    zIndex: hoverMinion === m.id ? 30 : undefined,
                   }}
                 >
                   <span style={minionArtWrap}><CardArt id={m.defId} size={54} /></span>
@@ -129,6 +135,16 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
                   {m.taunt && <span style={minionKw} title="도발">🛡</span>}
                   {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="천상의 보호막">✦</span>}
+                  {hoverMinion === m.id && def && (
+                    <div style={minionTip}>
+                      <span style={minionTipEdge} aria-hidden />
+                      <div style={minionTipHead}>
+                        <span style={minionTipName}>{def.name}</span>
+                        <span style={minionTipStat}>{m.attack}/{m.health}</span>
+                      </div>
+                      <div style={minionTipDesc}>{def.desc}</div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -361,6 +377,25 @@ const minionChip: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
+// Hover panel for a minion on the board — name, current stats, and its ability text. Sits above
+// the chip, doesn't intercept the pointer, and is wide enough to read the keyword description.
+const minionTip: React.CSSProperties = {
+  position: 'absolute', bottom: '116%', left: '50%', transform: 'translateX(-50%)',
+  width: 172, padding: '9px 11px 10px', borderRadius: 9, zIndex: 40, pointerEvents: 'none',
+  background: 'linear-gradient(180deg, rgba(42,32,19,0.99), rgba(20,13,9,0.99))',
+  border: `1px solid ${C.borderHi}`, textAlign: 'left', overflow: 'hidden',
+  boxShadow: '0 14px 34px rgba(0,0,0,0.6)',
+};
+const minionTipEdge: React.CSSProperties = {
+  position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
+  background: 'linear-gradient(90deg, transparent, #caa24a, transparent)', opacity: 0.9,
+};
+const minionTipHead: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6,
+};
+const minionTipName: React.CSSProperties = { fontFamily: sans, fontSize: 14, fontWeight: 800, color: '#f0e0b4', lineHeight: 1.15 };
+const minionTipStat: React.CSSProperties = { flexShrink: 0, fontFamily: mono, fontSize: 13, fontWeight: 900, color: '#f0e0b4' };
+const minionTipDesc: React.CSSProperties = { fontFamily: sans, fontSize: 12, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
 const minionArtWrap: React.CSSProperties = { display: 'grid', placeItems: 'center', marginTop: -3 };
 const minionStat: React.CSSProperties = {
   position: 'absolute', bottom: -8, minWidth: 20, height: 21, padding: '0 3px', borderRadius: 6,
