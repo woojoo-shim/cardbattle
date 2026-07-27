@@ -509,7 +509,7 @@ const manaDock: React.CSSProperties = {
   position: 'absolute', bottom: 24, right: 24, zIndex: 16,
 };
 const endTurnBtn: React.CSSProperties = {
-  position: 'absolute', bottom: 84, right: 32, padding: '13px 24px', fontSize: 16, fontWeight: 700,
+  position: 'absolute', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
   color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
   background: '#9c3b28',
   transition: 'transform .15s', zIndex: 16,

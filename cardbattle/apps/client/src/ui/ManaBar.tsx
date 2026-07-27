@@ -32,20 +32,50 @@ export function ManaBar({ mana, max, lit }: Props) {
   );
 }
 
+/** A fully-illustrated faceted mana jewel — brilliant-cut crown, table facet, pavilion, and
+ *  glints — instead of a flat hexagon. Filled gems glow warm amber; empty gems read as a dead
+ *  socket. Shared gradient ids are safe: every instance's <defs> is identical, so url() resolving
+ *  to the first match in the document paints them all the same. */
 function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) {
-  const base = on ? '#c8912f' : '#241a10';
-  const outline = on ? '#f0d089' : '#3a2e1c';
   return (
     <svg
-      viewBox="0 0 24 24" width="22" height="22" aria-hidden
-      style={{ display: 'block', filter: on ? `drop-shadow(0 0 ${lit ? 4 : 2}px rgba(224,178,90,0.9))` : undefined, animation: fresh ? 'cb-mana-pop 0.5s cubic-bezier(.2,1.5,.4,1) both' : undefined }}
+      viewBox="0 0 24 24" width="26" height="26" aria-hidden
+      style={{
+        display: 'block',
+        filter: on
+          ? `drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 ${lit ? 6 : 3}px rgba(240,196,96,0.9))`
+          : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+        animation: fresh ? 'cb-mana-pop 0.5s cubic-bezier(.2,1.5,.4,1) both' : undefined,
+      }}
     >
-      <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill={base} stroke={outline} strokeWidth="1.3" strokeLinejoin="round" />
+      <defs>
+        <radialGradient id="cb-mana-body" cx="42%" cy="32%" r="74%">
+          <stop offset="0%" stopColor={on ? '#ffeeb8' : '#3a2c17'} />
+          <stop offset="46%" stopColor={on ? '#f0b84a' : '#2a2013'} />
+          <stop offset="100%" stopColor={on ? '#a5691d' : '#181209'} />
+        </radialGradient>
+        <linearGradient id="cb-mana-crown" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fff6d8" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#fff6d8" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* faceted gem body */}
+      <polygon
+        points="12,1.4 18.6,4.2 22.6,11 18,20.6 12,23 6,20.6 1.4,11 5.4,4.2"
+        fill="url(#cb-mana-body)" stroke={on ? '#ffdf8f' : '#4a3a20'} strokeWidth="1" strokeLinejoin="round"
+      />
+      {/* table facet */}
+      <polygon points="12,5 16,7 15,12 12,14 9,12 8,7" fill={on ? '#ffe9ad' : '#2f2415'} opacity={on ? 0.72 : 0.5} />
       {on && (
         <>
-          <polygon points="12,2 21,7 12,12 3,7" fill="#f0cd83" opacity="0.6" />
-          <polygon points="3,7 12,12 3,17" fill="#8a5f1f" opacity="0.55" />
-          <circle cx="9" cy="8" r="1.5" fill="#fff2d4" opacity="0.92" />
+          {/* crown highlight sweep */}
+          <polygon points="12,1.4 18.6,4.2 16,7 12,5 8,7 5.4,4.2" fill="url(#cb-mana-crown)" />
+          {/* pavilion shading (bottom facets) */}
+          <polygon points="12,14 15,12 18,20.6 12,23" fill="#8a5518" opacity="0.5" />
+          <polygon points="12,14 9,12 6,20.6 12,23" fill="#6f4413" opacity="0.55" />
+          {/* glints */}
+          <circle cx="10" cy="7.4" r="1.4" fill="#fffef2" opacity="0.95" />
+          <circle cx="14.6" cy="9" r="0.7" fill="#fff7dd" opacity="0.85" />
         </>
       )}
     </svg>
@@ -67,5 +97,5 @@ const num: React.CSSProperties = {
 const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(16px, 1.5vw, 21px)', fontWeight: 700, color: '#c2a878', marginTop: 3 };
 const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', letterSpacing: 4, color: '#c2a878', marginTop: 7 };
 const crystals: React.CSSProperties = {
-  display: 'flex', flexWrap: 'wrap', gap: 6, maxWidth: 204, alignContent: 'center',
+  display: 'flex', flexWrap: 'wrap', gap: 6, maxWidth: 228, alignContent: 'center',
 };
