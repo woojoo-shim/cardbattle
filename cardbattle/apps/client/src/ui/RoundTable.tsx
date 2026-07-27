@@ -369,11 +369,15 @@ const badgeWarn: React.CSSProperties = { right: 5, color: C.rare };
 // The minion field: a compact row of summoned bodies under the portrait. Each carries its
 // attack (bottom-left) and current health (bottom-right); taunt/divine-shield show as corner marks.
 const fieldRow: React.CSSProperties = {
+  // Hearthstone-style board: every player's minions sit in ONE clean horizontal rank facing the
+  // table centre, never wrapping into a cluster. The row grows symmetrically from its anchor
+  // point (translate -50%) so it stays lined up in front of the player.
   position: 'absolute', transform: 'translate(-50%,-50%)', zIndex: 6, pointerEvents: 'auto',
-  display: 'flex', gap: 9, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 320,
+  display: 'flex', gap: 8, flexWrap: 'nowrap', justifyContent: 'center', alignItems: 'flex-end',
+  whiteSpace: 'nowrap',
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 90, aspectRatio: '5 / 7', borderRadius: 10,
+  position: 'relative', width: 90, aspectRatio: '5 / 7', borderRadius: 10, flexShrink: 0,
   background: [
     'linear-gradient(180deg, rgba(255,238,208,0.06), transparent 22%)',
     'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
