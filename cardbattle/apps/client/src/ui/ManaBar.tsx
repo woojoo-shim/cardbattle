@@ -37,6 +37,10 @@ export function ManaBar({ mana, max, lit }: Props) {
  *  socket. Shared gradient ids are safe: every instance's <defs> is identical, so url() resolving
  *  to the first match in the document paints them all the same. */
 function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) {
+  // id keyed by state: on/off gems have DIFFERENT stops, so a shared id would make every gem
+  // paint with the first-defined (on) gradient — killing the filled/empty distinction. Two
+  // state-keyed ids stay identical across same-state instances, so first-match resolution is safe.
+  const bodyId = on ? 'cb-mana-body-on' : 'cb-mana-body-off';
   return (
     <svg
       viewBox="0 0 24 24" width="26" height="26" aria-hidden
@@ -49,7 +53,7 @@ function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) 
       }}
     >
       <defs>
-        <radialGradient id="cb-mana-body" cx="42%" cy="32%" r="74%">
+        <radialGradient id={bodyId} cx="42%" cy="32%" r="74%">
           <stop offset="0%" stopColor={on ? '#ffeeb8' : '#3a2c17'} />
           <stop offset="46%" stopColor={on ? '#f0b84a' : '#2a2013'} />
           <stop offset="100%" stopColor={on ? '#a5691d' : '#181209'} />
@@ -62,7 +66,7 @@ function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) 
       {/* faceted gem body */}
       <polygon
         points="12,1.4 18.6,4.2 22.6,11 18,20.6 12,23 6,20.6 1.4,11 5.4,4.2"
-        fill="url(#cb-mana-body)" stroke={on ? '#ffdf8f' : '#4a3a20'} strokeWidth="1" strokeLinejoin="round"
+        fill={`url(#${bodyId})`} stroke={on ? '#ffdf8f' : '#4a3a20'} strokeWidth="1" strokeLinejoin="round"
       />
       {/* table facet */}
       <polygon points="12,5 16,7 15,12 12,14 9,12 8,7" fill={on ? '#ffe9ad' : '#2f2415'} opacity={on ? 0.72 : 0.5} />

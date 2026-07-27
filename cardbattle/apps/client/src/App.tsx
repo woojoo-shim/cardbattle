@@ -125,11 +125,18 @@ function Game({ connect, onExit, borderCosmetic, coach }: { connect: Connect; on
   const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote, reward, autofillDeadline, status } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
+  // A stale resume token (its room already ended) or an invite link to a finished game fails the
+  // INITIAL connect with a scary raw error like "reconnection token invalid or expired." On a
+  // fresh page load the player never knew they had a seat, so don't strand them on an English
+  // wall — auto-clear (unmount clears the token) and bounce straight to the lobby list.
+  const staleConn = !ui && !!error && /reconnection token|invalid or expired|disposed|not found/i.test(error.message);
+  useEffect(() => { if (staleConn) onExit(); }, [staleConn, onExit]);
+
   if (!ui) {
     // A failed join/resume must never strand the player on a dead screen. This most often fires
     // when a saved seat's room has already ended (stale resume token, or an invite link to a
     // finished game) — surface a calm message and always offer a way back to the lobby list.
-    if (error) {
+    if (error && !staleConn) {
       const gone = /disposed|not found|locked|no rooms/i.test(error.message);
       return (
         <div style={connOverlay}>
