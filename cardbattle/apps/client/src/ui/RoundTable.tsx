@@ -130,7 +130,8 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                     zIndex: hoverMinion === m.id ? 30 : undefined,
                   }}
                 >
-                  <span style={minionArtWrap}><CardArt id={m.defId} size={54} /></span>
+                  <div style={minionArtWindow}><CardArt id={m.defId} size={46} /></div>
+                  <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
                   {m.taunt && <span style={minionKw} title="도발">🛡</span>}
@@ -372,9 +373,15 @@ const fieldRow: React.CSSProperties = {
   display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 220,
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 60, height: 70, borderRadius: 9,
-  background: 'linear-gradient(160deg,#2a2013,#150d07)', border: '2px solid',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  position: 'relative', width: 62, aspectRatio: '5 / 7', borderRadius: 8,
+  background: [
+    'linear-gradient(180deg, rgba(255,238,208,0.06), transparent 22%)',
+    'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
+    'radial-gradient(125% 85% at 50% -8%, #2a2013, #1c140b 68%, #120709)',
+  ].join(','),
+  border: '2px solid',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 3px 6px',
+  boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
 // Hover panel for a minion on the board — name, current stats, and its ability text. Sits above
@@ -396,7 +403,17 @@ const minionTipHead: React.CSSProperties = {
 const minionTipName: React.CSSProperties = { fontFamily: sans, fontSize: 14, fontWeight: 800, color: '#f0e0b4', lineHeight: 1.15 };
 const minionTipStat: React.CSSProperties = { flexShrink: 0, fontFamily: mono, fontSize: 13, fontWeight: 900, color: '#f0e0b4' };
 const minionTipDesc: React.CSSProperties = { fontFamily: sans, fontSize: 12, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
-const minionArtWrap: React.CSSProperties = { display: 'grid', placeItems: 'center', marginTop: -3 };
+const minionArtWindow: React.CSSProperties = {
+  width: '92%', aspectRatio: '1 / 1', borderRadius: 5, overflow: 'hidden',
+  display: 'grid', placeItems: 'center', flexShrink: 0,
+  background: 'radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0.15), rgba(0,0,0,0.5))',
+  border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(255,238,208,0.08)',
+};
+const minionName: React.CSSProperties = {
+  maxWidth: '100%', fontFamily: sans, fontSize: 9, fontWeight: 800, color: '#e8d6ac',
+  lineHeight: 1.1, textAlign: 'center', letterSpacing: '-0.02em',
+  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+};
 const minionStat: React.CSSProperties = {
   position: 'absolute', bottom: -8, minWidth: 20, height: 21, padding: '0 3px', borderRadius: 6,
   fontSize: 14, fontFamily: mono, fontWeight: 900, lineHeight: '21px', textAlign: 'center',
