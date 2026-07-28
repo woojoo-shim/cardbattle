@@ -30,8 +30,28 @@ export function TopBar({ ui, myId }: Props) {
   const pct = Math.max(0, Math.min(100, (remainMs / totalMs) * 100));
   const danger = remain <= 5;
   const ringColor = danger ? C.enemy : isMyTurn ? C.you : C.dim;
+  // Burning fuse: only during MY turn's final seconds. The unburnt rope shrinks with the
+  // remaining time (5s window), the flame rides its shrinking tip toward the bomb.
+  const showFuse = danger && isMyTurn && remainMs > 0;
+  const fuse = Math.max(0, Math.min(1, remainMs / 5000));
 
   return (
+    <>
+    {showFuse && (
+      <div style={fuseWrap} aria-hidden>
+        <div style={fuseTaunt} className="cb-fuse-taunt">시간은 기다리지 않아!</div>
+        <div style={fuseTrack}>
+          <span style={fuseBomb}>💣</span>
+          <div style={fuseRail}>
+            <div style={{ ...fuseRope, width: `${fuse * 100}%` }} />
+            <div style={{ ...fuseCharred, left: `${fuse * 100}%` }} />
+            <div style={{ ...fuseFlame, left: `${fuse * 100}%` }} className="cb-fuse-flame">
+              <span style={fuseSpark} className="cb-fuse-spark" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
     <div style={{ ...bar, background: isMyTurn ? ribbonLit : ribbonIdle }}>
       <div style={round}>
         <Icon name="skull" size={13} />&nbsp;ROUND <b style={{ color: C.text }}>{ui.roundCount}</b>
@@ -63,8 +83,52 @@ export function TopBar({ ui, myId }: Props) {
         <span style={{ color: danger ? C.enemy : C.text, minWidth: 26, textAlign: 'right' }}>{remain}</span>
       </div>
     </div>
+    </>
   );
 }
+
+// --- Burning fuse (final 5s of your turn) ---
+const fuseWrap: React.CSSProperties = {
+  position: 'fixed', top: 66, left: '50%', transform: 'translateX(-50%)', zIndex: 40,
+  width: 'min(560px, 76vw)', display: 'flex', flexDirection: 'column', alignItems: 'center',
+  gap: 8, pointerEvents: 'none',
+};
+const fuseTaunt: React.CSSProperties = {
+  fontFamily: sans, fontWeight: 900, fontSize: 22, letterSpacing: '-0.02em',
+  color: '#ffd8a0',
+  textShadow: '0 0 12px rgba(240,120,40,0.9), 0 2px 4px rgba(0,0,0,0.8)',
+  whiteSpace: 'nowrap',
+};
+const fuseTrack: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 6, width: '100%',
+};
+const fuseBomb: React.CSSProperties = { fontSize: 22, flex: '0 0 auto', filter: 'drop-shadow(0 0 6px rgba(0,0,0,0.7))' };
+const fuseRail: React.CSSProperties = {
+  position: 'relative', flex: 1, height: 12, borderRadius: 6,
+};
+const fuseRope: React.CSSProperties = {
+  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: 8, borderRadius: 4,
+  // Braided hemp rope: warm strand base + a diagonal twist highlight.
+  background: 'repeating-linear-gradient(115deg, #9c6b3a 0 5px, #c89257 5px 8px, #7a5028 8px 12px)',
+  boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.4)',
+};
+const fuseCharred: React.CSSProperties = {
+  position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', height: 5, borderRadius: 3,
+  // The already-burnt stub trailing the flame toward the bomb-side.
+  background: 'repeating-linear-gradient(115deg, #241812 0 4px, #3a2418 4px 7px)',
+  // width is implicit: it spans from `left` to the right edge via left offset only, so give it a right anchor
+};
+const fuseFlame: React.CSSProperties = {
+  position: 'absolute', top: '50%', width: 20, height: 26, marginLeft: -10,
+  transform: 'translateY(-58%)',
+  background: 'radial-gradient(50% 60% at 50% 70%, #fff2c0 0%, #ffcf5a 28%, #ff7a1e 60%, rgba(214,60,20,0.2) 85%, transparent 100%)',
+  borderRadius: '50% 50% 50% 50% / 62% 62% 40% 40%',
+  filter: 'drop-shadow(0 0 8px rgba(255,140,40,0.95))',
+};
+const fuseSpark: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: 2, width: 6, height: 6, marginLeft: -3, borderRadius: '50%',
+  background: 'radial-gradient(circle, #fff6d8, #ffb03a 70%, transparent)',
+};
 
 const bar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 24, padding: '0 24px',

@@ -1,5 +1,26 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
+/* Burning fuse — the flame licks and flickers on its shrinking rope tip, and the taunt shakes. */
+@keyframes cb-fuse-flame {
+  0%   { transform: translateY(-58%) scale(1, 1)       rotate(-4deg); }
+  25%  { transform: translateY(-62%) scale(1.14, 1.22) rotate(3deg); }
+  50%  { transform: translateY(-56%) scale(0.9, 1.05)  rotate(-3deg); }
+  75%  { transform: translateY(-63%) scale(1.1, 1.18)  rotate(4deg); }
+  100% { transform: translateY(-58%) scale(1, 1)       rotate(-4deg); }
+}
+.cb-fuse-flame { animation: cb-fuse-flame 0.36s ease-in-out infinite; }
+@keyframes cb-fuse-spark {
+  0%, 100% { opacity: 0.5; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
+}
+.cb-fuse-spark { animation: cb-fuse-spark 0.3s ease-in-out infinite; }
+@keyframes cb-fuse-taunt {
+  0%, 100% { transform: translateX(0) rotate(-1deg); }
+  25%      { transform: translateX(-3px) rotate(1.2deg); }
+  50%      { transform: translateX(2px) rotate(-1.4deg); }
+  75%      { transform: translateX(-2px) rotate(1deg); }
+}
+.cb-fuse-taunt { animation: cb-fuse-taunt 0.5s ease-in-out infinite; }
 /* ===== LIVING ATMOSPHERE — the static back room was reading as flat/dead. Real dens breathe:
    a failing bulb stutters, its cone hangs in the dusty air, and motes drift through the light.
    All three layers are pointer-transparent and screen-blended so they add light, never block. */
