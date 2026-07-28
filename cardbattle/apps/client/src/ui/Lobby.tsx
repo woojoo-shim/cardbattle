@@ -162,7 +162,7 @@ function Atmosphere() {
             style={{
               position: 'absolute', left: `${e.x}%`, bottom: '-4%',
               width: e.s, height: e.s, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(240,200,120,0.9), rgba(224,165,60,0) 70%)',
+              background: 'radial-gradient(circle, rgba(214,200,255,0.9), rgba(168,107,255,0) 70%)',
               animation: `cb-lb-ember ${e.d}s linear ${e.delay}s infinite`,
             }}
           />
@@ -189,16 +189,16 @@ const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
   fontFamily: sans, color: C.text,
-  background: 'linear-gradient(180deg, #170d0d 0%, #0c0709 60%, #050304 100%)',
+  background: 'linear-gradient(180deg, #101422 0%, #0a0d16 60%, #06080f 100%)',
 };
 const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
 const atmosGlow: React.CSSProperties = {
   position: 'absolute', inset: 0,
   background:
-    'radial-gradient(120% 70% at 50% -8%, rgba(242,184,94,0.16), transparent 55%),' +
-    'radial-gradient(90% 60% at 50% 0%, rgba(158,58,40,0.14), transparent 60%),' +
+    'radial-gradient(120% 70% at 50% -8%, rgba(168,107,255,0.16), transparent 55%),' +
+    'radial-gradient(90% 60% at 50% 0%, rgba(55,224,160,0.10), transparent 60%),' +
     'radial-gradient(80% 50% at 50% 4%, rgba(74,48,86,0.12), transparent 62%),' +
-    'radial-gradient(100% 80% at 50% 110%, rgba(132,44,32,0.10), transparent 60%)',
+    'radial-gradient(100% 80% at 50% 110%, rgba(90,60,190,0.12), transparent 60%)',
 };
 const atmosVignette: React.CSSProperties = {
   position: 'absolute', inset: 0,
@@ -220,17 +220,17 @@ const kicker: React.CSSProperties = {
 };
 const title: React.CSSProperties = {
   margin: '2px 0 4px', fontFamily: serif, fontWeight: 700, letterSpacing: 'clamp(2px, 0.8vw, 8px)',
-  fontSize: 'clamp(34px, 6vw, 64px)', color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10, 0 8px 24px rgba(0,0,0,0.6)',
+  fontSize: 'clamp(34px, 6vw, 64px)', color: '#eef2fb',
+  textShadow: '0 2px 0 #0d1019, 0 8px 24px rgba(0,0,0,0.6)',
 };
-// A framed walnut slab holding the room details — warm cardstock with a candlelit top accent.
+// A framed slate slab holding the room details — cool cardstock with an amethyst top accent.
 const panel: React.CSSProperties = {
   position: 'relative', zIndex: 2,
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
   width: 'min(400px, 92vw)', padding: '22px 22px 24px', borderRadius: 4,
-  background: 'linear-gradient(180deg, rgba(38,28,17,0.82), rgba(20,13,9,0.78))',
-  border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
-  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,225,170,0.05)',
+  background: 'linear-gradient(180deg, rgba(30,38,58,0.82), rgba(16,20,32,0.78))',
+  border: `1px solid ${C.border}`, borderTop: '2px solid #a86bff',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(150,180,230,0.05)',
 };
 const subtitle: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13.5 };
 const modeBadge: React.CSSProperties = {
@@ -265,13 +265,13 @@ const seatGrid: React.CSSProperties = {
 const seatCell: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
   borderRadius: 4, textAlign: 'left',
-  background: 'rgba(26,17,10,0.66)',
+  background: 'rgba(28,34,51,0.66)',
   border: `1px solid ${C.border}`,
 };
 const seatMe: React.CSSProperties = { borderColor: C.magic };
 const seatThumb: React.CSSProperties = {
   width: 40, height: 40, borderRadius: 4, display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden',
-  background: '#1a140d', border: '1px solid rgba(255,255,255,0.1)',
+  background: '#141b2b', border: '1px solid rgba(255,255,255,0.1)',
 };
 const seatText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 };
 const seatName: React.CSSProperties = {
@@ -305,7 +305,7 @@ const kickBtn: React.CSSProperties = {
 };
 const fillBanner: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 4,
-  fontSize: 13, color: '#f4ead1', width: '100%', justifyContent: 'center',
+  fontSize: 13, color: '#eef2fb', width: '100%', justifyContent: 'center',
   background: 'rgba(216,162,60,0.1)', border: '1px solid rgba(216,162,60,0.34)',
 };
 const fillDot: React.CSSProperties = {
@@ -317,5 +317,5 @@ const hint: React.CSSProperties = { margin: '2px 0 0', color: C.faint, fontSize:
 const backBtn: React.CSSProperties = {
   position: 'fixed', top: 16, left: 16, zIndex: 40,
   padding: '9px 16px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
-  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(16,20,32,0.8)', fontFamily: sans,
 };

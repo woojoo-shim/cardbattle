@@ -88,13 +88,13 @@ const wrap: React.CSSProperties = {
 };
 const btn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '9px 16px', fontSize: 13.5, fontWeight: 800,
-  letterSpacing: 0.3, color: '#f4e9cb', cursor: 'pointer', borderRadius: 999,
+  letterSpacing: 0.3, color: '#eef2fb', cursor: 'pointer', borderRadius: 999,
   border: `1px solid ${C.borderHi}`, fontFamily: sans,
-  background: 'linear-gradient(180deg, rgba(56,43,26,0.94), rgba(28,19,10,0.94))',
-  boxShadow: '0 8px 22px rgba(90,60,20,0.42)', backdropFilter: 'blur(6px)',
+  background: 'linear-gradient(180deg, rgba(40,48,70,0.94), rgba(16,20,32,0.94))',
+  boxShadow: '0 8px 22px rgba(30,24,70,0.42)', backdropFilter: 'blur(6px)',
 };
 const hintBox: React.CSSProperties = {
   maxWidth: 240, padding: '9px 13px', borderRadius: 10, fontFamily: mono, fontSize: 12, lineHeight: 1.5,
-  color: C.text, background: 'rgba(24,16,9,0.97)', border: `1px solid ${C.border}`,
+  color: C.text, background: 'rgba(12,16,26,0.97)', border: `1px solid ${C.border}`,
   boxShadow: '0 12px 30px rgba(0,0,0,0.5)', textAlign: 'right',
 };

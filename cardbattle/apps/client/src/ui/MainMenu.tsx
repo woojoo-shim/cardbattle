@@ -208,7 +208,7 @@ const wrap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 'clamp(20px, 4vw, 100px)',
   fontFamily: sans, color: C.text,
   padding: '0 clamp(28px, 7vw, 130px)',
-  background: 'linear-gradient(180deg, #140b0e 0%, #0b070a 60%, #060305 100%)',
+  background: 'linear-gradient(180deg, #101422 0%, #0a0d16 60%, #06080f 100%)',
 };
 
 const content: React.CSSProperties = {
@@ -273,16 +273,16 @@ const fanGlow: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: 'clamp(560px, 52vw, 840px)', height: 'clamp(560px, 52vw, 840px)',
   transform: 'translate(-50%, -50%)',
   borderRadius: '50%', filter: 'blur(26px)',
-  background: 'radial-gradient(circle, rgba(224,165,60,0.18), rgba(150,44,32,0.09) 46%, transparent 72%)',
+  background: 'radial-gradient(circle, rgba(168,107,255,0.18), rgba(55,224,160,0.08) 46%, transparent 72%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
 const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(260px, 22vw, 340px)', height: 'clamp(420px, 44vw, 600px)' };
 const fanCard: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%',
   display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
-  background: 'linear-gradient(180deg, #2a1f13, #1c140b)',
-  border: '1px solid rgba(120,96,56,0.55)',
-  boxShadow: '0 22px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,225,170,0.12)',
+  background: 'linear-gradient(180deg, #26314a, #141b2b)',
+  border: '1px solid rgba(92,111,150,0.55)',
+  boxShadow: '0 22px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(150,180,230,0.12)',
 };
 // The cards are a fixed pixel size (CardArt size is an SVG width prop, not CSS-clampable), so the
 // big fan that looks right on a wide 2000px screen overflows / overlaps the title on narrower
@@ -344,7 +344,7 @@ const goldChip: React.CSSProperties = {
 };
 const nameChip: React.CSSProperties = {
   padding: '7px 14px', fontSize: 13, fontWeight: 700, color: C.dim,
-  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(20,14,16,0.8)', fontFamily: sans,
+  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(16,20,32,0.8)', fontFamily: sans,
 };
 
 const creditsBackdrop: React.CSSProperties = {
@@ -354,15 +354,15 @@ const creditsBackdrop: React.CSSProperties = {
 const creditsCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '30px 34px',
   borderRadius: 4, width: 'min(420px, 90vw)', textAlign: 'center',
-  background: '#150e10', border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
+  background: '#12161f', border: `1px solid ${C.border}`, borderTop: '2px solid #a86bff',
   boxShadow: '0 18px 40px rgba(0,0,0,0.5)',
 };
-const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 32, fontWeight: 700, margin: '2px 0 8px', color: '#f3eee6', letterSpacing: 1 };
+const creditsTitle: React.CSSProperties = { fontFamily: serif, fontSize: 32, fontWeight: 700, margin: '2px 0 8px', color: '#eef2fb', letterSpacing: 1 };
 const creditsLine: React.CSSProperties = { margin: 0, fontSize: 14, color: C.text };
 const creditsSmall: React.CSSProperties = { margin: '10px 0 4px', fontSize: 12.5, color: C.faint, lineHeight: 1.5 };
 const creditsClose: React.CSSProperties = {
-  marginTop: 14, padding: '10px 24px', fontSize: 14, fontWeight: 700, color: '#f4e9cb', cursor: 'pointer',
-  border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans, background: '#9c3b28',
+  marginTop: 14, padding: '10px 24px', fontSize: 14, fontWeight: 700, color: '#f4f0ff', cursor: 'pointer',
+  border: '1px solid #7a52c8', borderRadius: 4, fontFamily: sans, background: '#a86bff',
 };
 const inviteGhost: React.CSSProperties = {
   marginTop: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',

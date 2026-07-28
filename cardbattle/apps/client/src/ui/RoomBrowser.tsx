@@ -270,16 +270,16 @@ const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
   fontFamily: sans, color: C.text, overflow: 'hidden',
-  background: 'linear-gradient(180deg, #170d0d 0%, #0c0709 60%, #050304 100%)',
+  background: 'linear-gradient(180deg, #101422 0%, #0a0d16 60%, #06080f 100%)',
 };
 const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
 const atmosGlow: React.CSSProperties = {
   position: 'absolute', inset: 0,
   background:
-    'radial-gradient(120% 70% at 50% -8%, rgba(242,184,94,0.16), transparent 55%),' +
-    'radial-gradient(90% 60% at 50% 0%, rgba(158,58,40,0.14), transparent 60%),' +
+    'radial-gradient(120% 70% at 50% -8%, rgba(168,107,255,0.16), transparent 55%),' +
+    'radial-gradient(90% 60% at 50% 0%, rgba(55,224,160,0.10), transparent 60%),' +
     'radial-gradient(80% 50% at 50% 4%, rgba(74,48,86,0.12), transparent 62%),' +
-    'radial-gradient(100% 80% at 50% 110%, rgba(132,44,32,0.10), transparent 60%)',
+    'radial-gradient(100% 80% at 50% 110%, rgba(90,60,190,0.12), transparent 60%)',
 };
 const atmosVignette: React.CSSProperties = {
   position: 'absolute', inset: 0,
@@ -299,8 +299,8 @@ const kicker: React.CSSProperties = {
 };
 const heading: React.CSSProperties = {
   margin: 0, fontFamily: serif, fontSize: 'clamp(30px, 5.4vw, 46px)', fontWeight: 700,
-  letterSpacing: 2, color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10, 0 6px 22px rgba(0,0,0,0.6)',
+  letterSpacing: 2, color: '#eef2fb',
+  textShadow: '0 2px 0 #0d1019, 0 6px 22px rgba(0,0,0,0.6)',
 };
 const flourish: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, width: 'clamp(200px, 30vw, 340px)', margin: '2px 0' };
 const flourishRule: React.CSSProperties = {
@@ -312,14 +312,14 @@ const sub: React.CSSProperties = { margin: '4px 0 0', fontSize: 15, color: C.dim
 const cols: React.CSSProperties = { display: 'flex', gap: 22, width: '100%', alignItems: 'flex-start', flexWrap: 'wrap' };
 const panel: React.CSSProperties = {
   flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', borderRadius: 4, overflow: 'hidden',
-  background: 'linear-gradient(180deg, rgba(38,28,17,0.82), rgba(20,13,9,0.78))',
-  border: `1px solid ${C.border}`, borderTop: '2px solid #a4762f',
-  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,225,170,0.05)',
+  background: 'linear-gradient(180deg, rgba(30,38,58,0.82), rgba(16,20,32,0.78))',
+  border: `1px solid ${C.border}`, borderTop: '2px solid #a86bff',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(150,180,230,0.05)',
 };
 const winBar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', padding: '16px 20px', fontFamily: serif, fontSize: 18, fontWeight: 700,
-  color: '#f3eee6', letterSpacing: 1.5, borderBottom: `1px solid ${C.border}`,
-  background: 'linear-gradient(180deg, rgba(60,32,20,0.35), transparent)',
+  color: '#eef2fb', letterSpacing: 1.5, borderBottom: `1px solid ${C.border}`,
+  background: 'linear-gradient(180deg, rgba(40,32,64,0.35), transparent)',
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
@@ -331,12 +331,12 @@ const empty: React.CSSProperties = { color: C.faint, fontSize: 15, fontFamily: s
 const roomRow: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: 'auto 1fr auto auto', alignItems: 'center', gap: 14,
   padding: '12px 14px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
-  background: 'rgba(224,170,70,0.02)', border: `1px solid ${C.border}`, color: C.text, fontFamily: sans,
+  background: 'rgba(120,140,200,0.02)', border: `1px solid ${C.border}`, color: C.text, fontFamily: sans,
 };
 const rMedallion: React.CSSProperties = {
   width: 38, height: 38, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: '50%',
-  background: 'radial-gradient(circle at 50% 35%, rgba(90,64,30,0.9), rgba(28,18,10,0.9))',
-  border: '1px solid rgba(164,118,47,0.55)', boxShadow: 'inset 0 1px 0 rgba(255,225,170,0.14)',
+  background: 'radial-gradient(circle at 50% 35%, rgba(58,72,110,0.9), rgba(16,20,32,0.9))',
+  border: '1px solid rgba(120,90,190,0.55)', boxShadow: 'inset 0 1px 0 rgba(200,180,255,0.14)',
 };
 const rTitleCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' };
 const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };

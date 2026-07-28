@@ -223,27 +223,27 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
   background:
-    'radial-gradient(70% 60% at 50% 30%, rgba(126,38,62,0.22), transparent 70%),' +
-    'rgba(6,3,5,0.8)',
+    'radial-gradient(70% 60% at 50% 30%, rgba(120,70,200,0.22), transparent 70%),' +
+    'rgba(4,6,12,0.8)',
   backdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(860px, 96vw)', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  borderRadius: 4, background: '#150e10',
-  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a4762f', color: C.text,
+  borderRadius: 4, background: '#12161f',
+  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a86bff', color: C.text,
   boxShadow: '0 20px 44px rgba(0,0,0,0.55)',
 };
 const head: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
-  background: 'rgba(126,38,62,0.06)',
+  background: 'rgba(168,107,255,0.06)',
 };
 const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
 const hdKicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
 };
 const hd: React.CSSProperties = {
-  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10',
+  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#eef2fb',
+  textShadow: '0 2px 0 #0d1019',
 };
 const goldPill: React.CSSProperties = {
   fontFamily: mono, fontSize: 15, fontWeight: 700, color: '#e6cf96', padding: '5px 12px', borderRadius: 4,
@@ -259,7 +259,7 @@ const body: React.CSSProperties = { display: 'flex', gap: 18, padding: 18, overf
 // Deck column
 const deckCol: React.CSSProperties = {
   width: 268, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
-  background: 'rgba(20,13,9,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 12,
+  background: 'rgba(16,20,32,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 12,
 };
 const slotBar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 5 };
 function slotChip(on: boolean, active: boolean): React.CSSProperties {
@@ -288,7 +288,7 @@ function deleteBtn(active: boolean): React.CSSProperties {
   };
 }
 const deckHeadRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' };
-const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#f3eee6' };
+const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#eef2fb' };
 function deckCount(valid: boolean): React.CSSProperties {
   return { fontFamily: mono, fontSize: 15, fontWeight: 800, color: valid ? C.you : C.dim };
 }
@@ -304,7 +304,7 @@ const deckRow: React.CSSProperties = {
 function costChip(rarity: Rarity): React.CSSProperties {
   return {
     width: 22, height: 22, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 3,
-    fontFamily: mono, fontSize: 12, fontWeight: 800, color: '#f3eee6',
+    fontFamily: mono, fontSize: 12, fontWeight: 800, color: '#eef2fb',
     background: 'rgba(30,52,74,0.5)', border: `1px solid ${RARITY_BORDER[rarity]}`,
   };
 }
@@ -322,7 +322,7 @@ function saveBtn(active: boolean): React.CSSProperties {
 
 // Collection column
 const collCol: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 };
-const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#f3eee6' };
+const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#eef2fb' };
 const grid: React.CSSProperties = {
   overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(122px, 1fr))',
   gap: 10, alignContent: 'start', paddingRight: 4,

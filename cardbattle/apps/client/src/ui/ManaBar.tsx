@@ -89,7 +89,7 @@ function Gem({ on, lit, fresh }: { on: boolean; lit: boolean; fresh: boolean }) 
 const wrap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 20,
   padding: 'clamp(14px, 1.6vw, 20px) clamp(18px, 2vw, 26px)', borderRadius: 6,
-  background: 'rgba(34,26,15,0.94)',
+  background: 'rgba(28,34,51,0.94)',
   border: '1px solid #5a4820',
   boxShadow: '0 10px 24px rgba(0,0,0,0.45)',
 };
@@ -100,6 +100,7 @@ const num: React.CSSProperties = {
 };
 const slash: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(16px, 1.5vw, 21px)', fontWeight: 700, color: '#c2a878', marginTop: 3 };
 const label: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 15px)', letterSpacing: 4, color: '#c2a878', marginTop: 7 };
+// Mana gems + readout stay warm gold — gold is the jewel palette's `rare` accent (a gem), framed by a cooled slate holder.
 const crystals: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 6, maxWidth: 228, alignContent: 'center',
 };

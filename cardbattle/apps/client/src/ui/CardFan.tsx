@@ -273,7 +273,7 @@ const dragGhostName: React.CSSProperties = { fontSize: 13, fontWeight: 700, colo
 const dragGhostStat: React.CSSProperties = { fontFamily: mono, fontSize: 13, fontWeight: 800, color: '#f0e0b4' };
 const dragHint: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: C.you,
-  padding: '3px 8px', borderRadius: 6, background: 'rgba(20,13,9,0.92)', border: `1px solid ${C.you}66`,
+  padding: '3px 8px', borderRadius: 6, background: 'rgba(16,20,32,0.92)', border: `1px solid ${C.you}66`,
 };
 // Per-rarity accents: a glow behind the art window, an optional foil sheen streak, and a
 // nameplate tint. Keeps the grimy palette but signals card power at a glance.
@@ -350,7 +350,7 @@ const RARITY_META: Record<string, { label: string; color: string }> = {
 const tip: React.CSSProperties = {
   position: 'absolute', bottom: '108%', left: '50%', transform: 'translateX(-50%)',
   width: 'clamp(168px, 16vw, 216px)', padding: '11px 12px 10px', borderRadius: 11, zIndex: 20,
-  background: 'linear-gradient(180deg, rgba(42,32,19,0.99), rgba(20,13,9,0.99))',
+  background: 'linear-gradient(180deg, rgba(30,38,58,0.99), rgba(16,20,32,0.99))',
   border: '1px solid', pointerEvents: 'none', textAlign: 'left', overflow: 'hidden',
 };
 // A thin rarity-tinted light seam along the top rim of the panel.

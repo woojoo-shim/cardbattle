@@ -39,14 +39,14 @@ function Crest({ size }: { size: number }) {
           <stop offset="1" stopColor="#b98a3e" />
         </linearGradient>
         <radialGradient id="cbAbyss" cx="0.5" cy="0.4" r="0.75">
-          <stop offset="0" stopColor="#3a2015" />
-          <stop offset="0.6" stopColor="#1c0f0a" />
-          <stop offset="1" stopColor="#0a0504" />
+          <stop offset="0" stopColor="#26314a" />
+          <stop offset="0.6" stopColor="#141b2b" />
+          <stop offset="1" stopColor="#0a0d15" />
         </radialGradient>
         <radialGradient id="cbGem" cx="0.5" cy="0.4" r="0.7">
-          <stop offset="0" stopColor="#fff3d8" />
-          <stop offset="0.4" stopColor="#f0b45a" />
-          <stop offset="1" stopColor="#b0642a" />
+          <stop offset="0" stopColor="#f4f0ff" />
+          <stop offset="0.4" stopColor="#a86bff" />
+          <stop offset="1" stopColor="#6a3fb0" />
         </radialGradient>
         <linearGradient id="cbBlade" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#fbf3e2" />
@@ -75,8 +75,8 @@ function Crest({ size }: { size: number }) {
       <Sword rot={-26} />
 
       {/* rune gem over the cross */}
-      <polygon points="64,46 73,63 64,82 55,63" fill="url(#cbGem)" stroke="#fff3d8" strokeWidth="1" strokeLinejoin="round" />
-      <polygon points="64,46 73,63 64,63 55,63" fill="#fff3d8" opacity="0.55" />
+      <polygon points="64,46 73,63 64,82 55,63" fill="url(#cbGem)" stroke="#e2d0ff" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="64,46 73,63 64,63 55,63" fill="#f4f0ff" opacity="0.55" />
       <circle className="cb-crest-spark" cx="64" cy="61" r="2.6" fill="#ffffff" opacity="0.95" />
 
       {/* bottom point highlight */}

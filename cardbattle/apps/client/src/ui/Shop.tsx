@@ -192,29 +192,29 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
 
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',
-  // Oxblood haze over wet black, matching the menu's back-room mood.
+  // Amethyst haze over wet black, matching the menu's jewel mood.
   background:
-    'radial-gradient(70% 60% at 50% 30%, rgba(126,38,62,0.22), transparent 70%),' +
-    'rgba(6,3,5,0.8)',
+    'radial-gradient(70% 60% at 50% 30%, rgba(120,70,200,0.22), transparent 70%),' +
+    'rgba(4,6,12,0.8)',
   backdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(720px, 94vw)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
-  borderRadius: 4, background: '#150e10',
-  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a4762f', color: C.text,
+  borderRadius: 4, background: '#12161f',
+  border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a86bff', color: C.text,
   boxShadow: '0 20px 44px rgba(0,0,0,0.55)',
 };
 const head: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderBottom: `1px solid ${C.border}`,
-  background: 'rgba(126,38,62,0.06)',
+  background: 'rgba(168,107,255,0.06)',
 };
 const hdCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 3, flex: 1 };
 const hdKicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
 };
 const hd: React.CSSProperties = {
-  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#f3eee6',
-  textShadow: '0 2px 0 #1a0f10',
+  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#eef2fb',
+  textShadow: '0 2px 0 #0d1019',
 };
 const goldPill: React.CSSProperties = {
   fontFamily: mono, fontSize: 15, fontWeight: 700, color: '#e6cf96', padding: '5px 12px', borderRadius: 4,

@@ -63,20 +63,20 @@ const wrap: React.CSSProperties = {
 const grid: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
   padding: 12, borderRadius: 16,
-  background: 'linear-gradient(180deg, rgba(40,30,18,0.98), rgba(19,12,7,0.98))',
+  background: 'linear-gradient(180deg, rgba(30,38,58,0.98), rgba(12,16,26,0.98))',
   border: `1.5px solid ${C.border}`, boxShadow: '0 14px 34px rgba(0,0,0,0.5)',
   animation: 'cb-emote-pop 0.2s ease',
 };
 const cell: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
   width: 74, padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
-  background: 'rgba(156,59,40,0.06)', border: `1px solid ${C.border}`,
-  color: '#ece0c6', fontFamily: sans, transition: 'background .15s, border-color .15s',
+  background: 'rgba(168,107,255,0.06)', border: `1px solid ${C.border}`,
+  color: '#eef2fb', fontFamily: sans, transition: 'background .15s, border-color .15s',
 };
 const cellLabel: React.CSSProperties = { fontSize: 12, fontWeight: 700, letterSpacing: 0.3, whiteSpace: 'nowrap' };
 const trigger: React.CSSProperties = {
   width: 54, height: 54, borderRadius: '50%', border: 'none',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'linear-gradient(100deg,#b8492f,#9c3b28 56%,#7f2f1f)',
-  boxShadow: '0 8px 20px rgba(60,20,10,0.4)', transition: 'opacity .2s, transform .15s',
+  background: 'linear-gradient(100deg,#c07bff,#a86bff 56%,#7a52c8)',
+  boxShadow: '0 8px 20px rgba(40,20,70,0.4)', transition: 'opacity .2s, transform .15s',
 };
