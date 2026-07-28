@@ -530,12 +530,12 @@ const screen: React.CSSProperties = {
   // the far wall up top for cool/warm colour contrast. A vignette pulls the corners to black. This
   // is layered PIGMENT — muted printed tones, no neon — so the board reads coloured, not grey.
   background:
-    'radial-gradient(44% 32% at 50% 42%, rgba(242,184,94,0.18), transparent 60%),' +   // hot amber core on the table
-    'radial-gradient(72% 58% at 50% 44%, rgba(158,58,40,0.16), transparent 70%),' +    // oxblood halo around it
-    'radial-gradient(118% 84% at 50% 4%, rgba(74,48,86,0.14), transparent 58%),' +     // dusty plum wash up the far wall
-    'radial-gradient(92% 78% at 50% 110%, rgba(132,44,32,0.18), transparent 60%),' +   // warm burgundy floor glow
-    'radial-gradient(86% 80% at 50% 46%, transparent 46%, rgba(0,0,0,0.62) 100%),' +   // vignette frames the corners
-    'linear-gradient(180deg, #1c1016 0%, #0d0709 56%, #050205 100%)',
+    'radial-gradient(46% 34% at 50% 42%, rgba(250,196,104,0.24), transparent 60%),' +  // hot amber core on the table (brighter)
+    'radial-gradient(74% 60% at 50% 44%, rgba(178,62,42,0.18), transparent 70%),' +    // ember-oxblood halo around it
+    'radial-gradient(120% 88% at 50% 2%, rgba(70,58,124,0.20), transparent 60%),' +    // cooler indigo-plum wash up the far wall — strong warm/cool contrast
+    'radial-gradient(94% 80% at 50% 110%, rgba(148,50,36,0.22), transparent 60%),' +   // warm burgundy floor glow
+    'radial-gradient(86% 80% at 50% 46%, transparent 44%, rgba(0,0,0,0.66) 100%),' +   // vignette frames the corners
+    'linear-gradient(180deg, #1a1220 0%, #0c0709 56%, #030204 100%)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};

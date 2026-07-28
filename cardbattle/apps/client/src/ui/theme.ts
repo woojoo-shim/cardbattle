@@ -3,19 +3,19 @@
  * pigment (sage ink, ochre-red, gold-leaf, faded teal) — NO fluorescent neon and no glow spam.
  * Depth comes from luminance layers + 1px borders + soft drop shadows, like ink on old stock. */
 export const C = {
-  void: '#191209', // dark walnut desk the parchment rests on
-  stage: '#211810',
-  panel: '#2a2013', // aged leather / worn card-stock surface
-  panelHi: '#382b1a',
-  border: '#4a3b27', // scuffed leather edge
-  borderHi: '#6a5539',
-  text: '#ece0c6', // warm parchment ink
-  dim: '#b4a583',
-  faint: '#6f6047',
-  you: '#8f9d4f', // me / my turn / heal — muted sage ink (was fluorescent green)
-  enemy: '#b0462f', // opponents / damage / danger — ochre blood-red, printed not neon
-  rare: '#c39a4c', // rare/epic cards, victory — gold-leaf / lamp light
-  magic: '#71918a', // status effects, magic — faded teal ink
+  void: '#120c06',  // deep walnut desk — darkened so lit surfaces separate cleanly
+  stage: '#20160d',
+  panel: '#342714',  // aged leather / worn card-stock surface — brighter so it lifts off the void
+  panelHi: '#4a3720',
+  border: '#5f4b30',  // scuffed leather edge — raised so panels read a crisp outline
+  borderHi: '#8f7047',
+  text: '#f6edd7',  // warm parchment ink — crisper for legibility
+  dim: '#c6b78f',
+  faint: '#786849',
+  you: '#a8c84e',    // me / my turn / heal — vivid sage-lime (readable, not fluorescent)
+  enemy: '#d44a2e',  // opponents / damage / danger — bright ember blood-red
+  rare: '#e6b84e',   // rare/epic cards, victory — gleaming gold-leaf / lamp light
+  magic: '#5fb8a8',  // status effects, magic — clean jade-teal cool counterpoint to the warm surfaces
 } as const;
 
 export const RARITY_BORDER: Record<string, string> = {

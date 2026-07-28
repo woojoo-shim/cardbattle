@@ -224,7 +224,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
               {!p.connected && p.alive && <span style={{ ...badge, ...badgeWarn }}><Icon name="warn" size={12} /></span>}
               <AvatarArt avatar={p.avatar} tint={BOT_TINTS[p.seat % BOT_TINTS.length]} variant={p.seat} size={74} />
               {!p.alive && <span style={skull}><Icon name="skull" size={30} /></span>}
-              {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(143,157,79,0.4)' : 'rgba(176,70,47,0.35)'}, transparent 70%)` }} />}
+              {isActive && p.alive && <span style={{ ...spot, background: `radial-gradient(ellipse, ${isMe ? 'rgba(168,200,78,0.42)' : 'rgba(212,74,46,0.4)'}, transparent 70%)` }} />}
             </div>
 
             {p.alive && p.statuses.length > 0 && (
@@ -304,15 +304,15 @@ const felt: React.CSSProperties = {
   transform: 'translate(-50%,-50%)',
   width: '94%', height: '94%', borderRadius: 28, overflow: 'hidden',
   background:
-    'radial-gradient(circle at 50% 46%, rgba(240,188,102,0.22), transparent 56%),' + // warm overhead light pool
-    'radial-gradient(circle at 50% 44%, rgba(255,226,168,0.10), transparent 50%),' + // hot centre catch-light on the baize
-    'radial-gradient(circle at 50% 50%, transparent 60%, rgba(72,46,86,0.24) 100%),' + // cool plum edge tint (ties to the bg wall wash)
-    'radial-gradient(circle at 50% 48%, #4a2325 0%, #2c1214 52%, #120709 100%)',       // richer burgundy felt body: lit centre → black rim
-  border: '2px solid rgba(206,158,76,0.36)',
+    'radial-gradient(circle at 50% 46%, rgba(248,196,110,0.28), transparent 58%),' + // warm overhead light pool (brighter, wider)
+    'radial-gradient(circle at 50% 44%, rgba(255,232,176,0.14), transparent 50%),' + // hot centre catch-light on the baize
+    'radial-gradient(circle at 50% 50%, transparent 56%, rgba(86,52,104,0.30) 100%),' + // cooler plum edge tint — temperature contrast vs the warm centre
+    'radial-gradient(circle at 50% 48%, #6e2c30 0%, #3a1618 50%, #100608 100%)',       // richer wine-red felt body: lit centre → black rim
+  border: '2px solid rgba(224,178,84,0.46)',
   boxShadow:
-    'inset 0 0 6px 1px rgba(240,208,132,0.30),' + // brass rim highlight
-    'inset 0 0 180px 24px rgba(0,0,0,0.58),' +    // felt edge falls to black
-    '0 24px 60px rgba(0,0,0,0.6)',                // table floats above the floor
+    'inset 0 0 8px 1px rgba(248,214,140,0.38),' + // brass rim highlight
+    'inset 0 0 180px 24px rgba(0,0,0,0.56),' +    // felt edge falls to black
+    '0 24px 60px rgba(0,0,0,0.62)',               // table floats above the floor
 };
 // The engraved house medallion at the table centre. Face-on now (top-down view) and low-opacity
 // so it feels branded INTO the baize — an anchor for the dead middle, never competing with the
