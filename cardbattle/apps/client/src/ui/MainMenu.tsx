@@ -41,12 +41,12 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
-  // First-timers are offered a guided practice match once, automatically. A localStorage flag keeps
-  // the invite from re-appearing every visit; 플레이 방법 launches the same guided game afterwards.
+  // First-timers are dropped straight into the guided practice match so they can learn by playing.
+  // A localStorage flag keeps this from firing on every visit; 플레이 방법 replays the same game after.
   useEffect(() => {
     try {
-      if (!localStorage.getItem(INTRO_SEEN_KEY)) { setInviteOpen(true); localStorage.setItem(INTRO_SEEN_KEY, '1'); }
-    } catch { /* private mode / storage disabled: just skip the auto-invite */ }
+      if (!localStorage.getItem(INTRO_SEEN_KEY)) { localStorage.setItem(INTRO_SEEN_KEY, '1'); onStartCoach(); }
+    } catch { /* private mode / storage disabled: just skip the auto-launch */ }
   }, []);
 
   const act = (k: ItemKey) => {
