@@ -186,7 +186,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
           : recede
           ? 'brightness(0.62) saturate(0.8)'
           : 'none';
-        const seatOpacity = !p.alive ? 0.4 : isActive ? 1 : recede ? 0.58 : isMe ? 1 : 0.9;
+        const seatOpacity = !p.alive ? 0.62 : isActive ? 1 : recede ? 0.58 : isMe ? 1 : 0.9;
         const seatScale = isActive ? 1.12 : recede ? 0.96 : 1;
 
         return (
@@ -202,9 +202,15 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
               filter: seatFilter,
               opacity: seatOpacity,
               transform: `translate(-50%,-50%) scale(${seatScale})`,
-              zIndex: isActive ? 8 : recede ? 3 : 4,
+              zIndex: !p.alive ? 9 : isActive ? 8 : recede ? 3 : 4,
             }}
           >
+            {/* A bold skull bobbing above a fallen player's head — the clear "이 사람은 죽었다" marker. */}
+            {!p.alive && (
+              <span style={deathSkull} aria-label="탈락">
+                <Icon name="skull" size={34} color="#e7e0ec" />
+              </span>
+            )}
             <div
               data-portrait={p.id}
               style={{
@@ -487,6 +493,12 @@ const statusTurns: React.CSSProperties = {
 };
 const skull: React.CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,
+};
+// The bold knockout skull that floats and bobs just above a fallen player's portrait.
+const deathSkull: React.CSSProperties = {
+  position: 'absolute', top: -22, left: '50%', zIndex: 14, pointerEvents: 'none',
+  filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.85)) drop-shadow(0 0 9px rgba(255,255,255,0.45))',
+  animation: 'cb-death-skull 2.6s ease-in-out infinite',
 };
 const spot: React.CSSProperties = {
   position: 'absolute', left: '50%', bottom: -22, transform: 'translateX(-50%)',

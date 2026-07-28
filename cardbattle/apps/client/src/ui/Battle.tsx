@@ -201,6 +201,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       <SceneLife />
       <BoardFrame />
       <VfxLayer events={events} players={ui.players} myId={myId} />
+      {attacker && <AttackArrow attackerId={attacker} />}
       <EmoteLayer emotes={emotes} />
       {turnFlash > 0 && (
         <div key={turnFlash} style={turnBanner} aria-hidden>
@@ -279,6 +280,75 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     </div>
   );
 }
+
+// The Hearthstone-style red attack arrow. Once a minion is armed to attack, a bowed crimson
+// bolt springs from that minion and its head tracks the cursor, so aiming at an enemy portrait
+// feels like winding up a strike. Pointer-transparent full-screen SVG that re-reads the armed
+// minion's on-screen centre (via its data-pid box) on every cursor move, so table drift/parallax
+// never leaves the tail behind. Turns a brighter, hotter red once the cursor is over a valid
+// target, giving a clear "release here" read.
+function AttackArrow({ attackerId }: { attackerId: string }) {
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  const [onTarget, setOnTarget] = useState(false);
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      const src = document.querySelector(`[data-pid="${attackerId}"]`);
+      if (src) {
+        const r = src.getBoundingClientRect();
+        setOrigin({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }
+      setCursor({ x: e.clientX, y: e.clientY });
+      // Is the cursor over an enemy portrait/minion (a clickable data-pid that isn't the attacker)?
+      const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-pid]');
+      const overId = under?.getAttribute('data-pid');
+      setOnTarget(!!overId && overId !== attackerId);
+    };
+    window.addEventListener('pointermove', move);
+    return () => window.removeEventListener('pointermove', move);
+  }, [attackerId]);
+
+  if (!origin || !cursor) return null;
+
+  // A quadratic bezier bowed sideways off the straight tail→head line, so the bolt arcs like a
+  // drawn bowstring rather than a flat ruler.
+  const dx = cursor.x - origin.x;
+  const dy = cursor.y - origin.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len; // perpendicular (bow) direction
+  const ny = dx / len;
+  const bow = Math.min(90, len * 0.22);
+  const mx = origin.x + dx * 0.5 + nx * bow;
+  const my = origin.y + dy * 0.5 + ny * bow;
+  // Angle of the final approach (control point → head) so the arrowhead points along the curve.
+  const ang = Math.atan2(cursor.y - my, cursor.x - mx);
+  const hot = onTarget ? '#ff2b3d' : '#e04452';
+  const glow = onTarget ? '#ff5a68' : '#c0303c';
+
+  return (
+    <svg style={arrowSvg} aria-hidden>
+      <defs>
+        <filter id="cb-arrow-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="0" stdDeviation={onTarget ? 6 : 3.5} floodColor={glow} floodOpacity="0.9" />
+        </filter>
+      </defs>
+      <path
+        d={`M ${origin.x} ${origin.y} Q ${mx} ${my} ${cursor.x} ${cursor.y}`}
+        fill="none" stroke={hot} strokeWidth={onTarget ? 9 : 7} strokeLinecap="round"
+        strokeDasharray="2 14" filter="url(#cb-arrow-glow)"
+        className="cb-attack-flow" opacity={0.95}
+      />
+      <g transform={`translate(${cursor.x} ${cursor.y}) rotate(${(ang * 180) / Math.PI})`} filter="url(#cb-arrow-glow)">
+        <path d={`M 0 0 L ${onTarget ? -30 : -24} ${onTarget ? -15 : -12} L ${onTarget ? -21 : -17} 0 L ${onTarget ? -30 : -24} ${onTarget ? 15 : 12} Z`} fill={hot} />
+      </g>
+    </svg>
+  );
+}
+const arrowSvg: React.CSSProperties = {
+  position: 'fixed', inset: 0, width: '100vw', height: '100vh',
+  pointerEvents: 'none', zIndex: 45, overflow: 'visible',
+};
 
 // The learn-by-playing coach. A single contextual callout, anchored to whatever the newcomer
 // should touch next, that advances by watching the real game state: wait for your turn → play a

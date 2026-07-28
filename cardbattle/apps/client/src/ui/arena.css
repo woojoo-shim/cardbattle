@@ -381,6 +381,15 @@
   0%, 100% { filter: brightness(1)   drop-shadow(0 0 2px rgba(176,70,47,0.55)); }
   50%      { filter: brightness(1.35) drop-shadow(0 0 8px rgba(176,70,47,0.95)); }
 }
+/* A skull floating above a fallen player's head — bobs gently so a knockout reads at a glance. */
+@keyframes cb-death-skull {
+  0%, 100% { transform: translate(-50%, 0) rotate(-4deg); }
+  50%      { transform: translate(-50%, -5px) rotate(4deg); }
+}
+/* The red targeting arrow's energy flowing from the attacker toward the cursor (dash march). */
+@keyframes cb-attack-flow {
+  to { stroke-dashoffset: -28; }
+}
 /* The acting portrait flares up then eases back as a card is played (smooth glow, no flicker). */
 @keyframes cb-cast {
   0%   { filter: brightness(1); }
