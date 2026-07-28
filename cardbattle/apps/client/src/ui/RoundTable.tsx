@@ -134,8 +134,19 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
-                  {m.taunt && <span style={minionKw} title="수호">🛡</span>}
-                  {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="가호">✦</span>}
+                  {(() => {
+                    const kws = KEYWORD_ORDER.filter((k) => m[k]);
+                    if (!kws.length) return null;
+                    return (
+                      <div style={kwRow}>
+                        {kws.map((k) => (
+                          <span key={k} style={{ ...kwChip, color: KEYWORD_META[k].color, borderColor: KEYWORD_META[k].color }} title={KEYWORD_META[k].desc}>
+                            {KEYWORD_META[k].label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   {hoverMinion === m.id && def && (
                     <div style={minionTip}>
                       <span style={minionTipEdge} aria-hidden />
@@ -440,9 +451,23 @@ const minionStat: React.CSSProperties = {
 };
 const minionAtk: React.CSSProperties = { left: -8, color: '#f2c14a' };
 const minionHp: React.CSSProperties = { right: -8 };
-const minionKw: React.CSSProperties = {
-  position: 'absolute', top: -8, right: -6, fontSize: 20, lineHeight: 1,
-  filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.8))',
+// Passive keywords a minion carries, shown as readable name chips (수호/쇄도/가호/부식/착취)
+// so players don't have to hover to learn what a minion does.
+const KEYWORD_ORDER = ['taunt', 'charge', 'divineShield', 'poisonous', 'lifesteal'] as const;
+const KEYWORD_META: Record<typeof KEYWORD_ORDER[number], { label: string; color: string; desc: string }> = {
+  taunt: { label: '수호', color: '#e0c060', desc: '적은 먼저 이 하수인을 공격해야 한다.' },
+  charge: { label: '쇄도', color: '#f0a24a', desc: '소환된 턴에 바로 공격할 수 있다.' },
+  divineShield: { label: '가호', color: '#f0e096', desc: '첫 피해를 무효화한다.' },
+  poisonous: { label: '부식', color: '#9fb066', desc: '피해를 준 하수인을 즉사시킨다.' },
+  lifesteal: { label: '착취', color: '#d0839a', desc: '가한 피해만큼 내 영웅을 회복한다.' },
+};
+const kwRow: React.CSSProperties = {
+  display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', maxWidth: '100%', lineHeight: 1,
+};
+const kwChip: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', height: 14, padding: '0 3px', borderRadius: 4,
+  fontSize: 9, fontFamily: sans, fontWeight: 800, border: '1px solid', background: 'rgba(12,7,5,0.9)',
+  letterSpacing: '-0.03em',
 };
 // Ongoing turn-start effects, shown as a compact chip row under the portrait.
 const STATUS_META: Record<string, { color: string; icon: 'poison' | 'reflect' | 'regen' | 'zzz' }> = {
