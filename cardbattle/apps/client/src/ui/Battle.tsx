@@ -457,7 +457,7 @@ const lightShaft: React.CSSProperties = {
 const floorPool: React.CSSProperties = {
   position: 'absolute', left: '50%', bottom: '-8%', width: '80%', height: '40%',
   transform: 'translateX(-50%)', borderRadius: '50%', filter: 'blur(52px)',
-  background: 'radial-gradient(ellipse at 50% 60%, rgba(198,86,48,0.18), transparent 68%)',
+  background: 'radial-gradient(ellipse at 50% 60%, rgba(40,170,130,0.16), transparent 68%)',
 };
 const mote: React.CSSProperties = {
   position: 'absolute', borderRadius: '50%',
@@ -486,24 +486,24 @@ function BoardFrame() {
 const FR = 20; // plank thickness
 const grainH = 'repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
 const grainV = 'repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
-const woodH = 'linear-gradient(180deg,#4c3420 0%,#3a2711 46%,#281809 100%)';
-const woodV = 'linear-gradient(90deg,#4c3420 0%,#3a2711 46%,#281809 100%)';
+const woodH = 'linear-gradient(180deg,#2c3549 0%,#1e2636 46%,#12161f 100%)';
+const woodV = 'linear-gradient(90deg,#2c3549 0%,#1e2636 46%,#12161f 100%)';
 const boardFrame: React.CSSProperties = { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 };
 const framePlankTop: React.CSSProperties = {
   position: 'absolute', top: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
-  boxShadow: 'inset 0 2px 3px rgba(255,214,150,0.18), inset 0 -6px 11px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.45)',
+  boxShadow: 'inset 0 2px 3px rgba(150,180,230,0.18), inset 0 -6px 11px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.45)',
 };
 const framePlankBottom: React.CSSProperties = {
   position: 'absolute', bottom: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
-  boxShadow: 'inset 0 -2px 3px rgba(255,214,150,0.13), inset 0 6px 11px rgba(0,0,0,0.55), 0 -3px 12px rgba(0,0,0,0.45)',
+  boxShadow: 'inset 0 -2px 3px rgba(150,180,230,0.13), inset 0 6px 11px rgba(0,0,0,0.55), 0 -3px 12px rgba(0,0,0,0.45)',
 };
 const framePlankLeft: React.CSSProperties = {
   position: 'absolute', top: 0, bottom: 0, left: 0, width: FR, background: `${grainV}, ${woodV}`,
-  boxShadow: 'inset 2px 0 3px rgba(255,214,150,0.16), inset -6px 0 11px rgba(0,0,0,0.55), 3px 0 12px rgba(0,0,0,0.45)',
+  boxShadow: 'inset 2px 0 3px rgba(150,180,230,0.16), inset -6px 0 11px rgba(0,0,0,0.55), 3px 0 12px rgba(0,0,0,0.45)',
 };
 const framePlankRight: React.CSSProperties = {
   position: 'absolute', top: 0, bottom: 0, right: 0, width: FR, background: `${grainV}, ${woodV}`,
-  boxShadow: 'inset -2px 0 3px rgba(255,214,150,0.13), inset 6px 0 11px rgba(0,0,0,0.55), -3px 0 12px rgba(0,0,0,0.45)',
+  boxShadow: 'inset -2px 0 3px rgba(150,180,230,0.13), inset 6px 0 11px rgba(0,0,0,0.55), -3px 0 12px rgba(0,0,0,0.45)',
 };
 // The carved gold molding line just inside the wood.
 const frameBead: React.CSSProperties = {
@@ -525,17 +525,17 @@ const frameCorner: React.CSSProperties = {
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
-  // Painted like a candlelit fighting pit: a hot amber core pools on the table, an oxblood halo
-  // bleeds out around it, a warm burgundy glow rises off the floor, and a dusty plum shadow washes
-  // the far wall up top for cool/warm colour contrast. A vignette pulls the corners to black. This
-  // is layered PIGMENT — muted printed tones, no neon — so the board reads coloured, not grey.
+  // Painted like a jewelled crypt-arena on obsidian: a warm gold core pools on the table (the one
+  // warm note for contrast), an amethyst halo bleeds out around it, a deep sapphire wash climbs the
+  // far wall up top, and an emerald glow rises off the floor for cool jewel-tone depth. A vignette
+  // pulls the corners to black. Layered saturated GEMSTONE pigment — bright but not fluorescent.
   background:
-    'radial-gradient(46% 34% at 50% 42%, rgba(250,196,104,0.24), transparent 60%),' +  // hot amber core on the table (brighter)
-    'radial-gradient(74% 60% at 50% 44%, rgba(178,62,42,0.18), transparent 70%),' +    // ember-oxblood halo around it
-    'radial-gradient(120% 88% at 50% 2%, rgba(70,58,124,0.20), transparent 60%),' +    // cooler indigo-plum wash up the far wall — strong warm/cool contrast
-    'radial-gradient(94% 80% at 50% 110%, rgba(148,50,36,0.22), transparent 60%),' +   // warm burgundy floor glow
-    'radial-gradient(86% 80% at 50% 46%, transparent 44%, rgba(0,0,0,0.66) 100%),' +   // vignette frames the corners
-    'linear-gradient(180deg, #1a1220 0%, #0c0709 56%, #030204 100%)',
+    'radial-gradient(46% 34% at 50% 42%, rgba(255,207,77,0.18), transparent 60%),' +  // warm gold core on the table (the single warm accent)
+    'radial-gradient(74% 60% at 50% 44%, rgba(138,107,255,0.18), transparent 70%),' + // amethyst halo around it
+    'radial-gradient(120% 88% at 50% 2%, rgba(52,92,170,0.22), transparent 60%),' +   // deep sapphire wash up the far wall
+    'radial-gradient(94% 80% at 50% 110%, rgba(40,170,130,0.16), transparent 60%),' + // emerald floor glow
+    'radial-gradient(86% 80% at 50% 46%, transparent 44%, rgba(0,0,0,0.68) 100%),' +  // vignette frames the corners
+    'linear-gradient(180deg, #141a2a 0%, #0a0d15 56%, #04060b 100%)',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
@@ -545,8 +545,8 @@ const tableRow: React.CSSProperties = {
 const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-  padding: '8px 18px', background: 'rgba(176,70,47,0.18)', border: `1px solid ${C.enemy}`,
-  borderRadius: 4, color: '#e8b4a6', fontSize: 14, zIndex: 16,
+  padding: '8px 18px', background: 'rgba(255,77,94,0.16)', border: `1px solid ${C.enemy}`,
+  borderRadius: 4, color: '#ffc0c6', fontSize: 14, zIndex: 16,
 };
 // The "당신의 턴" onset telegraph. A full-screen, pointer-transparent layer that flashes up once
 // the instant my turn begins, then clears itself out. zIndex sits under the VfxLayer flash (50)
@@ -576,8 +576,8 @@ const turnWord: React.CSSProperties = {
 };
 const errToast: React.CSSProperties = {
   position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-  padding: '8px 16px', background: 'rgba(176,70,47,0.2)', border: `1px solid ${C.enemy}`,
-  borderRadius: 4, color: '#e8b4a6', fontSize: 13, zIndex: 17,
+  padding: '8px 16px', background: 'rgba(255,77,94,0.18)', border: `1px solid ${C.enemy}`,
+  borderRadius: 4, color: '#ffc0c6', fontSize: 13, zIndex: 17,
 };
 // The bottom-RIGHT corner cluster (Hearthstone-style): the draw pile sits just left of the mana
 // gems, both bottom-aligned, so the deck and mana read as one tidy corner group.
@@ -588,30 +588,30 @@ const cornerDock: React.CSSProperties = {
 const deckWrap: React.CSSProperties = { position: 'relative', width: 64, height: 88, cursor: 'default' };
 // Layered card backs, each nudged & tilted a touch, so the widget reads as a physical draw pile.
 const deckCard: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 8, boxSizing: 'border-box' };
-const deckCard3: React.CSSProperties = { ...deckCard, transform: 'translate(-7px,-7px) rotate(-5deg)', background: 'linear-gradient(160deg,#2a2013,#160f08)', border: '1px solid #46381f', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
-const deckCard2: React.CSSProperties = { ...deckCard, transform: 'translate(-3px,-3px) rotate(-2.5deg)', background: 'linear-gradient(160deg,#302516,#1a120a)', border: '1px solid #52422b', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
+const deckCard3: React.CSSProperties = { ...deckCard, transform: 'translate(-7px,-7px) rotate(-5deg)', background: 'linear-gradient(160deg,#1a2233,#0e131f)', border: '1px solid #33405a', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
+const deckCard2: React.CSSProperties = { ...deckCard, transform: 'translate(-3px,-3px) rotate(-2.5deg)', background: 'linear-gradient(160deg,#1f2839,#111826)', border: '1px solid #3d4c68', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' };
 const deckCardFront: React.CSSProperties = {
   ...deckCard, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'linear-gradient(160deg,#3a2a1a,#20160c)', border: '1px solid #6a5231',
-  boxShadow: '0 6px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,238,208,0.1)',
+  background: 'linear-gradient(160deg,#26314a,#141b2b)', border: '1px solid #4a5c80',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,220,255,0.1)',
 };
-// A brass diamond crest on the card back — a quiet emblem so the pile reads as "cards", not a box.
+// A gold diamond crest on the card back — a quiet emblem so the pile reads as "cards", not a box.
 const deckEmblem: React.CSSProperties = {
   width: 30, height: 30, display: 'grid', placeItems: 'center', borderRadius: 6,
-  border: '1px solid rgba(199,154,78,0.5)', color: '#c79a4e', fontSize: 15,
-  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))', background: 'radial-gradient(120% 120% at 50% 30%, rgba(199,154,78,0.14), transparent 70%)',
+  border: '1px solid rgba(255,207,77,0.5)', color: '#ffcf4d', fontSize: 15,
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))', background: 'radial-gradient(120% 120% at 50% 30%, rgba(255,207,77,0.14), transparent 70%)',
 };
 const deckTip: React.CSSProperties = {
   position: 'absolute', bottom: '100%', left: '50%', transform: 'translate(-50%,-10px)',
-  whiteSpace: 'nowrap', padding: '5px 11px', background: 'rgba(20,13,9,0.96)',
-  border: '1px solid #5a4820', borderRadius: 4, color: '#e8d6ac', fontFamily: sans,
+  whiteSpace: 'nowrap', padding: '5px 11px', background: 'rgba(12,16,26,0.96)',
+  border: '1px solid #3a4560', borderRadius: 4, color: '#cfe0ff', fontFamily: sans,
   fontSize: 12, fontWeight: 700, boxShadow: '0 6px 14px rgba(0,0,0,0.5)', pointerEvents: 'none', zIndex: 20,
 };
 const endTurnBtn: React.CSSProperties = {
   // Fixed to the viewport (not the hand row) so it sits at the screen's right vertical centre.
   position: 'fixed', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
-  color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
-  background: '#9c3b28',
+  color: '#eafff7', cursor: 'pointer', border: '1px solid #2a9e74', borderRadius: 4, fontFamily: sans,
+  background: '#1c7a58',
   transition: 'transform .15s', zIndex: 30,
 };
 // The avatar's signature ability, docked bottom-left above the mana readout. An arcane violet
@@ -662,7 +662,7 @@ const medallion: React.CSSProperties = {
 };
 const avatarDisc: React.CSSProperties = {
   width: 120, height: 120, borderRadius: '50%', display: 'grid', placeItems: 'center', overflow: 'hidden',
-  background: 'radial-gradient(circle at 50% 34%, #241a12, #0e0a07)',
+  background: 'radial-gradient(circle at 50% 34%, #1a2130, #0a0d14)',
 };
 const crest: React.CSSProperties = {
   position: 'absolute', top: -26, left: '50%', transform: 'translateX(-50%)', zIndex: 3,
@@ -697,8 +697,8 @@ const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fon
 const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
 const returnBtn: React.CSSProperties = {
   marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 700, letterSpacing: 0.5,
-  color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
-  background: '#9c3b28',
+  color: '#eafff7', cursor: 'pointer', border: '1px solid #2a9e74', borderRadius: 4, fontFamily: sans,
+  background: '#1c7a58',
 };
 
 // The coach note. Deliberately flat and typographic — a bordered slip of dark card with a single
@@ -710,7 +710,7 @@ const coachWrap: React.CSSProperties = {
 };
 const coachBubble: React.CSSProperties = {
   pointerEvents: 'auto', padding: '12px 15px 13px', borderRadius: 3,
-  background: '#161010', border: '1px solid rgba(150,120,72,0.3)', borderLeft: '3px solid #a4762f',
+  background: '#12151f', border: '1px solid rgba(90,110,150,0.3)', borderLeft: '3px solid #ffcf4d',
   boxShadow: '0 12px 26px rgba(0,0,0,0.5)',
 };
 const coachHead: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 5 };

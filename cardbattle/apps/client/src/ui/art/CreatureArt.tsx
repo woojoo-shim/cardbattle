@@ -1,12 +1,12 @@
 /** Hand-drawn SVG creature portraits — replaces emoji faces. Stylized dark-fantasy
  * head-and-shoulders busts, crisp inked (no blur bloom). 64x64 viewBox; scale via `size`. */
 
-// De-neoned to match the parchment/candlelight art direction: the old neon-pink /
-// neon-cyan accents read as loud on the muted table, so they're now an ember
-// oxblood and a faded verdigris teal. Eyes/lenses are crisp inked discs, not soft
-// glowing halos, so the portraits read as deliberate vector art, not cheap AI bloom.
-const RED = '#c2543a';
-const TEAL = '#79b0a2';
+// Jewel / dark-fantasy palette: accents are saturated GEMSTONE pigments — a ruby
+// red and an emerald teal — read as faceted stones against the slate surfaces.
+// Eyes/lenses stay crisp inked discs, not soft glowing halos, so the portraits
+// read as deliberate vector art, not cheap AI bloom.
+const RED = '#ff5a6a';
+const TEAL = '#4fe0ac';
 
 /** Crisp inked eye — a solid tinted disc with a sharp dark rim and a hard catch-light.
  *  No blur bloom (the old glowy version read as a cheap AI-portrait halo). */
@@ -23,12 +23,12 @@ function Eye({ x, color = RED }: { x: number; color?: string }) {
 function Mage() {
   return (
     <>
-      <path d="M32 6 C16 6 12 24 12 40 L12 60 L52 60 L52 40 C52 24 48 6 32 6 Z" fill="#241a3a" stroke="#5a3fa0" strokeWidth="1.5" />
+      <path d="M32 6 C16 6 12 24 12 40 L12 60 L52 60 L52 40 C52 24 48 6 32 6 Z" fill="#241a3a" stroke="#7a52c8" strokeWidth="1.5" />
       <path d="M32 6 C20 6 15 20 16 34 L48 34 C49 20 44 6 32 6 Z" fill="#160f26" />
       <path d="M22 30 Q32 24 42 30 L42 40 Q32 46 22 40 Z" fill="#0a0710" />
-      <Eye x={26} color="#8b6cff" />
-      <Eye x={38} color="#8b6cff" />
-      <path d="M12 40 L8 58 L18 54" fill="#241a3a" stroke="#5a3fa0" strokeWidth="1.2" />
+      <Eye x={26} color="#b57cff" />
+      <Eye x={38} color="#b57cff" />
+      <path d="M12 40 L8 58 L18 54" fill="#241a3a" stroke="#7a52c8" strokeWidth="1.2" />
     </>
   );
 }
@@ -37,14 +37,14 @@ function Mage() {
 function Goblin() {
   return (
     <>
-      <path d="M10 26 L24 34 L18 20 Z" fill="#4a7a32" stroke="#2f5320" strokeWidth="1" />
-      <path d="M54 26 L40 34 L46 20 Z" fill="#4a7a32" stroke="#2f5320" strokeWidth="1" />
-      <path d="M32 14 C18 14 16 32 18 44 C20 56 44 56 46 44 C48 32 46 14 32 14 Z" fill="#5a8f3c" stroke="#34521f" strokeWidth="1.5" />
-      <path d="M22 40 Q32 36 42 40 L38 48 Q32 52 26 48 Z" fill="#3a5e26" />
-      <Eye x={26} color="#ffd84a" />
-      <Eye x={38} color="#ffd84a" />
-      <path d="M26 46 L29 50 L32 46 L35 50 L38 46" fill="none" stroke="#f0f0e0" strokeWidth="1.4" />
-      <path d="M30 26 Q32 30 34 26" fill="none" stroke="#34521f" strokeWidth="1.2" />
+      <path d="M10 26 L24 34 L18 20 Z" fill="#2f9a68" stroke="#1f6845" strokeWidth="1" />
+      <path d="M54 26 L40 34 L46 20 Z" fill="#2f9a68" stroke="#1f6845" strokeWidth="1" />
+      <path d="M32 14 C18 14 16 32 18 44 C20 56 44 56 46 44 C48 32 46 14 32 14 Z" fill="#3ab87c" stroke="#22764f" strokeWidth="1.5" />
+      <path d="M22 40 Q32 36 42 40 L38 48 Q32 52 26 48 Z" fill="#268558" />
+      <Eye x={26} color="#ffcf4d" />
+      <Eye x={38} color="#ffcf4d" />
+      <path d="M26 46 L29 50 L32 46 L35 50 L38 46" fill="none" stroke="#f0f4ec" strokeWidth="1.4" />
+      <path d="M30 26 Q32 30 34 26" fill="none" stroke="#22764f" strokeWidth="1.2" />
     </>
   );
 }
@@ -185,16 +185,16 @@ const BOT_UNITS = [Bot0, Bot1, Bot2, Bot3, Bot4, Bot5, Bot6, Bot7];
 function Dragon() {
   return (
     <>
-      <path d="M18 10 L24 22 L14 20 Z" fill="#7a2f3a" stroke="#4a1c24" strokeWidth="1" />
-      <path d="M46 10 L40 22 L50 20 Z" fill="#7a2f3a" stroke="#4a1c24" strokeWidth="1" />
-      <path d="M32 12 C20 12 16 26 18 38 C20 50 28 58 32 58 C36 58 44 50 46 38 C48 26 44 12 32 12 Z" fill="#9a3a48" stroke="#5a232c" strokeWidth="1.5" />
-      <path d="M24 44 L32 56 L40 44 C40 50 36 54 32 54 C28 54 24 50 24 44 Z" fill="#3a1219" />
+      <path d="M18 10 L24 22 L14 20 Z" fill="#a82f42" stroke="#6e1c2a" strokeWidth="1" />
+      <path d="M46 10 L40 22 L50 20 Z" fill="#a82f42" stroke="#6e1c2a" strokeWidth="1" />
+      <path d="M32 12 C20 12 16 26 18 38 C20 50 28 58 32 58 C36 58 44 50 46 38 C48 26 44 12 32 12 Z" fill="#d43a4e" stroke="#7e2331" strokeWidth="1.5" />
+      <path d="M24 44 L32 56 L40 44 C40 50 36 54 32 54 C28 54 24 50 24 44 Z" fill="#4a121c" />
       <path d="M26 48 L28 52 M30 48 L31 53 M34 48 L33 53 M38 48 L36 52" stroke="#f0e6d0" strokeWidth="1.3" />
-      <Eye x={25} color="#ffd84a" />
-      <Eye x={39} color="#ffd84a" />
-      <path d="M28 38 Q32 41 36 38" fill="none" stroke="#5a232c" strokeWidth="1" />
-      <circle cx="29" cy="40" r="1" fill="#3a1219" />
-      <circle cx="35" cy="40" r="1" fill="#3a1219" />
+      <Eye x={25} color="#ffcf4d" />
+      <Eye x={39} color="#ffcf4d" />
+      <path d="M28 38 Q32 41 36 38" fill="none" stroke="#7e2331" strokeWidth="1" />
+      <circle cx="29" cy="40" r="1" fill="#4a121c" />
+      <circle cx="35" cy="40" r="1" fill="#4a121c" />
     </>
   );
 }
@@ -203,15 +203,15 @@ function Dragon() {
 function Ogre() {
   return (
     <>
-      <path d="M32 12 C18 12 14 28 16 42 C18 54 46 54 48 42 C50 28 46 12 32 12 Z" fill="#7c6a52" stroke="#4e4133" strokeWidth="1.5" />
-      <path d="M20 22 Q26 18 30 22" fill="none" stroke="#4e4133" strokeWidth="2" />
-      <path d="M34 22 Q38 18 44 22" fill="none" stroke="#4e4133" strokeWidth="2" />
+      <path d="M32 12 C18 12 14 28 16 42 C18 54 46 54 48 42 C50 28 46 12 32 12 Z" fill="#5c6880" stroke="#3a4358" strokeWidth="1.5" />
+      <path d="M20 22 Q26 18 30 22" fill="none" stroke="#3a4358" strokeWidth="2" />
+      <path d="M34 22 Q38 18 44 22" fill="none" stroke="#3a4358" strokeWidth="2" />
       <Eye x={26} color={RED} />
       <Eye x={38} color={RED} />
-      <path d="M22 44 L26 40 L26 50 Z" fill="#f0ecd8" stroke="#cfc9b0" strokeWidth="0.8" />
-      <path d="M42 44 L38 40 L38 50 Z" fill="#f0ecd8" stroke="#cfc9b0" strokeWidth="0.8" />
-      <path d="M26 44 Q32 48 38 44" fill="none" stroke="#4e4133" strokeWidth="1.5" />
-      <ellipse cx="32" cy="38" rx="3" ry="2" fill="#5e4f3c" />
+      <path d="M22 44 L26 40 L26 50 Z" fill="#eef1f8" stroke="#c2c8d6" strokeWidth="0.8" />
+      <path d="M42 44 L38 40 L38 50 Z" fill="#eef1f8" stroke="#c2c8d6" strokeWidth="0.8" />
+      <path d="M26 44 Q32 48 38 44" fill="none" stroke="#3a4358" strokeWidth="1.5" />
+      <ellipse cx="32" cy="38" rx="3" ry="2" fill="#485468" />
     </>
   );
 }
@@ -254,12 +254,12 @@ function Ghost() {
   return (
     <>
       <path d="M32 8 C20 8 16 22 16 36 L16 56 L22 50 L27 56 L32 50 L37 56 L42 50 L48 56 L48 36 C48 22 44 8 32 8 Z"
-        fill="#1a2a30" stroke="#3aa89a" strokeWidth="1.4" opacity="0.92" />
+        fill="#1a2a30" stroke="#37e0a0" strokeWidth="1.4" opacity="0.92" />
       <path d="M22 28 Q26 24 30 28 L30 36 Q26 40 22 36 Z" fill="#06110f" />
       <path d="M34 28 Q38 24 42 28 L42 36 Q38 40 34 36 Z" fill="#06110f" />
       <Eye x={26} color={TEAL} />
       <Eye x={38} color={TEAL} />
-      <path d="M28 44 Q32 40 36 44" fill="none" stroke="#3aa89a" strokeWidth="1.2" />
+      <path d="M28 44 Q32 40 36 44" fill="none" stroke="#37e0a0" strokeWidth="1.2" />
     </>
   );
 }
@@ -298,7 +298,7 @@ export const AVATAR_CHOICES: { id: string; name: string }[] = [
 ];
 
 /** Distinct glow colors so each bot at the table reads as its own machine. */
-export const BOT_TINTS = ['#c2543a', '#79b0a2', '#d8a63c', '#8b6cff', '#5f8fc4', '#c47a3a', '#8f9d4f', '#b06a92'];
+export const BOT_TINTS = ['#ff5a6a', '#37e0a0', '#ffcf4d', '#a86bff', '#5f9fe0', '#ff8f5a', '#7fd94f', '#e06ab0'];
 
 /** Unified portrait renderer. `bot` avatars render one of 8 distinct machines,
  *  picked by `variant` (usually the seat index) and tinted by `tint`. */

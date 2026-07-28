@@ -134,7 +134,7 @@ const bar: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 24, padding: '0 24px',
   borderBottom: `1px solid ${C.border}`, fontFamily: sans, position: 'relative', zIndex: 20,
 };
-const ribbonLit = `linear-gradient(180deg, rgba(143,157,79,0.12), transparent 80%)`;
+const ribbonLit = `linear-gradient(180deg, rgba(55,224,160,0.12), transparent 80%)`;
 const ribbonIdle = `linear-gradient(180deg, rgba(255,255,255,0.02), transparent 80%)`;
 const round: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: C.dim, letterSpacing: 1 };
 const dirTag: React.CSSProperties = { fontSize: 16, fontWeight: 800, margin: '0 2px 0 6px' };
@@ -144,7 +144,7 @@ const pill: React.CSSProperties = {
   fontWeight: 700, fontSize: 20, letterSpacing: 1,
 };
 const pillMine: React.CSSProperties = {
-  background: 'rgba(143,157,79,0.12)', border: `1px solid ${C.you}`, color: C.you,
+  background: 'rgba(55,224,160,0.12)', border: `1px solid ${C.you}`, color: C.you,
 };
 const pillOther: React.CSSProperties = {
   background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: C.dim,

@@ -250,13 +250,13 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                 // Number of lit pips (at least 1 while alive so a sliver of HP still shows a dot).
                 const lit = !p.alive ? 0 : Math.max(1, Math.round((hpPct / 100) * PIPS));
                 const litBg = crit
-                  ? 'radial-gradient(circle at 35% 30%,#f0866e,#a5301f)'
+                  ? 'radial-gradient(circle at 35% 30%,#ff8f9a,#b3202f)'
                   : isMe
-                  ? `radial-gradient(circle at 35% 30%,#c8d29a,${C.you})`
-                  : `radial-gradient(circle at 35% 30%,#dd8a72,${C.enemy})`;
+                  ? `radial-gradient(circle at 35% 30%,#9bf5d0,${C.you})`
+                  : `radial-gradient(circle at 35% 30%,#ff9aa4,${C.enemy})`;
                 const litGlow = crit
-                  ? '0 0 5px rgba(210,74,53,0.7)'
-                  : isMe ? '0 0 4px rgba(143,157,79,0.55)' : '0 0 4px rgba(176,70,47,0.55)';
+                  ? '0 0 5px rgba(255,77,94,0.7)'
+                  : isMe ? '0 0 4px rgba(55,224,160,0.55)' : '0 0 4px rgba(255,77,94,0.55)';
                 return Array.from({ length: PIPS }, (_, i) => {
                   const on = i < lit;
                   return (
@@ -264,7 +264,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                       key={i}
                       style={{
                         ...pip,
-                        background: on ? litBg : '#160f08',
+                        background: on ? litBg : '#0e131f',
                         borderColor: on ? 'transparent' : C.border,
                         boxShadow: on ? litGlow : 'inset 0 1px 2px rgba(0,0,0,0.5)',
                         animation: on && crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined,
@@ -304,13 +304,13 @@ const felt: React.CSSProperties = {
   transform: 'translate(-50%,-50%)',
   width: '94%', height: '94%', borderRadius: 28, overflow: 'hidden',
   background:
-    'radial-gradient(circle at 50% 46%, rgba(248,196,110,0.28), transparent 58%),' + // warm overhead light pool (brighter, wider)
-    'radial-gradient(circle at 50% 44%, rgba(255,232,176,0.14), transparent 50%),' + // hot centre catch-light on the baize
-    'radial-gradient(circle at 50% 50%, transparent 56%, rgba(86,52,104,0.30) 100%),' + // cooler plum edge tint — temperature contrast vs the warm centre
-    'radial-gradient(circle at 50% 48%, #6e2c30 0%, #3a1618 50%, #100608 100%)',       // richer wine-red felt body: lit centre → black rim
-  border: '2px solid rgba(224,178,84,0.46)',
+    'radial-gradient(circle at 50% 46%, rgba(255,207,77,0.22), transparent 58%),' +  // warm gold overhead light pool (the single warm note)
+    'radial-gradient(circle at 50% 44%, rgba(255,232,150,0.12), transparent 50%),' + // hot gold centre catch-light on the baize
+    'radial-gradient(circle at 50% 50%, transparent 56%, rgba(138,107,255,0.26) 100%),' + // amethyst edge tint — temperature contrast vs the warm centre
+    'radial-gradient(circle at 50% 48%, #1e5c46 0%, #123528 50%, #08120d 100%)',       // emerald baize felt body: lit centre → black rim
+  border: '2px solid rgba(255,207,77,0.44)',
   boxShadow:
-    'inset 0 0 8px 1px rgba(248,214,140,0.38),' + // brass rim highlight
+    'inset 0 0 8px 1px rgba(255,214,120,0.36),' + // gold rim highlight
     'inset 0 0 180px 24px rgba(0,0,0,0.56),' +    // felt edge falls to black
     '0 24px 60px rgba(0,0,0,0.62)',               // table floats above the floor
 };
@@ -349,8 +349,8 @@ const tableFan: React.CSSProperties = {
 const miniBack: React.CSSProperties = {
   position: 'absolute', top: 0, width: 20, height: 28, borderRadius: 4,
   transformOrigin: 'center center', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'linear-gradient(160deg,#2a2013,#171009)', border: `1px solid ${C.border}`,
-  boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(143,157,79,0.06)',
+  background: 'linear-gradient(160deg,#26314a,#141b2b)', border: `1px solid ${C.border}`,
+  boxShadow: '0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(55,224,160,0.06)',
 };
 /** Paint a mini face-down card's border/glow from an equipped border cosmetic. Gradient
  *  borders use the backgroundImage+clip trick; solid colors set borderColor directly. */
@@ -359,7 +359,7 @@ function miniBackCos(cos: { border: string; glow: string }): React.CSSProperties
   return {
     boxShadow: `0 0 8px ${cos.glow}, 0 3px 8px rgba(0,0,0,0.5)`,
     ...(grad
-      ? { border: '1.5px solid transparent', backgroundImage: `linear-gradient(160deg,#2a2013,#171009), ${cos.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
+      ? { border: '1.5px solid transparent', backgroundImage: `linear-gradient(160deg,#26314a,#141b2b), ${cos.border}`, backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }
       : { borderColor: cos.border }),
   };
 }
@@ -378,7 +378,7 @@ const portrait: React.CSSProperties = {
   // A recessed portrait well: a warm catch-light rakes the top, the base sinks into shadow, and
   // the avatar sits lit inside a framed medallion rather than pasted on a flat swatch.
   background:
-    'radial-gradient(ellipse 92% 58% at 50% 8%, rgba(240,206,150,0.16), transparent 60%),' +  // warm top catch-light
+    'radial-gradient(ellipse 92% 58% at 50% 8%, rgba(150,180,230,0.16), transparent 60%),' +  // cool top catch-light
     'radial-gradient(ellipse 100% 70% at 50% 118%, rgba(0,0,0,0.52), transparent 64%),' +      // base sinks to shadow
     `linear-gradient(160deg, ${C.panelHi}, ${C.panel})`,
   border: `1px solid ${C.border}`,
@@ -405,9 +405,9 @@ const fieldRow: React.CSSProperties = {
 const minionChip: React.CSSProperties = {
   position: 'relative', width: 90, aspectRatio: '5 / 7', borderRadius: 10, flexShrink: 0,
   background: [
-    'linear-gradient(180deg, rgba(255,238,208,0.06), transparent 22%)',
+    'linear-gradient(180deg, rgba(150,180,230,0.06), transparent 22%)',
     'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
-    'radial-gradient(125% 85% at 50% -8%, #2a2013, #1c140b 68%, #120709)',
+    'radial-gradient(125% 85% at 50% -8%, #26314a, #18202f 68%, #0e131f)',
   ].join(','),
   border: '2px solid',
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '5px 4px 8px',
@@ -419,37 +419,37 @@ const minionChip: React.CSSProperties = {
 const minionTip: React.CSSProperties = {
   position: 'absolute', bottom: '116%', left: '50%', transform: 'translateX(-50%)',
   width: 172, padding: '9px 11px 10px', borderRadius: 9, zIndex: 40, pointerEvents: 'none',
-  background: 'linear-gradient(180deg, rgba(42,32,19,0.99), rgba(20,13,9,0.99))',
+  background: 'linear-gradient(180deg, rgba(28,34,51,0.99), rgba(14,19,31,0.99))',
   border: `1px solid ${C.borderHi}`, textAlign: 'left', overflow: 'hidden',
   boxShadow: '0 14px 34px rgba(0,0,0,0.6)',
 };
 const minionTipEdge: React.CSSProperties = {
   position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
-  background: 'linear-gradient(90deg, transparent, #caa24a, transparent)', opacity: 0.9,
+  background: 'linear-gradient(90deg, transparent, #ffcf4d, transparent)', opacity: 0.9,
 };
 const minionTipHead: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6,
 };
-const minionTipName: React.CSSProperties = { fontFamily: sans, fontSize: 14, fontWeight: 800, color: '#f0e0b4', lineHeight: 1.15 };
-const minionTipStat: React.CSSProperties = { flexShrink: 0, fontFamily: mono, fontSize: 13, fontWeight: 900, color: '#f0e0b4' };
+const minionTipName: React.CSSProperties = { fontFamily: sans, fontSize: 14, fontWeight: 800, color: '#e6edfb', lineHeight: 1.15 };
+const minionTipStat: React.CSSProperties = { flexShrink: 0, fontFamily: mono, fontSize: 13, fontWeight: 900, color: '#e6edfb' };
 const minionTipDesc: React.CSSProperties = { fontFamily: sans, fontSize: 12, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
 const minionArtWindow: React.CSSProperties = {
   width: '92%', aspectRatio: '1 / 1', borderRadius: 5, overflow: 'hidden',
   display: 'grid', placeItems: 'center', flexShrink: 0,
   background: 'radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0.15), rgba(0,0,0,0.5))',
-  border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(255,238,208,0.08)',
+  border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(150,180,230,0.08)',
 };
 const minionName: React.CSSProperties = {
-  maxWidth: '100%', fontFamily: sans, fontSize: 12, fontWeight: 800, color: '#e8d6ac',
+  maxWidth: '100%', fontFamily: sans, fontSize: 12, fontWeight: 800, color: '#dbe4f5',
   lineHeight: 1.1, textAlign: 'center', letterSpacing: '-0.02em',
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const minionStat: React.CSSProperties = {
   position: 'absolute', bottom: -10, minWidth: 26, height: 26, padding: '0 4px', borderRadius: 7,
   fontSize: 17, fontFamily: mono, fontWeight: 900, lineHeight: '26px', textAlign: 'center',
-  background: '#0c0705', border: '1px solid rgba(0,0,0,0.6)',
+  background: '#0a0d15', border: '1px solid rgba(0,0,0,0.6)',
 };
-const minionAtk: React.CSSProperties = { left: -8, color: '#f2c14a' };
+const minionAtk: React.CSSProperties = { left: -8, color: '#ffcf4d' };
 const minionHp: React.CSSProperties = { right: -8 };
 // Passive keywords a minion carries, shown as readable name chips (수호/쇄도/가호/부식/착취)
 // so players don't have to hover to learn what a minion does.
@@ -507,9 +507,9 @@ const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 
 const nm: React.CSSProperties = {
   fontSize: 14, fontWeight: 700, maxWidth: 104, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
-const rattleMark: React.CSSProperties = { marginLeft: 3, fontSize: 13, color: '#c8b06a', filter: 'saturate(0.8)' };
+const rattleMark: React.CSSProperties = { marginLeft: 3, fontSize: 13, color: '#c9b8e0', filter: 'saturate(0.8)' };
 const val: React.CSSProperties = { fontFamily: mono, fontSize: 14, color: C.dim, whiteSpace: 'nowrap' };
-const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 14, color: '#c9ab63', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
+const manaVal: React.CSSProperties = { fontFamily: mono, fontSize: 14, color: '#ffcf4d', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 2 };
 /** Equipped-title chip under the name. Gradient title colors paint via background-clip:text. */
 function titleLine(color: string): React.CSSProperties {
   const grad = color.startsWith('linear') || color.startsWith('radial');

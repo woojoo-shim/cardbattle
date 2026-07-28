@@ -1,21 +1,21 @@
-/** Shared visual tokens for the battle UI — an aged-paper / candlelit-scriptorium palette.
- * Warm walnut-and-leather surfaces under parchment ink; every accent is a muted, printed
- * pigment (sage ink, ochre-red, gold-leaf, faded teal) — NO fluorescent neon and no glow spam.
- * Depth comes from luminance layers + 1px borders + soft drop shadows, like ink on old stock. */
+/** Shared visual tokens for the battle UI — a jewel / dark-fantasy palette.
+ * Deep blue-black slate surfaces under cool moonlit ink; every accent is a saturated GEMSTONE
+ * pigment (emerald, ruby, gold, amethyst) reading like faceted stones lit against obsidian.
+ * Depth comes from luminance layers + 1px borders + soft drop shadows. Bright but not fluorescent. */
 export const C = {
-  void: '#120c06',  // deep walnut desk — darkened so lit surfaces separate cleanly
-  stage: '#20160d',
-  panel: '#342714',  // aged leather / worn card-stock surface — brighter so it lifts off the void
-  panelHi: '#4a3720',
-  border: '#5f4b30',  // scuffed leather edge — raised so panels read a crisp outline
-  borderHi: '#8f7047',
-  text: '#f6edd7',  // warm parchment ink — crisper for legibility
-  dim: '#c6b78f',
-  faint: '#786849',
-  you: '#a8c84e',    // me / my turn / heal — vivid sage-lime (readable, not fluorescent)
-  enemy: '#d44a2e',  // opponents / damage / danger — bright ember blood-red
-  rare: '#e6b84e',   // rare/epic cards, victory — gleaming gold-leaf / lamp light
-  magic: '#5fb8a8',  // status effects, magic — clean jade-teal cool counterpoint to the warm surfaces
+  void: '#0a0d15',   // obsidian — darkened so lit surfaces separate cleanly
+  stage: '#10131c',  // 흑청 midnight
+  panel: '#1c2233',  // slate card-stock surface — lifts off the void
+  panelHi: '#2b3448',
+  border: '#3a4560',  // cool steel edge — raised so panels read a crisp outline
+  borderHi: '#5c6f96',
+  text: '#eef2fb',  // cool moonlit ink — crisp for legibility
+  dim: '#aab6cf',
+  faint: '#5a6484',
+  you: '#37e0a0',    // me / my turn / heal — bright emerald
+  enemy: '#ff4d5e',  // opponents / damage / danger — bright ruby
+  rare: '#ffcf4d',   // rare/epic cards, victory — gleaming gold
+  magic: '#a86bff',  // status effects, magic — amethyst cool counterpoint
 } as const;
 
 export const RARITY_BORDER: Record<string, string> = {
