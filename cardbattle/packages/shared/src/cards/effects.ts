@@ -93,7 +93,7 @@ function damageMinion(m: MinionInstance, amount: number, poisonous: boolean, emi
   }
   m.health -= amount;
   emit({ type: 'minion_damaged', minionId: m.id, amount, healthAfter: m.health });
-  if (poisonous) m.health = 0; // 독성: any damage is lethal
+  if (poisonous) m.health = 0; // 부식 (poisonous): any damage is lethal
   return amount;
 }
 
@@ -111,7 +111,7 @@ function healMinionBy(m: MinionInstance, amount: number, emit: (e: GameEvent) =>
   if (m.health !== before) emit({ type: 'minion_buffed', minionId: m.id, attack: m.attack, health: m.health });
 }
 
-/** Remove a dead minion from its field, announce it, then fire its 죽음의 메아리 (deathrattle) with the
+/** Remove a dead minion from its field, announce it, then fire its 유언 (deathrattle) with the
  *  owner as source. Guarded by presence on the field so a doubly-resolved death can't rattle twice. */
 function killMinion(state: GameState, owner: PlayerState, m: MinionInstance, emit: (e: GameEvent) => void, nextCardId: () => string): void {
   const idx = owner.field.findIndex((x) => x.id === m.id);

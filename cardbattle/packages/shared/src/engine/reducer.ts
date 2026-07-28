@@ -25,7 +25,7 @@ function randomOrder(state: GameState, sourceId: string): PlayerState[] {
   return pool;
 }
 
-/** True if `defender`'s controller has a 도발 (taunt) minion — enemies must strike a taunt first.
+/** True if `defender`'s controller has a 수호 (taunt) minion — enemies must strike a taunt first.
  *  The taunt minion itself is always a legal target. */
 function tauntBlocks(state: GameState, targetId: string): boolean {
   const ent = findEntity(state, targetId);
@@ -75,7 +75,7 @@ export function reduce(input: GameState, action: Action, ctx: ReduceCtx): Reduce
 
     if (def.kind === 'minion') {
       summonMinion(state, sActor, def.id, emit);
-      if (def.effects.length) { // 전투의 함성 (battlecry): the summon's effects fire on entry
+      if (def.effects.length) { // 강림 (battlecry): the summon's effects fire on entry
         emit({ type: 'battlecry_triggered', playerId: actorId, cond: def.id });
         for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx);
       }

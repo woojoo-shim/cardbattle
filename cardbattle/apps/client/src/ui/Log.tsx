@@ -46,8 +46,8 @@ function line(ui: UiState, e: GameEvent): Line | null {
     case 'minion_damaged': return { icon: 'burst', text: `${minionName(ui, e.minionId)} ${e.amount} 피해 (HP ${e.healthAfter})`, tone: 'dmg' };
     case 'minion_buffed': return { icon: 'heart', text: `${minionName(ui, e.minionId)} 강화 → ${e.attack}/${e.health}`, tone: 'buff' };
     case 'minion_died': return { icon: 'skull', text: `${minionName(ui, e.minionId)} 파괴됨`, tone: 'die' };
-    case 'battlecry_triggered': return { icon: 'burst', text: `${nameOf(ui, e.playerId)} — 전투의 함성!`, tone: 'cry' };
-    case 'deathrattle_triggered': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} — 죽음의 메아리!`, tone: 'die' };
+    case 'battlecry_triggered': return { icon: 'burst', text: `${nameOf(ui, e.playerId)} — 강림!`, tone: 'cry' };
+    case 'deathrattle_triggered': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} — 유언!`, tone: 'die' };
     case 'player_eliminated': return { icon: 'skull', text: `${nameOf(ui, e.playerId)} 탈락`, tone: 'out' };
     case 'game_over': return { icon: 'trophy', text: `${nameOf(ui, e.winnerId)} 승리!`, tone: 'win' };
     default: return null;

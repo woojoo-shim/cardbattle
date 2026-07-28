@@ -46,7 +46,7 @@ export class PlayerSchema extends Schema {
   @type('number') skipTurns = 0;
   @type('number') mana = 0;
   @type('boolean') heroPowerUsed = false;
-  @type('boolean') hasDeathrattle = false; // 죽음의 메아리 armed — clients paint a parting-blow badge
+  @type('boolean') hasDeathrattle = false; // 유언 (deathrattle) armed — clients paint a parting-blow badge
   // Equipped cosmetics, mirrored from the room's cosmetics map so every client sees them.
   // Set in BattleRoom.publish() (not here) since they live outside the pure GameState.
   @type('string') border = 'none';

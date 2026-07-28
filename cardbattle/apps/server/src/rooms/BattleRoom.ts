@@ -279,9 +279,9 @@ export class BattleRoom extends Room<BattleState> {
 
   /** Board-model bot policy (하스스톤식). One action per call; the caller loops until null.
    *  Priority: lethal (burst a reachable hero) → removal/AoE clear → develop the board (summon) →
-   *  buff → self-heal when hurt → attack with ready minions (respect 도발, trade well, else go face) →
+   *  buff → self-heal when hurt → attack with ready minions (respect 수호, trade well, else go face) →
    *  ramp/draw value → hero power → end. Every returned action is validated against the reducer's
-   *  legality (mana, field slot, 도발) so the bot loop never stalls on a rejected move. */
+   *  legality (mana, field slot, 수호) so the bot loop never stalls on a rejected move. */
   private chooseBotAction(bot: PlayerState): Action | null {
     const opponents = this.gs.players.filter((p) => p.alive && p.id !== bot.id);
     if (opponents.length === 0) return null;
@@ -292,10 +292,10 @@ export class BattleRoom extends Room<BattleState> {
     const atk = (attackerId: string, targetId: string): Action => ({ type: 'attack', attackerId, targetId });
 
     const weakestHero = [...opponents].sort((a, b) => a.hp - b.hp)[0];
-    // Every enemy minion tagged with its owner (for 도발 checks and trade scoring).
+    // Every enemy minion tagged with its owner (for 수호 checks and trade scoring).
     const enemyMinions: { m: MinionInstance; owner: PlayerState }[] = [];
     for (const o of opponents) for (const m of o.field) enemyMinions.push({ m, owner: o });
-    // An opponent hero is reachable by a direct hit only if that opponent has NO 도발 minion up.
+    // An opponent hero is reachable by a direct hit only if that opponent has NO 수호 minion up.
     const reachable = (o: PlayerState) => o.field.every((m) => !m.taunt);
 
     const affordable = bot.hand
@@ -333,7 +333,7 @@ export class BattleRoom extends Room<BattleState> {
       const big = [...enemyMinions].sort((a, b) => (b.m.attack + b.m.health) - (a.m.attack + a.m.health))[0];
       if (big.m.attack + big.m.health >= 6) return play(assn.inst.id, big.m.id);
     }
-    // 화염 폭풍 / 화염룡 전투의 함성 — AoE the enemy board when it clears value.
+    // 화염 폭풍 / 화염룡 강림 — AoE the enemy board when it clears value.
     const aoe = affordable.find((h) => h.def.kind === 'spell' && dmgOf(h.def, 'allEnemyMinions') > 0);
     if (aoe) {
       const amt = dmgOf(aoe.def, 'allEnemyMinions');
@@ -386,7 +386,7 @@ export class BattleRoom extends Room<BattleState> {
     // 6) ATTACK — one ready minion trades well or applies face pressure.
     const attacker = bot.field.find((m) => m.attacksLeft > 0 && m.attack > 0);
     if (attacker) {
-      // A 도발 minion anywhere forces a trade — smash the softest one.
+      // A 수호 minion anywhere forces a trade — smash the softest one.
       const taunts = enemyMinions.filter((e) => e.m.taunt);
       if (taunts.length) {
         const t = [...taunts].sort((a, b) => (a.m.divineShield ? 1 : 0) - (b.m.divineShield ? 1 : 0) || a.m.health - b.m.health)[0];

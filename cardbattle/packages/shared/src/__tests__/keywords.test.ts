@@ -15,7 +15,7 @@ function minion(id: string, ownerId: string, over: Partial<MinionInstance> = {})
 let n = 0;
 const ctx: ReduceCtx = { nextCardId: () => `d-${n++}`, now: 1000 };
 
-describe('battlecry (전투의 함성) fires on summon', () => {
+describe('battlecry (강림) fires on summon', () => {
   it('squire draws a card', () => {
     const s = game();
     s.players[0].hand = [{ id: 'c1', defId: 'squire' }];
@@ -53,7 +53,7 @@ describe('battlecry (전투의 함성) fires on summon', () => {
   });
 });
 
-describe('deathrattle (죽음의 메아리) fires on minion death', () => {
+describe('deathrattle (유언) fires on minion death', () => {
   it('bomber deals 2 to all enemy heroes when it dies', () => {
     // b's turn; b assassinates a's bomber -> bomber deathrattle hits a's enemies (b)
     const s = game({ currentTurnIndex: 1 });

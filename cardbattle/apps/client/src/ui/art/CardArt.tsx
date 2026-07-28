@@ -782,7 +782,7 @@ function Recruit() {
   );
 }
 
-/** A footman behind a broad shield (수비병 · 도발). */
+/** A footman behind a broad shield (수비병 · 수호). */
 function Guard() {
   return (
     <>
@@ -795,7 +795,7 @@ function Guard() {
   );
 }
 
-/** A lunging wolf (늑대 · 돌진). */
+/** A lunging wolf (늑대 · 쇄도). */
 function Wolf() {
   return (
     <>
@@ -865,7 +865,7 @@ function Cleric() {
   );
 }
 
-/** An enormous tower shield (방패병 · 도발). */
+/** An enormous tower shield (방패병 · 수호). */
 function Shieldbearer() {
   return (
     <>
@@ -892,7 +892,7 @@ function Berserker() {
   );
 }
 
-/** A venomous spider (맹독거미 · 독성). */
+/** A venomous spider (맹독거미 · 부식). */
 function Venomspider() {
   return (
     <>
@@ -907,7 +907,7 @@ function Venomspider() {
   );
 }
 
-/** A mounted lancer charging (창기병 · 돌진). */
+/** A mounted lancer charging (창기병 · 쇄도). */
 function Cavalier() {
   return (
     <>
@@ -933,7 +933,7 @@ function Paladin() {
   );
 }
 
-/** A caped vampire lord (흡혈귀 · 흡혈). */
+/** A caped vampire lord (흡혈귀 · 착취). */
 function Vampirelord() {
   return (
     <>
@@ -947,7 +947,7 @@ function Vampirelord() {
   );
 }
 
-/** A bomb-hurling grenadier (폭탄병 · 죽음의 메아리). */
+/** A bomb-hurling grenadier (폭탄병 · 유언). */
 function Bomber() {
   return (
     <>
@@ -976,7 +976,7 @@ function Warlord() {
   );
 }
 
-/** A hulking rock golem (바위 골렘 · 도발). */
+/** A hulking rock golem (바위 골렘 · 수호). */
 function Golem() {
   return (
     <>
@@ -991,7 +991,7 @@ function Golem() {
   );
 }
 
-/** A hooded necromancer with a floating skull (강령술사 · 죽음의 메아리). */
+/** A hooded necromancer with a floating skull (강령술사 · 유언). */
 function Necromancer() {
   return (
     <>

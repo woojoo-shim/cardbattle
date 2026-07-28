@@ -7,11 +7,11 @@ export type CardKind = 'minion' | 'spell';
 
 /** Passive minion abilities (Hearthstone-flavoured, adapted to our FFA board). */
 export type Keyword =
-  | 'taunt'         // 도발: enemies must attack this minion before the hero or other minions
-  | 'charge'        // 돌진: can attack the turn it's summoned (no summoning sickness)
-  | 'divineShield'  // 신성 보호막: the first damage this minion takes is negated
-  | 'poisonous'     // 독성: any minion this damages is destroyed outright
-  | 'lifesteal';    // 흡혈: damage this deals also heals its owner's hero
+  | 'taunt'         // 수호: enemies must attack this minion before the hero or other minions
+  | 'charge'        // 쇄도: can attack the turn it's summoned (no summoning sickness)
+  | 'divineShield'  // 가호: the first damage this minion takes is negated
+  | 'poisonous'     // 부식: any minion this damages is destroyed outright
+  | 'lifesteal';    // 착취: damage this deals also heals its owner's hero
 
 /** Who a damage/heal/buff effect reaches. Entity targets (`chosen`) resolve to a hero OR a minion. */
 export type DamageTarget = 'chosen' | 'allEnemies' | 'allEnemyMinions' | 'allMinions' | 'randomEnemy';
@@ -19,7 +19,7 @@ export type HealTarget = 'hero' | 'chosen' | 'allFriendly';
 export type BuffTarget = 'chosen' | 'allFriendlyMinions' | 'randomFriendlyMinion';
 
 /** The board-model effect union. A spell card's effects fire on play; a minion card's effects
- *  are its 전투의 함성 (battlecry, fire on summon); a minion's `deathrattle` fires on its death. */
+ *  are its 강림 (battlecry, fire on summon); a minion's `deathrattle` (유언) fires on its death. */
 export type Effect =
   | { kind: 'damage'; amount: number; target: DamageTarget }
   | { kind: 'heal'; amount: number; target: HealTarget }
@@ -144,8 +144,8 @@ export type GameEvent =
   | { type: 'minion_damaged'; minionId: string; amount: number; healthAfter: number }
   | { type: 'minion_buffed'; minionId: string; attack: number; health: number }   // new totals after the buff
   | { type: 'minion_died'; minionId: string; playerId: string }
-  | { type: 'deathrattle_triggered'; playerId: string }             // a minion's 죽음의 메아리 fired
-  | { type: 'battlecry_triggered'; playerId: string; cond: string } // a minion's 전투의 함성 fired
+  | { type: 'deathrattle_triggered'; playerId: string }             // a minion's 유언 (deathrattle) fired
+  | { type: 'battlecry_triggered'; playerId: string; cond: string } // a minion's 강림 (battlecry) fired
   | { type: 'player_eliminated'; playerId: string }
   | { type: 'game_over'; winnerId: string };
 

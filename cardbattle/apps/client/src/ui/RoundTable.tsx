@@ -134,8 +134,8 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
-                  {m.taunt && <span style={minionKw} title="도발">🛡</span>}
-                  {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="천상의 보호막">✦</span>}
+                  {m.taunt && <span style={minionKw} title="수호">🛡</span>}
+                  {m.divineShield && <span style={{ ...minionKw, right: 'auto', left: -4, top: -6 }} title="가호">✦</span>}
                   {hoverMinion === m.id && def && (
                     <div style={minionTip}>
                       <span style={minionTipEdge} aria-hidden />
@@ -265,7 +265,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
             </div>
             <div style={info}>
               <span style={{ ...nm, color: isMe ? C.you : C.dim }}>
-                {p.name}{isMe ? ' (나)' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}{p.alive && p.hasDeathrattle ? <span style={rattleMark} title="죽음의 메아리">⚰</span> : ''}
+                {p.name}{isMe ? ' (나)' : ''}{p.skipTurns > 0 && p.alive ? <> · <Icon name="zzz" size={11} /></> : ''}{p.alive && p.hasDeathrattle ? <span style={rattleMark} title="유언">⚰</span> : ''}
               </span>
               <span style={{ ...val, ...(p.alive && hpPct <= 30 ? { color: '#d9634a', fontWeight: 800 } : null) }}>{p.alive ? `${p.hp}/${p.maxHp}` : 'DEAD'}</span>
               {p.alive && <span style={manaVal}><Icon name="crystal" size={10} />{p.mana}</span>}
