@@ -608,10 +608,11 @@ const deckTip: React.CSSProperties = {
   fontSize: 12, fontWeight: 700, boxShadow: '0 6px 14px rgba(0,0,0,0.5)', pointerEvents: 'none', zIndex: 20,
 };
 const endTurnBtn: React.CSSProperties = {
-  position: 'absolute', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
+  // Fixed to the viewport (not the hand row) so it sits at the screen's right vertical centre.
+  position: 'fixed', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
   color: '#f4e9cb', cursor: 'pointer', border: '1px solid #7f2f1f', borderRadius: 4, fontFamily: sans,
   background: '#9c3b28',
-  transition: 'transform .15s', zIndex: 16,
+  transition: 'transform .15s', zIndex: 30,
 };
 // The avatar's signature ability, docked bottom-left above the mana readout. An arcane violet
 // slab so it reads as its own class of action, distinct from the oxblood 턴 종료 CTA.
