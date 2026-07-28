@@ -199,6 +199,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   return (
     <div style={screen} data-arena>
       <SceneLife />
+      <BoardFrame />
       <VfxLayer events={events} players={ui.players} myId={myId} />
       <EmoteLayer emotes={emotes} />
       {turnFlash > 0 && (
@@ -462,6 +463,61 @@ const mote: React.CSSProperties = {
   position: 'absolute', borderRadius: '50%',
   background: 'radial-gradient(circle, rgba(244,220,168,0.9), rgba(230,180,96,0) 70%)',
 };
+// A Hearthstone-style carved wooden game board frame ringing the whole screen: four walnut planks
+// with a running grain and beveled highlights, a warm brass bead-line just inside the wood (the
+// carved gold molding), and a domed brass boss capping each corner joint. Pure CSS (no images),
+// pointer-transparent, and low in the stack (zIndex 3) so cards, buttons and VFX all sit in front —
+// it reads as the physical board the match is played on, not chrome over the action.
+function BoardFrame() {
+  return (
+    <div style={boardFrame} aria-hidden>
+      <div style={framePlankTop} />
+      <div style={framePlankBottom} />
+      <div style={framePlankLeft} />
+      <div style={framePlankRight} />
+      <div style={frameBead} />
+      <span style={{ ...frameCorner, top: -3, left: -3 }} />
+      <span style={{ ...frameCorner, top: -3, right: -3 }} />
+      <span style={{ ...frameCorner, bottom: -3, left: -3 }} />
+      <span style={{ ...frameCorner, bottom: -3, right: -3 }} />
+    </div>
+  );
+}
+const FR = 20; // plank thickness
+const grainH = 'repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
+const grainV = 'repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
+const woodH = 'linear-gradient(180deg,#4c3420 0%,#3a2711 46%,#281809 100%)';
+const woodV = 'linear-gradient(90deg,#4c3420 0%,#3a2711 46%,#281809 100%)';
+const boardFrame: React.CSSProperties = { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 };
+const framePlankTop: React.CSSProperties = {
+  position: 'absolute', top: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
+  boxShadow: 'inset 0 2px 3px rgba(255,214,150,0.18), inset 0 -6px 11px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.45)',
+};
+const framePlankBottom: React.CSSProperties = {
+  position: 'absolute', bottom: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
+  boxShadow: 'inset 0 -2px 3px rgba(255,214,150,0.13), inset 0 6px 11px rgba(0,0,0,0.55), 0 -3px 12px rgba(0,0,0,0.45)',
+};
+const framePlankLeft: React.CSSProperties = {
+  position: 'absolute', top: 0, bottom: 0, left: 0, width: FR, background: `${grainV}, ${woodV}`,
+  boxShadow: 'inset 2px 0 3px rgba(255,214,150,0.16), inset -6px 0 11px rgba(0,0,0,0.55), 3px 0 12px rgba(0,0,0,0.45)',
+};
+const framePlankRight: React.CSSProperties = {
+  position: 'absolute', top: 0, bottom: 0, right: 0, width: FR, background: `${grainV}, ${woodV}`,
+  boxShadow: 'inset -2px 0 3px rgba(255,214,150,0.13), inset 6px 0 11px rgba(0,0,0,0.55), -3px 0 12px rgba(0,0,0,0.45)',
+};
+// The carved gold molding line just inside the wood.
+const frameBead: React.CSSProperties = {
+  position: 'absolute', inset: FR - 1, borderRadius: 3,
+  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(199,154,78,0.5), inset 0 0 14px rgba(199,154,78,0.14)',
+};
+// A domed brass boss capping each corner joint.
+const frameCorner: React.CSSProperties = {
+  position: 'absolute', width: 42, height: 42, borderRadius: 7,
+  background: 'radial-gradient(circle at 38% 32%, #f0cd85 0%, #c79a4e 40%, #8a6428 68%, #4e3714 100%)',
+  boxShadow: '0 2px 7px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,244,208,0.6), inset 0 -2px 4px rgba(0,0,0,0.5)',
+  border: '1px solid #3a2810',
+};
+
 // A clean, dark board finished like a lit stage: a warm key light falls on the table at centre,
 // a soft vignette pulls the corners to black to frame the play, and the base grades from oxblood
 // to near-black. No diorama, no clutter — just quality lighting so the cards and portraits are the
