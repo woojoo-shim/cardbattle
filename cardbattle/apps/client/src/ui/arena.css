@@ -402,6 +402,7 @@
 @keyframes cb-attack-flow {
   to { stroke-dashoffset: -28; }
 }
+.cb-attack-flow { animation: cb-attack-flow 0.5s linear infinite; }
 /* The acting portrait flares up then eases back as a card is played (smooth glow, no flicker). */
 @keyframes cb-cast {
   0%   { filter: brightness(1); }
