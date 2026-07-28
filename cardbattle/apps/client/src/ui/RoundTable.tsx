@@ -232,20 +232,35 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
               </div>
             )}
 
-            <div style={hpBar}>
+            <div style={hpPips}>
               {(() => {
+                const PIPS = 10;
                 const crit = p.alive && hpPct <= 30;
-                const fillBg = crit
-                  ? 'linear-gradient(90deg,#d24a35,#a5301f)'
-                  : isMe ? `linear-gradient(90deg,#aeb877,${C.you})` : `linear-gradient(90deg,#c96a52,${C.enemy})`;
-                return (
-                  <>
-                    <i style={{ ...hpGhost, width: `${hpPct}%` }} />
-                    <i style={{ ...hpFill, width: `${hpPct}%`, background: fillBg, animation: crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined }}>
-                      <span style={hpGloss} />
-                    </i>
-                  </>
-                );
+                // Number of lit pips (at least 1 while alive so a sliver of HP still shows a dot).
+                const lit = !p.alive ? 0 : Math.max(1, Math.round((hpPct / 100) * PIPS));
+                const litBg = crit
+                  ? 'radial-gradient(circle at 35% 30%,#f0866e,#a5301f)'
+                  : isMe
+                  ? `radial-gradient(circle at 35% 30%,#c8d29a,${C.you})`
+                  : `radial-gradient(circle at 35% 30%,#dd8a72,${C.enemy})`;
+                const litGlow = crit
+                  ? '0 0 5px rgba(210,74,53,0.7)'
+                  : isMe ? '0 0 4px rgba(143,157,79,0.55)' : '0 0 4px rgba(176,70,47,0.55)';
+                return Array.from({ length: PIPS }, (_, i) => {
+                  const on = i < lit;
+                  return (
+                    <i
+                      key={i}
+                      style={{
+                        ...pip,
+                        background: on ? litBg : '#160f08',
+                        borderColor: on ? 'transparent' : C.border,
+                        boxShadow: on ? litGlow : 'inset 0 1px 2px rgba(0,0,0,0.5)',
+                        animation: on && crit ? 'cb-hp-crit 0.9s ease-in-out infinite' : undefined,
+                      }}
+                    />
+                  );
+                });
               })()}
             </div>
             <div style={info}>
@@ -452,30 +467,16 @@ const spot: React.CSSProperties = {
   position: 'absolute', left: '50%', bottom: -22, transform: 'translateX(-50%)',
   width: 120, height: 42, borderRadius: '50%',
 };
-const hpBar: React.CSSProperties = {
-  position: 'relative',
-  width: '86%', height: 11, borderRadius: 6, background: '#160f08', border: `1px solid ${C.border}`, overflow: 'hidden',
+// HP is shown as a row of 10 circular pips that deplete proportionally (the exact hp/maxHp
+// number still lives in the info row below). A row of dots reads instantly and avoids the
+// generic "health bar" look.
+const hpPips: React.CSSProperties = {
+  display: 'flex', gap: 3, width: '86%', justifyContent: 'center', flexWrap: 'nowrap',
 };
-// The real fill drops FAST so the ghost bleed behind it is briefly exposed on a hit.
-const hpFill: React.CSSProperties = {
-  position: 'absolute', left: 0, top: 0, zIndex: 2,
-  height: '100%', borderRadius: 6, overflow: 'hidden',
-  transition: 'width .2s cubic-bezier(.4,0,.2,1)',
-};
-// The lagging "ghost" bleed behind the real fill. On damage it holds at the old HP for a
-// beat (transition-delay) then drains slowly, so the chunk just lost flashes hot crimson
-// and bleeds off — this carries the "how much damage" read now that the number is gone.
-// On heal the real fill covers it instantly, so no artifact appears.
-const hpGhost: React.CSSProperties = {
-  position: 'absolute', left: 0, top: 0, zIndex: 1,
-  height: '100%', borderRadius: 6,
-  background: 'linear-gradient(90deg,#ff7a52,#e5482c)',
-  transition: 'width .6s cubic-bezier(.5,0,.5,1) .28s',
-};
-// A slim specular strip across the top of the fill — the bar reads as a lit glass tube, not a flat block.
-const hpGloss: React.CSSProperties = {
-  position: 'absolute', left: 0, right: 0, top: 0, height: '45%', borderRadius: '6px 6px 40% 40%',
-  background: 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0))',
+const pip: React.CSSProperties = {
+  flex: '0 0 auto', width: 9, height: 9, borderRadius: '50%',
+  border: '1px solid', boxSizing: 'border-box',
+  transition: 'background .25s ease, box-shadow .25s ease',
 };
 const info: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7, maxWidth: '100%' };
 const nm: React.CSSProperties = {
