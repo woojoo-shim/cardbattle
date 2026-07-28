@@ -181,6 +181,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                       {needsTarget && <span style={{ ...tipChip, ...tipTargetChip }}>대상 지정</span>}
                     </div>
                     <div style={tipDesc}>{def.desc}</div>
+                    {def.flavor && <div style={tipFlavor}>{def.flavor}</div>}
                     {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
                   </div>
                 );
@@ -373,6 +374,10 @@ const tipChip: React.CSSProperties = {
 const tipCostChip: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.15)', borderColor: '#6a552855' };
 const tipTargetChip: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.14)', borderColor: '#5a2c2288' };
 const tipDesc: React.CSSProperties = { fontSize: 13, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
+const tipFlavor: React.CSSProperties = {
+  marginTop: 7, paddingTop: 6, borderTop: `1px solid ${C.border}`,
+  fontSize: 12, lineHeight: 1.45, color: C.dim, fontStyle: 'italic', whiteSpace: 'normal',
+};
 const tipHint: React.CSSProperties = {
   marginTop: 8, paddingTop: 6, borderTop: `1px solid ${C.border}`,
   fontSize: 11, fontWeight: 700, color: C.you, textAlign: 'center', letterSpacing: 0.3,

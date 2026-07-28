@@ -50,6 +50,8 @@ export interface CardDef {
   sfxKey: string;
   icon: string;
   desc: string;
+  /** Hearthstone-style flavor text — personality, no mechanical meaning. */
+  flavor?: string;
   drawWeight: number;
 }
 
