@@ -20,6 +20,8 @@ type Fx =
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean; dur?: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
+  | { id: number; kind: 'death'; x: number; y: number }
+  | { id: number; kind: 'shard'; x: number; y: number; dx: number; dy: number; rot: number }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -271,6 +273,22 @@ export function VfxLayer({ events, players, myId }: Props) {
           setTimeout(() => setFx((cur) => cur.filter((f) => !ids.has(f.id))), 2000);
           impactHit(e.minionId, 0, 1, magNorm);
         }, IMPACT_DELAY * 1000);
+      } else if (e.type === 'minion_died') {
+        // A destroyed minion shatters: a skull puffs up and drifts off where it stood, ringed by a
+        // burst of dark shards flung outward. Measured NOW — the minion is about to leave the DOM,
+        // so its on-screen spot must be captured before the board re-renders without it.
+        const at = centerOf(e.minionId) ?? tableCenter();
+        if (!at) continue;
+        add.push({ id: nextId.current++, kind: 'death', x: at.x, y: at.y });
+        const shards = 8;
+        for (let i = 0; i < shards; i++) {
+          const ang = (i / shards) * Math.PI * 2 + Math.random() * 0.5;
+          const dist = 30 + Math.random() * 28;
+          add.push({
+            id: nextId.current++, kind: 'shard', x: at.x, y: at.y,
+            dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist - 8, rot: (Math.random() - 0.5) * 280,
+          });
+        }
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
@@ -325,6 +343,10 @@ export function VfxLayer({ events, players, myId }: Props) {
             </span>
           ) : f.kind === 'impact' ? (
             <span key={f.id} style={impactStyle(f)} />
+          ) : f.kind === 'death' ? (
+            <span key={f.id} style={deathStyle(f)}><Icon name="skull" size={32} color="#e7dfe8" /></span>
+          ) : f.kind === 'shard' ? (
+            <span key={f.id} style={shardStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -392,6 +414,25 @@ function impactStyle(f: Extract<Fx, { kind: 'impact' }>): React.CSSProperties {
     mixBlendMode: 'screen', willChange: 'transform, opacity', zIndex: 61,
     animation: `cb-impact ${f.big ? 0.36 : 0.3}s cubic-bezier(.1,.78,.28,1) ${f.delay}s backwards`,
   };
+}
+/** A destroyed minion's skull: puffs up big, then drifts up and fades — the clear "파괴됨" beat. */
+function deathStyle(f: Extract<Fx, { kind: 'death' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, zIndex: 62,
+    filter: 'drop-shadow(0 0 12px rgba(200,96,104,0.85)) drop-shadow(0 2px 5px rgba(0,0,0,0.8))',
+    willChange: 'transform, opacity',
+    animation: 'cb-death-pop 1.1s cubic-bezier(.2,.72,.3,1) forwards',
+  };
+}
+/** Dark cracked fragments flung out as the minion breaks apart. */
+function shardStyle(f: Extract<Fx, { kind: 'shard' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 7, height: 7, borderRadius: 2,
+    background: 'linear-gradient(140deg,#4a3550,#241826)', border: '1px solid rgba(200,96,104,0.5)',
+    boxShadow: '0 0 6px rgba(200,96,104,0.55)', willChange: 'transform, opacity', zIndex: 61,
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
+    animation: 'cb-shard .8s cubic-bezier(.2,.7,.3,1) forwards',
+  } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
   return {

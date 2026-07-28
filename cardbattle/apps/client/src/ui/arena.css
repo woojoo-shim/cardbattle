@@ -238,6 +238,18 @@
   20%  { transform: translate(-50%, -50%) scale(0.98) rotate(-3deg);  opacity: 1; }   /* brief hold at peak — the flash reads crisp, not a smear */
   100% { transform: translate(-50%, -50%) scale(1.62) rotate(12deg);  opacity: 0; }   /* the starburst spikes twist as they burn off */
 }
+/* A destroyed minion's skull: snaps in oversized, holds a beat, then drifts up and fades out. */
+@keyframes cb-death-pop {
+  0%   { transform: translate(-50%, -50%) scale(0.3);  opacity: 0; }
+  22%  { transform: translate(-50%, -64%) scale(1.25); opacity: 1; }
+  55%  { transform: translate(-50%, -78%) scale(1);    opacity: 1; }
+  100% { transform: translate(-50%, -116%) scale(0.9); opacity: 0; }
+}
+/* Dark fragments flung outward as the minion breaks apart, spinning and shrinking as they fade. */
+@keyframes cb-shard {
+  0%   { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot, 180deg)) scale(0.35); opacity: 0; }
+}
 /* Energy gathering at the caster during the wind-up: a core orb blooms then implodes as the strike
    releases, so the attack reads as charged rather than casually tossed. */
 @keyframes cb-charge {
