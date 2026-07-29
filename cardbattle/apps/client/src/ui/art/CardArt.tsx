@@ -758,12 +758,16 @@ const GOLD = '#f0c860', GOLD_D = '#b8862c';
 function Sprite() {
   return (
     <>
-      <ellipse cx="32" cy="34" rx="9" ry="11" fill="#bfe9ff" />
-      <ellipse cx="32" cy="32" rx="5" ry="6.5" fill="#f2fbff" />
-      <circle cx="29.5" cy="30" r="1.3" fill="#1a2a3a" />
-      <circle cx="34.5" cy="30" r="1.3" fill="#1a2a3a" />
-      <path d="M24 40 Q20 46 24 50" stroke="#8fd6f0" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
-      <path d="M40 40 Q44 46 40 50" stroke="#8fd6f0" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+      <path d="M31 36 Q15 24 12 40 Q23 42 31 41 Z" fill="#bfe9ff" opacity="0.5" stroke="#8fd6f0" strokeWidth="0.7" />
+      <path d="M33 36 Q49 24 52 40 Q41 42 33 41 Z" fill="#bfe9ff" opacity="0.5" stroke="#8fd6f0" strokeWidth="0.7" />
+      <path d="M29 40 Q29 52 32 52 Q35 52 35 40 Z" fill="#7fcff0" stroke="#4a9ec0" strokeWidth="0.8" />
+      <circle cx="32" cy="30" r="9.5" fill="#dff4ff" />
+      <circle cx="32" cy="30" r="6.5" fill="#f4fbff" />
+      <circle cx="29.5" cy="29" r="1.4" fill="#1a2a3a" />
+      <circle cx="34.5" cy="29" r="1.4" fill="#1a2a3a" />
+      <path d="M30 33 Q32 35 34 33" stroke="#5a7a90" strokeWidth="1" fill="none" strokeLinecap="round" />
+      <circle cx="46" cy="23" r="1.6" fill="#eafaff" />
+      <circle cx="19" cy="26" r="1.2" fill="#eafaff" />
     </>
   );
 }
@@ -772,12 +776,17 @@ function Sprite() {
 function Recruit() {
   return (
     <>
-      <path d="M22 52 Q22 40 32 40 Q42 40 42 52 Z" fill="#5b6a4a" />
-      <circle cx="32" cy="30" r="8" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M24 28 Q32 18 40 28 L40 24 Q32 16 24 24 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" />
-      <rect x="43" y="30" width="2.4" height="20" fill={STEEL} stroke={STEEL_D} strokeWidth="0.7" transform="rotate(12 44 40)" />
-      <circle cx="29" cy="31" r="1.1" fill="#26303e" />
-      <circle cx="35" cy="31" r="1.1" fill="#26303e" />
+      <path d="M20 53 Q20 39 32 39 Q44 39 44 53 Z" fill="#5b6a4a" stroke="#33402a" strokeWidth="1.2" />
+      <path d="M32 40 L32 53" stroke="#3a4a2a" strokeWidth="1" opacity="0.6" />
+      <path d="M20 43 Q17 41 16 46 L20 48 Z" fill="#4a5740" stroke="#33402a" strokeWidth="0.8" />
+      <circle cx="32" cy="30" r="8.2" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M28 31 Q32 34 36 31" stroke={SKIN_D} strokeWidth="0.7" fill="none" opacity="0.5" />
+      <path d="M23 27 Q32 16 41 27 L41 23 Q32 15 23 23 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.9" />
+      <path d="M32 16 L32 23" stroke={STEEL_D} strokeWidth="0.6" opacity="0.6" />
+      <rect x="44" y="28" width="2.6" height="22" rx="0.6" fill={STEEL} stroke={STEEL_D} strokeWidth="0.7" transform="rotate(13 45 39)" />
+      <rect x="41" y="37" width="8" height="2.2" rx="0.6" fill={GOLD} stroke={GOLD_D} strokeWidth="0.5" transform="rotate(13 45 38)" />
+      <circle cx="29" cy="31" r="1.2" fill="#26303e" />
+      <circle cx="35" cy="31" r="1.2" fill="#26303e" />
     </>
   );
 }
@@ -786,11 +795,17 @@ function Recruit() {
 function Guard() {
   return (
     <>
-      <circle cx="36" cy="28" r="7" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M28 26 Q36 18 44 26 L44 22 Q36 15 28 22 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" />
-      <path d="M14 24 L30 24 L30 44 Q22 52 14 44 Z" fill="#7c5a30" stroke="#40260f" strokeWidth="1.4" />
-      <path d="M22 24 L22 48" stroke="#c8922f" strokeWidth="1.6" />
-      <circle cx="22" cy="35" r="2.4" fill={GOLD} stroke={GOLD_D} strokeWidth="0.8" />
+      <path d="M34 52 Q34 40 40 40 Q47 40 47 52 Z" fill="#5c6470" stroke="#333844" strokeWidth="1.1" />
+      <circle cx="40" cy="28" r="7.2" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M32 26 Q40 17 48 26 L48 22 Q40 14 32 22 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.9" />
+      <circle cx="38" cy="29" r="1.1" fill="#26303e" />
+      <circle cx="43" cy="29" r="1.1" fill="#26303e" />
+      <path d="M13 22 L31 22 L31 43 Q22 53 13 43 Z" fill="#8a6636" stroke="#40260f" strokeWidth="1.6" />
+      <path d="M13 22 L22 24 L22 48 Q17 46 13 43 Z" fill="#9c7842" opacity="0.5" />
+      <path d="M22 22 L22 50" stroke="#c8922f" strokeWidth="1.8" />
+      <path d="M13 32 L31 32" stroke="#c8922f" strokeWidth="1.6" />
+      <circle cx="22" cy="32" r="3" fill={GOLD} stroke={GOLD_D} strokeWidth="1" />
+      <circle cx="21" cy="31" r="1" fill="#fff3d0" opacity="0.7" />
     </>
   );
 }
@@ -799,12 +814,15 @@ function Guard() {
 function Wolf() {
   return (
     <>
-      <path d="M16 46 Q24 30 40 32 L52 30 L48 38 Q46 48 34 48 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1.4" />
-      <path d="M50 28 L54 22 L54 30 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1" />
-      <path d="M45 30 L48 24 L50 31 Z" fill="#6b6f78" stroke="#2b2e35" strokeWidth="1" />
-      <path d="M52 32 L60 33 L52 36 Z" fill="#3a3d44" />
-      <circle cx="50" cy="31" r="1.3" fill="#ffd24a" />
-      <path d="M20 46 L18 54 M28 47 L27 55 M36 47 L36 55" stroke="#2b2e35" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12 40 Q22 44 30 40 L44 40 Q52 40 54 34 Q50 44 40 44 Q34 48 26 46 Q18 48 12 40 Z" fill="#5f636c" stroke="#26292f" strokeWidth="1.4" />
+      <path d="M44 40 Q54 36 58 28 Q60 34 55 38 Q58 40 54 43 Q50 46 44 44 Z" fill="#6b6f78" stroke="#26292f" strokeWidth="1.4" />
+      <path d="M54 30 L57 23 L59 31 Z" fill="#6b6f78" stroke="#26292f" strokeWidth="1" />
+      <path d="M49 31 L51 24 L54 32 Z" fill="#6b6f78" stroke="#26292f" strokeWidth="1" />
+      <path d="M57 34 L64 34 L57 38 Z" fill="#33363d" stroke="#26292f" strokeWidth="0.6" />
+      <path d="M57 36 L61 35 M57 37 L60 37" stroke="#e8ecf2" strokeWidth="0.7" />
+      <circle cx="55" cy="32" r="1.4" fill="#ffd24a" stroke="#7a5a10" strokeWidth="0.4" />
+      <path d="M18 44 L16 53 M27 45 L26 54 M36 44 L35 53 M45 44 L44 52" stroke="#26292f" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M12 40 Q10 36 13 34 Q15 38 12 40 Z" fill="#5f636c" stroke="#26292f" strokeWidth="1" />
     </>
   );
 }
@@ -813,12 +831,17 @@ function Wolf() {
 function Squire() {
   return (
     <>
-      <rect x="30" y="14" width="2" height="38" fill="#6b4a26" />
-      <path d="M32 15 L48 19 L44 26 L48 33 L32 29 Z" fill="#a83b2c" stroke="#5f1f16" strokeWidth="1" />
-      <circle cx="24" cy="32" r="7" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M18 52 Q18 40 24 40 Q31 40 31 52 Z" fill="#456089" />
-      <circle cx="22" cy="32" r="1.1" fill="#26303e" />
-      <circle cx="27" cy="32" r="1.1" fill="#26303e" />
+      <rect x="30" y="12" width="2.2" height="40" rx="0.6" fill="#6b4a26" stroke="#432c14" strokeWidth="0.5" />
+      <path d="M32 13 L50 17 L45 25 L50 33 L32 29 Z" fill="#a83b2c" stroke="#5f1f16" strokeWidth="1.1" />
+      <path d="M32 13 L50 17 L45 25 L32 22 Z" fill="#c04a36" opacity="0.55" />
+      <path d="M37 18 L43 19 M37 23 L44 24" stroke="#5f1f16" strokeWidth="0.7" opacity="0.6" />
+      <path d="M16 52 Q16 39 24 39 Q32 39 32 52 Z" fill="#456089" stroke="#2a3d58" strokeWidth="1.1" />
+      <path d="M16 52 Q16 39 24 39 L24 52 Z" fill="#54739e" opacity="0.5" />
+      <circle cx="24" cy="31" r="7.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M17 28 Q24 20 31 27 Q30 22 24 22 Q18 22 17 28 Z" fill="#5a3f22" stroke="#3a2814" strokeWidth="0.7" />
+      <circle cx="22" cy="32" r="1.2" fill="#26303e" />
+      <circle cx="27" cy="32" r="1.2" fill="#26303e" />
+      <path d="M22 35 Q24 36 26 35" stroke={SKIN_D} strokeWidth="0.7" fill="none" opacity="0.6" />
     </>
   );
 }
@@ -827,12 +850,18 @@ function Squire() {
 function Archer() {
   return (
     <>
-      <path d="M20 16 Q40 32 20 48" stroke="#7c5a30" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <path d="M20 16 L20 48" stroke="#e8e2d0" strokeWidth="1" />
-      <path d="M20 32 L46 32" stroke="#cfd8e6" strokeWidth="1.4" />
-      <path d="M44 30 L50 32 L44 34 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="0.6" />
-      <circle cx="30" cy="26" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M25 50 Q25 40 31 40 Q37 40 37 50 Z" fill="#3f5a3a" />
+      <path d="M18 14 Q40 32 18 50" stroke="#7c5a30" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <path d="M18 14 Q38 30 20 34" stroke="#9c7842" strokeWidth="1" fill="none" opacity="0.6" />
+      <path d="M18 14 L18 50" stroke="#e8e2d0" strokeWidth="0.9" />
+      <path d="M22 51 Q22 40 30 40 Q38 40 38 51 Z" fill="#3f5a3a" stroke="#26361f" strokeWidth="1.1" />
+      <path d="M22 51 Q22 40 30 40 L30 51 Z" fill="#4d6b46" opacity="0.5" />
+      <circle cx="30" cy="26" r="6.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M24 24 Q30 17 36 24 Q35 20 30 20 Q25 20 24 24 Z" fill="#3f5a3a" stroke="#26361f" strokeWidth="0.7" />
+      <circle cx="31" cy="26" r="1.1" fill="#26303e" />
+      <path d="M20 30 L52 30" stroke="#cfd8e6" strokeWidth="1.5" />
+      <path d="M18 30 L18 30" />
+      <path d="M50 27 L57 30 L50 33 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="0.7" />
+      <path d="M50 30 L44 28 M50 30 L44 32" stroke="#79839a" strokeWidth="0.6" />
     </>
   );
 }
@@ -841,12 +870,18 @@ function Archer() {
 function Knight() {
   return (
     <>
-      <path d="M22 52 Q22 38 32 38 Q42 38 42 52 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
-      <path d="M25 40 L39 40" stroke={STEEL_D} strokeWidth="1" />
-      <path d="M24 30 Q32 20 40 30 L40 34 L24 34 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1" />
-      <rect x="30" y="30" width="4" height="6" fill="#1c2430" />
-      <rect x="45" y="16" width="2.6" height="30" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" transform="rotate(8 46 30)" />
-      <rect x="42" y="30" width="9" height="2.4" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" transform="rotate(8 46 31)" />
+      <path d="M20 53 Q20 38 32 38 Q44 38 44 53 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1.3" />
+      <path d="M20 53 Q20 38 32 38 L32 53 Z" fill="#e4eaf4" opacity="0.45" />
+      <path d="M32 40 L32 53 M24 44 L40 44" stroke={PLATE_D} strokeWidth="0.9" opacity="0.7" />
+      <path d="M18 40 Q16 44 19 47 L24 44 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1" />
+      <path d="M40 40 Q46 42 46 47 L41 46 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1" />
+      <path d="M23 30 Q32 19 41 30 L41 35 L23 35 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1.1" />
+      <path d="M32 19 L32 33" stroke={PLATE_D} strokeWidth="0.7" opacity="0.6" />
+      <rect x="30" y="29" width="4" height="7" rx="0.8" fill="#121a26" />
+      <path d="M32 20 L29 14 L32 16 L35 14 Z" fill="#c0392b" stroke="#7a2018" strokeWidth="0.5" />
+      <rect x="46" y="12" width="2.8" height="34" rx="0.7" fill={PLATE} stroke={PLATE_D} strokeWidth="0.9" transform="rotate(9 47 30)" />
+      <path d="M46 12 L47 30" stroke="#fff" strokeWidth="0.6" opacity="0.5" transform="rotate(9 47 30)" />
+      <rect x="42" y="30" width="10" height="2.6" rx="0.6" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" transform="rotate(9 47 31)" />
     </>
   );
 }
@@ -855,12 +890,19 @@ function Knight() {
 function Cleric() {
   return (
     <>
-      <rect x="44" y="14" width="2.2" height="36" fill="#c8922f" />
-      <path d="M45 14 L45 8 M42 11 L48 11" stroke={GOLD} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="45" cy="11" r="3.4" fill="none" stroke={GOLD} strokeWidth="1.4" />
-      <path d="M20 52 Q20 30 30 30 Q40 30 40 52 Z" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="1.2" />
-      <circle cx="30" cy="26" r="6.5" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M23 26 Q30 18 37 26 L37 22 Q30 16 23 22 Z" fill="#d9cfae" />
+      <rect x="44" y="12" width="2.4" height="38" rx="0.6" fill="#c8922f" stroke="#8a5f1c" strokeWidth="0.5" />
+      <circle cx="45.2" cy="11" r="4" fill="none" stroke={GOLD} strokeWidth="1.6" />
+      <path d="M45.2 5 L45.2 12 M41 8 L49.4 8" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="45.2" cy="11" r="6.5" fill="#fff2c0" opacity="0.25" />
+      <path d="M18 53 Q18 29 30 29 Q42 29 42 53 Z" fill="#eae4d2" stroke="#b6ad92" strokeWidth="1.3" />
+      <path d="M18 53 Q18 29 30 29 L30 53 Z" fill="#f4efdf" opacity="0.5" />
+      <path d="M30 34 L30 53" stroke="#c4b89a" strokeWidth="0.8" opacity="0.6" />
+      <path d="M24 40 L36 40" stroke={GOLD} strokeWidth="1.6" />
+      <circle cx="30" cy="25" r="6.8" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M22 25 Q30 15 38 25 L38 20 Q30 13 22 20 Z" fill="#dcd2b4" stroke="#b6ad92" strokeWidth="0.8" />
+      <path d="M30 15 L30 22" stroke="#b6ad92" strokeWidth="0.6" opacity="0.6" />
+      <circle cx="28" cy="26" r="1" fill="#26303e" />
+      <circle cx="32" cy="26" r="1" fill="#26303e" />
     </>
   );
 }
@@ -869,10 +911,16 @@ function Cleric() {
 function Shieldbearer() {
   return (
     <>
-      <path d="M18 14 L46 14 L46 42 Q32 54 18 42 Z" fill="#8a6636" stroke="#3e2510" strokeWidth="1.8" />
-      <path d="M32 14 L32 50" stroke="#c8922f" strokeWidth="2" />
-      <path d="M18 26 L46 26" stroke="#c8922f" strokeWidth="2" />
-      <circle cx="32" cy="26" r="4" fill={GOLD} stroke={GOLD_D} strokeWidth="1" />
+      <path d="M16 12 L48 12 L48 42 Q32 55 16 42 Z" fill="#8a6636" stroke="#3e2510" strokeWidth="2" />
+      <path d="M16 12 L32 12 L32 53 Q23 49 16 42 Z" fill="#9c7842" opacity="0.5" />
+      <path d="M32 12 L32 52" stroke="#c8922f" strokeWidth="2.2" />
+      <path d="M16 25 L48 25" stroke="#c8922f" strokeWidth="2.2" />
+      <circle cx="32" cy="25" r="4.6" fill={GOLD} stroke={GOLD_D} strokeWidth="1.1" />
+      <circle cx="30.5" cy="23.5" r="1.3" fill="#fff3d0" opacity="0.7" />
+      <circle cx="20" cy="16" r="1.2" fill={GOLD_D} />
+      <circle cx="44" cy="16" r="1.2" fill={GOLD_D} />
+      <circle cx="20" cy="40" r="1.2" fill={GOLD_D} />
+      <circle cx="44" cy="40" r="1.2" fill={GOLD_D} />
     </>
   );
 }
@@ -881,13 +929,18 @@ function Shieldbearer() {
 function Berserker() {
   return (
     <>
-      <circle cx="32" cy="30" r="8" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M24 40 Q24 52 32 52 Q40 52 40 40 Z" fill="#7a2e22" />
-      <path d="M16 20 L22 26 L20 30 L12 24 Z" fill="#b03428" stroke="#5f1710" strokeWidth="0.8" />
-      <rect x="20" y="26" width="2" height="16" fill="#6b4a26" transform="rotate(-40 21 34)" />
-      <path d="M48 20 L42 26 L44 30 L52 24 Z" fill="#b03428" stroke="#5f1710" strokeWidth="0.8" />
-      <rect x="42" y="26" width="2" height="16" fill="#6b4a26" transform="rotate(40 43 34)" />
-      <path d="M28 29 L31 30 M36 29 L33 30" stroke="#3a1410" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M22 41 Q22 53 32 53 Q42 53 42 41 Z" fill="#7a2e22" stroke="#481810" strokeWidth="1.2" />
+      <path d="M22 41 Q22 53 32 53 L32 41 Z" fill="#8f3a2c" opacity="0.5" />
+      <path d="M13 21 L23 27 L21 31 L11 25 Z" fill="#b8483a" stroke="#5f1710" strokeWidth="0.9" />
+      <path d="M13 21 L23 27 L21 24 Z" fill="#d05c48" opacity="0.6" />
+      <rect x="20" y="26" width="2.2" height="18" rx="0.6" fill="#6b4a26" stroke="#432c14" strokeWidth="0.4" transform="rotate(-42 21 35)" />
+      <path d="M51 21 L41 27 L43 31 L53 25 Z" fill="#b8483a" stroke="#5f1710" strokeWidth="0.9" />
+      <path d="M51 21 L41 27 L43 24 Z" fill="#d05c48" opacity="0.6" />
+      <rect x="42" y="26" width="2.2" height="18" rx="0.6" fill="#6b4a26" stroke="#432c14" strokeWidth="0.4" transform="rotate(42 43 35)" />
+      <circle cx="32" cy="30" r="8.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M22 26 Q26 16 32 20 Q38 16 42 26 Q38 22 32 24 Q26 22 22 26 Z" fill="#8a5a2a" stroke="#5a3a18" strokeWidth="0.7" />
+      <path d="M27 30 L31 31 M37 30 L33 31" stroke="#3a1410" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M28 34 Q32 32 36 34" stroke="#4a1a12" strokeWidth="1.2" fill="none" strokeLinecap="round" />
     </>
   );
 }
@@ -896,13 +949,17 @@ function Berserker() {
 function Venomspider() {
   return (
     <>
-      <ellipse cx="32" cy="36" rx="10" ry="8" fill="#3a4a24" stroke="#1a220f" strokeWidth="1.2" />
-      <circle cx="32" cy="27" r="5" fill="#4a5c2e" stroke="#1a220f" strokeWidth="1" />
-      <path d="M22 32 L12 26 M22 36 L11 36 M22 40 L13 46" stroke="#2a331a" strokeWidth="2" strokeLinecap="round" />
-      <path d="M42 32 L52 26 M42 36 L53 36 M42 40 L51 46" stroke="#2a331a" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="30" cy="26" r="1.3" fill="#c4f04a" />
-      <circle cx="34" cy="26" r="1.3" fill="#c4f04a" />
-      <ellipse cx="32" cy="38" rx="3" ry="4" fill="#a6c84a" opacity="0.7" />
+      <path d="M22 30 L9 22 M22 34 L8 32 M22 38 L9 42 M22 42 L11 50" stroke="#232c15" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M42 30 L55 22 M42 34 L56 32 M42 38 L55 42 M42 42 L53 50" stroke="#232c15" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M14 24 L10 21 M13 43 L9 46" stroke="#232c15" strokeWidth="2" strokeLinecap="round" />
+      <ellipse cx="32" cy="37" rx="10.5" ry="8.5" fill="#3a4a24" stroke="#1a220f" strokeWidth="1.3" />
+      <ellipse cx="29" cy="34" rx="4" ry="3" fill="#4d6130" opacity="0.6" />
+      <path d="M32 30 L30 38 L34 38 Z" fill="#c4f04a" opacity="0.55" />
+      <path d="M28 40 L26 45 M36 40 L38 45 M32 41 L32 47" stroke="#8fb03a" strokeWidth="0.8" opacity="0.6" />
+      <circle cx="32" cy="26" r="5.4" fill="#4a5c2e" stroke="#1a220f" strokeWidth="1.1" />
+      <circle cx="29.5" cy="26" r="1.5" fill="#c4f04a" />
+      <circle cx="34.5" cy="26" r="1.5" fill="#c4f04a" />
+      <path d="M30 30 L28 33 M34 30 L36 33" stroke="#d8ff6a" strokeWidth="1" strokeLinecap="round" />
     </>
   );
 }
@@ -911,11 +968,18 @@ function Venomspider() {
 function Cavalier() {
   return (
     <>
-      <path d="M14 44 Q22 34 38 36 L46 34 L44 44 Q40 50 30 50 Z" fill="#6b5236" stroke="#33260f" strokeWidth="1.2" />
-      <path d="M18 44 L16 52 M28 46 L27 53 M36 45 L36 52" stroke="#33260f" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="30" cy="26" r="5.5" fill={STEEL} stroke={STEEL_D} strokeWidth="1" />
-      <path d="M34 24 L60 18" stroke="#cfd8e6" strokeWidth="2" strokeLinecap="round" />
-      <path d="M58 16 L62 18 L58 20 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="0.6" />
+      <path d="M10 44 Q18 34 34 36 L44 33 Q50 34 47 40 L44 44 Q40 51 28 50 Q18 51 10 44 Z" fill="#6b5236" stroke="#33260f" strokeWidth="1.3" />
+      <path d="M10 44 Q18 34 34 36 L34 48 Q20 50 10 44 Z" fill="#7d613f" opacity="0.5" />
+      <path d="M44 33 Q49 32 50 36 Q47 37 44 36 Z" fill="#5a4429" stroke="#33260f" strokeWidth="0.8" />
+      <path d="M15 45 L13 53 M25 47 L24 54 M35 46 L35 53 M43 44 L43 51" stroke="#33260f" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M30 30 Q28 24 33 22 L33 30 Z" fill="#5a4429" stroke="#33260f" strokeWidth="0.8" />
+      <path d="M26 22 Q30 14 36 20 Q40 24 38 30 L30 30 Q26 26 26 22 Z" fill="#8a6a44" stroke="#4a3618" strokeWidth="1.1" />
+      <circle cx="31" cy="22" r="4.4" fill={PLATE} stroke={PLATE_D} strokeWidth="1" />
+      <rect x="30" y="20" width="2.4" height="4" rx="0.6" fill="#121a26" />
+      <path d="M35 21 L62 12" stroke="#cfd8e6" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M35 21 L58 13" stroke="#f0f4fa" strokeWidth="0.7" opacity="0.6" />
+      <path d="M59 10 L64 12 L59 15 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="0.7" />
+      <path d="M50 18 L54 15 L53 20 Z" fill="#a83b2c" stroke="#5f1f16" strokeWidth="0.6" />
     </>
   );
 }
@@ -924,11 +988,17 @@ function Cavalier() {
 function Paladin() {
   return (
     <>
-      <circle cx="32" cy="32" r="16" fill="none" stroke="#fff2c0" strokeWidth="1" opacity="0.5" />
-      <path d="M22 52 Q22 36 32 36 Q42 36 42 52 Z" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
-      <path d="M24 30 Q32 20 40 30 L40 34 L24 34 Z" fill="#eef2fa" stroke={STEEL_D} strokeWidth="1" />
-      <rect x="30" y="30" width="4" height="6" fill="#1c2430" />
-      <path d="M32 40 L32 50 M27 44 L37 44" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="32" cy="30" r="17" fill="#fff2c0" opacity="0.16" />
+      <circle cx="32" cy="30" r="17" fill="none" stroke="#fff2c0" strokeWidth="1" opacity="0.5" />
+      <path d="M20 53 Q20 36 32 36 Q44 36 44 53 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1.3" />
+      <path d="M20 53 Q20 36 32 36 L32 53 Z" fill="#eef2fa" opacity="0.5" />
+      <path d="M18 40 Q16 44 19 47 L24 44 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1" />
+      <path d="M40 40 Q46 42 46 47 L41 46 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1" />
+      <path d="M23 30 Q32 19 41 30 L41 35 L23 35 Z" fill="#eef2fa" stroke={PLATE_D} strokeWidth="1.1" />
+      <path d="M32 20 L32 34" stroke={PLATE_D} strokeWidth="0.7" opacity="0.6" />
+      <rect x="30" y="29" width="4" height="7" rx="0.8" fill="#121a26" />
+      <path d="M32 22 L29 15 L32 17 L35 15 Z" fill={GOLD} stroke={GOLD_D} strokeWidth="0.5" />
+      <path d="M32 40 L32 51 M26 44 L38 44" stroke={GOLD} strokeWidth="2.4" strokeLinecap="round" />
     </>
   );
 }
@@ -937,12 +1007,17 @@ function Paladin() {
 function Vampirelord() {
   return (
     <>
-      <path d="M14 50 Q20 30 32 30 Q44 30 50 50 Z" fill="#2a1420" stroke="#120810" strokeWidth="1.4" />
-      <circle cx="32" cy="26" r="7.5" fill="#e8dcd4" stroke="#b09a92" strokeWidth="1" />
-      <path d="M24 24 Q32 14 40 24 L40 20 Q32 13 24 20 Z" fill="#1a0c14" />
-      <circle cx="29" cy="26" r="1.4" fill="#c4182c" />
-      <circle cx="35" cy="26" r="1.4" fill="#c4182c" />
-      <path d="M29 30 L30 33 M35 30 L34 33" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M12 52 Q18 28 32 30 Q46 28 52 52 Z" fill="#2a1420" stroke="#120810" strokeWidth="1.5" />
+      <path d="M12 52 Q18 28 32 30 L32 52 Z" fill="#3a1c2c" opacity="0.55" />
+      <path d="M22 30 Q22 24 32 24 Q42 24 42 30 L38 33 Q32 30 26 33 Z" fill="#4a1020" stroke="#2a0810" strokeWidth="1" />
+      <path d="M22 30 L20 24 Q26 22 32 24 M42 30 L44 24 Q38 22 32 24" stroke="#2a0810" strokeWidth="1" fill="none" />
+      <circle cx="32" cy="25" r="7.6" fill="#e8dcd4" stroke="#b09a92" strokeWidth="1.1" />
+      <path d="M24 21 Q32 12 40 21 Q40 14 32 14 Q24 14 24 21 Z" fill="#140812" stroke="#0a0408" strokeWidth="0.7" />
+      <path d="M30 14 L30 20 M34 14 L34 20" stroke="#2a1420" strokeWidth="0.6" opacity="0.7" />
+      <circle cx="29" cy="25" r="1.5" fill="#e01020" />
+      <circle cx="35" cy="25" r="1.5" fill="#e01020" />
+      <path d="M26 22 L28 25 M38 22 L36 25" stroke="#0a0408" strokeWidth="1" strokeLinecap="round" />
+      <path d="M29.5 29 L30.5 32 M34.5 29 L33.5 32" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
     </>
   );
 }
@@ -951,13 +1026,19 @@ function Vampirelord() {
 function Bomber() {
   return (
     <>
-      <circle cx="38" cy="36" r="9" fill="#2a2e36" stroke="#0e1014" strokeWidth="1.4" />
-      <ellipse cx="35" cy="33" rx="3" ry="2" fill="#5a6068" opacity="0.7" />
-      <path d="M38 27 Q42 20 46 22" stroke="#8a6636" strokeWidth="1.6" fill="none" />
-      <circle cx="46" cy="21" r="2.2" fill="#ffb43a" />
-      <circle cx="46" cy="21" r="3.4" fill="none" stroke="#ff6a1a" strokeWidth="0.8" opacity="0.7" />
-      <circle cx="20" cy="30" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <path d="M15 50 Q15 40 21 40 Q27 40 27 50 Z" fill="#4a3a24" />
+      <path d="M13 51 Q13 39 21 39 Q29 39 29 51 Z" fill="#4a3a24" stroke="#2c2012" strokeWidth="1.1" />
+      <path d="M13 51 Q13 39 21 39 L21 51 Z" fill="#5c4a30" opacity="0.5" />
+      <circle cx="21" cy="30" r="6.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <path d="M15 28 Q21 20 27 28 Q26 23 21 23 Q16 23 15 28 Z" fill="#5a3f22" stroke="#3a2814" strokeWidth="0.7" />
+      <circle cx="20" cy="30" r="1" fill="#26303e" />
+      <circle cx="23" cy="30" r="1" fill="#26303e" />
+      <circle cx="39" cy="37" r="9.4" fill="#2a2e36" stroke="#0e1014" strokeWidth="1.5" />
+      <ellipse cx="35" cy="33" rx="3.2" ry="2.2" fill="#5a6068" opacity="0.6" />
+      <rect x="35" y="26" width="8" height="3.4" rx="1" fill="#4a4038" stroke="#0e1014" strokeWidth="0.7" />
+      <path d="M40 26 Q44 18 48 21" stroke="#8a6636" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <circle cx="48" cy="20" r="2.4" fill="#ffce5a" />
+      <path d="M48 15 L48 12 M52 18 L55 16 M52 22 L55 24 M44 15 L42 12" stroke="#ff8a2a" strokeWidth="1.2" strokeLinecap="round" />
+      <circle cx="48" cy="20" r="3.8" fill="none" stroke="#ff6a1a" strokeWidth="0.8" opacity="0.6" />
     </>
   );
 }
@@ -966,12 +1047,19 @@ function Bomber() {
 function Warlord() {
   return (
     <>
-      <rect x="46" y="12" width="2" height="40" fill="#6b4a26" />
-      <path d="M48 13 L60 16 L56 22 L60 28 L48 25 Z" fill="#7a1f18" stroke="#3e0f0a" strokeWidth="1" />
-      <path d="M20 52 Q20 36 30 36 Q40 36 40 52 Z" fill="#54341f" stroke={GOLD_D} strokeWidth="1" />
-      <circle cx="30" cy="26" r="7" fill={STEEL} stroke={STEEL_D} strokeWidth="1.2" />
-      <path d="M30 18 L27 13 L30 15 L33 13 Z" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" />
-      <rect x="12" y="18" width="2.4" height="28" fill={STEEL} stroke={STEEL_D} strokeWidth="0.8" transform="rotate(-10 13 32)" />
+      <rect x="47" y="10" width="2.2" height="42" rx="0.6" fill="#6b4a26" stroke="#432c14" strokeWidth="0.5" />
+      <path d="M49 11 L62 14 L58 21 L62 28 L49 25 Z" fill="#7a1f18" stroke="#3e0f0a" strokeWidth="1.1" />
+      <path d="M49 11 L62 14 L58 21 L49 19 Z" fill="#94322a" opacity="0.55" />
+      <path d="M53 15 L57 16 M53 21 L58 22" stroke="#3e0f0a" strokeWidth="0.6" opacity="0.6" />
+      <path d="M18 53 Q18 36 30 36 Q42 36 42 53 Z" fill="#54341f" stroke={GOLD_D} strokeWidth="1.2" />
+      <path d="M18 53 Q18 36 30 36 L30 53 Z" fill="#6a4428" opacity="0.5" />
+      <path d="M24 42 L36 42" stroke={GOLD} strokeWidth="1.4" opacity="0.7" />
+      <path d="M22 30 Q22 22 30 22 Q38 22 38 30 L38 34 L22 34 Z" fill={PLATE} stroke={PLATE_D} strokeWidth="1.2" />
+      <path d="M30 22 L30 34" stroke={PLATE_D} strokeWidth="0.6" opacity="0.5" />
+      <rect x="28.6" y="28" width="2.8" height="5" rx="0.6" fill="#121a26" />
+      <path d="M30 22 L27 12 L30 15 L33 12 Z" fill="#c0392b" stroke="#7a2018" strokeWidth="0.6" />
+      <rect x="11" y="14" width="2.6" height="32" rx="0.6" fill={PLATE} stroke={PLATE_D} strokeWidth="0.9" transform="rotate(-11 12 30)" />
+      <rect x="8" y="28" width="9" height="2.4" rx="0.5" fill={GOLD} stroke={GOLD_D} strokeWidth="0.5" transform="rotate(-11 12 29)" />
     </>
   );
 }
@@ -980,13 +1068,19 @@ function Warlord() {
 function Golem() {
   return (
     <>
-      <rect x="20" y="30" width="24" height="22" rx="3" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.6" />
-      <rect x="24" y="20" width="16" height="14" rx="3" fill="#7a776a" stroke="#2f2c24" strokeWidth="1.4" />
-      <rect x="14" y="32" width="7" height="16" rx="2" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.2" />
-      <rect x="43" y="32" width="7" height="16" rx="2" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.2" />
-      <circle cx="29" cy="27" r="1.6" fill="#8be3ff" />
-      <circle cx="35" cy="27" r="1.6" fill="#8be3ff" />
-      <path d="M24 40 L40 40 M32 34 L32 50" stroke="#2f2c24" strokeWidth="1" opacity="0.5" />
+      <rect x="19" y="29" width="26" height="24" rx="3" fill="#6d6a5e" stroke="#2f2c24" strokeWidth="1.7" />
+      <path d="M19 32 Q19 29 22 29 L32 29 L32 53 L19 53 Z" fill="#7c796c" opacity="0.5" />
+      <rect x="24" y="18" width="16" height="15" rx="3" fill="#7a776a" stroke="#2f2c24" strokeWidth="1.5" />
+      <rect x="11" y="31" width="8" height="18" rx="2" fill="#636055" stroke="#2f2c24" strokeWidth="1.3" />
+      <rect x="45" y="31" width="8" height="18" rx="2" fill="#636055" stroke="#2f2c24" strokeWidth="1.3" />
+      <rect x="27" y="24" width="4" height="2.6" rx="0.6" fill="#8be3ff" />
+      <rect x="33" y="24" width="4" height="2.6" rx="0.6" fill="#8be3ff" />
+      <circle cx="29" cy="25.3" r="2.6" fill="#8be3ff" opacity="0.35" />
+      <circle cx="35" cy="25.3" r="2.6" fill="#8be3ff" opacity="0.35" />
+      <path d="M24 30 L28 33 M30 30 L27 34 M38 44 L42 40 M22 44 L26 48" stroke="#2f2c24" strokeWidth="1" opacity="0.5" fill="none" />
+      <path d="M25 51 L28 47 L31 51 M35 40 L38 44 L41 40" stroke="#2f2c24" strokeWidth="0.8" opacity="0.4" fill="none" />
+      <circle cx="40" cy="47" r="1.6" fill="#5a6b3a" opacity="0.7" />
+      <circle cx="22" cy="35" r="1.2" fill="#5a6b3a" opacity="0.6" />
     </>
   );
 }
@@ -995,14 +1089,22 @@ function Golem() {
 function Necromancer() {
   return (
     <>
-      <path d="M20 52 Q20 26 32 26 Q44 26 44 52 Z" fill="#2a2440" stroke="#120e22" strokeWidth="1.4" />
-      <path d="M24 30 Q32 18 40 30 L40 26 Q32 16 24 26 Z" fill="#1a1630" />
-      <ellipse cx="32" cy="30" rx="5" ry="6" fill="#0c0a16" />
-      <circle cx="30" cy="29" r="1.3" fill="#a45cff" />
-      <circle cx="34" cy="29" r="1.3" fill="#a45cff" />
-      <circle cx="48" cy="20" r="4" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="0.8" />
-      <circle cx="46.5" cy="19" r="1" fill="#2a2440" />
-      <circle cx="49.5" cy="19" r="1" fill="#2a2440" />
+      <path d="M18 53 Q18 25 32 25 Q46 25 46 53 Z" fill="#2a2440" stroke="#120e22" strokeWidth="1.5" />
+      <path d="M18 53 Q18 25 32 25 L32 53 Z" fill="#372f52" opacity="0.5" />
+      <path d="M32 33 L30 53 M32 33 L34 53" stroke="#120e22" strokeWidth="0.7" opacity="0.5" />
+      <path d="M22 32 Q22 15 32 15 Q42 15 42 32 L38 34 Q32 30 26 34 Z" fill="#1a1630" stroke="#0a0818" strokeWidth="1.1" />
+      <path d="M22 32 L20 16 Q26 13 32 15 M42 32 L44 16 Q38 13 32 15" stroke="#0a0818" strokeWidth="0.8" fill="none" />
+      <ellipse cx="32" cy="31" rx="5.4" ry="6.4" fill="#0c0a16" />
+      <circle cx="30" cy="30" r="1.5" fill="#b46cff" />
+      <circle cx="34" cy="30" r="1.5" fill="#b46cff" />
+      <circle cx="30" cy="30" r="3" fill="#a45cff" opacity="0.3" />
+      <circle cx="34" cy="30" r="3" fill="#a45cff" opacity="0.3" />
+      <circle cx="49" cy="19" r="4.4" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="0.9" />
+      <path d="M45 20 Q49 25 53 20" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="0.7" />
+      <ellipse cx="47.2" cy="18.5" rx="1.2" ry="1.5" fill="#2a2440" />
+      <ellipse cx="50.8" cy="18.5" rx="1.2" ry="1.5" fill="#2a2440" />
+      <path d="M47 23 L48 25 M51 23 L50 25" stroke="#b6ad92" strokeWidth="0.6" />
+      <circle cx="49" cy="19" r="6.5" fill="#a45cff" opacity="0.18" />
     </>
   );
 }
@@ -1011,13 +1113,19 @@ function Necromancer() {
 function Dragon() {
   return (
     <>
-      <path d="M14 44 Q24 26 42 30 L54 24 L50 34 Q52 44 38 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1.4" />
-      <path d="M52 22 L58 16 L57 26 Z" fill="#c24327" stroke="#521309" strokeWidth="0.8" />
-      <path d="M46 26 L50 18 L52 27 Z" fill="#c24327" stroke="#521309" strokeWidth="0.8" />
-      <path d="M20 34 Q28 22 38 30 L34 40 Q26 44 20 38 Z" fill="#c24327" opacity="0.8" />
-      <circle cx="52" cy="26" r="1.5" fill="#ffd24a" />
-      <path d="M55 30 Q62 30 60 34 Q58 32 55 33 Z" fill="#ffb43a" />
-      <path d="M16 42 L14 50 M26 44 L25 52 M34 44 L34 52" stroke="#521309" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 36 Q18 20 30 30 Q24 40 14 42 Q10 40 8 36 Z" fill="#8a2818" stroke="#4a1108" strokeWidth="1.3" />
+      <path d="M8 36 Q18 20 30 30 Q22 30 14 34 Q10 36 8 36 Z" fill="#a8331f" opacity="0.5" />
+      <path d="M12 46 Q22 26 42 30 L52 26 Q56 28 53 34 Q54 43 40 46 Q26 50 12 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1.5" />
+      <path d="M12 46 Q22 26 42 30 L42 44 Q26 48 12 46 Z" fill="#bf3d24" opacity="0.4" />
+      <path d="M26 32 L30 34 M32 34 L36 36 M38 36 L42 38" stroke="#7a1e10" strokeWidth="0.8" opacity="0.6" fill="none" />
+      <path d="M52 24 L59 17 L57 27 Z" fill="#c24327" stroke="#521309" strokeWidth="0.9" />
+      <path d="M46 25 L49 16 L52 26 Z" fill="#c24327" stroke="#521309" strokeWidth="0.9" />
+      <circle cx="53" cy="27" r="1.6" fill="#ffd24a" stroke="#7a4a08" strokeWidth="0.4" />
+      <path d="M56 30 Q64 27 63 32 Q61 30 56 31 Q66 33 62 37 Q60 34 56 34 Z" fill="#ffb43a" />
+      <path d="M58 31 Q62 30 63 33" stroke="#ff6a1a" strokeWidth="0.7" fill="none" opacity="0.7" />
+      <path d="M15 44 L13 52 M25 46 L24 54 M35 45 L35 53 M44 44 L45 51" stroke="#4a1108" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M13 52 L11 53 M24 54 L22 55 M35 53 L37 54" stroke="#e8e2d0" strokeWidth="1" strokeLinecap="round" />
+      <path d="M12 46 Q6 48 4 44 Q8 45 12 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1" />
     </>
   );
 }
@@ -1026,12 +1134,18 @@ function Dragon() {
 function Archangel() {
   return (
     <>
-      <path d="M32 20 Q14 22 12 40 Q24 34 32 40 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1" />
-      <path d="M32 20 Q50 22 52 40 Q40 34 32 40 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1" />
-      <path d="M26 52 Q26 32 32 32 Q38 32 38 52 Z" fill="#eef2fa" stroke="#c2c9d6" strokeWidth="1.2" />
-      <circle cx="32" cy="24" r="6" fill={SKIN} stroke={SKIN_D} strokeWidth="1" />
-      <ellipse cx="32" cy="15" rx="6" ry="2" fill="none" stroke={GOLD} strokeWidth="1.6" />
-      <path d="M32 40 L32 50 M28 44 L36 44" stroke={GOLD} strokeWidth="2" strokeLinecap="round" />
+      <path d="M32 20 Q12 20 9 42 Q16 36 22 38 Q16 32 24 34 Q18 28 32 38 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1.1" />
+      <path d="M32 20 Q52 20 55 42 Q48 36 42 38 Q48 32 40 34 Q46 28 32 38 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1.1" />
+      <path d="M14 34 Q20 34 24 37 M20 30 Q26 31 30 36 M50 34 Q44 34 40 37 M44 30 Q38 31 34 36" stroke="#cfc6ac" strokeWidth="0.6" fill="none" opacity="0.7" />
+      <path d="M24 53 Q24 31 32 31 Q40 31 40 53 Z" fill="#eef2fa" stroke="#c2c9d6" strokeWidth="1.3" />
+      <path d="M24 53 Q24 31 32 31 L32 53 Z" fill="#f8fbff" opacity="0.6" />
+      <path d="M32 36 L32 53" stroke="#c2c9d6" strokeWidth="0.7" opacity="0.6" />
+      <circle cx="32" cy="24" r="6.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
+      <ellipse cx="32" cy="14" rx="6.5" ry="2.2" fill="none" stroke={GOLD} strokeWidth="1.8" />
+      <ellipse cx="32" cy="14" rx="6.5" ry="2.2" fill="#fff2c0" opacity="0.3" />
+      <path d="M32 39 L32 50 M27 43 L37 43" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="30" cy="24" r="0.9" fill="#26303e" />
+      <circle cx="34" cy="24" r="0.9" fill="#26303e" />
     </>
   );
 }
