@@ -1156,9 +1156,13 @@ function Archangel() {
 function StrikeArt() {
   return (
     <>
-      <path d="M14 46 Q34 12 54 22" stroke="#eef2fa" strokeWidth="4" fill="none" strokeLinecap="round" />
-      <path d="M14 46 Q34 16 52 24" stroke="#8fa0c0" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.7" />
-      <path d="M50 20 L58 20 L52 26 Z" fill="#eef2fa" />
+      <path d="M10 50 Q30 14 56 20" stroke="#eef2fa" strokeWidth="5.5" fill="none" strokeLinecap="round" />
+      <path d="M10 50 Q30 14 56 20" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.9" />
+      <path d="M13 47 Q32 18 50 22" stroke="#8fa0c0" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.55" />
+      <path d="M18 42 Q34 24 46 26" stroke="#c8d4e8" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.4" />
+      <path d="M50 14 L60 19 L51 25 Z" fill="#eef2fa" stroke="#a8b4c8" strokeWidth="0.6" />
+      <path d="M50 20 L44 22 M52 24 L47 27" stroke="#fff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+      <path d="M52 21 L58 18 M53 24 L59 25 M50 26 L54 31" stroke="#eef2fa" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
     </>
   );
 }
@@ -1167,10 +1171,15 @@ function StrikeArt() {
 function FireboltArt() {
   return (
     <>
-      <path d="M14 44 Q26 36 40 30" stroke="#ff7a2a" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.6" />
-      <circle cx="44" cy="28" r="8" fill="#ff9a3c" />
-      <circle cx="44" cy="28" r="4.5" fill="#ffe08a" />
-      <path d="M44 20 Q50 24 48 30 Q52 26 50 20 Z" fill="#ff6a1a" />
+      <path d="M8 50 Q22 40 34 32" stroke="#ff6a1a" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.4" />
+      <path d="M12 48 Q24 40 36 32" stroke="#ff9a3c" strokeWidth="2.6" fill="none" strokeLinecap="round" opacity="0.7" />
+      <path d="M16 46 Q24 42 32 38" stroke="#ffe08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.6" />
+      <circle cx="44" cy="27" r="9.5" fill="#ff6a1a" opacity="0.35" />
+      <circle cx="44" cy="27" r="7.6" fill="#ff9a3c" stroke="#c2400f" strokeWidth="0.8" />
+      <circle cx="44" cy="27" r="4.2" fill="#ffe08a" />
+      <circle cx="42.5" cy="25.5" r="1.8" fill="#fffbe8" />
+      <path d="M44 17 Q49 21 47 27 Q52 23 50 16 Z" fill="#ff6a1a" />
+      <path d="M52 22 L57 18 M53 28 L58 30 M50 32 L53 37" stroke="#ffb43a" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
     </>
   );
 }
@@ -1179,10 +1188,15 @@ function FireboltArt() {
 function HolylightArt() {
   return (
     <>
-      <path d="M26 8 L38 8 L34 40 L30 40 Z" fill="#fff2c0" opacity="0.5" />
-      <path d="M28 8 L36 8 L33 40 L31 40 Z" fill="#fffbe8" opacity="0.8" />
-      <circle cx="32" cy="44" r="6" fill="#ffe08a" />
-      <path d="M32 36 L32 52 M24 44 L40 44" stroke={GOLD} strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+      <path d="M22 6 L42 6 L36 44 L28 44 Z" fill="#fff2c0" opacity="0.35" />
+      <path d="M26 6 L38 6 L34 44 L30 44 Z" fill="#fff7d8" opacity="0.6" />
+      <path d="M29 6 L35 6 L33 44 L31 44 Z" fill="#fffbe8" opacity="0.9" />
+      <path d="M18 12 L26 40 M46 12 L38 40" stroke="#fff2c0" strokeWidth="1" opacity="0.3" strokeLinecap="round" />
+      <circle cx="32" cy="45" r="8.5" fill="#ffe08a" opacity="0.4" />
+      <circle cx="32" cy="45" r="5.5" fill="#fff7d8" />
+      <circle cx="32" cy="45" r="2.6" fill="#fffbe8" />
+      <path d="M32 35 L32 55 M22 45 L42 45" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
+      <path d="M25 38 L39 52 M39 38 L25 52" stroke="#ffe08a" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
     </>
   );
 }
@@ -1191,8 +1205,13 @@ function HolylightArt() {
 function FlamestrikeArt() {
   return (
     <>
-      <path d="M12 50 Q16 32 20 44 Q24 26 28 44 Q32 28 36 44 Q40 26 44 44 Q48 32 52 50 Z" fill="#ff7a2a" stroke="#a8331f" strokeWidth="1" />
-      <path d="M18 48 Q22 38 26 48 Q30 36 34 48 Q38 38 42 48 Z" fill="#ffe08a" opacity="0.9" />
+      <path d="M8 52 Q13 28 18 44 Q23 20 28 44 Q32 24 36 44 Q41 20 46 44 Q51 28 56 52 Z" fill="#ff6a1a" stroke="#8a2818" strokeWidth="1.2" />
+      <path d="M12 51 Q16 34 20 46 Q25 26 29 46 Q33 30 37 46 Q42 26 46 46 Q50 34 52 51 Z" fill="#ff9a3c" opacity="0.9" />
+      <path d="M16 49 Q20 38 24 49 Q28 34 32 49 Q36 38 40 49 Q44 40 47 49 Z" fill="#ffe08a" opacity="0.85" />
+      <path d="M24 46 Q27 40 30 46 Q33 40 36 46 Z" fill="#fffbe8" opacity="0.8" />
+      <circle cx="20" cy="24" r="1.4" fill="#ffb43a" opacity="0.7" />
+      <circle cx="42" cy="22" r="1.6" fill="#ffb43a" opacity="0.7" />
+      <circle cx="32" cy="18" r="1.2" fill="#ffe08a" opacity="0.6" />
     </>
   );
 }
@@ -1201,10 +1220,15 @@ function FlamestrikeArt() {
 function BlessArt() {
   return (
     <>
-      <path d="M32 12 L32 44 M20 24 L32 12 L44 24" stroke="#ffe08a" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="32" cy="48" r="4" fill="#fff2c0" />
-      <circle cx="20" cy="20" r="1.6" fill="#ffe08a" />
-      <circle cx="44" cy="20" r="1.6" fill="#ffe08a" />
+      <circle cx="32" cy="30" r="18" fill="#fff2c0" opacity="0.12" />
+      <path d="M32 50 L32 12 M18 26 L32 10 L46 26" stroke="#fff7d8" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+      <path d="M32 50 L32 12 M19 25 L32 11 L45 25" stroke="#ffe08a" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M32 48 L32 14" stroke="#fffbe8" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+      <circle cx="32" cy="10" r="3.4" fill="#fffbe8" />
+      <circle cx="32" cy="10" r="5.5" fill="#ffe08a" opacity="0.4" />
+      <path d="M14 18 L18 22 M50 18 L46 22 M12 34 L16 34 M52 34 L48 34" stroke="#ffe08a" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
+      <circle cx="20" cy="42" r="1.5" fill="#ffe08a" opacity="0.7" />
+      <circle cx="44" cy="42" r="1.5" fill="#ffe08a" opacity="0.7" />
     </>
   );
 }
@@ -1213,9 +1237,14 @@ function BlessArt() {
 function FrostshockArt() {
   return (
     <>
-      <path d="M32 14 L32 50 M18 22 L46 42 M46 22 L18 42" stroke="#bfe9ff" strokeWidth="3" strokeLinecap="round" />
-      <path d="M32 14 L29 19 L35 19 Z M32 50 L29 45 L35 45 Z" fill="#eafaff" />
-      <circle cx="32" cy="32" r="3.4" fill="#eafaff" />
+      <circle cx="32" cy="32" r="17" fill="#bfe9ff" opacity="0.12" />
+      <path d="M32 12 L32 52 M15 22 L49 42 M49 22 L15 42" stroke="#8fd6f0" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
+      <path d="M32 12 L32 52 M15 22 L49 42 M49 22 L15 42" stroke="#eafaff" strokeWidth="2" strokeLinecap="round" />
+      <path d="M32 12 L28 17 L36 17 Z M32 52 L28 47 L36 47 Z" fill="#eafaff" />
+      <path d="M15 22 L15 28 L21 25 Z M49 42 L49 36 L43 39 Z M49 22 L49 28 L43 25 Z M15 42 L15 36 L21 39 Z" fill="#eafaff" opacity="0.9" />
+      <path d="M32 22 L28 26 M32 22 L36 26 M32 42 L28 38 M32 42 L36 38 M24 32 L28 28 M24 32 L28 36 M40 32 L36 28 M40 32 L36 36" stroke="#dff4ff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+      <circle cx="32" cy="32" r="3.8" fill="#fff" />
+      <circle cx="32" cy="32" r="2" fill="#bfe9ff" />
     </>
   );
 }
@@ -1224,10 +1253,15 @@ function FrostshockArt() {
 function AssassinateArt() {
   return (
     <>
-      <path d="M40 12 L46 18 L26 46 L22 42 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="1" />
-      <path d="M40 12 L44 16 L26 44 L24 42 Z" fill="#eef2fa" />
-      <rect x="18" y="42" width="10" height="4" rx="1" fill="#8a1f18" transform="rotate(45 23 44)" />
-      <circle cx="18" cy="50" r="3" fill="#c4182c" opacity="0.8" />
+      <path d="M42 10 L50 16 L28 46 L22 40 Z" fill="#cfd8e6" stroke="#79839a" strokeWidth="1.1" />
+      <path d="M42 10 L47 14 L26 42 L23 40 Z" fill="#f4f7fc" />
+      <path d="M42 10 L50 16 L46 18 Z" fill="#a8b4c8" />
+      <path d="M30 26 L38 32" stroke="#a8b4c8" strokeWidth="0.7" opacity="0.6" />
+      <rect x="17" y="40" width="12" height="4.5" rx="1.2" fill="#8a1f18" stroke="#4a0f0a" strokeWidth="0.7" transform="rotate(45 23 42)" />
+      <circle cx="20" cy="38" r="2.4" fill="#3a2418" stroke="#1a0e08" strokeWidth="0.6" />
+      <circle cx="16" cy="50" r="3.4" fill="#c4182c" opacity="0.85" />
+      <path d="M16 46 Q18 50 15 54" stroke="#c4182c" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.7" />
+      <circle cx="22" cy="54" r="1.4" fill="#c4182c" opacity="0.6" />
     </>
   );
 }
@@ -1236,10 +1270,13 @@ function AssassinateArt() {
 function WarhornArt() {
   return (
     <>
-      <path d="M14 34 Q34 22 50 34 Q44 44 30 42 Q20 42 14 34 Z" fill="#d9b878" stroke="#8a6636" strokeWidth="1.4" />
-      <path d="M48 30 Q54 30 54 36 Q50 36 48 38 Z" fill="#e8d8a8" />
-      <path d="M22 40 Q28 46 40 46" stroke="#c8922f" strokeWidth="1.4" fill="none" />
-      <path d="M50 26 L54 24 M52 30 L57 30 M50 34 L54 38" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" opacity="0.8" />
+      <path d="M10 38 Q30 20 50 32 Q46 42 34 42 Q28 46 20 44 Q13 43 10 38 Z" fill="#d9b878" stroke="#8a6636" strokeWidth="1.5" />
+      <path d="M10 38 Q30 20 50 32 Q40 30 30 34 Q18 38 10 38 Z" fill="#e8d8a8" opacity="0.6" />
+      <path d="M48 28 Q56 28 56 36 Q51 36 47 39 Z" fill="#e8d8a8" stroke="#8a6636" strokeWidth="1.2" />
+      <path d="M18 40 Q26 47 38 45" stroke="#c8922f" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <circle cx="16" cy="38" r="2.2" fill={GOLD} stroke={GOLD_D} strokeWidth="0.6" />
+      <path d="M52 22 L56 19 M54 27 L60 26 M53 32 L58 35 M55 15 L57 11" stroke={GOLD} strokeWidth="1.8" strokeLinecap="round" opacity="0.85" />
+      <path d="M56 18 L62 14 M58 24 L64 23" stroke="#ffe08a" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
     </>
   );
 }
@@ -1248,11 +1285,13 @@ function WarhornArt() {
 function InsightArt() {
   return (
     <>
-      <path d="M14 24 Q24 20 32 24 L32 46 Q24 42 14 46 Z" fill="#e8e2d0" stroke="#b6ad92" strokeWidth="1.2" />
-      <path d="M50 24 Q40 20 32 24 L32 46 Q40 42 50 46 Z" fill="#d9cfae" stroke="#b6ad92" strokeWidth="1.2" />
-      <path d="M18 28 L28 28 M18 32 L28 32 M36 28 L46 28 M36 32 L46 32" stroke="#a89a72" strokeWidth="1" />
-      <circle cx="32" cy="18" r="4" fill="#a45cff" opacity="0.85" />
-      <path d="M32 12 L32 15 M28 16 L30 18 M36 16 L34 18" stroke="#c8a0ff" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M12 26 Q23 21 32 26 L32 50 Q23 45 12 50 Z" fill="#eae4d2" stroke="#b6ad92" strokeWidth="1.3" />
+      <path d="M52 26 Q41 21 32 26 L32 50 Q41 45 52 50 Z" fill="#dcd2b4" stroke="#b6ad92" strokeWidth="1.3" />
+      <path d="M32 26 L32 50" stroke="#a89a72" strokeWidth="1.2" />
+      <path d="M17 30 L28 30 M17 34 L28 34 M17 38 L26 38 M36 30 L47 30 M36 34 L47 34 M38 38 L47 38" stroke="#a89a72" strokeWidth="0.9" opacity="0.8" />
+      <circle cx="32" cy="16" r="4.6" fill="#a45cff" opacity="0.5" />
+      <circle cx="32" cy="16" r="2.6" fill="#c8a0ff" />
+      <path d="M32 8 L32 12 M25 12 L28 15 M39 12 L36 15 M23 18 L26 18 M41 18 L38 18" stroke="#c8a0ff" strokeWidth="1.2" strokeLinecap="round" opacity="0.8" />
     </>
   );
 }
@@ -1261,11 +1300,16 @@ function InsightArt() {
 function ManasurgeArt() {
   return (
     <>
-      <path d="M32 12 L42 30 L32 52 L22 30 Z" fill="#5aa0ff" stroke="#2a4a8a" strokeWidth="1.4" />
-      <path d="M32 12 L37 30 L32 52 L32 12 Z" fill="#8ec4ff" opacity="0.8" />
-      <path d="M32 12 L27 30 L32 52" stroke="#2a4a8a" strokeWidth="0.8" opacity="0.6" />
-      <circle cx="18" cy="40" r="1.6" fill="#bfe0ff" />
-      <circle cx="46" cy="22" r="1.6" fill="#bfe0ff" />
+      <path d="M32 10 L44 30 L32 54 L20 30 Z" fill="#5aa0ff" stroke="#22407a" strokeWidth="1.5" />
+      <path d="M32 10 L38 30 L32 54 L32 10 Z" fill="#8ec4ff" opacity="0.85" />
+      <path d="M32 10 L26 30 L32 54" stroke="#22407a" strokeWidth="0.8" opacity="0.5" />
+      <path d="M20 30 L44 30" stroke="#22407a" strokeWidth="0.8" opacity="0.5" />
+      <path d="M28 20 L34 18" stroke="#dff0ff" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+      <circle cx="32" cy="30" r="7" fill="#bfe0ff" opacity="0.35" />
+      <circle cx="14" cy="42" r="1.8" fill="#bfe0ff" opacity="0.85" />
+      <circle cx="50" cy="20" r="1.8" fill="#bfe0ff" opacity="0.85" />
+      <circle cx="48" cy="44" r="1.3" fill="#bfe0ff" opacity="0.7" />
+      <path d="M14 36 L16 40 M50 26 L48 30" stroke="#8ec4ff" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
     </>
   );
 }
