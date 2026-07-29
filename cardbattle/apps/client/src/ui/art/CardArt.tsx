@@ -1252,19 +1252,39 @@ function Necromancer() {
 function Dragon() {
   return (
     <>
+      {/* far wing + finger-spars */}
       <path d="M8 36 Q18 20 30 30 Q24 40 14 42 Q10 40 8 36 Z" fill="#8a2818" stroke="#4a1108" strokeWidth="1.3" />
       <path d="M8 36 Q18 20 30 30 Q22 30 14 34 Q10 36 8 36 Z" fill="#a8331f" opacity="0.5" />
+      <path d="M12 39 Q18 26 28 29 M12 41 Q19 32 30 33 M13 37 Q18 24 26 27" stroke="#4a1108" strokeWidth="0.8" fill="none" opacity="0.55" />
+      {/* curling spade tail */}
+      <path d="M12 46 Q5 50 2 58 Q5 52 10 50 Q14 49 14 45 Z" fill="#a8331f" stroke="#521309" strokeWidth="1.2" />
+      <path d="M2 58 Q0 54 1 50 Q4 53 4 57 Z" fill="#c24327" stroke="#521309" strokeWidth="0.8" />
+      {/* body + belly highlight */}
       <path d="M12 46 Q22 26 42 30 L52 26 Q56 28 53 34 Q54 43 40 46 Q26 50 12 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1.5" />
       <path d="M12 46 Q22 26 42 30 L42 44 Q26 48 12 46 Z" fill="#bf3d24" opacity="0.4" />
+      {/* scale rows */}
       <path d="M26 32 L30 34 M32 34 L36 36 M38 36 L42 38" stroke="#7a1e10" strokeWidth="0.8" opacity="0.6" fill="none" />
+      <path d="M22 42 Q27 40 31 42 M20 38 Q25 36 29 38" stroke="#7a1e10" strokeWidth="0.7" opacity="0.5" fill="none" />
+      {/* back spine spikes */}
+      <path d="M30 30 L31 25 L35 30 Z M38 30 L40 25 L44 29 Z M46 28 L48 22 L51 27 Z" fill="#8a2818" stroke="#521309" strokeWidth="0.7" />
+      {/* crest horns */}
       <path d="M52 24 L59 17 L57 27 Z" fill="#c24327" stroke="#521309" strokeWidth="0.9" />
       <path d="M46 25 L49 16 L52 26 Z" fill="#c24327" stroke="#521309" strokeWidth="0.9" />
-      <circle cx="53" cy="27" r="1.6" fill="#ffd24a" stroke="#7a4a08" strokeWidth="0.4" />
-      <path d="M56 30 Q64 27 63 32 Q61 30 56 31 Q66 33 62 37 Q60 34 56 34 Z" fill="#ffb43a" />
-      <path d="M58 31 Q62 30 63 33" stroke="#ff6a1a" strokeWidth="0.7" fill="none" opacity="0.7" />
+      {/* brow + fierce eye */}
+      <path d="M49 25 Q53 22.6 57 25" stroke="#521309" strokeWidth="1" fill="none" strokeLinecap="round" />
+      <circle cx="53" cy="27" r="1.9" fill="#ffd24a" stroke="#7a4a08" strokeWidth="0.5" />
+      <path d="M53 25.3 L53 28.7" stroke="#7a1e00" strokeWidth="0.9" strokeLinecap="round" />
+      <circle cx="52.2" cy="26.1" r="0.5" fill="#fffbe8" />
+      {/* fire breath */}
+      <path d="M56 30 Q63 26 62 32 Q60 30 56 31 Q63 33 60 38 Q58 34 55 34 Q60 32 56 30 Z" fill="#ff6a1a" />
+      <path d="M57 31 Q62 28 61 33 Q59 31 56 32 Q61 34 58 37 Q57 34 56 33 Z" fill="#ff9a3c" opacity="0.9" />
+      <path d="M57 31 Q61 30 60 33 Q58 32 57 32 Z" fill="#ffe08a" opacity="0.85" />
+      <circle cx="60" cy="32" r="0.9" fill="#fffbe8" />
+      <circle cx="61" cy="37" r="0.8" fill="#ffb43a" opacity="0.7" />
+      <circle cx="57" cy="40" r="0.6" fill="#ff9a3c" opacity="0.6" />
+      {/* forelegs + claws */}
       <path d="M15 44 L13 52 M25 46 L24 54 M35 45 L35 53 M44 44 L45 51" stroke="#4a1108" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M13 52 L11 53 M24 54 L22 55 M35 53 L37 54" stroke="#e8e2d0" strokeWidth="1" strokeLinecap="round" />
-      <path d="M12 46 Q6 48 4 44 Q8 45 12 46 Z" fill="#a8331f" stroke="#521309" strokeWidth="1" />
+      <path d="M13 52 L11 53 M24 54 L22 55 M35 53 L37 54 M45 51 L47 52" stroke="#e8e2d0" strokeWidth="1" strokeLinecap="round" />
     </>
   );
 }
