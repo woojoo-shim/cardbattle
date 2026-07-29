@@ -7,6 +7,7 @@ type Cue =
   | 'hover' | 'select' | 'back' | 'toggle'
   | 'deal' | 'play' | 'draw'
   | 'attack' | 'damage' | 'block' | 'heal' | 'shield' | 'reverse' | 'coin'
+  | 'shatter'
   | 'poison' | 'regen' | 'reflect'
   | 'win' | 'lose' | 'turn';
 
@@ -99,6 +100,16 @@ export function playSfx(cue: Cue, opts?: { mag?: number }) {
     case 'play':
       noise(ac, master, t, 0.1, 0.16, 4200, true);
       tone(ac, master, 'triangle', 380, 620, t, 0.12, 0.14); break;
+    case 'shatter': {
+      // A minion is destroyed: a dry crumbling CRACK as it shatters — a broadband noise burst
+      // (the debris scattering) over a short low descending tone (the body dropping) and a brittle
+      // high-pass clatter that rings off. Matches the skull-pop + dark-shard-burst visual.
+      noise(ac, master, t, 0.18, 0.20, 2400, false);
+      tone(ac, master, 'sawtooth', 180, 54, t, 0.20, 0.13);
+      tone(ac, master, 'square', 300, 90, t + 0.02, 0.14, 0.06);
+      noise(ac, master, t + 0.03, 0.14, 0.10, 6200, true);
+      break;
+    }
     case 'attack': {
       // A minion swings: a quick blade cutting through the air — an airy high-pass whoosh that
       // rushes past with a fast downward pitched swipe. This is the WIND-UP lunge sound; the meaty
@@ -192,6 +203,9 @@ export function soundEvents(
       // The minion lunges — a blade-swing whoosh fires at the wind-up, ahead of the impact thud
       // which lands IMPACT_MS later on the resulting minion_damaged / damage_dealt event.
       case 'minion_attacked': playSfx('attack'); break;
+      // The minion is destroyed — a dry shatter crack, fired at once to land with the skull-pop
+      // and dark-shard-burst visual (both are immediate, not deferred).
+      case 'minion_died': playSfx('shatter'); break;
       case 'minion_damaged': {
         if (e.amount && e.amount > 0) { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
         break;
