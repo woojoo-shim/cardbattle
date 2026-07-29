@@ -6,7 +6,7 @@
 type Cue =
   | 'hover' | 'select' | 'back' | 'toggle'
   | 'deal' | 'play' | 'draw'
-  | 'damage' | 'block' | 'heal' | 'shield' | 'reverse' | 'coin'
+  | 'attack' | 'damage' | 'block' | 'heal' | 'shield' | 'reverse' | 'coin'
   | 'poison' | 'regen' | 'reflect'
   | 'win' | 'lose' | 'turn';
 
@@ -99,6 +99,15 @@ export function playSfx(cue: Cue, opts?: { mag?: number }) {
     case 'play':
       noise(ac, master, t, 0.1, 0.16, 4200, true);
       tone(ac, master, 'triangle', 380, 620, t, 0.12, 0.14); break;
+    case 'attack': {
+      // A minion swings: a quick blade cutting through the air — an airy high-pass whoosh that
+      // rushes past with a fast downward pitched swipe. This is the WIND-UP lunge sound; the meaty
+      // impact thud rides IMPACT_DELAY later on the resulting damage event.
+      const m = mag;
+      noise(ac, master, t, 0.10 + m * 0.03, 0.09 + m * 0.04, 1500 + m * 900, true);
+      tone(ac, master, 'triangle', 780, 240, t, 0.10 + m * 0.03, 0.06 + m * 0.03);
+      break;
+    }
     case 'damage': {
       // A layered impact, scaled by magnitude so a chip taps and a crusher slams:
       // 1) a sharp high transient CRACK (the leading edge of the strike),
@@ -180,6 +189,9 @@ export function soundEvents(
     switch (e.type) {
       case 'card_played': playSfx('play'); break;
       case 'minion_summoned': playSfx('deal'); break;
+      // The minion lunges — a blade-swing whoosh fires at the wind-up, ahead of the impact thud
+      // which lands IMPACT_MS later on the resulting minion_damaged / damage_dealt event.
+      case 'minion_attacked': playSfx('attack'); break;
       case 'minion_damaged': {
         if (e.amount && e.amount > 0) { const mag = magOf(e.amount); setTimeout(() => playSfx('damage', { mag }), IMPACT_MS); }
         break;
