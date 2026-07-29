@@ -250,6 +250,18 @@
   0%   { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot, 180deg)) scale(0.35); opacity: 0; }
 }
+/* A buffed minion's empowering surge: an aura blooms up big then settles and fades. */
+@keyframes cb-buff-surge {
+  0%   { transform: translate(-50%, -50%) scale(0.3);  opacity: 0; }
+  30%  { transform: translate(-50%, -58%) scale(1.15); opacity: 1; }
+  100% { transform: translate(-50%, -72%) scale(0.7);  opacity: 0; }
+}
+/* Gilded motes rising off a buffed minion — float up and out, then wink out. */
+@keyframes cb-buff-mote {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  25%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.4); opacity: 0; }
+}
 /* Energy gathering at the caster during the wind-up: a core orb blooms then implodes as the strike
    releases, so the attack reads as charged rather than casually tossed. */
 @keyframes cb-charge {

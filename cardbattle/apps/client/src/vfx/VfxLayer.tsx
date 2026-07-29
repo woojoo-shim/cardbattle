@@ -22,6 +22,8 @@ type Fx =
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
   | { id: number; kind: 'death'; x: number; y: number }
   | { id: number; kind: 'shard'; x: number; y: number; dx: number; dy: number; rot: number }
+  | { id: number; kind: 'buff'; x: number; y: number }
+  | { id: number; kind: 'spark'; x: number; y: number; dx: number; dy: number; delay: number }
   | { id: number; kind: 'burst'; x: number; y: number; dx: number; dy: number; rot: number; effect: string; color: string };
 
 /** When the projectile lands, the impact ring/number pops — synced to the hurl travel time.
@@ -289,6 +291,19 @@ export function VfxLayer({ events, players, myId }: Props) {
             dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist - 8, rot: (Math.random() - 0.5) * 280,
           });
         }
+      } else if (e.type === 'minion_buffed') {
+        // A minion is empowered: a warm emerald→gold surge blooms up from it with a cluster of
+        // gilded motes rising, selling the "grows stronger" beat. Fires at once (the minion stays).
+        const at = centerOf(e.minionId);
+        if (!at) continue;
+        add.push({ id: nextId.current++, kind: 'buff', x: at.x, y: at.y });
+        const motes = 6;
+        for (let i = 0; i < motes; i++) {
+          add.push({
+            id: nextId.current++, kind: 'spark', x: at.x, y: at.y,
+            dx: (Math.random() - 0.5) * 46, dy: -(34 + Math.random() * 32), delay: Math.random() * 0.18,
+          });
+        }
       } else if (e.type === 'healed') {
         const tgt = centerOf(e.targetId);
         if (!tgt) continue;
@@ -347,6 +362,10 @@ export function VfxLayer({ events, players, myId }: Props) {
             <span key={f.id} style={deathStyle(f)}><Icon name="skull" size={32} color="#e7dfe8" /></span>
           ) : f.kind === 'shard' ? (
             <span key={f.id} style={shardStyle(f)} />
+          ) : f.kind === 'buff' ? (
+            <span key={f.id} style={buffStyle(f)} />
+          ) : f.kind === 'spark' ? (
+            <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'cast' ? (
@@ -432,6 +451,26 @@ function shardStyle(f: Extract<Fx, { kind: 'shard' }>): React.CSSProperties {
     boxShadow: '0 0 6px rgba(200,96,104,0.55)', willChange: 'transform, opacity', zIndex: 61,
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
     animation: 'cb-shard .8s cubic-bezier(.2,.7,.3,1) forwards',
+  } as React.CSSProperties;
+}
+/** The empowering surge that blooms up from a buffed minion — an emerald→gold aura ring. */
+function buffStyle(f: Extract<Fx, { kind: 'buff' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 66, height: 66, borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(255,207,77,0.55) 0%, rgba(55,224,160,0.42) 42%, rgba(55,224,160,0) 72%)',
+    boxShadow: '0 0 18px rgba(255,207,77,0.5)', willChange: 'transform, opacity', zIndex: 61,
+    animation: 'cb-buff-surge .85s cubic-bezier(.2,.72,.3,1) forwards',
+  };
+}
+/** Gilded motes rising off a buffed minion. */
+function sparkStyle(f: Extract<Fx, { kind: 'spark' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, width: 5, height: 5, borderRadius: '50%',
+    background: 'radial-gradient(circle,#fff6d8,#ffcf4d)', boxShadow: '0 0 7px rgba(255,207,77,0.85)',
+    willChange: 'transform, opacity', zIndex: 62,
+    ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`,
+    animation: `cb-buff-mote .8s ${f.delay}s cubic-bezier(.25,.6,.35,1) forwards`,
+    opacity: 0,
   } as React.CSSProperties;
 }
 function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {

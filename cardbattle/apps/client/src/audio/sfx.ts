@@ -7,7 +7,7 @@ type Cue =
   | 'hover' | 'select' | 'back' | 'toggle'
   | 'deal' | 'play' | 'draw'
   | 'attack' | 'damage' | 'block' | 'heal' | 'shield' | 'reverse' | 'coin'
-  | 'shatter'
+  | 'shatter' | 'empower'
   | 'poison' | 'regen' | 'reflect'
   | 'win' | 'lose' | 'turn';
 
@@ -148,6 +148,13 @@ export function playSfx(cue: Cue, opts?: { mag?: number }) {
     case 'shield':
       tone(ac, master, 'square', 300, 460, t, 0.14, 0.11);
       noise(ac, master, t, 0.08, 0.08, 1800); break;
+    case 'empower':
+      // A minion grows stronger: a bright ascending triad power-swell (each note rising as it
+      // fires) with a shimmering high overtone — reads as an uplifting reinforcement.
+      tone(ac, master, 'triangle', 420, 520, t, 0.14, 0.12);
+      tone(ac, master, 'triangle', 560, 680, t + 0.06, 0.15, 0.11);
+      tone(ac, master, 'sine', 760, 940, t + 0.12, 0.20, 0.1);
+      tone(ac, master, 'sine', 1520, 1880, t + 0.12, 0.16, 0.04); break;
     case 'reverse':
       tone(ac, master, 'sawtooth', 300, 720, t, 0.12, 0.12);
       tone(ac, master, 'sawtooth', 720, 300, t + 0.1, 0.14, 0.1); break;
@@ -223,7 +230,7 @@ export function soundEvents(
       }
       case 'healed': playSfx('heal'); break;
       case 'shielded': playSfx('shield'); break;
-      case 'minion_buffed': playSfx('shield'); break;
+      case 'minion_buffed': playSfx('empower'); break;
       case 'player_eliminated': setTimeout(() => playSfx('damage', { mag: 1.6 }), IMPACT_MS); break;
       case 'game_over': playSfx(e.winnerId === myId ? 'win' : 'lose'); break;
     }
