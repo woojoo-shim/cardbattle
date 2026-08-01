@@ -4,6 +4,8 @@
  * subject is stamped with a chunky ink outline so it pops off the diorama.
  * 64x64 viewBox; scale via `size`. */
 
+import { useState } from 'react';
+
 interface Props {
   id: string;
   size?: number | string; // number → px; string → any CSS length (e.g. a clamp() for responsive cards)
@@ -1586,7 +1588,11 @@ const SCENE: Record<Elem, Scene> = {
 
 export function CardArt({ id, size = 44 }: Props) {
   const Art = ART[id];
-  if (!Art) return null;
+  // Custom art override: if the artist drops `public/cards/<id>.png`, it renders in place of the
+  // coded SVG. When that file is absent the <image> 404s → onError falls back to the coded art.
+  const [failedId, setFailedId] = useState<string | null>(null);
+  const useCustom = failedId !== id;
+  if (!Art && !useCustom) return null;
   const dim = typeof size === 'number' ? `${size}px` : size;
   const el = ELEMENT[id] ?? 'none';
   const s = SCENE[el];
@@ -1644,8 +1650,22 @@ export function CardArt({ id, size = 44 }: Props) {
       {/* framing vignette + grounding contact shadow so the subject sits in the scene */}
       <rect x="0" y="0" width="64" height="64" fill="url(#ca-vig)" />
       <ellipse cx="32" cy="56" rx="17" ry="4.2" fill="url(#ca-floor)" />
-      {/* the illustration, stamped with a bold ink outline and a soft cast shadow */}
-      <g filter="url(#ca-pop)"><Art /></g>
+      {/* the illustration, stamped with a bold ink outline and a soft cast shadow.
+          a custom PNG (public/cards/<id>.png) wins; otherwise the coded SVG art renders. */}
+      {useCustom ? (
+        <image
+          href={`/cards/${id}.png`}
+          x="6"
+          y="6"
+          width="52"
+          height="52"
+          preserveAspectRatio="xMidYMid meet"
+          filter="url(#ca-pop)"
+          onError={() => setFailedId(id)}
+        />
+      ) : Art ? (
+        <g filter="url(#ca-pop)"><Art /></g>
+      ) : null}
       {/* faint overhead light wash across the top half */}
       <rect x="0" y="0" width="64" height="28" fill="url(#ca-toplight)" style={{ mixBlendMode: 'screen' }} />
     </svg>
