@@ -1575,13 +1575,13 @@ const ELEMENT: Record<string, Elem> = {
  *  muted candlelit pigments (the horizon glow is atmospheric light, not neon chrome). */
 interface Scene { sky1: string; sky2: string; horizon: string; g1: string; g2: string; haze: string }
 const SCENE: Record<Elem, Scene> = {
-  physical:  { sky1: '#23293a', sky2: '#3d3a3f', horizon: '#e0a866', g1: '#2a2118', g2: '#120d0a', haze: '#c99a63' },
-  fire:      { sky1: '#2e1710', sky2: '#5a2414', horizon: '#ff9a3c', g1: '#301410', g2: '#140806', haze: '#ff8a42' },
-  holy:      { sky1: '#2c2414', sky2: '#5a4720', horizon: '#ffe0a0', g1: '#2e2415', g2: '#150f09', haze: '#ffcf7a' },
-  lightning: { sky1: '#1e1830', sky2: '#3a2c52', horizon: '#ecd05a', g1: '#231a2c', g2: '#0e0a16', haze: '#d8c060' },
-  poison:    { sky1: '#1a2016', sky2: '#33401f', horizon: '#b6c85a', g1: '#1c2413', g2: '#0b0f07', haze: '#a6b34e' },
-  ice:       { sky1: '#1a242c', sky2: '#324a54', horizon: '#cfeaf0', g1: '#1e2a30', g2: '#0a1014', haze: '#bfe2ea' },
-  none:      { sky1: '#241d2c', sky2: '#443850', horizon: '#e0b878', g1: '#241b18', g2: '#120c0a', haze: '#d8b06a' },
+  physical:  { sky1: '#1e2a4a', sky2: '#33405f', horizon: '#f0b45a', g1: '#2c2114', g2: '#0e0a07', haze: '#f0b45a' },
+  fire:      { sky1: '#3a1408', sky2: '#7a2810', horizon: '#ff8a1a', g1: '#3a1408', g2: '#160604', haze: '#ff8a1a' },
+  holy:      { sky1: '#3a2c10', sky2: '#7a5c1e', horizon: '#ffdc7a', g1: '#332812', g2: '#150f07', haze: '#ffdc7a' },
+  lightning: { sky1: '#221846', sky2: '#43307a', horizon: '#f4d23a', g1: '#241a34', g2: '#0e0918', haze: '#f4d23a' },
+  poison:    { sky1: '#182814', sky2: '#33521c', horizon: '#a8e03a', g1: '#1a2810', g2: '#080f05', haze: '#a8e03a' },
+  ice:       { sky1: '#12303e', sky2: '#2a5e72', horizon: '#bff0fa', g1: '#16323c', g2: '#08161c', haze: '#bff0fa' },
+  none:      { sky1: '#2a1a3e', sky2: '#4e327a', horizon: '#e8b45a', g1: '#241a24', g2: '#100a12', haze: '#e8b45a' },
 };
 
 export function CardArt({ id, size = 44 }: Props) {
@@ -1602,8 +1602,8 @@ export function CardArt({ id, size = 44 }: Props) {
           <stop offset="1" stopColor={s.sky2} />
         </linearGradient>
         <radialGradient id={`ca-horizon-${el}`} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor={s.horizon} stopOpacity="0.7" />
-          <stop offset="0.5" stopColor={s.horizon} stopOpacity="0.28" />
+          <stop offset="0" stopColor={s.horizon} stopOpacity="0.95" />
+          <stop offset="0.5" stopColor={s.horizon} stopOpacity="0.45" />
           <stop offset="1" stopColor={s.horizon} stopOpacity="0" />
         </radialGradient>
         <linearGradient id={`ca-ground-${el}`} x1="0" y1="0" x2="0" y2="1">
@@ -1612,8 +1612,8 @@ export function CardArt({ id, size = 44 }: Props) {
         </linearGradient>
         {/* framing vignette to keep the illustration reading as a windowed scene */}
         <radialGradient id="ca-vig" cx="0.5" cy="0.44" r="0.72">
-          <stop offset="0.58" stopColor="#04060a" stopOpacity="0" />
-          <stop offset="1" stopColor="#03040a" stopOpacity="0.6" />
+          <stop offset="0.68" stopColor="#04060a" stopOpacity="0" />
+          <stop offset="1" stopColor="#03040a" stopOpacity="0.42" />
         </radialGradient>
         <radialGradient id="ca-floor" cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor="#000" stopOpacity="0.62" />
@@ -1640,7 +1640,7 @@ export function CardArt({ id, size = 44 }: Props) {
       <rect x="0" y="39" width="64" height="25" fill={`url(#ca-ground-${el})`} />
       <ellipse cx="32" cy="40" rx="36" ry="15" fill={`url(#ca-horizon-${el})`} />
       {/* thin luminous horizon line where sky meets ground */}
-      <rect x="0" y="38.4" width="64" height="1.6" fill={s.haze} opacity="0.32" style={{ mixBlendMode: 'screen' }} />
+      <rect x="0" y="38.4" width="64" height="1.6" fill={s.haze} opacity="0.6" style={{ mixBlendMode: 'screen' }} />
       {/* framing vignette + grounding contact shadow so the subject sits in the scene */}
       <rect x="0" y="0" width="64" height="64" fill="url(#ca-vig)" />
       <ellipse cx="32" cy="56" rx="17" ry="4.2" fill="url(#ca-floor)" />
