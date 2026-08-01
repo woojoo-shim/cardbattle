@@ -65,7 +65,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         const isPreview = c.id === preview && enabled;
         const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
-        const lift = Math.abs(i - mid) * 8;
+        const lift = Math.abs(i - mid) * 11;
         // Minion cards carry attack/health stats; spell cards fire an effect on play.
         const isMinion = !!def.minion;
         const hasDamage = def.effects.some((e) => e.kind === 'damage');
@@ -189,7 +189,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-                <CardArt id={def.id} size="clamp(60px, 6.2vw, 88px)" />
+                <CardArt id={def.id} size="clamp(84px, 9.2vw, 160px)" />
               </div>
               <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
                 <div style={cname}>{def.name}</div>
@@ -226,11 +226,11 @@ const fan: React.CSSProperties = {
 };
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
-const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -14px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -18px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
   // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
   // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
-  width: 'clamp(116px, 11.4vw, 168px)', aspectRatio: '5 / 7',
+  width: 'clamp(150px, 15vw, 236px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
   // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the
@@ -306,8 +306,8 @@ const nameplate: React.CSSProperties = {
   width: '100%', marginTop: 'auto', padding: '3px 2px 2px', textAlign: 'center',
   borderTop: `1px solid ${C.border}`,
 };
-const cname: React.CSSProperties = { fontSize: 'clamp(12px, 1.15vw, 16px)', fontWeight: 700, lineHeight: 1.1 };
-const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(12px, 1.1vw, 16px)', padding: '2px 9px', borderRadius: 999 };
+const cname: React.CSSProperties = { fontSize: 'clamp(14px, 1.45vw, 21px)', fontWeight: 700, lineHeight: 1.1 };
+const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.35vw, 19px)', padding: '2px 10px', borderRadius: 999 };
 // Every accent below is pulled into the theme's four printed-pigment families so the hand reads
 // as one coherent candlelit palette (icons carry the fine distinctions, not colour):
 //   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
