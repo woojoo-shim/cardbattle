@@ -594,7 +594,7 @@ const frameCorner: React.CSSProperties = {
 // only things that read.
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
-  display: 'grid', gridTemplateRows: '64px 1fr clamp(196px, 19vh, 256px)',
+  display: 'grid', gridTemplateRows: '64px 1fr clamp(280px, 34vh, 420px)',
   // Painted like a jewelled crypt-arena on obsidian: a warm gold core pools on the table (the one
   // warm note for contrast), an amethyst halo bleeds out around it, a deep sapphire wash climbs the
   // far wall up top, and an emerald glow rises off the floor for cool jewel-tone depth. A vignette

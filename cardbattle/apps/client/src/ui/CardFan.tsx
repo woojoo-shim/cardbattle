@@ -65,7 +65,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         const isPreview = c.id === preview && enabled;
         const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
-        const lift = Math.abs(i - mid) * 11;
+        const lift = Math.abs(i - mid) * 14;
         // Minion cards carry attack/health stats; spell cards fire an effect on play.
         const isMinion = !!def.minion;
         const hasDamage = def.effects.some((e) => e.kind === 'damage');
@@ -189,7 +189,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-                <CardArt id={def.id} size="clamp(84px, 9.2vw, 160px)" />
+                <CardArt id={def.id} size="clamp(122px, 13.5vw, 236px)" />
               </div>
               <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
                 <div style={cname}>{def.name}</div>
@@ -226,11 +226,11 @@ const fan: React.CSSProperties = {
 };
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
-const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -18px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -30px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
   // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
   // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
-  width: 'clamp(150px, 15vw, 236px)', aspectRatio: '5 / 7',
+  width: 'clamp(210px, 21vw, 340px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
   // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the
@@ -306,17 +306,17 @@ const nameplate: React.CSSProperties = {
   width: '100%', marginTop: 'auto', padding: '3px 2px 2px', textAlign: 'center',
   borderTop: `1px solid ${C.border}`,
 };
-const cname: React.CSSProperties = { fontSize: 'clamp(14px, 1.45vw, 21px)', fontWeight: 700, lineHeight: 1.1 };
-const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(13px, 1.35vw, 19px)', padding: '2px 10px', borderRadius: 999 };
+const cname: React.CSSProperties = { fontSize: 'clamp(17px, 1.9vw, 28px)', fontWeight: 700, lineHeight: 1.1 };
+const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(15px, 1.7vw, 25px)', padding: '3px 13px', borderRadius: 999 };
 // Every accent below is pulled into the theme's four printed-pigment families so the hand reads
 // as one coherent candlelit palette (icons carry the fine distinctions, not colour):
 //   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
 const manaValPill: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.16)', border: '1px solid #6a5528' };
 // Mana cost, top-left — gold-leaf resource. Turns ochre-red when the player can't afford it.
 const costBadge: React.CSSProperties = {
-  position: 'absolute', top: 6, left: 6, minWidth: 20, height: 20, padding: '0 5px',
+  position: 'absolute', top: 7, left: 7, minWidth: 27, height: 27, padding: '0 7px',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-  fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', fontWeight: 800, borderRadius: 7, zIndex: 3,
+  fontFamily: mono, fontSize: 'clamp(13px, 1.25vw, 18px)', fontWeight: 800, borderRadius: 9, zIndex: 3,
   color: '#e8cf96', background: 'linear-gradient(160deg, rgba(74,58,26,0.95), rgba(46,34,14,0.95))',
   border: '1px solid #6a5528', boxShadow: '0 2px 8px rgba(120,90,30,0.4)',
 };

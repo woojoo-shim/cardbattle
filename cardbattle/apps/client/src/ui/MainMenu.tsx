@@ -133,8 +133,8 @@ function HeroFan() {
         {FAN_CARDS.map((id, i) => {
           const off = i - mid;
           const rot = off * 13;
-          const x = off * 112;
-          const y = Math.abs(off) * 42 - 8; // arc: outer cards dip lower
+          const x = off * 150;
+          const y = Math.abs(off) * 56 - 10; // arc: outer cards dip lower
           return (
             <div
               key={id}
@@ -144,7 +144,7 @@ function HeroFan() {
                 zIndex: 10 - Math.abs(off),
               }}
             >
-              <CardArt id={id} size={216} />
+              <CardArt id={id} size={300} />
             </div>
           );
         })}
@@ -270,13 +270,13 @@ const fanPos: React.CSSProperties = {
   display: 'grid', placeItems: 'center',
 };
 const fanGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 'clamp(560px, 52vw, 840px)', height: 'clamp(560px, 52vw, 840px)',
+  position: 'absolute', left: '50%', top: '50%', width: 'clamp(720px, 62vw, 1040px)', height: 'clamp(720px, 62vw, 1040px)',
   transform: 'translate(-50%, -50%)',
   borderRadius: '50%', filter: 'blur(26px)',
   background: 'radial-gradient(circle, rgba(168,107,255,0.18), rgba(55,224,160,0.08) 46%, transparent 72%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
-const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(260px, 22vw, 340px)', height: 'clamp(420px, 44vw, 600px)' };
+const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(340px, 28vw, 460px)', height: 'clamp(540px, 56vw, 780px)' };
 const fanCard: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%',
   display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
