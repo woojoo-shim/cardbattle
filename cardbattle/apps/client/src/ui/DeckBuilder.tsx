@@ -195,7 +195,7 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                 const full = total >= DECK_SIZE;
                 return (
                   <div key={def.id} style={cardCell(def.rarity, owned)} title={def.desc}>
-                    <div style={artWrap(def.rarity)}><CardArt id={def.id} size={54} /></div>
+                    <div style={artWrap(def.rarity)}><CardArt id={def.id} size="clamp(96px, 9vw, 150px)" /></div>
                     <span style={cardName}>{def.name}</span>
                     <span style={cardMeta}>{RARITY_LABEL[def.rarity]} · {def.cost}코스트</span>
                     {owned ? (
@@ -228,7 +228,7 @@ const overlay: React.CSSProperties = {
   backdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
-  width: 'min(860px, 96vw)', maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+  width: 'min(1440px, 98vw)', height: '96vh', maxHeight: '96vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
   borderRadius: 4, background: '#12161f',
   border: `1px solid ${C.borderHi}`, borderTop: '2px solid #a86bff', color: C.text,
   boxShadow: '0 20px 44px rgba(0,0,0,0.55)',
@@ -242,7 +242,7 @@ const hdKicker: React.CSSProperties = {
   fontFamily: mono, fontSize: 10, letterSpacing: 3.5, color: C.faint, textTransform: 'uppercase',
 };
 const hd: React.CSSProperties = {
-  margin: 0, fontFamily: serif, fontSize: 26, fontWeight: 700, letterSpacing: 3, color: '#eef2fb',
+  margin: 0, fontFamily: serif, fontSize: 32, fontWeight: 700, letterSpacing: 3, color: '#eef2fb',
   textShadow: '0 2px 0 #0d1019',
 };
 const goldPill: React.CSSProperties = {
@@ -258,8 +258,8 @@ const body: React.CSSProperties = { display: 'flex', gap: 18, padding: 18, overf
 
 // Deck column
 const deckCol: React.CSSProperties = {
-  width: 268, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
-  background: 'rgba(16,20,32,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 12,
+  width: 'clamp(300px, 24vw, 380px)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
+  background: 'rgba(16,20,32,0.6)', border: `1px solid ${C.border}`, borderRadius: 4, padding: 14,
 };
 const slotBar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 5 };
 function slotChip(on: boolean, active: boolean): React.CSSProperties {
@@ -288,7 +288,7 @@ function deleteBtn(active: boolean): React.CSSProperties {
   };
 }
 const deckHeadRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' };
-const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#eef2fb' };
+const deckTitle: React.CSSProperties = { fontFamily: serif, fontSize: 22, fontWeight: 700, color: '#eef2fb' };
 function deckCount(valid: boolean): React.CSSProperties {
   return { fontFamily: mono, fontSize: 15, fontWeight: 800, color: valid ? C.you : C.dim };
 }
@@ -297,20 +297,20 @@ const deckList: React.CSSProperties = {
 };
 const emptyNote: React.CSSProperties = { margin: 'auto', color: C.faint, fontSize: 12.5, textAlign: 'center', lineHeight: 1.6 };
 const deckRow: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 8, padding: '7px 9px', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 11px', cursor: 'pointer',
   background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`, borderRadius: 4,
   color: C.text, fontFamily: sans, textAlign: 'left',
 };
 function costChip(rarity: Rarity): React.CSSProperties {
   return {
-    width: 22, height: 22, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 3,
-    fontFamily: mono, fontSize: 12, fontWeight: 800, color: '#eef2fb',
+    width: 28, height: 28, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 4,
+    fontFamily: mono, fontSize: 14, fontWeight: 800, color: '#eef2fb',
     background: 'rgba(30,52,74,0.5)', border: `1px solid ${RARITY_BORDER[rarity]}`,
   };
 }
-const deckName: React.CSSProperties = { flex: 1, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
-const copyTag: React.CSSProperties = { fontFamily: mono, fontSize: 12, fontWeight: 800, color: C.rare };
-const removeMark: React.CSSProperties = { fontSize: 16, fontWeight: 800, color: C.enemy, width: 14, textAlign: 'center' };
+const deckName: React.CSSProperties = { flex: 1, fontSize: 15, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const copyTag: React.CSSProperties = { fontFamily: mono, fontSize: 14, fontWeight: 800, color: C.rare };
+const removeMark: React.CSSProperties = { fontSize: 18, fontWeight: 800, color: C.enemy, width: 16, textAlign: 'center' };
 function saveBtn(active: boolean): React.CSSProperties {
   return {
     padding: '11px 16px', fontSize: 14, fontWeight: 700, cursor: active ? 'pointer' : 'default',
@@ -322,37 +322,38 @@ function saveBtn(active: boolean): React.CSSProperties {
 
 // Collection column
 const collCol: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 };
-const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 18, fontWeight: 700, color: '#eef2fb' };
+const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 22, fontWeight: 700, color: '#eef2fb' };
 const grid: React.CSSProperties = {
-  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(122px, 1fr))',
-  gap: 10, alignContent: 'start', paddingRight: 4,
+  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(170px, 15vw, 230px), 1fr))',
+  gap: 16, alignContent: 'start', paddingRight: 6,
 };
 function cardCell(rarity: Rarity, owned: boolean): React.CSSProperties {
   return {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 8px',
-    borderRadius: 4, background: owned ? 'rgba(42,33,14,0.4)' : 'rgba(255,255,255,0.02)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 12px',
+    borderRadius: 6, background: owned ? 'rgba(42,33,14,0.4)' : 'rgba(255,255,255,0.02)',
     border: `1px solid ${owned ? RARITY_BORDER[rarity] : C.border}`,
     opacity: owned ? 1 : 0.82,
   };
 }
 function artWrap(rarity: Rarity): React.CSSProperties {
   return {
-    width: 60, height: 60, display: 'grid', placeItems: 'center', borderRadius: 4,
+    width: 'clamp(112px, 10.5vw, 170px)', height: 'clamp(112px, 10.5vw, 170px)',
+    display: 'grid', placeItems: 'center', borderRadius: 6, overflow: 'hidden',
     background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${RARITY_BORDER[rarity]}`,
   };
 }
-const cardName: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, textAlign: 'center' };
-const cardMeta: React.CSSProperties = { fontFamily: mono, fontSize: 10, color: C.dim, textAlign: 'center' };
+const cardName: React.CSSProperties = { fontSize: 'clamp(15px, 1.4vw, 19px)', fontWeight: 700, textAlign: 'center' };
+const cardMeta: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', color: C.dim, textAlign: 'center' };
 function addBtn(active: boolean): React.CSSProperties {
   return {
-    width: '100%', padding: '6px 4px', fontSize: 11.5, fontWeight: 700, cursor: active ? 'pointer' : 'default',
-    borderRadius: 3, color: active ? C.text : C.faint,
+    width: '100%', padding: '9px 6px', fontSize: 'clamp(12px, 1.15vw, 15px)', fontWeight: 700, cursor: active ? 'pointer' : 'default',
+    borderRadius: 4, color: active ? C.text : C.faint,
     border: `1px solid ${active ? C.borderHi : C.border}`,
     background: active ? 'rgba(143,157,79,0.14)' : 'rgba(255,255,255,0.02)',
   };
 }
 const buyBtn: React.CSSProperties = {
-  width: '100%', padding: '6px 4px', fontSize: 11.5, fontWeight: 700, color: '#2a1e04', cursor: 'pointer',
-  border: '1px solid #b98a2c', borderRadius: 3, background: '#cf9a2f',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2,
+  width: '100%', padding: '9px 6px', fontSize: 'clamp(12px, 1.15vw, 15px)', fontWeight: 700, color: '#2a1e04', cursor: 'pointer',
+  border: '1px solid #b98a2c', borderRadius: 4, background: '#cf9a2f',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
 };
