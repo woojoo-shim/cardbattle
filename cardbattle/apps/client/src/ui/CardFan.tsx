@@ -275,7 +275,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
 }
 
 const fan: React.CSSProperties = {
-  display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%',
+  // Full width so pointermove fires across the WHOLE hand band — the cards then magnify as the
+  // cursor merely APPROACHES nearby (dock-style), not only when it's directly over a card.
+  display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', width: '100%',
   paddingBottom: 18, fontFamily: sans,
   // 3D depth for the deal-in tumble; pivot low so cards arc up from the "deck" at the bottom.
   perspective: 1300, perspectiveOrigin: '50% 120%',
