@@ -98,8 +98,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
         // not just a flat slide — the fan's perspective makes them read as real objects picked up.
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
-        if (isPending) { transform = 'perspective(720px) translateY(-30px) rotateX(-7deg) scale(1.1)'; z = 6; }
-        else if (isHover) { transform = 'perspective(720px) translateY(-22px) rotateX(-6deg) scale(1.08)'; z = 5; }
+        // Cards rest SMALL; hovering (mouse near a card) pops it up much bigger for a clear read.
+        if (isPending) { transform = 'perspective(720px) translateY(-52px) rotateX(-7deg) scale(1.62)'; z = 6; }
+        else if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 5; }
 
         return (
           <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 260}ms`, zIndex: z }}>
@@ -189,7 +190,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-                <CardArt id={def.id} size="clamp(122px, 13.5vw, 236px)" />
+                <CardArt id={def.id} size="clamp(82px, 8.6vw, 148px)" />
               </div>
               <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
                 <div style={cname}>{def.name}</div>
@@ -226,11 +227,11 @@ const fan: React.CSSProperties = {
 };
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
-const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -30px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
+const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -14px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
   // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
   // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
-  width: 'clamp(210px, 21vw, 340px)', aspectRatio: '5 / 7',
+  width: 'clamp(140px, 13.5vw, 210px)', aspectRatio: '5 / 7',
   borderRadius: 12, position: 'relative',
   // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
   // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the
