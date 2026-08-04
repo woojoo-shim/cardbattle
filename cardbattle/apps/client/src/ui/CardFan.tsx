@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
@@ -38,6 +38,11 @@ const IS_TOUCH =
   typeof window !== 'undefined' && !!window.matchMedia &&
   window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
+// macOS-dock-style proximity magnification: how far (px) from the cursor a card still feels
+// the pull. Cards inside this radius grow smoothly by distance — nearest biggest, neighbours
+// partially — so the hand "breathes" open as the cursor approaches, not only on direct hover.
+const MAG_RADIUS = 240;
+
 /** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
  * and the selected (pending-target) card lifts higher with a teal outline. */
 export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic }: Props) {
@@ -48,6 +53,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
   // Minions are summoned by DRAGGING the card up out of the hand onto the board (Hearthstone-style),
   // not by a single click. This tracks the in-flight drag: the card id + start/current pointer pos.
   const [drag, setDrag] = useState<{ id: string; sx: number; sy: number; x: number; y: number; moved: boolean } | null>(null);
+  // Cursor X (viewport px) while it hovers the fan, plus the measured center X of every card
+  // slot — together they drive the dock-style proximity magnification below. null = cursor away.
+  const [mouseX, setMouseX] = useState<number | null>(null);
+  const fanRef = useRef<HTMLDivElement>(null);
+  const centersRef = useRef<number[]>([]);
+  const rafRef = useRef<number | null>(null);
   const n = hand.length;
   const mid = (n - 1) / 2;
 
@@ -56,8 +67,38 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
     if (preview && (!enabled || !hand.some((c) => c.id === preview))) setPreview(null);
   }, [enabled, hand, preview]);
 
+  // Cancel any pending rAF on unmount so a late frame never touches a dead component.
+  useEffect(() => () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); }, []);
+
+  // rAF-throttled: remeasure each card slot's center X (transforms don't reflow, and cards scale
+  // from bottom-center so their center X is stable even while magnified — no feedback loop) then
+  // publish the cursor X. Direct-hover magnification isn't enough; the user wants the whole hand
+  // to swell as the cursor draws near (see the reference image).
+  const onFanMove = (e: React.PointerEvent) => {
+    const x = e.clientX;
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const root = fanRef.current;
+      if (root) {
+        const kids = root.children;
+        const arr: number[] = [];
+        for (let k = 0; k < kids.length; k++) {
+          const r = (kids[k] as HTMLElement).getBoundingClientRect();
+          arr.push(r.left + r.width / 2);
+        }
+        centersRef.current = arr;
+      }
+      setMouseX(x);
+    });
+  };
+  const onFanLeave = () => {
+    if (rafRef.current != null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    setMouseX(null);
+  };
+
   return (
-    <div style={fan}>
+    <div style={fan} ref={fanRef} onPointerMove={onFanMove} onPointerLeave={onFanLeave}>
       {hand.map((c, i) => {
         const def = CARD_DEFS[c.defId];
         if (!def) return null;
@@ -94,13 +135,27 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
 
         const tint = RARITY_TINT[def.rarity] ?? RARITY_TINT.common;
 
+        // Dock-style proximity magnification: 0 = at rest, 1 = cursor dead-centre on this card.
+        // Cards rest SMALL and swell smoothly as the cursor nears (nearest grows most). A smoothstep
+        // falloff keeps the bulge soft-edged so the hand "breathes" open instead of snapping.
+        const center = centersRef.current[i];
+        let m = 0;
+        if (mouseX != null && center != null) {
+          const t = 1 - Math.abs(mouseX - center) / MAG_RADIUS;
+          if (t > 0) m = t * t * (3 - 2 * t);
+        }
+
         // Lifted cards stand up toward the viewer with a slight 3D tilt (Balatro-style physicality),
         // not just a flat slide — the fan's perspective makes them read as real objects picked up.
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
-        // Cards rest SMALL; hovering (mouse near a card) pops it up much bigger for a clear read.
         if (isPending) { transform = 'perspective(720px) translateY(-52px) rotateX(-7deg) scale(1.62)'; z = 6; }
         else if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 5; }
+        else if (m > 0.002) {
+          // Straighten the fan spread, lift, and scale — all by proximity amount m.
+          transform = `perspective(720px) rotate(${rot * (1 - m)}deg) translateY(${lift - m * 60}px) rotateX(${-5 * m}deg) scale(${1 + m * 0.5})`;
+          z = 2 + Math.round(m * 2);
+        }
 
         return (
           <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 260}ms`, zIndex: z }}>
