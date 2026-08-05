@@ -612,7 +612,9 @@ const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = {
   position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
-const handRow: React.CSSProperties = { position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
+// zIndex 30 raises the whole hand band ABOVE the player/board row (tableRow) so a lifted or
+// proximity-magnified card overlaps and covers the players cleanly instead of being clipped behind them.
+const handRow: React.CSSProperties = { position: 'relative', zIndex: 30, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
   padding: '8px 18px', background: 'rgba(255,77,94,0.16)', border: `1px solid ${C.enemy}`,
