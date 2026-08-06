@@ -32,7 +32,7 @@ export const HERO_POWERS: Record<string, HeroPower> = {
   // 피의 갈망 — a small poke that tops you up: hit a target, mend yourself.
   vampire: { id: 'hp_vampire', name: '피의 갈망', icon: '🩸', cost: COST, element: 'poison',   effects: [{ kind: 'damage', amount: 3, target: 'chosen' }, { kind: 'heal', amount: 2, target: 'hero' }], desc: '대상에게 3 피해, 내 영웅을 2 회복' },
   // 박쥐 소환 — put a small body on the board every turn.
-  bat:     { id: 'hp_bat',     name: '박쥐 소환', icon: '🦇', cost: COST, element: 'none',     effects: [{ kind: 'summon', token: 'sprite', count: 1 }], desc: '반딧불 정령(1/2) 하나를 소환한다' },
+  bat:     { id: 'hp_bat',     name: '박쥐 소환', icon: '🦇', cost: COST, element: 'none',     effects: [{ kind: 'summon', token: 'sprite', count: 1 }], desc: '정령(1/2) 하나를 소환한다' },
   // 원혼의 계시 — dig for answers: refill your hand.
   ghost:   { id: 'hp_ghost',   name: '원혼의 계시', icon: '👻', cost: COST, element: 'none',   effects: [{ kind: 'draw', amount: 1 }], desc: '카드 1장을 뽑는다' },
   // 조준 사격 — the bot's straightforward targeted hit.
