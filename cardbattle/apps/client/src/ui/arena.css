@@ -223,6 +223,15 @@
   82%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(0.96) rotate(0deg); opacity: 0; }
 }
+/* A summoned minion's big reveal — the card art swells up large, overshoots, settles, holds a
+   readable beat so you can see who took the field, then eases upward and fades. */
+@keyframes cb-summon {
+  0%   { transform: translate(-50%, -50%) scale(0.3) rotate(-8deg); opacity: 0; }
+  16%  { transform: translate(-50%, -50%) scale(1.15) rotate(3deg); opacity: 1; }   /* swell up, overshoot */
+  28%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* settle */
+  74%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* hold — read who it is */
+  100% { transform: translate(-50%, -58%) scale(0.92) rotate(0deg); opacity: 0; }   /* ease up + fade */
+}
 /* A cosmetic play-effect particle: bursts outward from the caster's seat (--dx/--dy = pixel
    delta), tumbles a little, and fades. Several fire at once in a ring for a sparkle/petal spray. */
 @keyframes cb-burst {

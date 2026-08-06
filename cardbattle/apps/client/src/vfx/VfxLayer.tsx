@@ -18,6 +18,7 @@ type Fx =
   | { id: number; kind: 'bolt'; x: number; y: number; dx: number; dy: number; color: string }
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
+  | { id: number; kind: 'summon'; x: number; y: number; defId: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean; dur?: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
   | { id: number; kind: 'death'; x: number; y: number }
@@ -179,8 +180,13 @@ export function VfxLayer({ events, players, myId }: Props) {
         const def = CARD_DEFS[e.defId];
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
-        const isAttack = def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
-        if (isAttack) {
+        const isAttack = def.kind !== 'minion' && def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
+        if (def.kind === 'minion') {
+          // A summoned minion gets a BIG, prominent reveal at the caster's seat: the card art swells
+          // up large so you clearly see who just took the field, holds a beat, then settles and fades.
+          add.push({ id: nextId.current++, kind: 'summon', x: src.x, y: src.y, defId: e.defId, color });
+          castPulse(e.playerId);
+        } else if (isAttack) {
           // GODFIELD SIGNATURE: the actual weapon/item card is HURLED at the victim — it spins
           // end-over-end across the table and lands as the blow connects, instead of an abstract
           // comet beam. Aims at the chosen foe, or the table centre for area/random hits.
@@ -368,6 +374,8 @@ export function VfxLayer({ events, players, myId }: Props) {
             <span key={f.id} style={sparkStyle(f)} />
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
+          ) : f.kind === 'summon' ? (
+            <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={128} /></span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
               <CardArt id={f.defId} size={22} />
@@ -480,6 +488,16 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
     ['--dx' as string]: `${f.dx}px`, ['--dy' as string]: `${f.dy}px`, ['--rot' as string]: `${f.rot}deg`,
     animation: 'cb-burst .72s cubic-bezier(.2,.7,.3,1) forwards',
   } as React.CSSProperties;
+}
+/** A summoned minion's big reveal: the card art swells up large at the caster's seat, overshoots,
+ *  settles, holds a readable beat, then eases up and fades — clearly announcing who took the field. */
+function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, zIndex: 63,
+    filter: `drop-shadow(0 0 22px ${f.color}) drop-shadow(0 10px 22px rgba(0,0,0,0.75))`,
+    willChange: 'transform, opacity', transformOrigin: 'center',
+    animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
+  };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
   return {
