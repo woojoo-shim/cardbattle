@@ -7,7 +7,7 @@ export const DRAW_PER_TURN = 1;       // steady trickle: draw 1 at the start of 
 export const HAND_TARGET = 4;         // every lap, living players are topped up to this many cards (floor)
 export const HAND_CAP = 7;            // a hand never grows beyond this; draws past it are skipped
 export const HAND_SOFT_CAP = 8; // not enforced in S1
-export const TURN_SECONDS = 30;
+export const TURN_SECONDS = 90;
 
 // Mana economy (Clash-Royale-ish): a bankable resource that gates how many cards you can play
 // per turn. It refills a set amount at the start of each of your turns, and that refill AMOUNT
