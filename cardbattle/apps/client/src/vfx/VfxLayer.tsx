@@ -182,9 +182,12 @@ export function VfxLayer({ events, players, myId }: Props) {
         const color = ELEM[def.element] ?? ELEM.none;
         const isAttack = def.kind !== 'minion' && def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
         if (def.kind === 'minion') {
-          // A summoned minion gets a BIG, prominent reveal at the caster's seat: the card art swells
-          // up large so you clearly see who just took the field, holds a beat, then settles and fades.
-          add.push({ id: nextId.current++, kind: 'summon', x: src.x, y: src.y, defId: e.defId, color });
+          // A summoned minion gets a BIG, prominent reveal on the CASTER's side of the table (pulled
+          // partway toward centre so it stays on-screen but never blocks the middle): the card art
+          // swells up large so you clearly see who just took the field, holds a beat, then fades.
+          const c = tableCenter();
+          const spot = c ? { x: src.x + (c.x - src.x) * 0.45, y: src.y + (c.y - src.y) * 0.45 } : src;
+          add.push({ id: nextId.current++, kind: 'summon', x: spot.x, y: spot.y, defId: e.defId, color });
           castPulse(e.playerId);
         } else if (isAttack) {
           // GODFIELD SIGNATURE: the actual weapon/item card is HURLED at the victim — it spins
@@ -493,7 +496,7 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
  *  settles, holds a readable beat, then eases up and fades — clearly announcing who took the field. */
 function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: '50%', top: '44%', zIndex: 63,
+    position: 'fixed', left: f.x, top: f.y, zIndex: 63,
     filter: `drop-shadow(0 0 22px ${f.color}) drop-shadow(0 10px 22px rgba(0,0,0,0.75))`,
     willChange: 'transform, opacity', transformOrigin: 'center',
     animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
