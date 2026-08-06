@@ -130,7 +130,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
                     zIndex: hoverMinion === m.id ? 30 : undefined,
                   }}
                 >
-                  <div style={minionArtWindow}><CardArt id={m.defId} size={70} /></div>
+                  <div style={minionArtWindow}><CardArt id={m.defId} size={100} /></div>
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
@@ -409,7 +409,7 @@ const fieldRow: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 90, aspectRatio: '5 / 7', borderRadius: 10, flexShrink: 0,
+  position: 'relative', width: 128, aspectRatio: '5 / 7', borderRadius: 12, flexShrink: 0,
   background: [
     'linear-gradient(180deg, rgba(150,180,230,0.06), transparent 22%)',
     'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
@@ -446,17 +446,17 @@ const minionArtWindow: React.CSSProperties = {
   border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(150,180,230,0.08)',
 };
 const minionName: React.CSSProperties = {
-  maxWidth: '100%', fontFamily: sans, fontSize: 12, fontWeight: 800, color: '#dbe4f5',
+  maxWidth: '100%', fontFamily: sans, fontSize: 15, fontWeight: 800, color: '#dbe4f5',
   lineHeight: 1.1, textAlign: 'center', letterSpacing: '-0.02em',
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
 };
 const minionStat: React.CSSProperties = {
-  position: 'absolute', bottom: -10, minWidth: 26, height: 26, padding: '0 4px', borderRadius: 7,
-  fontSize: 17, fontFamily: mono, fontWeight: 900, lineHeight: '26px', textAlign: 'center',
+  position: 'absolute', bottom: -12, minWidth: 32, height: 32, padding: '0 5px', borderRadius: 8,
+  fontSize: 21, fontFamily: mono, fontWeight: 900, lineHeight: '32px', textAlign: 'center',
   background: '#0a0d15', border: '1px solid rgba(0,0,0,0.6)',
 };
-const minionAtk: React.CSSProperties = { left: -8, color: '#ffcf4d' };
-const minionHp: React.CSSProperties = { right: -8 };
+const minionAtk: React.CSSProperties = { left: -10, color: '#ffcf4d' };
+const minionHp: React.CSSProperties = { right: -10 };
 // Passive keywords a minion carries, shown as readable name chips (수호/쇄도/가호/부식/착취)
 // so players don't have to hover to learn what a minion does.
 const KEYWORD_ORDER = ['taunt', 'charge', 'divineShield', 'poisonous', 'lifesteal'] as const;
