@@ -6,11 +6,19 @@ import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon } from './art/Icon.js';
 
+/** Who a pending card/power can be aimed at. `side:'friendly'` = my own hero/minions (buffs,
+ *  heals); `side:'enemy'` = opponents (damage, destroy). `heroes`/`minions` gate which entity
+ *  kinds are valid (e.g. a +N/+N buff only lands on minions, so heroes:false). */
+export type TargetIntent = { side: 'enemy' | 'friendly'; heroes: boolean; minions: boolean };
+export const ENEMY_INTENT: TargetIntent = { side: 'enemy', heroes: true, minions: true };
+
 interface Props {
   ui: UiState;
   myId: string;
   selectable: boolean;
   onSelect: (id: string) => void;
+  /** Which entities the current selection is allowed to hit. Defaults to enemies. */
+  targetIntent?: TargetIntent;
   /** My turn and free to pick one of my minions to attack with. */
   attackMode?: boolean;
   /** The id of my minion currently armed to attack (highlighted). */
@@ -27,7 +35,8 @@ const CX = 50, CY = 52, RX = 41, RY = 37;
 /** Everyone seated around a single oval table: my seat anchored at the front (bottom), the
  * rest fanned clockwise by seat order so the central turn-needle points outward to whoever
  * is acting. Each seat keeps its data-pid anchor for the VFX layer + needle. */
-export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attackerId, onSelectAttacker }: Props) {
+export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEMY_INTENT, attackMode, attackerId, onSelectAttacker }: Props) {
+  const friendlyTarget = targetIntent.side === 'friendly';
   const activeId = ui.turnOrder[ui.currentTurnIndex];
   // Hovering any minion on the board reveals its name / stats / ability text — so you can read a
   // foe's board before you commit to an attack or target.
@@ -103,7 +112,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
             {p.field.map((m) => {
               const mine = p.id === myId;
               const canAttack = mine && !!attackMode && m.attacksLeft > 0 && m.attack > 0;
-              const canHit = !mine && selectable;
+              const canHit = selectable && targetIntent.minions && (friendlyTarget ? mine : !mine);
               const armed = attackerId === m.id;
               const clickable = canAttack || canHit;
               const def = CARD_DEFS[m.defId];
@@ -171,7 +180,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, attackMode, attacke
         const left = CX + RX * Math.cos(theta);
         const top = CY + RY * Math.sin(theta);
         const isActive = p.id === activeId;
-        const canTarget = selectable && p.alive && !isMe;
+        const canTarget = selectable && p.alive && targetIntent.heroes && (friendlyTarget ? isMe : !isMe);
         const accent = isMe ? C.you : C.enemy;
         const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
 

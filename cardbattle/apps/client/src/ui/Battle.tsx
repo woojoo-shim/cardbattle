@@ -3,7 +3,7 @@ import type { CardInstance, GameEvent } from '@cardbattle/shared';
 import { CARD_DEFS, requiresTarget, resolveMode, heroPowerFor, heroPowerNeedsTarget } from '@cardbattle/shared';
 import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
-import { RoundTable } from './RoundTable.js';
+import { RoundTable, ENEMY_INTENT, type TargetIntent } from './RoundTable.js';
 import { CardFan } from './CardFan.js';
 import { Log } from './Log.js';
 import { EmoteBar } from './EmoteBar.js';
@@ -125,6 +125,18 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     setCoachPlayed(true);
   };
 
+  // A pending card that heals/buffs a chosen target must aim at MY side; damage/destroy aim at
+  // foes (the default). Without this a friendly buff like 축복/빛 could only be pointed at enemies.
+  const targetIntent: TargetIntent = (() => {
+    const def = pending ? CARD_DEFS[pending.defId] : undefined;
+    if (!def) return ENEMY_INTENT;
+    for (const e of def.effects) {
+      if (e.kind === 'buff' && e.target === 'chosen') return { side: 'friendly', heroes: false, minions: true };
+      if (e.kind === 'heal' && e.target === 'chosen') return { side: 'friendly', heroes: true, minions: true };
+    }
+    return ENEMY_INTENT;
+  })();
+
   if (ui.phase === 'ended') {
     const winner = ui.players.find((p) => p.id === ui.winnerId);
     const iWon = ui.winnerId === myId;
@@ -217,6 +229,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           myId={myId}
           selectable={isMyTurn && (!!pending || powerPending || !!attacker)}
           onSelect={selectTarget}
+          targetIntent={targetIntent}
           attackMode={isMyTurn && !pending && !powerPending}
           attackerId={attacker}
           onSelectAttacker={selectAttacker}
@@ -227,6 +240,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
             <Icon name="target" size={15} />&nbsp;
             {attacker ? '공격할 대상을 선택하세요 (하수인 다시 클릭 시 취소)'
               : powerPending ? '영웅 능력의 대상을 선택하세요 (능력 버튼 다시 클릭 시 취소)'
+              : targetIntent.side === 'friendly'
+              ? '아군 대상을 선택하세요 (카드 다시 클릭 시 취소)'
               : '대상을 선택하세요 (카드 다시 클릭 시 취소)'}
           </div>
         )}
