@@ -15,6 +15,8 @@ interface Props {
   /** droppedOnId = the entity (hero/minion) the card was released ON, if any — lets a targeted
    *  spell (arrow) fire straight at that target instead of entering a separate click-to-aim step. */
   onPlay: (card: CardInstance, droppedOnId?: string) => void;
+  /** Fires while a card is being dragged out of the hand, so the board can light up the cast slot. */
+  onDragging?: (active: boolean) => void;
   /** Equipped cosmetic border id (from the account); 'none' or undefined = plain frame. */
   borderCosmetic?: string;
 }
@@ -59,7 +61,7 @@ const MAG_RADIUS = 240;
 
 /** Fanned hand — the dominant interaction. Cards rotate outward from center, lift on hover,
  * and the selected (pending-target) card lifts higher with a teal outline. */
-export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic }: Props) {
+export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, borderCosmetic }: Props) {
   const cos = borderCosmetic ? COSMETIC_BY_ID[borderCosmetic] : undefined;
   const hasCos = !!cos && cos.id !== 'none';
   const [hover, setHover] = useState<string | null>(null);
@@ -215,20 +217,23 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               onPointerMove={(e) => {
                 if (!drag || drag.id !== c.id) return;
                 const moved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8;
+                if (moved && !drag.moved) onDragging?.(true); // first real movement → light the cast slot
                 if (moved) setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: true });
               }}
               onPointerUp={(e) => {
                 if (!drag || drag.id !== c.id) return;
                 const lifted = drag.sy - e.clientY; // pulled up out of the hand toward the board
-                const dropped = drag.moved && lifted > 70;
-                // What entity (hero/minion) sits under the release point? A targeted card (arrow)
-                // dropped straight onto a valid foe/ally fires at it — no separate aim-click.
-                const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-pid]');
-                const overId = under?.getAttribute('data-pid') ?? undefined;
+                // What sits under the release point? A targeted card (arrow) dropped straight onto a
+                // valid foe/ally fires at it; dropped onto the left CAST SLOT (or lifted up) it plays.
+                const el = document.elementFromPoint(e.clientX, e.clientY);
+                const overId = el?.closest('[data-pid]')?.getAttribute('data-pid') ?? undefined;
+                const overCast = !!el?.closest('[data-castzone]');
+                const dropped = (drag.moved && lifted > 70) || overCast;
                 setDrag(null);
+                onDragging?.(false);
                 if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId); }
               }}
-              onPointerCancel={() => { if (drag && drag.id === c.id) setDrag(null); }}
+              onPointerCancel={() => { if (drag && drag.id === c.id) { setDrag(null); onDragging?.(false); } }}
               style={{
                 ...card,
                 transform,

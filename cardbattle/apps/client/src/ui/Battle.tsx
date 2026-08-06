@@ -38,6 +38,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const [powerPending, setPowerPending] = useState(false);
   // The id of my own minion armed to attack, waiting for the enemy it should strike.
   const [attacker, setAttacker] = useState<string | null>(null);
+  // True while a hand card is being dragged, so the left-of-desk cast slot lights up as a drop target.
+  const [dragging, setDragging] = useState(false);
   // Learn-by-playing coach: tracks whether the newcomer has taken their first play / ended a turn,
   // so the guidance advances in step with what they actually do at the table.
   const [coachPlayed, setCoachPlayed] = useState(false);
@@ -263,6 +265,19 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
+        {isMyTurn && (
+          <div
+            data-castzone
+            style={{
+              ...castZone,
+              pointerEvents: dragging ? 'auto' : 'none',
+              ...(dragging ? castZoneLive : null),
+            }}
+          >
+            <Icon name="target" size={26} />
+            <span>카드를 여기에<br />놓아 사용</span>
+          </div>
+        )}
         <RoundTable
           ui={ui}
           myId={myId}
@@ -291,7 +306,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           <DeckPile count={deckCount} />
           <ManaBar mana={myMana} max={manaMax} lit={isMyTurn} />
         </div>
-        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
+        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} onDragging={setDragging} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
         {isMyTurn && (
           <button
@@ -665,6 +680,24 @@ const screen: React.CSSProperties = {
 const topRow: React.CSSProperties = {};
 const tableRow: React.CSSProperties = {
   position: 'relative', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
+// The drop target on the LEFT of the desk: drag a card here (or straight onto a target) to play it.
+// Sits quiet during my turn, then flares up while a card is in hand-drag so it reads as "놓을 곳".
+const castZone: React.CSSProperties = {
+  position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
+  width: 'clamp(96px, 11vw, 138px)', minHeight: 148, zIndex: 12, textAlign: 'center',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 9,
+  padding: '18px 12px', borderRadius: 14, boxSizing: 'border-box',
+  border: '2px dashed rgba(224,196,120,0.30)',
+  background: 'radial-gradient(120% 90% at 50% 28%, rgba(224,196,120,0.05), rgba(0,0,0,0))',
+  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 12, fontWeight: 700,
+  letterSpacing: 0.4, lineHeight: 1.5,
+  transition: 'border-color .18s, background .18s, transform .18s, color .18s',
+};
+const castZoneLive: React.CSSProperties = {
+  borderColor: 'rgba(240,210,130,0.85)', color: '#f4e6bf', transform: 'translateY(-50%) scale(1.05)',
+  background: 'radial-gradient(120% 90% at 50% 28%, rgba(240,210,130,0.18), rgba(0,0,0,0))',
+  boxShadow: '0 0 26px rgba(224,196,120,0.28), inset 0 0 22px rgba(224,196,120,0.12)',
 };
 // zIndex 30 raises the whole hand band ABOVE the player/board row (tableRow) so a lifted or
 // proximity-magnified card overlaps and covers the players cleanly instead of being clipped behind them.
