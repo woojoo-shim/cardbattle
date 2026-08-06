@@ -375,7 +375,7 @@ export function VfxLayer({ events, players, myId }: Props) {
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'summon' ? (
-            <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={380} /></span>
+            <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={460} /></span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
               <CardArt id={f.defId} size={22} />
@@ -493,7 +493,7 @@ function burstStyle(f: Extract<Fx, { kind: 'burst' }>): React.CSSProperties {
  *  settles, holds a readable beat, then eases up and fades — clearly announcing who took the field. */
 function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
   return {
-    position: 'fixed', left: f.x, top: f.y, zIndex: 63,
+    position: 'fixed', left: '50%', top: '44%', zIndex: 63,
     filter: `drop-shadow(0 0 22px ${f.color}) drop-shadow(0 10px 22px rgba(0,0,0,0.75))`,
     willChange: 'transform, opacity', transformOrigin: 'center',
     animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
