@@ -59,6 +59,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
   const fanRef = useRef<HTMLDivElement>(null);
   const centersRef = useRef<number[]>([]);
   const rafRef = useRef<number | null>(null);
+  // After a successful drag-drop the browser still fires a click; this flag swallows that
+  // trailing click so a dragged spell doesn't also fire again via onClick (double-play).
+  const skipClickRef = useRef(false);
   const n = hand.length;
   const mid = (n - 1) / 2;
 
@@ -166,6 +169,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
               onMouseLeave={() => setHover((h) => (h === c.id ? null : h))}
               onClick={() => {
                 if (!enabled) return;
+                // Swallow the click that fires right after a drag-drop so we never play twice.
+                if (skipClickRef.current) { skipClickRef.current = false; return; }
                 if (isMinion) return; // 하수인은 클릭이 아니라 보드로 드래그해서 소환한다
                 // On touch, the first tap only previews the card; the second tap commits.
                 if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
@@ -174,7 +179,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 onPlay(c);
               }}
               onPointerDown={(e) => {
-                if (!isMinion || !playable) return;
+                // Both minions AND spells are dragged out of the hand onto the board; spells then
+                // snap to the board and fire (targeted spells enter target-select via onPlay).
+                if (!playable) return;
                 try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* older browsers */ }
                 setDrag({ id: c.id, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, moved: false });
               }}
@@ -188,13 +195,13 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 const lifted = drag.sy - e.clientY; // pulled up out of the hand toward the board
                 const dropped = drag.moved && lifted > 70;
                 setDrag(null);
-                if (dropped && affordable) { playSfx('select'); onPlay(c); }
+                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c); }
               }}
               onPointerCancel={() => { if (drag && drag.id === c.id) setDrag(null); }}
               style={{
                 ...card,
                 transform,
-                cursor: !enabled ? 'default' : !affordable ? 'not-allowed' : isMinion ? 'grab' : 'pointer',
+                cursor: !enabled ? 'default' : !affordable ? 'not-allowed' : 'grab',
                 opacity: drag?.id === c.id && drag.moved ? 0.28 : !enabled ? 0.5 : affordable ? 1 : 0.42,
                 filter: playable ? 'none' : 'grayscale(0.4)',
                 borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
@@ -258,15 +265,15 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
       {drag && drag.moved && createPortal((() => {
         const dc = hand.find((h) => h.id === drag.id);
         const ddef = dc && CARD_DEFS[dc.defId];
-        if (!ddef || !ddef.minion) return null;
+        if (!ddef) return null;
         return (
           <div style={{ ...dragGhost, left: drag.x, top: drag.y }}>
             <div style={dragGhostCard}>
               <div style={dragGhostArt}><CardArt id={ddef.id} size={64} /></div>
               <div style={dragGhostName}>{ddef.name}</div>
-              <div style={dragGhostStat}>{ddef.minion.attack}/{ddef.minion.health}</div>
+              <div style={dragGhostStat}>{ddef.minion ? `${ddef.minion.attack}/${ddef.minion.health}` : `◈${ddef.cost}`}</div>
             </div>
-            <div style={dragHint}>↑ 놓아서 소환</div>
+            <div style={dragHint}>{ddef.minion ? '↑ 놓아서 소환' : '↑ 놓아서 발동'}</div>
           </div>
         );
       })(), document.body)}
