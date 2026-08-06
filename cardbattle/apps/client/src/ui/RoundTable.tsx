@@ -4,7 +4,7 @@ import { COSMETIC_BY_ID, TITLE_BY_ID, CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
 import { AvatarArt, BOT_TINTS } from './art/CreatureArt.js';
 import { CardArt } from './art/CardArt.js';
-import { Icon } from './art/Icon.js';
+import { Icon, TauntFrame, type IconName } from './art/Icon.js';
 
 /** Who a pending card/power can be aimed at. `side:'friendly'` = my own hero/minions (buffs,
  *  heals); `side:'enemy'` = opponents (damage, destroy). `heroes`/`minions` gate which entity
@@ -139,6 +139,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                     zIndex: hoverMinion === m.id ? 30 : undefined,
                   }}
                 >
+                  {m.taunt && <TauntFrame color={armed ? '#e0b84a' : '#c8a24a'} style={{ zIndex: 3 }} />}
                   <div style={minionArtWindow}><CardArt id={m.defId} size={100} /></div>
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
@@ -164,6 +165,35 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                         <span style={minionTipStat}>{m.attack}/{m.health}</span>
                       </div>
                       <div style={minionTipDesc}>{def.desc}</div>
+                      {(() => {
+                        const abils = KEYWORD_ORDER.filter((k) => m[k]);
+                        const hasRattle = m.hasDeathrattle;
+                        if (!abils.length && !hasRattle) return null;
+                        return (
+                          <div style={minionTipAbilities}>
+                            {abils.map((k) => (
+                              <div key={k} style={minionTipAbilityRow}>
+                                <span style={{ ...minionTipAbilityIcon, color: KEYWORD_META[k].color, borderColor: `${KEYWORD_META[k].color}66` }}>
+                                  <Icon name={KEYWORD_META[k].icon} size="66%" />
+                                </span>
+                                <span style={minionTipAbilityText}>
+                                  <b style={{ color: KEYWORD_META[k].color }}>{KEYWORD_META[k].label}</b> — {KEYWORD_META[k].desc}
+                                </span>
+                              </div>
+                            ))}
+                            {hasRattle && (
+                              <div style={minionTipAbilityRow}>
+                                <span style={{ ...minionTipAbilityIcon, color: '#a89f88', borderColor: '#a89f8866' }}>
+                                  <Icon name="skull" size="66%" />
+                                </span>
+                                <span style={minionTipAbilityText}>
+                                  <b style={{ color: '#a89f88' }}>유언</b> — 죽을 때 특수 효과가 발동한다.
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
@@ -448,6 +478,18 @@ const minionTipHead: React.CSSProperties = {
 const minionTipName: React.CSSProperties = { fontFamily: sans, fontSize: 14, fontWeight: 800, color: '#e6edfb', lineHeight: 1.15 };
 const minionTipStat: React.CSSProperties = { flexShrink: 0, fontFamily: mono, fontSize: 13, fontWeight: 900, color: '#e6edfb' };
 const minionTipDesc: React.CSSProperties = { fontFamily: sans, fontSize: 12, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
+// Ability rows in the minion hover panel — icon disc + name + plain explanation.
+const minionTipAbilities: React.CSSProperties = {
+  marginTop: 7, paddingTop: 6, borderTop: `1px solid ${C.border}`,
+  display: 'flex', flexDirection: 'column', gap: 5,
+};
+const minionTipAbilityRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 6 };
+const minionTipAbilityIcon: React.CSSProperties = {
+  flexShrink: 0, width: 18, height: 18, marginTop: 1,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  borderRadius: '50%', border: '1px solid', background: 'rgba(12,7,5,0.9)',
+};
+const minionTipAbilityText: React.CSSProperties = { fontFamily: sans, fontSize: 10.5, lineHeight: 1.4, color: C.dim, whiteSpace: 'normal' };
 const minionArtWindow: React.CSSProperties = {
   width: '92%', aspectRatio: '1 / 1', borderRadius: 5, overflow: 'hidden',
   display: 'grid', placeItems: 'center', flexShrink: 0,
@@ -469,12 +511,12 @@ const minionHp: React.CSSProperties = { right: -10 };
 // Passive keywords a minion carries, shown as readable name chips (수호/쇄도/가호/부식/착취)
 // so players don't have to hover to learn what a minion does.
 const KEYWORD_ORDER = ['taunt', 'charge', 'divineShield', 'poisonous', 'lifesteal'] as const;
-const KEYWORD_META: Record<typeof KEYWORD_ORDER[number], { label: string; color: string; desc: string }> = {
-  taunt: { label: '수호', color: '#e0c060', desc: '적은 먼저 이 하수인을 공격해야 한다.' },
-  charge: { label: '쇄도', color: '#f0a24a', desc: '소환된 턴에 바로 공격할 수 있다.' },
-  divineShield: { label: '가호', color: '#f0e096', desc: '첫 피해를 무효화한다.' },
-  poisonous: { label: '부식', color: '#9fb066', desc: '피해를 준 하수인을 즉사시킨다.' },
-  lifesteal: { label: '착취', color: '#d0839a', desc: '가한 피해만큼 내 영웅을 회복한다.' },
+const KEYWORD_META: Record<typeof KEYWORD_ORDER[number], { label: string; color: string; desc: string; icon: IconName }> = {
+  taunt: { label: '수호', color: '#e0c060', desc: '적은 먼저 이 하수인을 공격해야 한다.', icon: 'shield' },
+  charge: { label: '쇄도', color: '#f0a24a', desc: '소환된 턴에 바로 공격할 수 있다.', icon: 'bolt' },
+  divineShield: { label: '가호', color: '#f0e096', desc: '첫 피해를 무효화한다.', icon: 'sparkle' },
+  poisonous: { label: '부식', color: '#9fb066', desc: '피해를 준 하수인을 즉사시킨다.', icon: 'poison' },
+  lifesteal: { label: '착취', color: '#d0839a', desc: '가한 피해만큼 내 영웅을 회복한다.', icon: 'heart' },
 };
 const kwRow: React.CSSProperties = {
   display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', maxWidth: '100%', lineHeight: 1,

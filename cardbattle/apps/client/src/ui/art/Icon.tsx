@@ -265,6 +265,25 @@ export const EFFECT_ICON: Record<string, IconName | null> = {
   fx_skulls: 'skull', fx_coins: 'coin', fx_stars: 'star', fx_crystal: 'crystal',
 };
 
+/** A heater-shield silhouette overlay that frames a 수호(taunt) card/minion, so a defender reads
+ *  at a glance (Hearthstone-style). Stretched to the parent via preserveAspectRatio='none'; the
+ *  parent must be position:relative. Purely decorative — pointer-events off. Color usually the
+ *  card's rarity border so the frame conveys BOTH rarity and the taunt ability at once. */
+export function TauntFrame({ color = '#e0c060', style }: { color?: string; style?: React.CSSProperties }) {
+  return (
+    <svg
+      viewBox="0 0 100 120" preserveAspectRatio="none" aria-hidden
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', ...style }}
+    >
+      <path
+        d="M9 9 Q50 2 91 9 L91 40 Q91 86 50 116 Q9 86 9 40 Z"
+        fill="none" stroke={color} strokeWidth={3} strokeLinejoin="round"
+        style={{ filter: `drop-shadow(0 0 3px ${color})`, opacity: 0.92 }}
+      />
+    </svg>
+  );
+}
+
 /** Inline SVG glyph. Sits on the text baseline via `verticalAlign` so it reads like a letter. */
 export function Icon({ name, size = 16, color, style, className }: Props) {
   const glyph = GLYPHS[name];

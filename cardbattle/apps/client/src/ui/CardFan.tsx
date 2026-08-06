@@ -4,7 +4,7 @@ import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
-import { Icon, type IconName } from './art/Icon.js';
+import { Icon, TauntFrame, type IconName } from './art/Icon.js';
 import { playSfx } from '../audio/sfx.js';
 
 interface Props {
@@ -41,13 +41,13 @@ const IS_TOUCH =
 // A minion's persistent abilities get a small emblem drawn on the card face, so a player can
 // read its power at a glance without opening the tooltip. Keyword keywords + the 유언 (deathrattle)
 // synthetic marker each map to a tinted glyph badge.
-const KEYWORD_META: Record<string, { icon: IconName; color: string; label: string }> = {
-  charge:       { icon: 'bolt',    color: '#d68a50', label: '쇄도' }, // 소환한 턴에 바로 공격
-  taunt:        { icon: 'shield',  color: '#b9cdc4', label: '수호' }, // 적은 이 하수인부터 공격
-  divineShield: { icon: 'sparkle', color: '#e8c880', label: '가호' }, // 첫 피해 1회 무효
-  lifesteal:    { icon: 'heart',   color: '#cf8f74', label: '착취' }, // 준 피해만큼 영웅 회복
-  poisonous:    { icon: 'poison',  color: '#9aa863', label: '부식' }, // 피해 준 하수인 즉시 파괴
-  deathrattle:  { icon: 'skull',   color: '#a89f88', label: '유언' }, // 죽을 때 효과 발동
+const KEYWORD_META: Record<string, { icon: IconName; color: string; label: string; desc: string }> = {
+  charge:       { icon: 'bolt',    color: '#d68a50', label: '쇄도', desc: '소환된 턴에 바로 공격할 수 있다.' },
+  taunt:        { icon: 'shield',  color: '#e0c060', label: '수호', desc: '적은 먼저 이 하수인을 공격해야 한다.' },
+  divineShield: { icon: 'sparkle', color: '#e8c880', label: '가호', desc: '첫 번째 피해를 1회 무효화한다.' },
+  lifesteal:    { icon: 'heart',   color: '#cf8f74', label: '착취', desc: '가한 피해만큼 내 영웅을 회복한다.' },
+  poisonous:    { icon: 'poison',  color: '#9aa863', label: '부식', desc: '피해를 준 하수인을 즉시 파괴한다.' },
+  deathrattle:  { icon: 'skull',   color: '#a89f88', label: '유언', desc: '죽을 때 특수 효과가 발동한다.' },
 };
 
 // macOS-dock-style proximity magnification: how far (px) from the cursor a card still feels
@@ -150,11 +150,15 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
 
         const tint = RARITY_TINT[def.rarity] ?? RARITY_TINT.common;
 
-        // The card's persistent abilities → emblem badges drawn on the face (keywords + 유언).
-        const emblems = [
+        // The card's persistent abilities. 수호(taunt) becomes a SHIELD-SHAPED frame around the
+        // whole card (coloured by rarity) so a defender reads at a glance; the other keywords +
+        // 유언 show as left-edge emblem badges. The tooltip lists ALL of them with icons.
+        const abilityKeys = [
           ...(def.keywords ?? []),
           ...(def.deathrattle && def.deathrattle.length ? ['deathrattle'] : []),
         ].filter((k) => KEYWORD_META[k]);
+        const hasTaunt = abilityKeys.includes('taunt');
+        const emblems = abilityKeys.filter((k) => k !== 'taunt');
 
         // Dock-style proximity magnification: 0 = at rest, 1 = cursor dead-centre on this card.
         // Cards rest SMALL and swell smoothly as the cursor nears (nearest grows most). A smoothstep
@@ -262,6 +266,23 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                       {needsTarget && <span style={{ ...tipChip, ...tipTargetChip }}>대상 지정</span>}
                     </div>
                     <div style={tipDesc}>{def.desc}</div>
+                    {abilityKeys.length > 0 && (
+                      <div style={tipAbilities}>
+                        {abilityKeys.map((k) => {
+                          const km = KEYWORD_META[k];
+                          return (
+                            <div key={k} style={tipAbilityRow}>
+                              <span style={{ ...tipAbilityIcon, color: km.color, borderColor: `${km.color}66` }}>
+                                <Icon name={km.icon} size="66%" />
+                              </span>
+                              <span style={tipAbilityText}>
+                                <b style={{ color: km.color }}>{km.label}</b> — {km.desc}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                     {def.flavor && <div style={tipFlavor}>{def.flavor}</div>}
                     {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
                   </div>
@@ -288,6 +309,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 <div style={cname}>{def.name}</div>
               </div>
               <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
+              {hasTaunt && <TauntFrame color={RARITY_BORDER[def.rarity] ?? C.border} style={{ zIndex: 2 }} />}
             </button>
           </div>
         );
@@ -483,6 +505,20 @@ const tipChip: React.CSSProperties = {
 const tipCostChip: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.15)', borderColor: '#6a552855' };
 const tipTargetChip: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.14)', borderColor: '#5a2c2288' };
 const tipDesc: React.CSSProperties = { fontSize: 13, lineHeight: 1.5, color: C.text, whiteSpace: 'normal' };
+// Ability rows in the tooltip — an icon disc + name + plain-language explanation, so a player
+// learns what each keyword/유언 does without memorising the glossary.
+const tipAbilities: React.CSSProperties = {
+  marginTop: 8, paddingTop: 7, borderTop: `1px solid ${C.border}`,
+  display: 'flex', flexDirection: 'column', gap: 6,
+};
+const tipAbilityRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 7 };
+const tipAbilityIcon: React.CSSProperties = {
+  flexShrink: 0, width: 20, height: 20, marginTop: 1,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  borderRadius: '50%', border: '1px solid',
+  background: 'linear-gradient(160deg, rgba(32,25,15,0.9), rgba(16,11,6,0.9))',
+};
+const tipAbilityText: React.CSSProperties = { fontSize: 11.5, lineHeight: 1.4, color: C.dim, whiteSpace: 'normal' };
 const tipFlavor: React.CSSProperties = {
   marginTop: 7, paddingTop: 6, borderTop: `1px solid ${C.border}`,
   fontSize: 12, lineHeight: 1.45, color: C.dim, fontStyle: 'italic', whiteSpace: 'normal',
