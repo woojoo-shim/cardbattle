@@ -12,7 +12,9 @@ interface Props {
   enabled: boolean;
   pendingId: string | null;
   mana: number;
-  onPlay: (card: CardInstance) => void;
+  /** droppedOnId = the entity (hero/minion) the card was released ON, if any — lets a targeted
+   *  spell (arrow) fire straight at that target instead of entering a separate click-to-aim step. */
+  onPlay: (card: CardInstance, droppedOnId?: string) => void;
   /** Equipped cosmetic border id (from the account); 'none' or undefined = plain frame. */
   borderCosmetic?: string;
 }
@@ -219,8 +221,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 if (!drag || drag.id !== c.id) return;
                 const lifted = drag.sy - e.clientY; // pulled up out of the hand toward the board
                 const dropped = drag.moved && lifted > 70;
+                // What entity (hero/minion) sits under the release point? A targeted card (arrow)
+                // dropped straight onto a valid foe/ally fires at it — no separate aim-click.
+                const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-pid]');
+                const overId = under?.getAttribute('data-pid') ?? undefined;
                 setDrag(null);
-                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c); }
+                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId); }
               }}
               onPointerCancel={() => { if (drag && drag.id === c.id) setDrag(null); }}
               style={{

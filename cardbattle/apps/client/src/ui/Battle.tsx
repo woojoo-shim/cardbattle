@@ -74,14 +74,45 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   const soundCursor = useRef(0);
   useEffect(() => { soundCursor.current = soundEvents(events, soundCursor.current, myId); }, [events, myId]);
 
-  const playCard = (card: CardInstance) => {
+  // Where a targeted card is allowed to aim: heal/buff (chosen) hit MY side, everything else foes.
+  const intentForDef = (def: (typeof CARD_DEFS)[string]): TargetIntent => {
+    for (const e of def.effects) {
+      if (e.kind === 'buff' && e.target === 'chosen') return { side: 'friendly', heroes: false, minions: true };
+      if (e.kind === 'heal' && e.target === 'chosen') return { side: 'friendly', heroes: true, minions: true };
+    }
+    return ENEMY_INTENT;
+  };
+
+  // Is `id` a living hero/minion this card is actually allowed to target? Validates side
+  // (mine vs enemy per the intent) and kind (heroes/minions) so a mis-dropped arrow falls back
+  // to click-to-aim instead of firing at an illegal target the server would just reject.
+  const isValidTarget = (def: (typeof CARD_DEFS)[string], id: string): boolean => {
+    const intent = intentForDef(def);
+    const wantMine = intent.side === 'friendly';
+    const hero = ui.players.find((p) => p.id === id);
+    if (hero) return intent.heroes && hero.alive && (wantMine ? hero.id === myId : hero.id !== myId);
+    for (const p of ui.players) {
+      const m = p.field.find((mn) => mn.id === id);
+      if (m) return intent.minions && (wantMine ? p.id === myId : p.id !== myId);
+    }
+    return false;
+  };
+
+  const playCard = (card: CardInstance, droppedOnId?: string) => {
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
     if (!def) return;
     setPowerPending(false); // playing a card cancels an armed hero power
     setAttacker(null);      // …and cancels an armed minion attack
     if (requiresTarget(def)) {
-      setPending((cur) => (cur?.id === card.id ? null : card)); // toggle target mode
+      // Dropped straight onto a legal target → fire immediately (drag-to-aim, card-game style).
+      if (droppedOnId && isValidTarget(def, droppedOnId)) {
+        send({ type: 'play_card', cardInstanceId: card.id, targetId: droppedOnId });
+        setPending(null);
+        setCoachPlayed(true);
+        return;
+      }
+      setPending((cur) => (cur?.id === card.id ? null : card)); // else fall back to click-to-aim
       return;
     }
     send({ type: 'play_card', cardInstanceId: card.id });
@@ -127,15 +158,8 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
 
   // A pending card that heals/buffs a chosen target must aim at MY side; damage/destroy aim at
   // foes (the default). Without this a friendly buff like 축복/빛 could only be pointed at enemies.
-  const targetIntent: TargetIntent = (() => {
-    const def = pending ? CARD_DEFS[pending.defId] : undefined;
-    if (!def) return ENEMY_INTENT;
-    for (const e of def.effects) {
-      if (e.kind === 'buff' && e.target === 'chosen') return { side: 'friendly', heroes: false, minions: true };
-      if (e.kind === 'heal' && e.target === 'chosen') return { side: 'friendly', heroes: true, minions: true };
-    }
-    return ENEMY_INTENT;
-  })();
+  const pendingDef = pending ? CARD_DEFS[pending.defId] : undefined;
+  const targetIntent: TargetIntent = pendingDef ? intentForDef(pendingDef) : ENEMY_INTENT;
 
   if (ui.phase === 'ended') {
     const winner = ui.players.find((p) => p.id === ui.winnerId);
