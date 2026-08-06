@@ -419,9 +419,11 @@ const costBadgeShort: React.CSSProperties = {
   color: '#e8b09a', background: 'linear-gradient(160deg, rgba(90,44,34,0.95), rgba(50,22,16,0.95))',
   border: '1px solid #7a3a2a', boxShadow: '0 2px 8px rgba(150,60,40,0.4)',
 };
-// Ability emblems stack down the top-right corner (cost badge sits top-left), each a tinted disc.
+// Ability emblems stack down the LEFT edge, under the cost badge — the fanned cards overlap so
+// only their left strip is exposed (the right corner is hidden behind the neighbour), so the
+// left edge is the only always-visible place for the badges. Each is a small tinted disc.
 const emblemCol: React.CSSProperties = {
-  position: 'absolute', top: 7, right: 7, zIndex: 3,
+  position: 'absolute', top: 38, left: 7, zIndex: 3,
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
 };
 const emblemBadge: React.CSSProperties = {
