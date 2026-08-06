@@ -375,7 +375,7 @@ export function VfxLayer({ events, players, myId }: Props) {
           ) : f.kind === 'burst' ? (
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'summon' ? (
-            <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={240} /></span>
+            <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={380} /></span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
               <CardArt id={f.defId} size={22} />
