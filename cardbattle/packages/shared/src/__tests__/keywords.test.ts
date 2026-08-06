@@ -16,15 +16,6 @@ let n = 0;
 const ctx: ReduceCtx = { nextCardId: () => `d-${n++}`, now: 1000 };
 
 describe('battlecry (강림) fires on summon', () => {
-  it('squire draws a card', () => {
-    const s = game();
-    s.players[0].hand = [{ id: 'c1', defId: 'squire' }];
-    const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1' }, ctx);
-    expect(state.players[0].field).toHaveLength(1);
-    expect(state.players[0].hand).toHaveLength(1); // squire consumed, 1 drawn
-    expect(events).toContainEqual(expect.objectContaining({ type: 'battlecry_triggered', playerId: 'a', cond: 'squire' }));
-  });
-
   it('archer deals 2 damage to a chosen enemy hero', () => {
     const s = game();
     s.players[0].hand = [{ id: 'c1', defId: 'archer' }];

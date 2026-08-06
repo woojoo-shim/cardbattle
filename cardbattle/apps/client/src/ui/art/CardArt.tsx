@@ -968,25 +968,6 @@ function Wolf() {
   );
 }
 
-/** A young squire raising a banner (종자). */
-function Squire() {
-  return (
-    <>
-      <rect x="30" y="12" width="2.2" height="40" rx="0.6" fill="#6b4a26" stroke="#432c14" strokeWidth="0.5" />
-      <path d="M32 13 L50 17 L45 25 L50 33 L32 29 Z" fill="#a83b2c" stroke="#5f1f16" strokeWidth="1.1" />
-      <path d="M32 13 L50 17 L45 25 L32 22 Z" fill="#c04a36" opacity="0.55" />
-      <path d="M37 18 L43 19 M37 23 L44 24" stroke="#5f1f16" strokeWidth="0.7" opacity="0.6" />
-      <path d="M16 52 Q16 39 24 39 Q32 39 32 52 Z" fill="#456089" stroke="#2a3d58" strokeWidth="1.1" />
-      <path d="M16 52 Q16 39 24 39 L24 52 Z" fill="#54739e" opacity="0.5" />
-      <circle cx="24" cy="31" r="7.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
-      <path d="M17 28 Q24 20 31 27 Q30 22 24 22 Q18 22 17 28 Z" fill="#5a3f22" stroke="#3a2814" strokeWidth="0.7" />
-      <circle cx="22" cy="32" r="1.2" fill="#26303e" />
-      <circle cx="27" cy="32" r="1.2" fill="#26303e" />
-      <path d="M22 35 Q24 36 26 35" stroke={SKIN_D} strokeWidth="0.7" fill="none" opacity="0.6" />
-    </>
-  );
-}
-
 /** An archer drawing a bow (궁수). */
 function Archer() {
   return (
@@ -1480,7 +1461,6 @@ const ART: Record<string, () => JSX.Element> = {
   recruit: Recruit,
   guard: Guard,
   wolf: Wolf,
-  squire: Squire,
   archer: Archer,
   knight: Knight,
   cleric: Cleric,
@@ -1558,7 +1538,7 @@ const ELEMENT: Record<string, Elem> = {
   bind: 'ice', frostbolt: 'ice', gale: 'ice',
   peek: 'none', gambit: 'none', meditate: 'none', fateswap: 'none',
   // ── board-model minions ──
-  recruit: 'physical', squire: 'physical', archer: 'physical', knight: 'physical',
+  recruit: 'physical', archer: 'physical', knight: 'physical',
   shieldbearer: 'physical', berserker: 'physical', cavalier: 'physical',
   warlord: 'physical', golem: 'physical', guard: 'physical', wolf: 'physical',
   cleric: 'holy', paladin: 'holy', archangel: 'holy',
