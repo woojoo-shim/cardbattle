@@ -194,8 +194,11 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 // Swallow the click that fires right after a drag-drop so we never play twice.
                 if (skipClickRef.current) { skipClickRef.current = false; return; }
                 if (isMinion) return; // 하수인은 클릭이 아니라 보드로 드래그해서 소환한다
+                // On desktop, MAGIC is cast the same way as minions: drag it up onto the desk and
+                // release — a plain click no longer fires it. (Touch keeps tap-to-preview below.)
+                if (!IS_TOUCH) return;
                 // On touch, the first tap only previews the card; the second tap commits.
-                if (IS_TOUCH && preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
+                if (preview !== c.id) { setPreview(c.id); playSfx('select'); return; }
                 if (!affordable) return; // can't pay for it — reads fine, just won't play
                 setPreview(null);
                 onPlay(c);

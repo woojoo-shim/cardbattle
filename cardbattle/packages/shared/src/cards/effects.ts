@@ -100,7 +100,9 @@ function damageMinion(m: MinionInstance, amount: number, poisonous: boolean, emi
 function healHeroBy(hero: PlayerState, amount: number, emit: (e: GameEvent) => void): void {
   if (amount <= 0 || !hero.alive) return;
   const before = hero.hp;
-  hero.hp = Math.min(hero.maxHp, hero.hp + amount);
+  // Healing can push the hero ABOVE their starting max HP (overheal) — no cap. maxHp still
+  // tracks the baseline so the HP bar/percent has a reference, but current hp may exceed it.
+  hero.hp = hero.hp + amount;
   if (hero.hp !== before) emit({ type: 'healed', targetId: hero.id, amount: hero.hp - before, targetHpAfter: hero.hp });
 }
 

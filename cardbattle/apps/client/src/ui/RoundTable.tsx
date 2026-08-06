@@ -212,7 +212,9 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
         const isActive = p.id === activeId;
         const canTarget = selectable && p.alive && targetIntent.heroes && (friendlyTarget ? isMe : !isMe);
         const accent = isMe ? C.you : C.enemy;
-        const hpPct = Math.max(0, (p.hp / p.maxHp) * 100);
+        // Overheal can push hp above maxHp, so clamp the BAR/pips at 100% (the numeric readout
+        // below still shows the true value, e.g. 35/30).
+        const hpPct = Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100));
 
         // Value hierarchy: the acting player is the clear focus (bigger, brighter); everyone
         // else who isn't me or a current target recedes into the background (dimmer, desaturated,
