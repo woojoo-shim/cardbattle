@@ -4,7 +4,7 @@ import type { CardInstance } from '@cardbattle/shared';
 import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
 import { C, RARITY_BORDER, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
-import { Icon } from './art/Icon.js';
+import { Icon, type IconName } from './art/Icon.js';
 import { playSfx } from '../audio/sfx.js';
 
 interface Props {
@@ -37,6 +37,18 @@ function cosmeticRing(border: string): React.CSSProperties {
 const IS_TOUCH =
   typeof window !== 'undefined' && !!window.matchMedia &&
   window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+// A minion's persistent abilities get a small emblem drawn on the card face, so a player can
+// read its power at a glance without opening the tooltip. Keyword keywords + the 유언 (deathrattle)
+// synthetic marker each map to a tinted glyph badge.
+const KEYWORD_META: Record<string, { icon: IconName; color: string; label: string }> = {
+  charge:       { icon: 'bolt',    color: '#d68a50', label: '쇄도' }, // 소환한 턴에 바로 공격
+  taunt:        { icon: 'shield',  color: '#b9cdc4', label: '수호' }, // 적은 이 하수인부터 공격
+  divineShield: { icon: 'sparkle', color: '#e8c880', label: '가호' }, // 첫 피해 1회 무효
+  lifesteal:    { icon: 'heart',   color: '#cf8f74', label: '착취' }, // 준 피해만큼 영웅 회복
+  poisonous:    { icon: 'poison',  color: '#9aa863', label: '부식' }, // 피해 준 하수인 즉시 파괴
+  deathrattle:  { icon: 'skull',   color: '#a89f88', label: '유언' }, // 죽을 때 효과 발동
+};
 
 // macOS-dock-style proximity magnification: how far (px) from the cursor a card still feels
 // the pull. Cards inside this radius grow smoothly by distance — nearest biggest, neighbours
@@ -137,6 +149,12 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
           : { style: healVal, label: `+${value}` };
 
         const tint = RARITY_TINT[def.rarity] ?? RARITY_TINT.common;
+
+        // The card's persistent abilities → emblem badges drawn on the face (keywords + 유언).
+        const emblems = [
+          ...(def.keywords ?? []),
+          ...(def.deathrattle && def.deathrattle.length ? ['deathrattle'] : []),
+        ].filter((k) => KEYWORD_META[k]);
 
         // Dock-style proximity magnification: 0 = at rest, 1 = cursor dead-centre on this card.
         // Cards rest SMALL and swell smoothly as the cursor nears (nearest grows most). A smoothstep
@@ -250,6 +268,18 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, borderCosmetic
                 );
               })()}
               <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
+              {emblems.length > 0 && (
+                <div style={emblemCol}>
+                  {emblems.map((k) => {
+                    const km = KEYWORD_META[k];
+                    return (
+                      <div key={k} style={{ ...emblemBadge, color: km.color, borderColor: `${km.color}77` }} title={km.label} aria-label={km.label}>
+                        <Icon name={km.icon} size="62%" />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
                 <CardArt id={def.id} size="clamp(82px, 8.6vw, 148px)" />
@@ -388,6 +418,18 @@ const costBadge: React.CSSProperties = {
 const costBadgeShort: React.CSSProperties = {
   color: '#e8b09a', background: 'linear-gradient(160deg, rgba(90,44,34,0.95), rgba(50,22,16,0.95))',
   border: '1px solid #7a3a2a', boxShadow: '0 2px 8px rgba(150,60,40,0.4)',
+};
+// Ability emblems stack down the top-right corner (cost badge sits top-left), each a tinted disc.
+const emblemCol: React.CSSProperties = {
+  position: 'absolute', top: 7, right: 7, zIndex: 3,
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+};
+const emblemBadge: React.CSSProperties = {
+  width: 'clamp(21px, 2vw, 28px)', height: 'clamp(21px, 2vw, 28px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  borderRadius: '50%', border: '1px solid',
+  background: 'linear-gradient(160deg, rgba(32,25,15,0.96), rgba(16,11,6,0.96))',
+  boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
 };
 const dmgVal: React.CSSProperties = { color: '#e8b4a6', background: 'rgba(176,70,47,0.18)', border: '1px solid #5a2c22' };
 const healVal: React.CSSProperties = { color: '#cdd3a0', background: 'rgba(143,157,79,0.18)', border: '1px solid #4a5230' };
