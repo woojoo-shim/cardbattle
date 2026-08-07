@@ -232,6 +232,15 @@
   74%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* hold — read who it is */
   100% { transform: translate(-50%, -58%) scale(0.92) rotate(0deg); opacity: 0; }   /* ease up + fade */
 }
+/* The BIG card-activation reveal on the LEFT of the table — the card slams in oversized from the
+   left, snaps to a huge readable hold, then eases out. Sells "카드 발동" (the card being cast). */
+@keyframes cb-activate {
+  0%   { transform: translate(calc(-50% - 90px), -50%) scale(0.55) rotate(-7deg); opacity: 0; }
+  13%  { transform: translate(-50%, -50%) scale(1.1) rotate(3deg);  opacity: 1; }   /* slam in, overshoot */
+  24%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* settle big */
+  72%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* hold — read the card */
+  100% { transform: translate(-50%, -54%) scale(1.05) rotate(0deg); opacity: 0; }   /* ease up + fade */
+}
 /* A cosmetic play-effect particle: bursts outward from the caster's seat (--dx/--dy = pixel
    delta), tumbles a little, and fades. Several fire at once in a ring for a sparkle/petal spray. */
 @keyframes cb-burst {

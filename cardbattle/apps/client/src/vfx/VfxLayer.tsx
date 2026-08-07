@@ -19,6 +19,7 @@ type Fx =
   | { id: number; kind: 'num'; x: number; y: number; text: string; color: string; delay: number; icon?: IconName }
   | { id: number; kind: 'cast'; x: number; y: number; dx: number; dy: number; defId: string; name: string; color: string }
   | { id: number; kind: 'summon'; x: number; y: number; defId: string; color: string }
+  | { id: number; kind: 'activate'; x: number; y: number; size: number; defId: string; name: string; color: string }
   | { id: number; kind: 'hurl'; x: number; y: number; dx: number; dy: number; defId: string | null; color: string; spin: boolean; dur?: number }
   | { id: number; kind: 'impact'; x: number; y: number; color: string; delay: number; big: boolean }
   | { id: number; kind: 'death'; x: number; y: number }
@@ -181,6 +182,18 @@ export function VfxLayer({ events, players, myId }: Props) {
         if (!src || !def) continue;
         const color = ELEM[def.element] ?? ELEM.none;
         const isAttack = def.kind !== 'minion' && def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
+        if (def.kind !== 'minion') {
+          // BIG LEFT-OF-THE-TABLE ACTIVATION REVEAL: whenever a card is played (dragged onto the
+          // desk to cast it), the card art blows up HUGE on the LEFT of the table, holds a readable
+          // beat with a glowing element-tinted aura, then fades — so it unmistakably reads as the
+          // card being CAST/activated. This is the star; the attack hurl / support deal below still
+          // deliver the effect afterward.
+          const c = tableCenter();
+          const midY = c ? c.y : window.innerHeight / 2;
+          const size = Math.round(Math.min(window.innerHeight * 0.52, 460));
+          const leftX = Math.max(size * 0.6, window.innerWidth * 0.17);
+          add.push({ id: nextId.current++, kind: 'activate', x: leftX, y: midY, size, defId: e.defId, name: def.name, color });
+        }
         if (def.kind === 'minion') {
           // A summoned minion gets a BIG, prominent reveal on the CASTER's side of the table (pulled
           // partway toward centre so it stays on-screen but never blocks the middle): the card art
@@ -379,6 +392,11 @@ export function VfxLayer({ events, players, myId }: Props) {
             <span key={f.id} style={burstStyle(f)}><Icon name={EFFECT_ICON[f.effect]!} size={16} color={f.color} /></span>
           ) : f.kind === 'summon' ? (
             <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={460} /></span>
+          ) : f.kind === 'activate' ? (
+            <span key={f.id} style={activateStyle(f)}>
+              <CardArt id={f.defId} size={f.size} />
+              <span style={activateNameStyle(f)}>{f.name}</span>
+            </span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
               <CardArt id={f.defId} size={22} />
@@ -500,6 +518,25 @@ function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
     filter: `drop-shadow(0 0 22px ${f.color}) drop-shadow(0 10px 22px rgba(0,0,0,0.75))`,
     willChange: 'transform, opacity', transformOrigin: 'center',
     animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
+  };
+}
+/** The BIG activation reveal on the LEFT of the table: the played card art blows up huge, holds a
+ *  readable beat inside a bright element-tinted aura, then fades — the "카드 발동" money shot. */
+function activateStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
+  return {
+    position: 'fixed', left: f.x, top: f.y, zIndex: 64,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+    filter: `drop-shadow(0 0 40px ${f.color}) drop-shadow(0 0 14px ${f.color}) drop-shadow(0 16px 34px rgba(0,0,0,0.82))`,
+    willChange: 'transform, opacity', transformOrigin: 'center',
+    animation: 'cb-activate 1.4s cubic-bezier(.16,.72,.26,1) forwards',
+  };
+}
+/** The card's name plate under the big left reveal — a struck gilt-white label. */
+function activateNameStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
+  return {
+    fontFamily: '"Geist", system-ui, sans-serif', fontWeight: 800,
+    fontSize: Math.round(f.size * 0.11), letterSpacing: '-0.01em', color: '#f6efdd',
+    whiteSpace: 'nowrap', textShadow: `0 0 16px ${f.color}, 0 2px 6px rgba(0,0,0,0.85)`,
   };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
