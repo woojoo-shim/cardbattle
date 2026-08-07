@@ -13,8 +13,10 @@ interface Props {
   pendingId: string | null;
   mana: number;
   /** droppedOnId = the entity (hero/minion) the card was released ON, if any — lets a targeted
-   *  spell (arrow) fire straight at that target instead of entering a separate click-to-aim step. */
-  onPlay: (card: CardInstance, droppedOnId?: string) => void;
+   *  spell (arrow) fire straight at that target instead of entering a separate click-to-aim step.
+   *  onCast = the card was dropped on the left cast desk, so a targeted card is deliberately
+   *  PLACED there and enters aim mode (big card sits on the left while you pick a target). */
+  onPlay: (card: CardInstance, droppedOnId?: string, onCast?: boolean) => void;
   /** Fires while a card is being dragged out of the hand, so the board can light up the cast slot. */
   onDragging?: (active: boolean) => void;
   /** Equipped cosmetic border id (from the account); 'none' or undefined = plain frame. */
@@ -231,7 +233,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 const dropped = (drag.moved && lifted > 70) || overCast;
                 setDrag(null);
                 onDragging?.(false);
-                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId); }
+                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId, overCast); }
               }}
               onPointerCancel={() => { if (drag && drag.id === c.id) { setDrag(null); onDragging?.(false); } }}
               style={{

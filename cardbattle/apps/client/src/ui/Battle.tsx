@@ -117,7 +117,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     setCoachPlayed(true);
   };
 
-  const playCard = (card: CardInstance, droppedOnId?: string) => {
+  const playCard = (card: CardInstance, droppedOnId?: string, onCast?: boolean) => {
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
     if (!def) return;
@@ -126,6 +126,9 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     if (requiresTarget(def)) {
       // Dropped straight onto a legal target → fire immediately (drag-to-aim, card-game style).
       if (droppedOnId && isValidTarget(def, droppedOnId)) { fire(card, droppedOnId); return; }
+      // Dropped on the LEFT cast desk → deliberately PLACE it there (big card sits on the left)
+      // and enter aim mode, even for a lone target — the 화살 lands on the desk, then you pick.
+      if (onCast) { setPending((cur) => (cur?.id === card.id ? null : card)); return; }
       // 알잘딱: dropped on empty felt but only ONE legal target exists → just aim it there. Only
       // when it's ambiguous (multiple choices) do we fall back to click-to-aim.
       const targets = validTargets(def);
