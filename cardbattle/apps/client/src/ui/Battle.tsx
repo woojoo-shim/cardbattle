@@ -12,6 +12,7 @@ import { ManaBar } from './ManaBar.js';
 import { VfxLayer } from '../vfx/VfxLayer.js';
 import { Icon, type IconName } from './art/Icon.js';
 import { AvatarArt } from './art/CreatureArt.js';
+import { CardArt } from './art/CardArt.js';
 import { soundEvents } from '../audio/sfx.js';
 import { C, mono, sans } from './theme.js';
 import './arena.css';
@@ -265,7 +266,20 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
       )}
       <div style={topRow}><TopBar ui={ui} myId={myId} /></div>
       <div style={tableRow}>
-        {isMyTurn && (
+        {isMyTurn && pending ? (
+          // A card was dropped on the desk but still needs a target — keep it sitting
+          // BIG on the left as a "placed / awaiting aim" commit so it's clear the next
+          // step is to choose a target (mirrors the card_played activation reveal).
+          <div style={castCommitted}>
+            <div style={castCommittedCard}>
+              <CardArt id={pending.defId} size={116} />
+            </div>
+            <span style={castCommittedName}>{CARD_DEFS[pending.defId]?.name ?? ''}</span>
+            <span style={castCommittedPrompt}>
+              <Icon name="target" size={14} />&nbsp;대상 선택
+            </span>
+          </div>
+        ) : isMyTurn ? (
           <div
             data-castzone
             style={{
@@ -277,7 +291,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
             <Icon name="target" size={26} />
             <span>카드를 여기에<br />놓아 사용</span>
           </div>
-        )}
+        ) : null}
         <RoundTable
           ui={ui}
           myId={myId}
@@ -698,6 +712,28 @@ const castZoneLive: React.CSSProperties = {
   borderColor: 'rgba(240,210,130,0.85)', color: '#f4e6bf', transform: 'translateY(-50%) scale(1.05)',
   background: 'radial-gradient(120% 90% at 50% 28%, rgba(240,210,130,0.18), rgba(0,0,0,0))',
   boxShadow: '0 0 26px rgba(224,196,120,0.28), inset 0 0 22px rgba(224,196,120,0.12)',
+};
+// The committed card sitting on the LEFT of the desk while it waits for a target — the played
+// card is "placed", glowing, with a "대상 선택" prompt so choosing the target reads as the next step.
+const castCommitted: React.CSSProperties = {
+  position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
+  zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+  pointerEvents: 'none', animation: 'cb-cast-commit .3s cubic-bezier(.16,.72,.26,1)',
+};
+const castCommittedCard: React.CSSProperties = {
+  borderRadius: 12, overflow: 'hidden', background: '#1a130a',
+  border: '2px solid rgba(240,210,130,0.85)',
+  boxShadow: '0 0 30px rgba(224,196,120,0.5), 0 10px 24px rgba(0,0,0,0.72)',
+  animation: 'cb-cast-glow 1.7s ease-in-out infinite',
+};
+const castCommittedName: React.CSSProperties = {
+  fontFamily: sans, fontWeight: 800, fontSize: 15, color: '#f6efdd',
+  textShadow: '0 2px 6px rgba(0,0,0,0.85)', whiteSpace: 'nowrap',
+};
+const castCommittedPrompt: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 12,
+  letterSpacing: 0.5, color: '#ffd98a', padding: '4px 12px', borderRadius: 999,
+  border: '1px solid rgba(240,210,130,0.5)', background: 'rgba(224,196,120,0.12)',
 };
 // zIndex 30 raises the whole hand band ABOVE the player/board row (tableRow) so a lifted or
 // proximity-magnified card overlaps and covers the players cleanly instead of being clipped behind them.

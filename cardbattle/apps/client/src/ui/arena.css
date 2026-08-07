@@ -241,6 +241,17 @@
   72%  { transform: translate(-50%, -50%) scale(1) rotate(0deg);    opacity: 1; }   /* hold — read the card */
   100% { transform: translate(-50%, -54%) scale(1.05) rotate(0deg); opacity: 0; }   /* ease up + fade */
 }
+/* The committed card dropping onto the desk-left while it waits for a target: it snaps in from
+   the hand, then keeps a soft glowing pulse so "대상 선택" reads as the pending next step. */
+@keyframes cb-cast-commit {
+  0%   { transform: translateY(-50%) scale(0.72); opacity: 0; }
+  70%  { transform: translateY(-50%) scale(1.06); opacity: 1; }
+  100% { transform: translateY(-50%) scale(1);    opacity: 1; }
+}
+@keyframes cb-cast-glow {
+  0%, 100% { box-shadow: 0 0 22px rgba(224,196,120,0.38), 0 10px 24px rgba(0,0,0,0.72); }
+  50%      { box-shadow: 0 0 38px rgba(240,210,130,0.62), 0 10px 24px rgba(0,0,0,0.72); }
+}
 /* A cosmetic play-effect particle: bursts outward from the caster's seat (--dx/--dy = pixel
    delta), tumbles a little, and fades. Several fire at once in a ring for a sparkle/petal spray. */
 @keyframes cb-burst {
