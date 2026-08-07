@@ -1,5 +1,6 @@
 /** Hand-drawn SVG creature portraits — replaces emoji faces. Stylized dark-fantasy
  * head-and-shoulders busts, crisp inked (no blur bloom). 64x64 viewBox; scale via `size`. */
+import { useState } from 'react';
 
 // Jewel / dark-fantasy palette: accents are saturated GEMSTONE pigments — a ruby
 // red and an emerald teal — read as faceted stones against the slate surfaces.
@@ -305,6 +306,11 @@ export const BOT_TINTS = ['#ff5a6a', '#37e0a0', '#ffcf4d', '#a86bff', '#5f9fe0',
 export function AvatarArt({ avatar, tint, variant = 0, size = 58 }: { avatar: string; tint?: string; variant?: number; size?: number }) {
   const isBot = avatar === 'bot' || !AVATARS[avatar];
   const Bot = BOT_UNITS[((variant % BOT_UNITS.length) + BOT_UNITS.length) % BOT_UNITS.length];
+  // Custom AI-photo override: drop `public/avatars/<id>.png` (a high-quality AI portrait) and it
+  // renders framed in place of the coded SVG bust. When the file is absent the <image> 404s →
+  // onError falls back to the coded art, so adding a photo needs the file only, no code change.
+  const [failed, setFailed] = useState(false);
+  const useCustom = !isBot && !failed;
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden style={{ display: 'block' }}>
       <defs>
@@ -323,11 +329,36 @@ export function AvatarArt({ avatar, tint, variant = 0, size = 58 }: { avatar: st
         <filter id="av-shadow" x="-35%" y="-35%" width="170%" height="170%">
           <feDropShadow dx="0" dy="1.4" stdDeviation="1.6" floodColor="#000" floodOpacity="0.55" />
         </filter>
+        {/* rounded window so a photo reads as a framed portrait medallion, and an edge vignette
+            that sinks the photo's corners into the dark table so it doesn't float as a sticker */}
+        <clipPath id="av-clip"><rect x="3" y="3" width="58" height="58" rx="11" /></clipPath>
+        <radialGradient id="av-photovig" cx="0.5" cy="0.42" r="0.62">
+          <stop offset="0.6" stopColor="#04060a" stopOpacity="0" />
+          <stop offset="1" stopColor="#03050a" stopOpacity="0.7" />
+        </radialGradient>
       </defs>
       <rect x="0" y="0" width="64" height="64" fill="url(#av-mood)" />
       <ellipse cx="32" cy="59" rx="18" ry="4" fill="url(#av-floor)" />
-      <g filter="url(#av-shadow)">{isBot ? <Bot tint={tint} /> : AVATARS[avatar]()}</g>
-      <rect x="0" y="0" width="64" height="28" fill="url(#av-toplight)" style={{ mixBlendMode: 'screen' }} />
+      {useCustom ? (
+        <g clipPath="url(#av-clip)">
+          <image
+            href={`/avatars/${avatar}.png`}
+            x="3"
+            y="3"
+            width="58"
+            height="58"
+            preserveAspectRatio="xMidYMid slice"
+            onError={() => setFailed(true)}
+          />
+          <rect x="3" y="3" width="58" height="58" fill="url(#av-photovig)" />
+          <rect x="3" y="3" width="58" height="28" fill="url(#av-toplight)" style={{ mixBlendMode: 'screen' }} />
+        </g>
+      ) : (
+        <>
+          <g filter="url(#av-shadow)">{isBot ? <Bot tint={tint} /> : AVATARS[avatar]()}</g>
+          <rect x="0" y="0" width="64" height="28" fill="url(#av-toplight)" style={{ mixBlendMode: 'screen' }} />
+        </>
+      )}
     </svg>
   );
 }
