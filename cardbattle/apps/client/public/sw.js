@@ -1,7 +1,7 @@
 // Minimal service worker — makes the game installable and gives the app shell
 // an offline fallback. It never touches the Colyseus server (different origin),
 // so live multiplayer traffic is untouched.
-const CACHE = 'cardbattle-v237';
+const CACHE = 'cardbattle-v238';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -47,13 +47,18 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Static assets (hashed JS/CSS/icons): serve from cache, then fill the cache.
+  // Only cache OK (2xx) responses — caching a 404 would PIN a missing asset: a card art PNG that
+  // 404'd before it was added would keep serving the stale 404 even after the file ships. Skipping
+  // non-OK responses lets a later-added asset load the moment it exists.
   event.respondWith(
     caches.match(request).then(
       (hit) =>
         hit ||
         fetch(request).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(request, copy));
+          }
           return res;
         }),
     ),
