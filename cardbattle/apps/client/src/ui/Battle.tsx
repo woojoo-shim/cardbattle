@@ -101,23 +101,13 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     return false;
   };
 
-  // Every living hero/minion this card may legally aim at, given its heal/buff-vs-attack intent.
-  const validTargets = (def: (typeof CARD_DEFS)[string]): string[] => {
-    const ids: string[] = [];
-    for (const p of ui.players) {
-      if (isValidTarget(def, p.id)) ids.push(p.id);
-      for (const m of p.field) if (isValidTarget(def, m.id)) ids.push(m.id);
-    }
-    return ids;
-  };
-
   const fire = (card: CardInstance, targetId: string) => {
     send({ type: 'play_card', cardInstanceId: card.id, targetId });
     setPending(null);
     setCoachPlayed(true);
   };
 
-  const playCard = (card: CardInstance, droppedOnId?: string, onCast?: boolean) => {
+  const playCard = (card: CardInstance, droppedOnId?: string) => {
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
     if (!def) return;
@@ -126,13 +116,9 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     if (requiresTarget(def)) {
       // Dropped straight onto a legal target → fire immediately (drag-to-aim, card-game style).
       if (droppedOnId && isValidTarget(def, droppedOnId)) { fire(card, droppedOnId); return; }
-      // Dropped on the LEFT cast desk → deliberately PLACE it there (big card sits on the left)
-      // and enter aim mode, even for a lone target — the 화살 lands on the desk, then you pick.
-      if (onCast) { setPending((cur) => (cur?.id === card.id ? null : card)); return; }
-      // 알잘딱: dropped on empty felt but only ONE legal target exists → just aim it there. Only
-      // when it's ambiguous (multiple choices) do we fall back to click-to-aim.
-      const targets = validTargets(def);
-      if (targets.length === 1) { fire(card, targets[0]); return; }
+      // Otherwise the card is 시동(activated) onto the desk and sits there BIG on the left, then
+      // you designate the target by clicking a highlighted hero/minion. No single-target
+      // auto-fire — playing a targeted spell always gives you the "시동 → 대상 선택" aim step.
       setPending((cur) => (cur?.id === card.id ? null : card));
       return;
     }
