@@ -1482,7 +1482,7 @@ const ART: Record<string, () => JSX.Element> = {
   flamestrike: FlamestrikeArt,
   bless: BlessArt,
   frostshock: FrostshockArt,
-  assassinate: AssassinateArt,
+  assassin: AssassinateArt,
   warhorn: WarhornArt,
   insight: InsightArt,
   manasurge: ManasurgeArt,
@@ -1546,7 +1546,8 @@ const ELEMENT: Record<string, Elem> = {
   bomber: 'fire', dragon: 'fire',
   sprite: 'none',
   // ── board-model spells ──
-  strike: 'physical', assassinate: 'physical', warhorn: 'physical',
+  strike: 'physical', warhorn: 'physical',
+  assassin: 'poison',
   firebolt: 'fire', flamestrike: 'fire',
   holylight: 'holy', bless: 'holy',
   frostshock: 'ice',

@@ -69,12 +69,14 @@ describe('reduce: play_card (spells)', () => {
     expect(state.players[1].hp).toBe(38);     // 4 - 2 through
   });
 
-  it('assassinate destroys a chosen minion outright', () => {
+  it('assassin destroys a chosen enemy minion on summon', () => {
     const s = game();
     s.players[1].field = [minion('m1', 'b', { health: 8, maxHealth: 8 })];
-    s.players[0].hand = [{ id: 'c1', defId: 'assassinate' }];
+    s.players[0].hand = [{ id: 'c1', defId: 'assassin' }];
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
     expect(state.players[1].field).toHaveLength(0);
+    expect(state.players[0].field).toHaveLength(1); // the assassin itself is summoned
+    expect(state.players[0].field[0].defId).toBe('assassin');
     expect(events).toContainEqual(expect.objectContaining({ type: 'minion_died', minionId: 'm1' }));
   });
 

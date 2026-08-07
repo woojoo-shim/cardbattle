@@ -8,11 +8,11 @@
 - 파일을 지우면 원래 기본 그림으로 돌아갑니다.
 
 ■ 카드 id 목록
-하수인(19): sprite recruit guard wolf archer knight cleric
+하수인(20): sprite recruit guard wolf archer knight cleric
   shieldbearer berserker venomspider cavalier paladin vampirelord
-  bomber warlord golem necromancer dragon archangel
-스펠(10): strike firebolt holylight flamestrike bless frostshock
-  assassinate warhorn insight manasurge
+  bomber warlord golem necromancer dragon archangel assassin
+스펠(9): strike firebolt holylight flamestrike bless frostshock
+  warhorn insight manasurge
 
 ■ 팁
 - 배경을 투명하게 두면 카드의 원소별 배경(하늘/지평선) 위에 그림이 얹혀요.

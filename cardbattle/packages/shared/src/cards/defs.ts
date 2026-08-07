@@ -1,6 +1,6 @@
 import type { CardDef } from '../types.js';
 
-// Hearthstone-style board deck: 20 minions summoned to the field + 10 spells cast for instant effect.
+// Hearthstone-style board deck: 20 minions summoned to the field + 9 spells cast for instant effect.
 // A minion card's `effects` are its 강림 (battlecry — fired on summon); `deathrattle` (유언) fires on death.
 // A spell card's `effects` fire the moment it's played.
 export const CARD_DEFS: Record<string, CardDef> = {
@@ -32,7 +32,7 @@ export const CARD_DEFS: Record<string, CardDef> = {
   flamestrike: { id: 'flamestrike', name: '폭풍',   rarity: 'epic',   cost: 5, element: 'fire',      kind: 'spell', effects: [{ kind: 'damage', amount: 4, target: 'allEnemyMinions' }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '🌋', desc: '적 하수인 전체에게 4 피해.', flavor: '"줄 서 있었니? 잘됐네. 한 번에 처리하지."', drawWeight: 5 },
   bless:       { id: 'bless',       name: '축복',        rarity: 'common', cost: 2, element: 'holy',      kind: 'spell', effects: [{ kind: 'buff', attack: 2, health: 2, target: 'chosen' }], cooldown: 0, vfxKey: 'heal', sfxKey: 'shield', icon: '🙏', desc: '지목한 내 하수인의 공격력·체력 +2.', flavor: '하늘의 가호가 함께한다. 그리고 근육도 조금 함께한다.', drawWeight: 8 },
   frostshock:  { id: 'frostshock',  name: '서리',   rarity: 'rare',   cost: 3, element: 'ice',       kind: 'spell', effects: [{ kind: 'damage', amount: 3, target: 'allEnemies' }], cooldown: 0, vfxKey: 'bolt', sfxKey: 'bolt', icon: '❄️', desc: '적 영웅 전체에게 3 피해.', flavor: '"다들 좀 식힐 필요가 있어 보여서."', drawWeight: 6 },
-  assassinate: { id: 'assassinate', name: '암살',        rarity: 'rare',   cost: 4, element: 'poison',    kind: 'spell', effects: [{ kind: 'destroy', target: 'chosen' }], cooldown: 0, vfxKey: 'shatter', sfxKey: 'shatter', icon: '🗡️', desc: '지목한 적 하수인을 체력에 상관없이 즉시 파괴.', flavor: '소리도, 흔적도, 자비도 없다.', drawWeight: 6 },
+  assassin:    { id: 'assassin',    name: '암살자',      rarity: 'epic',   cost: 4, element: 'poison',    kind: 'minion', minion: { attack: 4, health: 2 }, effects: [{ kind: 'destroy', target: 'chosen' }], cooldown: 0, vfxKey: 'shatter', sfxKey: 'shatter', icon: '🗡️', desc: '공격력 4 · 체력 2 | 강림: 지목한 적 하수인을 체력에 상관없이 즉시 파괴.', flavor: '소리도, 흔적도, 자비도 없다.', drawWeight: 6 },
   warhorn:     { id: 'warhorn',     name: '나팔',rarity: 'rare',  cost: 3, element: 'physical',  kind: 'spell', effects: [{ kind: 'buff', attack: 1, health: 1, target: 'allFriendlyMinions' }], cooldown: 0, vfxKey: 'summon', sfxKey: 'summon', icon: '📯', desc: '내 하수인 전체의 공격력·체력 +1.', flavor: '그 소리를 들으면 심장이 먼저 앞으로 나선다.', drawWeight: 6 },
   insight:     { id: 'insight',     name: '지혜',   rarity: 'common', cost: 2, element: 'none',      kind: 'spell', effects: [{ kind: 'draw', amount: 2 }], cooldown: 0, vfxKey: 'peek', sfxKey: 'draw', icon: '📖', desc: '내 덱에서 카드 2장을 뽑는다.', flavor: '"답은 언제나 책 속에 있지. 두 페이지쯤 뒤에."', drawWeight: 8 },
   manasurge:   { id: 'manasurge',   name: '마나',     rarity: 'common', cost: 1, element: 'lightning', kind: 'spell', effects: [{ kind: 'gainMana', amount: 2 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🔷', desc: '마나 +2 (이 카드 비용 1 → 실제로 마나 1 이득).', flavor: '한 모금 마시면, 오늘은 뭐든 할 수 있을 것 같다.', drawWeight: 8 },

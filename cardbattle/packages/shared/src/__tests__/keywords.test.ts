@@ -46,10 +46,10 @@ describe('battlecry (강림) fires on summon', () => {
 
 describe('deathrattle (유언) fires on minion death', () => {
   it('bomber deals 2 to all enemy heroes when it dies', () => {
-    // b's turn; b assassinates a's bomber -> bomber deathrattle hits a's enemies (b)
+    // b's turn; b's assassin kills a's bomber -> bomber deathrattle hits a's enemies (b)
     const s = game({ currentTurnIndex: 1 });
     s.players[0].field = [minion('m1', 'a', { defId: 'bomber', health: 2, deathrattle: [{ kind: 'damage', amount: 2, target: 'allEnemies' }] })];
-    s.players[1].hand = [{ id: 'c1', defId: 'assassinate' }];
+    s.players[1].hand = [{ id: 'c1', defId: 'assassin' }];
     const { state, events } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
     expect(state.players[0].field).toHaveLength(0);
     expect(events).toContainEqual(expect.objectContaining({ type: 'deathrattle_triggered', playerId: 'a' }));
@@ -59,7 +59,7 @@ describe('deathrattle (유언) fires on minion death', () => {
   it('necromancer summons 2 sprites when it dies', () => {
     const s = game({ currentTurnIndex: 1 });
     s.players[0].field = [minion('m1', 'a', { defId: 'necromancer', health: 4, deathrattle: [{ kind: 'summon', token: 'sprite', count: 2 }] })];
-    s.players[1].hand = [{ id: 'c1', defId: 'assassinate' }];
+    s.players[1].hand = [{ id: 'c1', defId: 'assassin' }];
     const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'm1' }, ctx);
     expect(state.players[0].field).toHaveLength(2); // necromancer died, 2 sprites summoned
     expect(state.players[0].field.every((m) => m.defId === 'sprite')).toBe(true);
