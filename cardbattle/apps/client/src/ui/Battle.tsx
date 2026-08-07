@@ -64,6 +64,15 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   // Clear a half-finished target selection whenever the turn passes away from me.
   useEffect(() => { if (!isMyTurn) { setPending(null); setPowerPending(false); setAttacker(null); } }, [isMyTurn]);
 
+  // Esc / right-click always cancels a 시동(placed) card or an armed power/attacker — the desk clears
+  // and the card returns to hand. Gives an unmistakable escape hatch from the "대상 선택" step.
+  const cancelAim = () => { setPending(null); setPowerPending(false); setAttacker(null); };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') cancelAim(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   // Fire the "당신의 턴" telegraph on the RISING edge of my turn — a bump to a nonce key remounts
   // the banner so its one-shot animation replays each time the turn lands back on me.
   const [turnFlash, setTurnFlash] = useState(0);
@@ -243,6 +252,9 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           // BIG on the left as a "placed / awaiting aim" commit so it's clear the next
           // step is to choose a target (mirrors the card_played activation reveal).
           <div style={castCommitted}>
+            <button type="button" style={castCancelBtn} onClick={cancelAim} title="시동 취소 (Esc)">
+              <Icon name="close" size={13} />&nbsp;취소
+            </button>
             <div style={castCommittedCard}>
               <CardArt id={pending.defId} size={116} />
             </div>
@@ -278,11 +290,11 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         {(pending || powerPending || attacker) && (
           <div style={targetHint}>
             <Icon name="target" size={15} />&nbsp;
-            {attacker ? '공격할 대상을 선택하세요 (하수인 다시 클릭 시 취소)'
-              : powerPending ? '영웅 능력의 대상을 선택하세요 (능력 버튼 다시 클릭 시 취소)'
+            {attacker ? '공격할 대상을 선택하세요 (취소 버튼 또는 Esc)'
+              : powerPending ? '영웅 능력의 대상을 선택하세요 (취소 버튼 또는 Esc)'
               : targetIntent.side === 'friendly'
-              ? '아군 대상을 선택하세요 (카드 다시 클릭 시 취소)'
-              : '대상을 선택하세요 (카드 다시 클릭 시 취소)'}
+              ? '아군 대상을 선택하세요 (취소 버튼 또는 Esc)'
+              : '대상을 선택하세요 (취소 버튼 또는 Esc)'}
           </div>
         )}
         {error && <div style={errToast}>{error.message}</div>}
@@ -706,6 +718,14 @@ const castCommittedPrompt: React.CSSProperties = {
   display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 12,
   letterSpacing: 0.5, color: '#ffd98a', padding: '4px 12px', borderRadius: 999,
   border: '1px solid rgba(240,210,130,0.5)', background: 'rgba(224,196,120,0.12)',
+};
+// The parent castCommitted is pointerEvents:'none' so it never blocks the board; the 취소 button
+// re-enables pointer events on itself so it stays clickable — the one desktop escape hatch from 시동.
+const castCancelBtn: React.CSSProperties = {
+  pointerEvents: 'auto', cursor: 'pointer', display: 'flex', alignItems: 'center',
+  fontFamily: mono, fontWeight: 700, fontSize: 12, letterSpacing: 0.5, color: '#ffb0a0',
+  padding: '4px 12px', borderRadius: 999, border: '1px solid rgba(200,90,70,0.55)',
+  background: 'rgba(120,40,32,0.35)',
 };
 // zIndex 30 raises the whole hand band ABOVE the player/board row (tableRow) so a lifted or
 // proximity-magnified card overlaps and covers the players cleanly instead of being clipped behind them.
