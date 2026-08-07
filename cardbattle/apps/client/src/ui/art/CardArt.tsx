@@ -1272,26 +1272,6 @@ function Dragon() {
   );
 }
 
-/** A winged archangel (대천사 · 신성한 보호막). */
-function Archangel() {
-  return (
-    <>
-      <path d="M32 20 Q12 20 9 42 Q16 36 22 38 Q16 32 24 34 Q18 28 32 38 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1.1" />
-      <path d="M32 20 Q52 20 55 42 Q48 36 42 38 Q48 32 40 34 Q46 28 32 38 Z" fill="#f4efe0" stroke="#cfc6ac" strokeWidth="1.1" />
-      <path d="M14 34 Q20 34 24 37 M20 30 Q26 31 30 36 M50 34 Q44 34 40 37 M44 30 Q38 31 34 36" stroke="#cfc6ac" strokeWidth="0.6" fill="none" opacity="0.7" />
-      <path d="M24 53 Q24 31 32 31 Q40 31 40 53 Z" fill="#eef2fa" stroke="#c2c9d6" strokeWidth="1.3" />
-      <path d="M24 53 Q24 31 32 31 L32 53 Z" fill="#f8fbff" opacity="0.6" />
-      <path d="M32 36 L32 53" stroke="#c2c9d6" strokeWidth="0.7" opacity="0.6" />
-      <circle cx="32" cy="24" r="6.4" fill={SKIN} stroke={SKIN_D} strokeWidth="1.1" />
-      <ellipse cx="32" cy="14" rx="6.5" ry="2.2" fill="none" stroke={GOLD} strokeWidth="1.8" />
-      <ellipse cx="32" cy="14" rx="6.5" ry="2.2" fill="#fff2c0" opacity="0.3" />
-      <path d="M32 39 L32 50 M27 43 L37 43" stroke={GOLD} strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="30" cy="24" r="0.9" fill="#26303e" />
-      <circle cx="34" cy="24" r="0.9" fill="#26303e" />
-    </>
-  );
-}
-
 /* ── Spells ── */
 
 /** A slashing blade arc (강타). */
@@ -1475,7 +1455,6 @@ const ART: Record<string, () => JSX.Element> = {
   golem: Golem,
   necromancer: Necromancer,
   dragon: Dragon,
-  archangel: Archangel,
   strike: StrikeArt,
   firebolt: FireboltArt,
   holylight: HolylightArt,
