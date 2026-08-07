@@ -86,39 +86,22 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
     return ENEMY_INTENT;
   };
 
-  // Is `id` a living hero/minion this card is actually allowed to target? Validates side
-  // (mine vs enemy per the intent) and kind (heroes/minions) so a mis-dropped arrow falls back
-  // to click-to-aim instead of firing at an illegal target the server would just reject.
-  const isValidTarget = (def: (typeof CARD_DEFS)[string], id: string): boolean => {
-    const intent = intentForDef(def);
-    const wantMine = intent.side === 'friendly';
-    const hero = ui.players.find((p) => p.id === id);
-    if (hero) return intent.heroes && hero.alive && (wantMine ? hero.id === myId : hero.id !== myId);
-    for (const p of ui.players) {
-      const m = p.field.find((mn) => mn.id === id);
-      if (m) return intent.minions && (wantMine ? p.id === myId : p.id !== myId);
-    }
-    return false;
-  };
-
   const fire = (card: CardInstance, targetId: string) => {
     send({ type: 'play_card', cardInstanceId: card.id, targetId });
     setPending(null);
     setCoachPlayed(true);
   };
 
-  const playCard = (card: CardInstance, droppedOnId?: string) => {
+  const playCard = (card: CardInstance) => {
     if (!isMyTurn) return;
     const def = CARD_DEFS[card.defId];
     if (!def) return;
     setPowerPending(false); // playing a card cancels an armed hero power
     setAttacker(null);      // …and cancels an armed minion attack
     if (requiresTarget(def)) {
-      // Dropped straight onto a legal target → fire immediately (drag-to-aim, card-game style).
-      if (droppedOnId && isValidTarget(def, droppedOnId)) { fire(card, droppedOnId); return; }
-      // Otherwise the card is 시동(activated) onto the desk and sits there BIG on the left, then
-      // you designate the target by clicking a highlighted hero/minion. No single-target
-      // auto-fire — playing a targeted spell always gives you the "시동 → 대상 선택" aim step.
+      // A targeted spell is ALWAYS 시동(activated) onto the desk first — it sits BIG on the left,
+      // then you designate the target by clicking a highlighted hero/minion. No drop-on-target or
+      // single-target auto-fire; every targeted magic goes through the "시동 → 대상 선택" aim step.
       setPending((cur) => (cur?.id === card.id ? null : card));
       return;
     }
