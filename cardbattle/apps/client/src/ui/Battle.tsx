@@ -253,14 +253,14 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           // step is to choose a target (mirrors the card_played activation reveal).
           <div style={castCommitted}>
             <button type="button" style={castCancelBtn} onClick={cancelAim} title="시동 취소 (Esc)">
-              <Icon name="close" size={13} />&nbsp;취소
+              <Icon name="close" size={15} />&nbsp;취소
             </button>
             <div style={castCommittedCard}>
-              <CardArt id={pending.defId} size={116} />
+              <CardArt id={pending.defId} size={192} />
             </div>
             <span style={castCommittedName}>{CARD_DEFS[pending.defId]?.name ?? ''}</span>
             <span style={castCommittedPrompt}>
-              <Icon name="target" size={14} />&nbsp;대상 선택
+              <Icon name="target" size={17} />&nbsp;대상 선택
             </span>
           </div>
         ) : isMyTurn ? (
@@ -272,7 +272,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
               ...(dragging ? castZoneLive : null),
             }}
           >
-            <Icon name="target" size={26} />
+            <Icon name="target" size={40} />
             <span>카드를 여기에<br />놓아 사용</span>
           </div>
         ) : null}
@@ -683,12 +683,12 @@ const tableRow: React.CSSProperties = {
 // Sits quiet during my turn, then flares up while a card is in hand-drag so it reads as "놓을 곳".
 const castZone: React.CSSProperties = {
   position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
-  width: 'clamp(96px, 11vw, 138px)', minHeight: 148, zIndex: 12, textAlign: 'center',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 9,
-  padding: '18px 12px', borderRadius: 14, boxSizing: 'border-box',
-  border: '2px dashed rgba(224,196,120,0.30)',
+  width: 'clamp(150px, 17vw, 236px)', minHeight: 256, zIndex: 12, textAlign: 'center',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
+  padding: '30px 20px', borderRadius: 20, boxSizing: 'border-box',
+  border: '3px dashed rgba(224,196,120,0.30)',
   background: 'radial-gradient(120% 90% at 50% 28%, rgba(224,196,120,0.05), rgba(0,0,0,0))',
-  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 12, fontWeight: 700,
+  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 16, fontWeight: 700,
   letterSpacing: 0.4, lineHeight: 1.5,
   transition: 'border-color .18s, background .18s, transform .18s, color .18s',
 };
@@ -705,18 +705,18 @@ const castCommitted: React.CSSProperties = {
   pointerEvents: 'none', animation: 'cb-cast-commit .3s cubic-bezier(.16,.72,.26,1)',
 };
 const castCommittedCard: React.CSSProperties = {
-  borderRadius: 12, overflow: 'hidden', background: '#1a130a',
-  border: '2px solid rgba(240,210,130,0.85)',
-  boxShadow: '0 0 30px rgba(224,196,120,0.5), 0 10px 24px rgba(0,0,0,0.72)',
+  borderRadius: 18, overflow: 'hidden', background: '#1a130a',
+  border: '3px solid rgba(240,210,130,0.85)',
+  boxShadow: '0 0 44px rgba(224,196,120,0.5), 0 14px 32px rgba(0,0,0,0.72)',
   animation: 'cb-cast-glow 1.7s ease-in-out infinite',
 };
 const castCommittedName: React.CSSProperties = {
-  fontFamily: sans, fontWeight: 800, fontSize: 15, color: '#f6efdd',
+  fontFamily: sans, fontWeight: 800, fontSize: 21, color: '#f6efdd',
   textShadow: '0 2px 6px rgba(0,0,0,0.85)', whiteSpace: 'nowrap',
 };
 const castCommittedPrompt: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 12,
-  letterSpacing: 0.5, color: '#ffd98a', padding: '4px 12px', borderRadius: 999,
+  display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 15,
+  letterSpacing: 0.5, color: '#ffd98a', padding: '6px 16px', borderRadius: 999,
   border: '1px solid rgba(240,210,130,0.5)', background: 'rgba(224,196,120,0.12)',
 };
 // The parent castCommitted is pointerEvents:'none' so it never blocks the board; the 취소 button
