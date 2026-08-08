@@ -244,13 +244,23 @@
 /* The committed card dropping onto the desk-left while it waits for a target: it snaps in from
    the hand, then keeps a soft glowing pulse so "대상 선택" reads as the pending next step. */
 @keyframes cb-cast-commit {
-  0%   { transform: translateY(-50%) scale(0.72); opacity: 0; }
-  70%  { transform: translateY(-50%) scale(1.06); opacity: 1; }
-  100% { transform: translateY(-50%) scale(1);    opacity: 1; }
+  0%   { transform: translateY(-50%) translateX(-38px) scale(0.5) rotate(-16deg); opacity: 0; filter: brightness(2.4); }
+  30%  { opacity: 1; }
+  55%  { transform: translateY(-50%) translateX(0) scale(1.16) rotate(4deg); opacity: 1; filter: brightness(1.55); }
+  74%  { transform: translateY(-50%) scale(0.97) rotate(-1.5deg); filter: brightness(1); }
+  88%  { transform: translateY(-50%) scale(1.03) rotate(0.5deg); }
+  100% { transform: translateY(-50%) scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
 }
 @keyframes cb-cast-glow {
-  0%, 100% { box-shadow: 0 0 22px rgba(224,196,120,0.38), 0 10px 24px rgba(0,0,0,0.72); }
-  50%      { box-shadow: 0 0 38px rgba(240,210,130,0.62), 0 10px 24px rgba(0,0,0,0.72); }
+  0%, 100% { box-shadow: 0 0 26px rgba(224,196,120,0.42), 0 10px 24px rgba(0,0,0,0.72); }
+  50%      { box-shadow: 0 0 52px rgba(240,210,130,0.72), 0 0 90px rgba(224,196,120,0.22), 0 10px 24px rgba(0,0,0,0.72); }
+}
+/* An arcane summon-ring that expands out from the card the instant it's 발동'd — a one-shot
+   pulse of light so casting reads as a spell being cast, not just a card appearing. */
+@keyframes cb-cast-ring {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  25%  { opacity: 0.85; }
+  100% { transform: translate(-50%, -50%) scale(2.1); opacity: 0; }
 }
 /* A cosmetic play-effect particle: bursts outward from the caster's seat (--dx/--dy = pixel
    delta), tumbles a little, and fades. Several fire at once in a ring for a sparkle/petal spray. */

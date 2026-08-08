@@ -254,8 +254,11 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
             <button type="button" style={castCancelBtn} onClick={cancelAim} title="시동 취소 (Esc)">
               <Icon name="close" size={15} />&nbsp;취소
             </button>
-            <div style={castCommittedCard}>
-              <CardArt id={pending.defId} size="100%" />
+            <div style={castCardWrap}>
+              <span style={castRing} aria-hidden />
+              <div style={castCommittedCard}>
+                <CardArt id={pending.defId} size="100%" />
+              </div>
             </div>
             <span style={castCommittedName}>{CARD_DEFS[pending.defId]?.name ?? ''}</span>
             <span style={castCommittedPrompt}>
@@ -673,7 +676,19 @@ const tableRow: React.CSSProperties = {
 const castCommitted: React.CSSProperties = {
   position: 'absolute', left: 'clamp(40px, 8vw, 170px)', top: '50%', transform: 'translateY(-50%)',
   zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-  pointerEvents: 'none', animation: 'cb-cast-commit .3s cubic-bezier(.16,.72,.26,1)',
+  pointerEvents: 'none', animation: 'cb-cast-commit .58s cubic-bezier(.16,.72,.26,1)',
+};
+// Holds the card + the one-shot summon ring behind it (no overflow clip so the ring can bloom out).
+const castCardWrap: React.CSSProperties = {
+  position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
+// The arcane ring that pulses outward the instant the card is 발동'd.
+const castRing: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: '100%', aspectRatio: '1 / 1',
+  borderRadius: '50%', border: '3px solid rgba(240,214,140,0.9)',
+  boxShadow: '0 0 30px rgba(240,210,130,0.6), inset 0 0 24px rgba(240,210,130,0.35)',
+  transform: 'translate(-50%, -50%)', pointerEvents: 'none',
+  animation: 'cb-cast-ring .62s ease-out',
 };
 // A full portrait CARD frame (5:7) — the art sits inside a proper card silhouette, not a bare square.
 const castCommittedCard: React.CSSProperties = {
