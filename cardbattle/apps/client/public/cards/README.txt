@@ -8,10 +8,10 @@
 - 파일을 지우면 원래 기본 그림으로 돌아갑니다.
 
 ■ 카드 id 목록
-하수인(20): sprite recruit guard wolf archer knight cleric
-  shieldbearer berserker venomspider cavalier paladin vampirelord
+하수인(19): sprite recruit guard wolf archer knight cleric
+  berserker venomspider cavalier paladin vampirelord
   bomber warlord golem necromancer dragon archangel assassin
-스펠(9): strike firebolt holylight flamestrike bless frostshock
+스펠(8): strike firebolt holylight bless frostshock
   warhorn insight manasurge
 
 ■ 팁

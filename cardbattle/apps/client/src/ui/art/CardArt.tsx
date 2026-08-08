@@ -1029,24 +1029,6 @@ function Cleric() {
   );
 }
 
-/** An enormous tower shield (방패병 · 수호). */
-function Shieldbearer() {
-  return (
-    <>
-      <path d="M16 12 L48 12 L48 42 Q32 55 16 42 Z" fill="#8a6636" stroke="#3e2510" strokeWidth="2" />
-      <path d="M16 12 L32 12 L32 53 Q23 49 16 42 Z" fill="#9c7842" opacity="0.5" />
-      <path d="M32 12 L32 52" stroke="#c8922f" strokeWidth="2.2" />
-      <path d="M16 25 L48 25" stroke="#c8922f" strokeWidth="2.2" />
-      <circle cx="32" cy="25" r="4.6" fill={GOLD} stroke={GOLD_D} strokeWidth="1.1" />
-      <circle cx="30.5" cy="23.5" r="1.3" fill="#fff3d0" opacity="0.7" />
-      <circle cx="20" cy="16" r="1.2" fill={GOLD_D} />
-      <circle cx="44" cy="16" r="1.2" fill={GOLD_D} />
-      <circle cx="20" cy="40" r="1.2" fill={GOLD_D} />
-      <circle cx="44" cy="40" r="1.2" fill={GOLD_D} />
-    </>
-  );
-}
-
 /** A raging berserker with twin axes (광전사). */
 function Berserker() {
   return (
@@ -1323,21 +1305,6 @@ function HolylightArt() {
   );
 }
 
-/** A sweeping wall of flame (화염 폭풍). */
-function FlamestrikeArt() {
-  return (
-    <>
-      <path d="M8 52 Q13 28 18 44 Q23 20 28 44 Q32 24 36 44 Q41 20 46 44 Q51 28 56 52 Z" fill="#ff6a1a" stroke="#8a2818" strokeWidth="1.2" />
-      <path d="M12 51 Q16 34 20 46 Q25 26 29 46 Q33 30 37 46 Q42 26 46 46 Q50 34 52 51 Z" fill="#ff9a3c" opacity="0.9" />
-      <path d="M16 49 Q20 38 24 49 Q28 34 32 49 Q36 38 40 49 Q44 40 47 49 Z" fill="#ffe08a" opacity="0.85" />
-      <path d="M24 46 Q27 40 30 46 Q33 40 36 46 Z" fill="#fffbe8" opacity="0.8" />
-      <circle cx="20" cy="24" r="1.4" fill="#ffb43a" opacity="0.7" />
-      <circle cx="42" cy="22" r="1.6" fill="#ffb43a" opacity="0.7" />
-      <circle cx="32" cy="18" r="1.2" fill="#ffe08a" opacity="0.6" />
-    </>
-  );
-}
-
 /** An upward blessing sigil (축복). */
 function BlessArt() {
   return (
@@ -1444,7 +1411,6 @@ const ART: Record<string, () => JSX.Element> = {
   archer: Archer,
   knight: Knight,
   cleric: Cleric,
-  shieldbearer: Shieldbearer,
   berserker: Berserker,
   venomspider: Venomspider,
   cavalier: Cavalier,
@@ -1458,7 +1424,6 @@ const ART: Record<string, () => JSX.Element> = {
   strike: StrikeArt,
   firebolt: FireboltArt,
   holylight: HolylightArt,
-  flamestrike: FlamestrikeArt,
   bless: BlessArt,
   frostshock: FrostshockArt,
   assassin: AssassinateArt,
@@ -1518,7 +1483,7 @@ const ELEMENT: Record<string, Elem> = {
   peek: 'none', gambit: 'none', meditate: 'none', fateswap: 'none',
   // ── board-model minions ──
   recruit: 'physical', archer: 'physical', knight: 'physical',
-  shieldbearer: 'physical', berserker: 'physical', cavalier: 'physical',
+  berserker: 'physical', cavalier: 'physical',
   warlord: 'physical', golem: 'physical', guard: 'physical', wolf: 'physical',
   cleric: 'holy', paladin: 'holy', archangel: 'holy',
   venomspider: 'poison', vampirelord: 'poison', necromancer: 'poison',
@@ -1527,7 +1492,7 @@ const ELEMENT: Record<string, Elem> = {
   // ── board-model spells ──
   strike: 'physical', warhorn: 'physical',
   assassin: 'poison',
-  firebolt: 'fire', flamestrike: 'fire',
+  firebolt: 'fire',
   holylight: 'holy', bless: 'holy',
   frostshock: 'ice',
   insight: 'none', manasurge: 'lightning',
