@@ -40,7 +40,6 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   // The id of my own minion armed to attack, waiting for the enemy it should strike.
   const [attacker, setAttacker] = useState<string | null>(null);
   // True while a hand card is being dragged, so the left-of-desk cast slot lights up as a drop target.
-  const [dragging, setDragging] = useState(false);
   // Learn-by-playing coach: tracks whether the newcomer has taken their first play / ended a turn,
   // so the guidance advances in step with what they actually do at the table.
   const [coachPlayed, setCoachPlayed] = useState(false);
@@ -256,24 +255,12 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
               <Icon name="close" size={15} />&nbsp;취소
             </button>
             <div style={castCommittedCard}>
-              <CardArt id={pending.defId} size="clamp(120px, 13vw, 192px)" />
+              <CardArt id={pending.defId} size="100%" />
             </div>
             <span style={castCommittedName}>{CARD_DEFS[pending.defId]?.name ?? ''}</span>
             <span style={castCommittedPrompt}>
               <Icon name="target" size={17} />&nbsp;대상 선택
             </span>
-          </div>
-        ) : isMyTurn ? (
-          <div
-            data-castzone
-            style={{
-              ...castZone,
-              pointerEvents: dragging ? 'auto' : 'none',
-              ...(dragging ? castZoneLive : null),
-            }}
-          >
-            <Icon name="target" size={40} />
-            <span>카드를 여기에<br />놓아 사용</span>
           </div>
         ) : null}
         <RoundTable
@@ -304,7 +291,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           <DeckPile count={deckCount} />
           <ManaBar mana={myMana} max={manaMax} lit={isMyTurn} />
         </div>
-        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} onDragging={setDragging} borderCosmetic={borderCosmetic} />
+        <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
         {isMyTurn && (
           <button
@@ -681,30 +668,17 @@ const tableRow: React.CSSProperties = {
 };
 // The drop target on the LEFT of the desk: drag a card here (or straight onto a target) to play it.
 // Sits quiet during my turn, then flares up while a card is in hand-drag so it reads as "놓을 곳".
-const castZone: React.CSSProperties = {
-  position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
-  width: 'clamp(150px, 17vw, 236px)', minHeight: 'clamp(190px, 26vh, 256px)', zIndex: 12, textAlign: 'center',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
-  padding: 'clamp(18px, 2.4vw, 30px) clamp(12px, 1.6vw, 20px)', borderRadius: 20, boxSizing: 'border-box',
-  border: '3px dashed rgba(224,196,120,0.30)',
-  background: 'radial-gradient(120% 90% at 50% 28%, rgba(224,196,120,0.05), rgba(0,0,0,0))',
-  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 16px)', fontWeight: 700,
-  letterSpacing: 0.4, lineHeight: 1.5,
-  transition: 'border-color .18s, background .18s, transform .18s, color .18s',
-};
-const castZoneLive: React.CSSProperties = {
-  borderColor: 'rgba(240,210,130,0.85)', color: '#f4e6bf', transform: 'translateY(-50%) scale(1.05)',
-  background: 'radial-gradient(120% 90% at 50% 28%, rgba(240,210,130,0.18), rgba(0,0,0,0))',
-  boxShadow: '0 0 26px rgba(224,196,120,0.28), inset 0 0 22px rgba(224,196,120,0.12)',
-};
 // The committed card sitting on the LEFT of the desk while it waits for a target — the played
 // card is "placed", glowing, with a "대상 선택" prompt so choosing the target reads as the next step.
 const castCommitted: React.CSSProperties = {
-  position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
-  zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+  position: 'absolute', left: 'clamp(40px, 8vw, 170px)', top: '50%', transform: 'translateY(-50%)',
+  zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
   pointerEvents: 'none', animation: 'cb-cast-commit .3s cubic-bezier(.16,.72,.26,1)',
 };
+// A full portrait CARD frame (5:7) — the art sits inside a proper card silhouette, not a bare square.
 const castCommittedCard: React.CSSProperties = {
+  width: 'clamp(170px, 18vw, 264px)', aspectRatio: '5 / 7',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
   borderRadius: 18, overflow: 'hidden', background: '#1a130a',
   border: '3px solid rgba(240,210,130,0.85)',
   boxShadow: '0 0 44px rgba(224,196,120,0.5), 0 14px 32px rgba(0,0,0,0.72)',
