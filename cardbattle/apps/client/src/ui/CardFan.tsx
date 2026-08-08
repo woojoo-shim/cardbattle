@@ -225,10 +225,11 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
               }}
               onPointerUp={(e) => {
                 if (!drag || drag.id !== c.id) return;
-                const lifted = drag.sy - e.clientY; // pulled up out of the hand toward the board
+                const px = e.clientX, py = e.clientY;
+                const lifted = drag.sy - py; // pulled up out of the hand toward the board
                 // What sits under the release point? A targeted card (arrow) dropped straight onto a
                 // valid foe/ally fires at it; dropped onto the left CAST SLOT (or lifted up) it plays.
-                const el = document.elementFromPoint(e.clientX, e.clientY);
+                const el = document.elementFromPoint(px, py);
                 const overId = el?.closest('[data-pid]')?.getAttribute('data-pid') ?? undefined;
                 const overCast = !!el?.closest('[data-castzone]');
                 const dropped = (drag.moved && lifted > 70) || overCast;
@@ -236,7 +237,19 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 onDragging?.(false);
                 if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId, overCast); }
               }}
-              onPointerCancel={() => { if (drag && drag.id === c.id) { setDrag(null); onDragging?.(false); } }}
+              onPointerCancel={() => {
+                if (!drag || drag.id !== c.id) return;
+                // macOS Safari fires pointercancel mid-drag instead of pointerup. Don't discard the
+                // gesture — resolve the drop from the last tracked position so the summon still lands.
+                const lifted = drag.sy - drag.y;
+                const el = document.elementFromPoint(drag.x, drag.y);
+                const overId = el?.closest('[data-pid]')?.getAttribute('data-pid') ?? undefined;
+                const overCast = !!el?.closest('[data-castzone]');
+                const dropped = (drag.moved && lifted > 70) || overCast;
+                setDrag(null);
+                onDragging?.(false);
+                if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId, overCast); }
+              }}
               style={{
                 ...card,
                 transform,
@@ -382,7 +395,11 @@ const card: React.CSSProperties = {
   transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease, border-color .24s ease',
   transformOrigin: 'bottom center', willChange: 'transform',
   touchAction: 'none', // let a minion be dragged up onto the board without the page scrolling
-};
+  // macOS Safari treats a drag on a <button> as a text/native-drag gesture and fires
+  // pointercancel mid-drag, which silently aborted the summon. Killing selection + native
+  // drag stops that so the pointer stream survives to pointerup.
+  userSelect: 'none', WebkitUserSelect: 'none', WebkitUserDrag: 'none',
+} as React.CSSProperties;
 // The card that floats under the cursor while a minion is being dragged out of the hand. Rendered
 // through a portal to document.body so the fan's `perspective` doesn't warp its fixed positioning.
 const dragGhost: React.CSSProperties = {
