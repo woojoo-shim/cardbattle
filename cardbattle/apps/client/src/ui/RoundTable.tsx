@@ -351,15 +351,9 @@ const felt: React.CSSProperties = {
   transform: 'translate(-50%,-50%)',
   width: '94%', height: '94%', borderRadius: 28, overflow: 'hidden',
   background:
-    'radial-gradient(circle at 50% 46%, rgba(255,207,77,0.22), transparent 58%),' +  // warm gold overhead light pool (the single warm note)
-    'radial-gradient(circle at 50% 44%, rgba(255,232,150,0.12), transparent 50%),' + // hot gold centre catch-light on the baize
-    'radial-gradient(circle at 50% 50%, transparent 56%, rgba(138,107,255,0.26) 100%),' + // amethyst edge tint — temperature contrast vs the warm centre
-    'radial-gradient(circle at 50% 48%, #1e5c46 0%, #123528 50%, #08120d 100%)',       // emerald baize felt body: lit centre → black rim
-  border: '2px solid rgba(255,207,77,0.44)',
-  boxShadow:
-    'inset 0 0 8px 1px rgba(255,214,120,0.36),' + // gold rim highlight
-    'inset 0 0 180px 24px rgba(0,0,0,0.56),' +    // felt edge falls to black
-    '0 24px 60px rgba(0,0,0,0.62)',               // table floats above the floor
+    'radial-gradient(circle at 50% 46%, rgba(255,207,77,0.16), transparent 60%),' +  // faint warm overhead light pool on the stone floor
+    'radial-gradient(circle at 50% 50%, transparent 62%, rgba(0,0,0,0.42) 100%)',    // soft dark rim so seats/VFX read on the arena floor
+  boxShadow: 'inset 0 0 160px 30px rgba(0,0,0,0.34)', // gentle inner vignette — no table body, just the AI-generated floor
 };
 // The engraved house medallion at the table centre. Face-on now (top-down view) and low-opacity
 // so it feels branded INTO the baize — an anchor for the dead middle, never competing with the
