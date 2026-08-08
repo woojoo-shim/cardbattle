@@ -331,9 +331,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
               )}
               <div style={artWindow}>
                 <div style={{ ...artGlow, background: `radial-gradient(circle at 50% 44%, ${tint.glow}, transparent 68%)` }} aria-hidden />
-                <CardArt id={def.id} size="clamp(82px, 8.6vw, 148px)" />
+                <CardArt id={def.id} size="100%" />
               </div>
-              <div style={{ ...nameplate, background: `linear-gradient(180deg, transparent, ${tint.plate})` }}>
+              <div style={nameplate}>
                 <div style={cname}>{def.name}</div>
               </div>
               <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
@@ -373,26 +373,18 @@ const fan: React.CSSProperties = {
 // rotation and hover lift, so the entrance animation never fights the hover transform.
 const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -14px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
 const card: React.CSSProperties = {
-  // Width scales with the viewport; height derives from a locked 5:7 playing-card ratio so the
-  // proportion never drifts across clamp breakpoints (independent width/height clamps used to).
-  width: 'clamp(140px, 13.5vw, 210px)', aspectRatio: '5 / 7',
-  borderRadius: 12, position: 'relative',
-  // Layered "cardstock" material: a warm lit embossed top edge, a fine woven cross-hatch grain,
-  // an off-centre warm bloom and an aged edge vignette for handled-card depth, then the
-  // rarity-neutral body. Pure CSS — no image, no extra DOM per card.
-  background: [
-    'linear-gradient(180deg, rgba(255,238,208,0.07), transparent 20%)',                 // warm lit top edge
-    'radial-gradient(70% 46% at 32% 10%, rgba(226,182,112,0.06), transparent 60%)',      // faint warm bloom, off-centre = hand-made feel
-    'radial-gradient(120% 104% at 50% 46%, transparent 55%, rgba(0,0,0,0.44) 100%)',     // aged edge vignette — corners darken like a handled card
-    'repeating-linear-gradient(45deg, rgba(255,238,208,0.02) 0 1.5px, transparent 1.5px 3.5px)',  // warm woven thread
-    'repeating-linear-gradient(-45deg, rgba(0,0,0,0.07) 0 1.5px, transparent 1.5px 3.5px)',        // cross-hatch shadow
-    `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
-  ].join(','),
-  border: `1px solid ${C.border}`,
-  color: C.text, display: 'flex', flexDirection: 'column', alignItems: 'center',
-  justifyContent: 'flex-start', gap: 'clamp(4px, 0.5vw, 7px)',
-  padding: 'clamp(9px, 0.95vw, 14px) clamp(8px, 0.8vw, 12px) clamp(7px, 0.7vw, 11px)',
-  transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease, border-color .24s ease',
+  // Width scales with the viewport; the ornate stone card frame is a 2:3 PNG, so the card locks
+  // to that ratio and the artwork/nameplate are positioned INTO the frame's carved openings.
+  width: 'clamp(140px, 13.5vw, 210px)', aspectRatio: '2 / 3',
+  borderRadius: 10, position: 'relative',
+  // The whole card face is the hand-illustrated ornate frame (skull arches, torches, hanging
+  // lantern, stone-tile arena floor art window, blank plaque). It fills the card exactly, so
+  // its transparent rounded corners define the silhouette — no CSS cardstock underneath.
+  backgroundImage: 'url(/card-frame.png)',
+  backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent',
+  border: 'none',
+  color: C.text,
+  transition: 'transform .24s cubic-bezier(.34,1.25,.64,1), box-shadow .24s ease',
   transformOrigin: 'bottom center', willChange: 'transform',
   touchAction: 'none', // let a minion be dragged up onto the board without the page scrolling
   // macOS Safari treats a drag on a <button> as a text/native-drag gesture and fires
@@ -432,31 +424,39 @@ const RARITY_TINT: Record<string, { glow: string; sheen: string; plate: string }
   epic: { glow: 'rgba(216,162,60,0.36)', sheen: 'rgba(216,162,60,0.11)', plate: 'rgba(90,68,26,0.48)' },
   legendary: { glow: 'rgba(216,162,60,0.5)', sheen: 'rgba(255,212,120,0.17)', plate: 'rgba(110,82,30,0.52)' },
 };
-// Recessed art frame — an inset dark well with a rarity glow so the illustration reads as
-// mounted, giving the flat card real depth.
+// The illustration is dropped INTO the frame's stone-tile arena floor (the carved central
+// opening). Absolutely placed to match the PNG's floor panel; the frame itself supplies the
+// recessed depth, so no extra well styling is needed — just the rarity glow behind the art.
 const artWindow: React.CSSProperties = {
-  position: 'relative', width: '84%', aspectRatio: '1', marginTop: 2, borderRadius: 10,
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
   display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-  background: [
-    'radial-gradient(ellipse 80% 40% at 50% 6%, rgba(240,206,150,0.10), transparent 62%)',  // warm rim catch-light at the top of the well
-    'repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px)',
-    'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
-  ].join(','),
-  border: `1px solid ${C.border}`,
-  boxShadow: 'inset 0 2px 9px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(255,255,255,0.03)',
+  borderRadius: 6,
 };
-const artGlow: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 10, pointerEvents: 'none' };
+const artGlow: React.CSSProperties = { position: 'absolute', inset: 0, borderRadius: 6, pointerEvents: 'none' };
 // Diagonal light streak for epic/legendary — a subtle foil shimmer.
 const foilSheen: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: 12, pointerEvents: 'none', zIndex: 2,
   mixBlendMode: 'screen',
 };
+// The card name is engraved onto the frame's blank stone plaque near the bottom. Dark ink on the
+// light plaque (the reverse of the rest of the UI), with a faint light emboss so it reads carved.
 const nameplate: React.CSSProperties = {
-  width: '100%', marginTop: 'auto', padding: '3px 2px 2px', textAlign: 'center',
-  borderTop: `1px solid ${C.border}`,
+  position: 'absolute', left: '13%', top: '81%', width: '74%', height: '11.5%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+  padding: '0 4px', pointerEvents: 'none',
 };
-const cname: React.CSSProperties = { fontSize: 'clamp(17px, 1.9vw, 28px)', fontWeight: 700, lineHeight: 1.1 };
-const pillVal: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(15px, 1.7vw, 25px)', padding: '3px 13px', borderRadius: 999 };
+const cname: React.CSSProperties = {
+  fontSize: 'clamp(15px, 1.65vw, 25px)', fontWeight: 800, lineHeight: 1.02,
+  color: '#2c1d0d', textShadow: '0 1px 0 rgba(244,228,192,0.55)',
+};
+// The value gem (damage / heal / mana / minion stats) rests on the frame's lower ledge, centred
+// below the plaque like a mounted seal.
+const pillVal: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: '1.5%', transform: 'translateX(-50%)',
+  fontFamily: mono, fontSize: 'clamp(14px, 1.55vw, 23px)', fontWeight: 800,
+  padding: '2px 12px', borderRadius: 999, zIndex: 3,
+  boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+};
 // Every accent below is pulled into the theme's four printed-pigment families so the hand reads
 // as one coherent candlelit palette (icons carry the fine distinctions, not colour):
 //   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
@@ -477,7 +477,7 @@ const costBadgeShort: React.CSSProperties = {
 // only their left strip is exposed (the right corner is hidden behind the neighbour), so the
 // left edge is the only always-visible place for the badges. Each is a small tinted disc.
 const emblemCol: React.CSSProperties = {
-  position: 'absolute', top: 38, left: 7, zIndex: 3,
+  position: 'absolute', top: '17%', left: '1.5%', zIndex: 3,
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
 };
 const emblemBadge: React.CSSProperties = {
