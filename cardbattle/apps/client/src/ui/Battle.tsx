@@ -233,7 +233,6 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
   return (
     <div style={screen} data-arena>
       <SceneLife />
-      <BoardFrame />
       <VfxLayer events={events} players={ui.players} myId={myId} />
       {attacker && <AttackArrow attackerId={attacker} />}
       <EmoteLayer emotes={emotes} />
@@ -523,10 +522,7 @@ function DeckPile({ count }: { count: number }) {
 function SceneLife() {
   return (
     <div style={lifeWrap} aria-hidden>
-      <div style={coolRim} />
-      <div style={lightShaft} className="cb-batt-shaft" />
       <div style={keyBreath} />
-      <div style={floorPool} />
       {MOTES.map((m, i) => (
         <span
           key={i}
@@ -565,84 +561,9 @@ const keyBreath: React.CSSProperties = {
   background: 'radial-gradient(ellipse at 50% 45%, rgba(238,178,88,0.18), transparent 66%)',
   animation: 'cb-breathe 7.5s ease-in-out infinite',
 };
-// A cool dusty-plum wash raking down the far wall — the cold counterpoint that makes the warm
-// firelight read as colour, not just brightness.
-const coolRim: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '-6%', width: '120%', height: '54%',
-  transform: 'translateX(-50%)', borderRadius: '50%', filter: 'blur(60px)',
-  background: 'radial-gradient(ellipse at 50% 30%, rgba(96,64,116,0.16), transparent 64%)',
-};
-// A tall cone of warm light falling from the unseen ceiling onto the table — breathes and sways.
-const lightShaft: React.CSSProperties = {
-  position: 'absolute', top: '-18%', left: '50%', width: 'min(640px, 62vw)', height: '112%',
-  transform: 'translateX(-50%)',
-  clipPath: 'polygon(40% 0%, 60% 0%, 84% 100%, 16% 100%)',
-  background: 'linear-gradient(180deg, rgba(244,190,96,0.20) 0%, rgba(228,168,72,0.08) 44%, transparent 80%)',
-  filter: 'blur(7px)',
-};
-// A warm pool of firelight blooming off the floor beneath the table.
-const floorPool: React.CSSProperties = {
-  position: 'absolute', left: '50%', bottom: '-8%', width: '80%', height: '40%',
-  transform: 'translateX(-50%)', borderRadius: '50%', filter: 'blur(52px)',
-  background: 'radial-gradient(ellipse at 50% 60%, rgba(40,170,130,0.16), transparent 68%)',
-};
 const mote: React.CSSProperties = {
   position: 'absolute', borderRadius: '50%',
   background: 'radial-gradient(circle, rgba(244,220,168,0.9), rgba(230,180,96,0) 70%)',
-};
-// A Hearthstone-style carved wooden game board frame ringing the whole screen: four walnut planks
-// with a running grain and beveled highlights, a warm brass bead-line just inside the wood (the
-// carved gold molding), and a domed brass boss capping each corner joint. Pure CSS (no images),
-// pointer-transparent, and low in the stack (zIndex 3) so cards, buttons and VFX all sit in front —
-// it reads as the physical board the match is played on, not chrome over the action.
-function BoardFrame() {
-  return (
-    <div style={boardFrame} aria-hidden>
-      <div style={framePlankTop} />
-      <div style={framePlankBottom} />
-      <div style={framePlankLeft} />
-      <div style={framePlankRight} />
-      <div style={frameBead} />
-      <span style={{ ...frameCorner, top: -3, left: -3 }} />
-      <span style={{ ...frameCorner, top: -3, right: -3 }} />
-      <span style={{ ...frameCorner, bottom: -3, left: -3 }} />
-      <span style={{ ...frameCorner, bottom: -3, right: -3 }} />
-    </div>
-  );
-}
-const FR = 20; // plank thickness
-const grainH = 'repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
-const grainV = 'repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px)';
-const woodH = 'linear-gradient(180deg,#2c3549 0%,#1e2636 46%,#12161f 100%)';
-const woodV = 'linear-gradient(90deg,#2c3549 0%,#1e2636 46%,#12161f 100%)';
-const boardFrame: React.CSSProperties = { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 };
-const framePlankTop: React.CSSProperties = {
-  position: 'absolute', top: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
-  boxShadow: 'inset 0 2px 3px rgba(150,180,230,0.18), inset 0 -6px 11px rgba(0,0,0,0.55), 0 3px 12px rgba(0,0,0,0.45)',
-};
-const framePlankBottom: React.CSSProperties = {
-  position: 'absolute', bottom: 0, left: 0, right: 0, height: FR, background: `${grainH}, ${woodH}`,
-  boxShadow: 'inset 0 -2px 3px rgba(150,180,230,0.13), inset 0 6px 11px rgba(0,0,0,0.55), 0 -3px 12px rgba(0,0,0,0.45)',
-};
-const framePlankLeft: React.CSSProperties = {
-  position: 'absolute', top: 0, bottom: 0, left: 0, width: FR, background: `${grainV}, ${woodV}`,
-  boxShadow: 'inset 2px 0 3px rgba(150,180,230,0.16), inset -6px 0 11px rgba(0,0,0,0.55), 3px 0 12px rgba(0,0,0,0.45)',
-};
-const framePlankRight: React.CSSProperties = {
-  position: 'absolute', top: 0, bottom: 0, right: 0, width: FR, background: `${grainV}, ${woodV}`,
-  boxShadow: 'inset -2px 0 3px rgba(150,180,230,0.13), inset 6px 0 11px rgba(0,0,0,0.55), -3px 0 12px rgba(0,0,0,0.45)',
-};
-// The carved gold molding line just inside the wood.
-const frameBead: React.CSSProperties = {
-  position: 'absolute', inset: FR - 1, borderRadius: 3,
-  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(199,154,78,0.5), inset 0 0 14px rgba(199,154,78,0.14)',
-};
-// A domed brass boss capping each corner joint.
-const frameCorner: React.CSSProperties = {
-  position: 'absolute', width: 42, height: 42, borderRadius: 7,
-  background: 'radial-gradient(circle at 38% 32%, #f0cd85 0%, #c79a4e 40%, #8a6428 68%, #4e3714 100%)',
-  boxShadow: '0 2px 7px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,244,208,0.6), inset 0 -2px 4px rgba(0,0,0,0.5)',
-  border: '1px solid #3a2810',
 };
 
 // A clean, dark board finished like a lit stage: a warm key light falls on the table at centre,
@@ -652,17 +573,14 @@ const frameCorner: React.CSSProperties = {
 const screen: React.CSSProperties = {
   width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', fontFamily: sans,
   display: 'grid', gridTemplateRows: '64px 1fr clamp(210px, 25vh, 320px)',
-  // Painted like a jewelled crypt-arena on obsidian: a warm gold core pools on the table (the one
-  // warm note for contrast), an amethyst halo bleeds out around it, a deep sapphire wash climbs the
-  // far wall up top, and an emerald glow rises off the floor for cool jewel-tone depth. A vignette
-  // pulls the corners to black. Layered saturated GEMSTONE pigment — bright but not fluorescent.
+  // The AI-painted arena chamber (public/battle-bg.png) — a warm candlelit stone pit with a
+  // lantern pooling light on the central floor. It carries its own ornate frame, torches, banners
+  // and vignette, so the coded board-frame / cool light layers were removed to sit cleanly on it.
+  // A soft extra vignette darkens the corners further so the crop stays framed on any aspect ratio.
   background:
-    'radial-gradient(46% 34% at 50% 42%, rgba(255,207,77,0.18), transparent 60%),' +  // warm gold core on the table (the single warm accent)
-    'radial-gradient(74% 60% at 50% 44%, rgba(138,107,255,0.18), transparent 70%),' + // amethyst halo around it
-    'radial-gradient(120% 88% at 50% 2%, rgba(52,92,170,0.22), transparent 60%),' +   // deep sapphire wash up the far wall
-    'radial-gradient(94% 80% at 50% 110%, rgba(40,170,130,0.16), transparent 60%),' + // emerald floor glow
-    'radial-gradient(86% 80% at 50% 46%, transparent 44%, rgba(0,0,0,0.68) 100%),' +  // vignette frames the corners
-    'linear-gradient(180deg, #141a2a 0%, #0a0d15 56%, #04060b 100%)',
+    'radial-gradient(88% 82% at 50% 46%, transparent 54%, rgba(0,0,0,0.55) 100%),' +
+    'url(/battle-bg.png) center center / cover no-repeat,' +
+    '#0a0604',
   color: C.text,
 };
 const topRow: React.CSSProperties = {};
