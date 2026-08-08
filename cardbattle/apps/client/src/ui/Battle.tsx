@@ -256,7 +256,7 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
               <Icon name="close" size={15} />&nbsp;취소
             </button>
             <div style={castCommittedCard}>
-              <CardArt id={pending.defId} size={192} />
+              <CardArt id={pending.defId} size="clamp(120px, 13vw, 192px)" />
             </div>
             <span style={castCommittedName}>{CARD_DEFS[pending.defId]?.name ?? ''}</span>
             <span style={castCommittedPrompt}>
@@ -683,12 +683,12 @@ const tableRow: React.CSSProperties = {
 // Sits quiet during my turn, then flares up while a card is in hand-drag so it reads as "놓을 곳".
 const castZone: React.CSSProperties = {
   position: 'absolute', left: 'clamp(10px, 3vw, 46px)', top: '50%', transform: 'translateY(-50%)',
-  width: 'clamp(150px, 17vw, 236px)', minHeight: 256, zIndex: 12, textAlign: 'center',
+  width: 'clamp(150px, 17vw, 236px)', minHeight: 'clamp(190px, 26vh, 256px)', zIndex: 12, textAlign: 'center',
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
-  padding: '30px 20px', borderRadius: 20, boxSizing: 'border-box',
+  padding: 'clamp(18px, 2.4vw, 30px) clamp(12px, 1.6vw, 20px)', borderRadius: 20, boxSizing: 'border-box',
   border: '3px dashed rgba(224,196,120,0.30)',
   background: 'radial-gradient(120% 90% at 50% 28%, rgba(224,196,120,0.05), rgba(0,0,0,0))',
-  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 16, fontWeight: 700,
+  color: 'rgba(240,225,190,0.55)', fontFamily: mono, fontSize: 'clamp(13px, 1.2vw, 16px)', fontWeight: 700,
   letterSpacing: 0.4, lineHeight: 1.5,
   transition: 'border-color .18s, background .18s, transform .18s, color .18s',
 };
@@ -711,11 +711,11 @@ const castCommittedCard: React.CSSProperties = {
   animation: 'cb-cast-glow 1.7s ease-in-out infinite',
 };
 const castCommittedName: React.CSSProperties = {
-  fontFamily: sans, fontWeight: 800, fontSize: 21, color: '#f6efdd',
+  fontFamily: sans, fontWeight: 800, fontSize: 'clamp(15px, 1.5vw, 21px)', color: '#f6efdd',
   textShadow: '0 2px 6px rgba(0,0,0,0.85)', whiteSpace: 'nowrap',
 };
 const castCommittedPrompt: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 15,
+  display: 'flex', alignItems: 'center', fontFamily: mono, fontWeight: 700, fontSize: 'clamp(12px, 1.1vw, 15px)',
   letterSpacing: 0.5, color: '#ffd98a', padding: '6px 16px', borderRadius: 999,
   border: '1px solid rgba(240,210,130,0.5)', background: 'rgba(224,196,120,0.12)',
 };

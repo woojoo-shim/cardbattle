@@ -140,7 +140,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                   }}
                 >
                   {m.taunt && <TauntFrame color={armed ? '#e0b84a' : '#c8a24a'} style={{ zIndex: 3 }} />}
-                  <div style={minionArtWindow}><CardArt id={m.defId} size={100} /></div>
+                  <div style={minionArtWindow}><CardArt id={m.defId} size="100%" /></div>
                   <span style={minionName}>{def?.name}</span>
                   <span style={{ ...minionStat, ...minionAtk }}>{m.attack}</span>
                   <span style={{ ...minionStat, ...minionHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
@@ -450,7 +450,7 @@ const fieldRow: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 128, aspectRatio: '5 / 7', borderRadius: 12, flexShrink: 0,
+  position: 'relative', width: 'clamp(84px, 9vw, 128px)', aspectRatio: '5 / 7', borderRadius: 12, flexShrink: 0,
   background: [
     'linear-gradient(180deg, rgba(150,180,230,0.06), transparent 22%)',
     'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
