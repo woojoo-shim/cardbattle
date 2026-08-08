@@ -80,7 +80,10 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
   // After a successful drag-drop the browser still fires a click; this flag swallows that
   // trailing click so a dragged spell doesn't also fire again via onClick (double-play).
   const skipClickRef = useRef(false);
-  const n = hand.length;
+  // A 시동'd (pending-target) card has left the hand and now sits in the board's left cast area,
+  // so it must NOT also render in the fan — filter it out and fan the remaining cards cleanly.
+  const visible = pendingId ? hand.filter((c) => c.id !== pendingId) : hand;
+  const n = visible.length;
   const mid = (n - 1) / 2;
 
   // Drop a stale preview when the turn ends or the previewed card leaves the hand.
@@ -120,10 +123,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
 
   return (
     <div style={fan} ref={fanRef} onPointerMove={onFanMove} onPointerLeave={onFanLeave}>
-      {hand.map((c, i) => {
+      {visible.map((c, i) => {
         const def = CARD_DEFS[c.defId];
         if (!def) return null;
-        const isPending = c.id === pendingId;
         const isPreview = c.id === preview && enabled;
         const isHover = (c.id === hover || isPreview) && enabled;
         const rot = (i - mid) * 5;
@@ -180,8 +182,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
         // not just a flat slide — the fan's perspective makes them read as real objects picked up.
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
-        if (isPending) { transform = 'perspective(720px) translateY(-52px) rotateX(-7deg) scale(1.62)'; z = 6; }
-        else if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 5; }
+        if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 5; }
         else if (m > 0.002) {
           // Straighten the fan spread, lift, and scale — all by proximity amount m.
           transform = `perspective(720px) rotate(${rot * (1 - m)}deg) translateY(${lift - m * 60}px) rotateX(${-5 * m}deg) scale(${1 + m * 0.5})`;
@@ -242,10 +243,8 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 cursor: !enabled ? 'default' : !affordable ? 'not-allowed' : 'grab',
                 opacity: drag?.id === c.id && drag.moved ? 0.28 : !enabled ? 0.5 : affordable ? 1 : 0.42,
                 filter: playable ? 'none' : 'grayscale(0.4)',
-                borderColor: isPending ? C.you : RARITY_BORDER[def.rarity] ?? C.border,
-                boxShadow: isPending
-                  ? `0 0 0 1px ${C.you}, 0 26px 44px rgba(143,157,79,0.3)`
-                  : hasCos && isHover
+                borderColor: RARITY_BORDER[def.rarity] ?? C.border,
+                boxShadow: hasCos && isHover
                   ? `0 0 22px ${cos!.glow}, 0 26px 44px rgba(0,0,0,0.6)`
                   : hasCos
                   ? `0 0 14px ${cos!.glow}, 0 14px 26px rgba(0,0,0,0.55)`
@@ -263,7 +262,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                   aria-hidden
                 />
               )}
-              {(isHover || isPending) && (() => {
+              {isHover && (() => {
                 const rm = RARITY_META[def.rarity] ?? RARITY_META.common;
                 const em = ELEM_META[def.element] ?? ELEM_META.none;
                 const needsTarget = requiresTarget(def);
@@ -300,7 +299,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                       </div>
                     )}
                     {def.flavor && <div style={tipFlavor}>{def.flavor}</div>}
-                    {IS_TOUCH && isPreview && !isPending && <div style={tipHint}>한 번 더 탭하여 사용</div>}
+                    {IS_TOUCH && isPreview && <div style={tipHint}>한 번 더 탭하여 사용</div>}
                   </div>
                 );
               })()}
