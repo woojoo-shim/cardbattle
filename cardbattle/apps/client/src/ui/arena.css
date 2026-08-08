@@ -244,11 +244,11 @@
 /* The committed card dropping onto the desk-left while it waits for a target: it snaps in from
    the hand, then keeps a soft glowing pulse so "대상 선택" reads as the pending next step. */
 @keyframes cb-cast-commit {
-  0%   { transform: translateY(-50%) translateX(-38px) scale(0.5) rotate(-16deg); opacity: 0; filter: brightness(2.4); }
-  30%  { opacity: 1; }
-  55%  { transform: translateY(-50%) translateX(0) scale(1.16) rotate(4deg); opacity: 1; filter: brightness(1.55); }
-  74%  { transform: translateY(-50%) scale(0.97) rotate(-1.5deg); filter: brightness(1); }
-  88%  { transform: translateY(-50%) scale(1.03) rotate(0.5deg); }
+  0%   { transform: translateY(-50%) translateX(90px) scale(0.42) rotate(-380deg); opacity: 0; filter: brightness(2.4); }
+  28%  { opacity: 1; }
+  62%  { transform: translateY(-50%) translateX(0) scale(1.16) rotate(0deg); opacity: 1; filter: brightness(1.5); }
+  80%  { transform: translateY(-50%) scale(0.97) rotate(0deg); filter: brightness(1); }
+  92%  { transform: translateY(-50%) scale(1.03) rotate(0deg); }
   100% { transform: translateY(-50%) scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
 }
 @keyframes cb-cast-glow {
