@@ -188,9 +188,18 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
             <div style={deckList}>
               {deckRows.length === 0 && <p style={emptyNote}>보유 카드를 추가해 20장 덱을 만드세요.</p>}
               {deckRows.map(({ def, n }) => (
-                <button key={def.id} style={deckRow} onClick={() => removeCard(def.id)} title="클릭하면 1장 제거">
+                <button key={def.id} style={deckRow(def.rarity)} onClick={() => removeCard(def.id)} title="클릭하면 1장 제거">
+                  <span style={rowThumb(def.rarity)}><CardArt id={def.id} size="100%" /></span>
                   <span style={costChip(def.rarity)}>{def.cost}</span>
-                  <span style={deckName}>{def.name}</span>
+                  <span style={rowNameCol}>
+                    <span style={deckName}>{def.name}</span>
+                    <span style={rowSub}>
+                      {def.tribe
+                        ? <b style={{ color: TRIBE_COLOR[def.tribe], fontWeight: 800 }}>{TRIBE_LABEL[def.tribe]}</b>
+                        : <b style={{ color: C.rare, fontWeight: 800 }}>주문</b>}
+                      {' · '}{RARITY_LABEL[def.rarity]}
+                    </span>
+                  </span>
                   {n > 1 && <span style={copyTag}>×{n}</span>}
                   <span style={removeMark}>−</span>
                 </button>
@@ -382,11 +391,22 @@ const deckList: React.CSSProperties = {
   flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 5, minHeight: 120,
 };
 const emptyNote: React.CSSProperties = { margin: 'auto', color: C.faint, fontSize: 12.5, textAlign: 'center', lineHeight: 1.6 };
-const deckRow: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 11px', cursor: 'pointer',
-  background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`, borderRadius: 4,
-  color: C.text, fontFamily: sans, textAlign: 'left',
-};
+function deckRow(rarity: Rarity): React.CSSProperties {
+  return {
+    display: 'flex', alignItems: 'center', gap: 9, padding: '6px 10px 6px 7px', cursor: 'pointer',
+    background: 'rgba(255,255,255,0.02)', border: `1px solid ${C.border}`,
+    borderLeft: `3px solid ${RARITY_BORDER[rarity]}`, borderRadius: 4,
+    color: C.text, fontFamily: sans, textAlign: 'left',
+  };
+}
+function rowThumb(rarity: Rarity): React.CSSProperties {
+  return {
+    width: 34, height: 34, flexShrink: 0, display: 'grid', placeItems: 'center', overflow: 'hidden',
+    borderRadius: 5, background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${RARITY_BORDER[rarity]}`,
+  };
+}
+const rowNameCol: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 };
+const rowSub: React.CSSProperties = { fontFamily: mono, fontSize: 10.5, color: C.dim, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 function costChip(rarity: Rarity): React.CSSProperties {
   return {
     width: 28, height: 28, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: 4,
@@ -394,7 +414,7 @@ function costChip(rarity: Rarity): React.CSSProperties {
     background: 'rgba(30,52,74,0.5)', border: `1px solid ${RARITY_BORDER[rarity]}`,
   };
 }
-const deckName: React.CSSProperties = { flex: 1, fontSize: 15, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const deckName: React.CSSProperties = { fontSize: 15, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.15 };
 const copyTag: React.CSSProperties = { fontFamily: mono, fontSize: 14, fontWeight: 800, color: C.rare };
 const removeMark: React.CSSProperties = { fontSize: 18, fontWeight: 800, color: C.enemy, width: 16, textAlign: 'center' };
 function saveBtn(active: boolean): React.CSSProperties {
