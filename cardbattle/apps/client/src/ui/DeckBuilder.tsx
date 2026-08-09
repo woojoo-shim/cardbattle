@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, MAX_DECKS, TRIBE_LABEL, cardPrice,
-  isValidDeck, type CardDef, type Rarity,
+  isValidDeck, type CardDef, type Rarity, type Tribe,
 } from '@cardbattle/shared';
 import { buyCard, saveDeck, setActiveDeck, deleteDeck, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
@@ -36,6 +36,17 @@ const CATALOG: CardDef[] = [...ALL_DEFS].sort(
   (a, b) => RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity] || a.cost - b.cost || a.name.localeCompare(b.name),
 );
 
+// Collection filter buttons — 전체 + the four tribes + 주문(spells, which have no tribe).
+type FilterCat = 'all' | Tribe | 'spell';
+const FILTERS: { key: FilterCat; label: string }[] = [
+  { key: 'all', label: '전체' },
+  { key: 'beast', label: '야수' },
+  { key: 'human', label: '인간' },
+  { key: 'undead', label: '망자' },
+  { key: 'elemental', label: '정령' },
+  { key: 'spell', label: '주문' },
+];
+
 /** Custom deck builder — buy cards with gold, then compose a DECK_SIZE-card draw deck
  *  (max MAX_COPIES per card) from owned cards. The saved deck is the account's match draw pool. */
 export function DeckBuilder({ account, onAccount, onClose }: Props) {
@@ -47,6 +58,9 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
   const [saved, setSaved] = useState(false);
   // Card whose description is shown — hover on desktop, tap on touch (no hover there).
   const [peek, setPeek] = useState<string | null>(null);
+  // Collection filters: category (전체/종족/주문) + "보유한 카드만" toggle.
+  const [filter, setFilter] = useState<FilterCat>('all');
+  const [ownedOnly, setOwnedOnly] = useState(false);
 
   const slotCount = account.decks.length;
   const canAddSlot = slotCount < MAX_DECKS;
@@ -118,6 +132,18 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
       .finally(() => setBusy(false));
   };
 
+  // Apply the collection filters. Category matches tribe (하수인) or the 주문 bucket (kind==='spell').
+  const shown = useMemo(
+    () =>
+      CATALOG.filter((def) => {
+        if (ownedOnly && !account.ownedCards.includes(def.id)) return false;
+        if (filter === 'all') return true;
+        if (filter === 'spell') return def.kind === 'spell';
+        return def.tribe === filter;
+      }),
+    [filter, ownedOnly, account.ownedCards],
+  );
+
   // The deck side, grouped by card and sorted by cost, reads like a mana curve.
   const deckRows = useMemo(() => {
     return [...draftCounts.entries()]
@@ -187,9 +213,29 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
 
           {/* Collection side */}
           <div style={collCol}>
-            <span style={collTitle}>카드 수집</span>
+            <div style={collHead}>
+              <span style={collTitle}>카드 수집</span>
+              <span style={collCount}>{shown.length}장</span>
+            </div>
+            <div style={filterBar}>
+              {FILTERS.map((f) => {
+                const on = filter === f.key;
+                const col = f.key !== 'all' && f.key !== 'spell' ? TRIBE_COLOR[f.key] : C.rare;
+                return (
+                  <button key={f.key} style={filterChip(on, col)}
+                    onClick={() => { playSfx('select'); setFilter(f.key); }}>
+                    {f.label}
+                  </button>
+                );
+              })}
+              <button style={{ ...filterChip(ownedOnly, C.you), marginLeft: 'auto' }}
+                onClick={() => { playSfx('select'); setOwnedOnly((v) => !v); }}>
+                보유한 카드만
+              </button>
+            </div>
             <div style={grid}>
-              {CATALOG.map((def) => {
+              {shown.length === 0 && <p style={emptyFilter}>해당하는 카드가 없습니다.</p>}
+              {shown.map((def) => {
                 const owned = owns(def.id);
                 const inDeck = draftCounts.get(def.id) ?? 0;
                 const price = cardPrice(def.id) ?? 0;
@@ -344,7 +390,20 @@ function saveBtn(active: boolean): React.CSSProperties {
 
 // Collection column
 const collCol: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 };
+const collHead: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 10 };
 const collTitle: React.CSSProperties = { fontFamily: serif, fontSize: 22, fontWeight: 700, color: '#eef2fb' };
+const collCount: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.dim };
+const filterBar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 };
+function filterChip(on: boolean, color: string): React.CSSProperties {
+  return {
+    fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: 0.3, cursor: 'pointer',
+    padding: '4px 11px', borderRadius: 999,
+    color: on ? '#0a0d15' : C.dim,
+    background: on ? color : 'rgba(255,255,255,0.03)',
+    border: `1px solid ${on ? color : C.border}`,
+  };
+}
+const emptyFilter: React.CSSProperties = { gridColumn: '1 / -1', color: C.faint, fontSize: 14, padding: '18px 4px' };
 const grid: React.CSSProperties = {
   overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(170px, 15vw, 230px), 1fr))',
   gap: 16, alignContent: 'start', paddingRight: 6,
