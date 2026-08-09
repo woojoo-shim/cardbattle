@@ -3,7 +3,7 @@ import { DEFAULT_AVATAR } from '../constants.js';
 import { resolveMode, manaRegenFor, DEFAULT_MODE, type GameModeId, type RuleSet } from '../modes.js';
 import { ALL_DEFS, CARD_DEFS } from '../cards/defs.js';
 import { eliminate } from '../cards/effects.js';
-import { weightedPick } from './rng.js';
+import { weightedPick, shuffle } from './rng.js';
 import { checkWin } from './reducer.js';
 
 /** Build a fresh lobby-ready player under the given ruleset. Shared by initGame and the
@@ -23,13 +23,25 @@ export function initGame(seats: { id: string; name: string }[], mode: GameModeId
   return { phase: 'lobby', mode: m.id, rules: m.rules, players, turnOrder: [], currentTurnIndex: 0, turnDir: 1, roundCount: 1, turnDeadline: 0, rngSeed: (Math.random() * 1e9) | 0, nextMinionId: 0, log: [], winnerId: null };
 }
 
-/** Draw one weighted card into a player's hand (mutates state, advances seed). */
+/** Draw one card into a player's hand (mutates state, advances seed).
+ *  Clash-Royale-style cycle: a player's own deck is an ORDERED, rotating queue — the front card
+ *  is drawn and every played card returns to the back (see reducer), so cards come back around in
+ *  a predictable loop. Coach pools and deckless seats (guests/bots) fall back to a weighted roll. */
 function drawCard(state: GameState, player: PlayerState, ctx: ReduceCtx, emit: (e: GameEvent) => void): void {
   if (player.hand.length >= state.rules.handCap) return; // a hand never overflows past the cap
-  // The coach/tutorial restricts the deck to a small curated pool (rules.cardPool wins over any
-  // per-player deck); otherwise draw from THIS player's chosen deck; else the full card set.
-  // Duplicate ids in a deck are kept so each copy weights the card toward being drawn.
-  const ids = state.rules.cardPool ?? (player.deck.length ? player.deck : null);
+  // Cycle path: draw the next queued card off the FRONT of this player's deck (no cardPool override).
+  if (!state.rules.cardPool && player.deck.length) {
+    const defId = player.deck.shift()!;
+    if (CARD_DEFS[defId]) {
+      const inst = { id: ctx.nextCardId(), defId };
+      player.hand.push(inst);
+      emit({ type: 'card_drawn', playerId: player.id, cardInstanceId: inst.id, defId });
+      return;
+    }
+    // unknown id in the queue: drop it and fall through to a weighted roll this draw
+  }
+  // Fallback (coach pool / deckless guests & bots): a weighted random pick from the pool.
+  const ids = state.rules.cardPool ?? null;
   const pool: CardDef[] = ids
     ? ids.map((id) => CARD_DEFS[id]).filter((d): d is CardDef => !!d)
     : ALL_DEFS;
@@ -48,6 +60,15 @@ export function startGame(input: GameState, ctx: ReduceCtx): ReduceResult {
   state.phase = 'playing';
   state.turnOrder = state.players.filter((p) => p.alive).map((p) => p.id);
   state.currentTurnIndex = 0;
+  // Shuffle each player's deck ONCE into its rotating draw queue (Clash-Royale cycle). Coach pools
+  // aren't shuffled here — they roll weighted each draw. Deckless seats keep their empty queue.
+  for (const p of state.players) {
+    if (!state.rules.cardPool && p.deck.length) {
+      const sh = shuffle(state.rngSeed, p.deck);
+      state.rngSeed = sh.seed;
+      p.deck = sh.items;
+    }
+  }
   // opening hands (drawn silently into hand; card_drawn still emitted for log)
   for (const p of state.players) {
     for (let i = 0; i < state.rules.startHand; i++) drawCard(state, p, ctx, emit);

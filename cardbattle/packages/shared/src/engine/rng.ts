@@ -8,6 +8,19 @@ export function nextFloat(seed: number): { value: number; seed: number } {
   return { value, seed: t };
 }
 
+/** Seeded Fisher–Yates shuffle: returns a new shuffled array + the advanced seed. */
+export function shuffle<T>(seed: number, items: readonly T[]): { items: T[]; seed: number } {
+  const out = items.slice();
+  let s = seed;
+  for (let i = out.length - 1; i > 0; i--) {
+    const r = nextFloat(s);
+    s = r.seed;
+    const j = Math.floor(r.value * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return { items: out, seed: s };
+}
+
 export function weightedPick<T>(
   seed: number,
   items: readonly T[],

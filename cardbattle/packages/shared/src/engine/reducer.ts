@@ -65,6 +65,10 @@ export function reduce(input: GameState, action: Action, ctx: ReduceCtx): Reduce
     const emit = (e: GameEvent) => { events.push(e); state.log.push(e); };
     const sActor = state.players.find((p) => p.id === actorId)!;
     sActor.hand.splice(cardIdx, 1); // consume
+    // Clash-Royale cycle: a played card returns to the BACK of your deck queue so it comes back
+    // around after you've cycled the rest. Only decked seats cycle (their queue is non-empty from
+    // the shuffled start); coach pools / deckless seats (guests & bots) keep weighted draws.
+    if (!state.rules.cardPool && sActor.deck.length > 0) sActor.deck.push(def.id);
     sActor.mana -= def.cost;        // pay the cost before effects (so 마나 샘 nets correctly)
     emit({ type: 'card_played', playerId: actorId, defId: def.id, targetId: action.targetId });
 
