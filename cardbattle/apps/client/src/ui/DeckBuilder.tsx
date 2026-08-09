@@ -242,11 +242,34 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                 const maxed = inDeck >= MAX_COPIES;
                 const full = total >= DECK_SIZE;
                 return (
-                  <div key={def.id} style={cardCell(def.rarity, owned)}
-                    onMouseEnter={() => setPeek(def.id)} onMouseLeave={() => setPeek((p) => (p === def.id ? null : p))}>
-                    <div style={artWrap(def.rarity)}
+                  <div key={def.id} style={cardCell}>
+                    <div style={cardFace(owned)}
+                      onMouseEnter={() => setPeek(def.id)} onMouseLeave={() => setPeek((p) => (p === def.id ? null : p))}
                       onClick={() => setPeek((p) => (p === def.id ? null : def.id))}>
-                      <CardArt id={def.id} size="clamp(96px, 9vw, 150px)" />
+                      <div style={faceCost}>
+                        <svg viewBox="0 0 32 36" style={faceGem} aria-hidden>
+                          <defs>
+                            <linearGradient id="cbDeckMana" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0" stopColor="#c8f2ff" />
+                              <stop offset="0.34" stopColor="#59c2ff" />
+                              <stop offset="0.68" stopColor="#2f7ce0" />
+                              <stop offset="1" stopColor="#12379a" />
+                            </linearGradient>
+                          </defs>
+                          <path d="M16 2 L29 14 L16 34 L3 14 Z" fill="url(#cbDeckMana)" stroke="#e2f5ff" strokeWidth="1.3" strokeLinejoin="round" />
+                          <path d="M3 14 L16 2 L16 34 Z" fill="#0d3486" opacity="0.26" />
+                          <path d="M16 2 L23 10 L16 15 L9 10 Z" fill="#eafcff" opacity="0.5" />
+                        </svg>
+                        <span style={faceCostNum}>{def.cost}</span>
+                      </div>
+                      {def.tribe && (
+                        <span style={{ ...faceTribe, color: TRIBE_COLOR[def.tribe], borderColor: `${TRIBE_COLOR[def.tribe]}66`, background: `${TRIBE_COLOR[def.tribe]}22` }}>{TRIBE_LABEL[def.tribe]}</span>
+                      )}
+                      {inDeck > 0 && <span style={faceInDeck}>덱 ×{inDeck}</span>}
+                      <div style={faceArt}>
+                        <CardArt id={def.id} size="100%" />
+                      </div>
+                      <div style={facePlate}><div style={facePlateName}>{def.name}</div></div>
                       {peek === def.id && (
                         <div style={{ ...descPanel, borderColor: RARITY_BORDER[def.rarity] }}>
                           <span style={{ ...descRibbon, background: `linear-gradient(90deg, transparent, ${RARITY_BORDER[def.rarity]}, transparent)` }} aria-hidden />
@@ -261,11 +284,6 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                         </div>
                       )}
                     </div>
-                    <span style={cardName}>{def.name}</span>
-                    <span style={cardMeta}>
-                      {def.tribe && <b style={{ color: TRIBE_COLOR[def.tribe] }}>{TRIBE_LABEL[def.tribe]} · </b>}
-                      {RARITY_LABEL[def.rarity]} · {def.cost}코스트
-                    </span>
                     {owned ? (
                       <button style={addBtn(!maxed && !full)} disabled={maxed || full}
                         onClick={() => addCard(def.id)}>
@@ -405,25 +423,54 @@ function filterChip(on: boolean, color: string): React.CSSProperties {
 }
 const emptyFilter: React.CSSProperties = { gridColumn: '1 / -1', color: C.faint, fontSize: 14, padding: '18px 4px' };
 const grid: React.CSSProperties = {
-  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(170px, 15vw, 230px), 1fr))',
+  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(150px, 13vw, 200px), 1fr))',
   gap: 16, alignContent: 'start', paddingRight: 6,
 };
-function cardCell(rarity: Rarity, owned: boolean): React.CSSProperties {
+const cardCell: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8 };
+// Each collection entry is a real game card — the ornate 2:3 stone frame PNG with the artwork,
+// mana crystal, and engraved nameplate dropped into its carved openings, mirroring the battle hand.
+function cardFace(owned: boolean): React.CSSProperties {
   return {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 12px',
-    borderRadius: 6, background: owned ? 'rgba(42,33,14,0.4)' : 'rgba(255,255,255,0.02)',
-    border: `1px solid ${owned ? RARITY_BORDER[rarity] : C.border}`,
-    opacity: owned ? 1 : 0.82,
+    position: 'relative', width: '100%', aspectRatio: '2 / 3', cursor: 'help',
+    backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+    filter: owned ? 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))' : 'grayscale(0.6) brightness(0.82) drop-shadow(0 6px 12px rgba(0,0,0,0.45))',
+    opacity: owned ? 1 : 0.92,
   };
 }
-function artWrap(rarity: Rarity): React.CSSProperties {
-  return {
-    position: 'relative', cursor: 'help',
-    width: 'clamp(112px, 10.5vw, 170px)', height: 'clamp(112px, 10.5vw, 170px)',
-    display: 'grid', placeItems: 'center', borderRadius: 6, overflow: 'hidden',
-    background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${RARITY_BORDER[rarity]}`,
-  };
-}
+// Mana crystal, top-left carved socket.
+const faceCost: React.CSSProperties = {
+  position: 'absolute', top: '3.5%', left: '3.5%', zIndex: 3,
+  width: 'clamp(26px, 2.6vw, 36px)', height: 'clamp(30px, 3vw, 41px)',
+};
+const faceGem: React.CSSProperties = { position: 'absolute', inset: 0, width: '100%', height: '100%', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.55))' };
+const faceCostNum: React.CSSProperties = {
+  position: 'absolute', inset: 0, top: '-6%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  fontFamily: mono, fontSize: 'clamp(13px, 1.3vw, 19px)', fontWeight: 800, color: '#fff',
+  textShadow: '0 1px 2px rgba(4,20,70,0.95), 0 0 4px rgba(120,200,255,0.6)', pointerEvents: 'none',
+};
+const faceTribe: React.CSSProperties = {
+  position: 'absolute', top: '4%', right: '5%', zIndex: 3,
+  fontFamily: mono, fontSize: 'clamp(8px, 0.85vw, 10px)', fontWeight: 800, letterSpacing: 0.4,
+  padding: '1px 6px', borderRadius: 5, border: '1px solid transparent',
+};
+const faceInDeck: React.CSSProperties = {
+  position: 'absolute', top: '14.5%', right: '5%', zIndex: 3,
+  fontFamily: mono, fontSize: 'clamp(8px, 0.85vw, 10px)', fontWeight: 800, letterSpacing: 0.3, color: '#141608',
+  padding: '1px 6px', borderRadius: 5, background: '#9fae6a', border: '1px solid #6f7d3a',
+};
+// The illustration is dropped INTO the frame's central carved opening (same coords as the hand card).
+const faceArt: React.CSSProperties = {
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: 6,
+};
+const facePlate: React.CSSProperties = {
+  position: 'absolute', left: '13%', top: '81%', width: '74%', height: '11.5%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 4px', pointerEvents: 'none',
+};
+const facePlateName: React.CSSProperties = {
+  fontSize: 'clamp(13px, 1.35vw, 20px)', fontWeight: 800, lineHeight: 1.02,
+  color: '#2c1d0d', textShadow: '0 1px 0 rgba(244,228,192,0.55)',
+};
 // Hover/tap description — overlays the art window (stays inside the cell, so the grid never clips it).
 const descPanel: React.CSSProperties = {
   position: 'absolute', inset: 0, zIndex: 5, padding: '12px 11px 10px',
@@ -446,8 +493,6 @@ const descText: React.CSSProperties = {
   fontSize: 'clamp(11px, 1.05vw, 13.5px)', lineHeight: 1.5, color: C.text, whiteSpace: 'normal',
   overflowY: 'auto',
 };
-const cardName: React.CSSProperties = { fontSize: 'clamp(15px, 1.4vw, 19px)', fontWeight: 700, textAlign: 'center' };
-const cardMeta: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', color: C.dim, textAlign: 'center' };
 function addBtn(active: boolean): React.CSSProperties {
   return {
     width: '100%', padding: '9px 6px', fontSize: 'clamp(12px, 1.15vw, 15px)', fontWeight: 700, cursor: active ? 'pointer' : 'default',
