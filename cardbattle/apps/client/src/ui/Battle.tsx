@@ -301,8 +301,12 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
               ...heroBtn,
               opacity: canUsePower ? 1 : 0.42,
               cursor: canUsePower ? 'pointer' : 'default',
-              borderColor: powerPending ? '#e0b84a' : '#5a4a86',
-              boxShadow: powerPending ? '0 0 14px rgba(224,184,74,0.4)' : 'none',
+              borderColor: powerPending ? '#e0b84a' : canUsePower ? '#8b74c8' : '#4a3d6e',
+              boxShadow: powerPending
+                ? '0 0 18px rgba(224,184,74,0.55)'
+                : canUsePower
+                  ? '0 6px 18px rgba(0,0,0,0.45), 0 0 14px rgba(139,116,200,0.4)'
+                  : '0 6px 18px rgba(0,0,0,0.45)',
             }}
             onClick={usePower}
             disabled={!canUsePower}
@@ -310,7 +314,11 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           >
             <span style={heroIcon}>{power.icon}</span>
             <span style={heroInfo}>
-              <span style={heroName}>{power.name}</span>
+              <span style={heroTopRow}>
+                <span style={heroKicker}>직업 스킬</span>
+                <span style={heroName}>{power.name}</span>
+              </span>
+              <span style={heroDesc}>{power.desc}</span>
               <span style={heroCost}>
                 <Icon name="crystal" size={11} />&nbsp;{power.cost}
                 {powerUsed ? ' · 사용함' : ''}
@@ -711,15 +719,26 @@ const endTurnBtn: React.CSSProperties = {
 // The avatar's signature ability, docked bottom-left above the mana readout. An arcane violet
 // slab so it reads as its own class of action, distinct from the oxblood 턴 종료 CTA.
 const heroBtn: React.CSSProperties = {
-  position: 'absolute', bottom: 92, left: 24, zIndex: 16,
-  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
-  background: 'linear-gradient(180deg, rgba(48,38,74,0.96), rgba(28,20,44,0.96))',
-  border: '1px solid #5a4a86', borderRadius: 4, fontFamily: sans,
-  transition: 'opacity .15s, box-shadow .15s',
+  position: 'absolute', bottom: 92, left: 24, zIndex: 16, maxWidth: 240,
+  display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px',
+  background: 'linear-gradient(180deg, rgba(56,44,86,0.97), rgba(30,22,48,0.97))',
+  border: '2px solid #6a58a0', borderRadius: 8, fontFamily: sans,
+  boxShadow: '0 6px 18px rgba(0,0,0,0.45)',
+  transition: 'opacity .15s, box-shadow .15s, border-color .15s',
 };
-const heroIcon: React.CSSProperties = { fontSize: 22, lineHeight: 1 };
-const heroInfo: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 };
-const heroName: React.CSSProperties = { fontSize: 14, fontWeight: 700, color: '#e9def6', letterSpacing: 0.3 };
+const heroIcon: React.CSSProperties = {
+  fontSize: 30, lineHeight: 1, flexShrink: 0,
+  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+};
+const heroInfo: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 };
+const heroTopRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 7 };
+const heroKicker: React.CSSProperties = {
+  fontSize: 9, fontWeight: 800, letterSpacing: 1, color: '#12080a',
+  background: 'linear-gradient(180deg,#e8c96a,#c99a34)', padding: '2px 6px', borderRadius: 999,
+  textTransform: 'uppercase', whiteSpace: 'nowrap',
+};
+const heroName: React.CSSProperties = { fontSize: 16, fontWeight: 800, color: '#f3ecff', letterSpacing: 0.3 };
+const heroDesc: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: '#cfc0ec', lineHeight: 1.15 };
 const heroCost: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', fontSize: 11, fontFamily: mono, color: '#b6a6d8',
 };
