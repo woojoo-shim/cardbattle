@@ -286,16 +286,12 @@ const AVATARS: Record<string, () => JSX.Element> = {
   ogre: Ogre, vampire: Vampire, bat: Bat, ghost: Ghost,
 };
 
-/** Human-selectable characters (id + Korean label), in picker order. Excludes the bot shape. */
+/** Human-selectable characters (id + Korean label), in picker order. Excludes the bot shape.
+ *  For now the protagonist is limited to just two classes: 기사(knight) and 마법사(mage). The
+ *  other coded busts stay in AVATARS as a fallback but aren't offered in the picker. */
 export const AVATAR_CHOICES: { id: string; name: string }[] = [
   { id: 'hero', name: '기사' },
   { id: 'mage', name: '마법사' },
-  { id: 'goblin', name: '고블린' },
-  { id: 'dragon', name: '드래곤' },
-  { id: 'ogre', name: '오우거' },
-  { id: 'vampire', name: '뱀파이어' },
-  { id: 'bat', name: '박쥐' },
-  { id: 'ghost', name: '유령' },
 ];
 
 /** Distinct glow colors so each bot at the table reads as its own machine. */
