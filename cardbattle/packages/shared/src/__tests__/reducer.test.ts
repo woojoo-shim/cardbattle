@@ -37,9 +37,9 @@ describe('reduce: play_card (spells)', () => {
   it('holylight heals a chosen hero and can overheal past maxHp', () => {
     const s = game();
     s.players[0].hp = 36;
-    s.players[0].hand = [{ id: 'c1', defId: 'holylight' }]; // heal 6
+    s.players[0].hand = [{ id: 'c1', defId: 'holylight' }]; // heal 5
     const { state } = reduce(s, { type: 'play_card', cardInstanceId: 'c1', targetId: 'a' }, ctx);
-    expect(state.players[0].hp).toBe(42); // 36 + 6, overheals past the 40 max
+    expect(state.players[0].hp).toBe(41); // 36 + 5, overheals past the 40 max
   });
 
   it('eliminates a hero brought to 0 hp', () => {

@@ -28,7 +28,7 @@ export const HERO_POWERS: Record<string, HeroPower> = {
   // 화염 숨결 — chip every foe at once; strong in a crowded FFA table.
   dragon:  { id: 'hp_dragon',  name: '화염 숨결', icon: '🐲', cost: COST, element: 'fire',     effects: [{ kind: 'damage', amount: 2, target: 'allEnemies' }], desc: '나를 제외한 모든 영웅에게 2 피해' },
   // 재생력 — a steady self-mend to outlast the room.
-  ogre:    { id: 'hp_ogre',    name: '재생력',   icon: '💪', cost: COST, element: 'holy',     effects: [{ kind: 'heal', amount: 5, target: 'hero' }], desc: '내 영웅을 5 회복' },
+  ogre:    { id: 'hp_ogre',    name: '재생력',   icon: '💪', cost: COST, element: 'holy',     effects: [{ kind: 'heal', amount: 4, target: 'hero' }], desc: '내 영웅을 4 회복' },
   // 피의 갈망 — a small poke that tops you up: hit a target, mend yourself.
   vampire: { id: 'hp_vampire', name: '피의 갈망', icon: '🩸', cost: COST, element: 'poison',   effects: [{ kind: 'damage', amount: 3, target: 'chosen' }, { kind: 'heal', amount: 2, target: 'hero' }], desc: '대상에게 3 피해, 내 영웅을 2 회복' },
   // 박쥐 소환 — put a small body on the board every turn.
