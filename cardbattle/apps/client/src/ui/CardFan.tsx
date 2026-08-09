@@ -316,7 +316,24 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                   </div>
                 );
               })()}
-              <div style={{ ...costBadge, ...(enabled && !affordable ? costBadgeShort : null) }}>◈{def.cost}</div>
+              <div style={{ ...costBadge, filter: enabled && !affordable ? `grayscale(0.66) brightness(0.82) ${COST_SHADOW}` : COST_SHADOW }}>
+                <svg viewBox="0 0 32 36" style={costGem} aria-hidden>
+                  <defs>
+                    <linearGradient id="cbManaBody" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#c8f2ff" />
+                      <stop offset="0.34" stopColor="#59c2ff" />
+                      <stop offset="0.68" stopColor="#2f7ce0" />
+                      <stop offset="1" stopColor="#12379a" />
+                    </linearGradient>
+                  </defs>
+                  {/* faceted mana crystal — bright crown table + specular glint, shadowed left flank for depth */}
+                  <path d="M16 2 L29 14 L16 34 L3 14 Z" fill="url(#cbManaBody)" stroke="#e2f5ff" strokeWidth="1.3" strokeLinejoin="round" />
+                  <path d="M3 14 L16 2 L16 34 Z" fill="#0d3486" opacity="0.26" />
+                  <path d="M16 2 L23 10 L16 15 L9 10 Z" fill="#eafcff" opacity="0.5" />
+                  <path d="M11.5 6.5 L14.5 5.5 L13 11 Z" fill="#ffffff" opacity="0.85" />
+                </svg>
+                <span style={{ ...costNum, ...(enabled && !affordable ? costNumShort : null) }}>{def.cost}</span>
+              </div>
               {emblems.length > 0 && (
                 <div style={emblemCol}>
                   {emblems.map((k) => {
@@ -461,18 +478,21 @@ const pillVal: React.CSSProperties = {
 // as one coherent candlelit palette (icons carry the fine distinctions, not colour):
 //   ochre-red = offense · sage = life · gold-leaf = resource/fortune · faded-teal = arcane/defense.
 const manaValPill: React.CSSProperties = { color: '#e6cf96', background: 'rgba(195,154,76,0.16)', border: '1px solid #6a5528' };
-// Mana cost, top-left — gold-leaf resource. Turns ochre-red when the player can't afford it.
+// Mana cost, top-left — a faceted blue mana crystal with the cost struck across its face.
+// Desaturates to a dim red-tinted number when the player can't afford it.
+const COST_SHADOW = 'drop-shadow(0 2px 4px rgba(0,0,0,0.55))';
 const costBadge: React.CSSProperties = {
-  position: 'absolute', top: 7, left: 7, minWidth: 27, height: 27, padding: '0 7px',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1,
-  fontFamily: mono, fontSize: 'clamp(13px, 1.25vw, 18px)', fontWeight: 800, borderRadius: 9, zIndex: 3,
-  color: '#e8cf96', background: 'linear-gradient(160deg, rgba(74,58,26,0.95), rgba(46,34,14,0.95))',
-  border: '1px solid #6a5528', boxShadow: '0 2px 8px rgba(120,90,30,0.4)',
+  position: 'absolute', top: 5, left: 5, zIndex: 3,
+  width: 'clamp(26px, 2.5vw, 34px)', height: 'clamp(30px, 2.9vw, 39px)',
 };
-const costBadgeShort: React.CSSProperties = {
-  color: '#e8b09a', background: 'linear-gradient(160deg, rgba(90,44,34,0.95), rgba(50,22,16,0.95))',
-  border: '1px solid #7a3a2a', boxShadow: '0 2px 8px rgba(150,60,40,0.4)',
+const costGem: React.CSSProperties = { position: 'absolute', inset: 0, width: '100%', height: '100%' };
+const costNum: React.CSSProperties = {
+  position: 'absolute', inset: 0, top: '-6%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  fontFamily: mono, fontSize: 'clamp(13px, 1.3vw, 19px)', fontWeight: 800, color: '#fff',
+  textShadow: '0 1px 2px rgba(4,20,70,0.95), 0 0 4px rgba(120,200,255,0.6)', pointerEvents: 'none',
 };
+const costNumShort: React.CSSProperties = { color: '#ffd7cc', textShadow: '0 1px 2px rgba(70,10,4,0.95)' };
 // Ability emblems stack down the LEFT edge, under the cost badge — the fanned cards overlap so
 // only their left strip is exposed (the right corner is hidden behind the neighbour), so the
 // left edge is the only always-visible place for the badges. Each is a small tinted disc.
