@@ -653,9 +653,10 @@ const castCancelBtn: React.CSSProperties = {
   padding: '4px 12px', borderRadius: 999, border: '1px solid rgba(200,90,70,0.55)',
   background: 'rgba(120,40,32,0.35)',
 };
-// zIndex 30 raises the whole hand band ABOVE the player/board row (tableRow) so a lifted or
-// proximity-magnified card overlaps and covers the players cleanly instead of being clipped behind them.
-const handRow: React.CSSProperties = { position: 'relative', zIndex: 30, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
+// zIndex 40 raises the whole hand band ABOVE the player/board row (tableRow) AND the side buttons
+// (턴 종료/직업 스킬, z 16-30) so a lifted card's hover tooltip overlaps everything cleanly; it still
+// sits UNDER the transient VFX flashes (z 44+) so impacts read on top.
+const handRow: React.CSSProperties = { position: 'relative', zIndex: 40, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
 const targetHint: React.CSSProperties = {
   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
   padding: '8px 18px', background: 'rgba(255,77,94,0.16)', border: `1px solid ${C.enemy}`,

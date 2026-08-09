@@ -182,7 +182,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
         // not just a flat slide — the fan's perspective makes them read as real objects picked up.
         let transform = `rotate(${rot}deg) translateY(${lift}px)`;
         let z = 1;
-        if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 5; }
+        if (isHover) { transform = 'perspective(720px) translateY(-46px) rotateX(-5deg) scale(1.55)'; z = 200; }
         else if (m > 0.002) {
           // Straighten the fan spread, lift, and scale — all by proximity amount m.
           transform = `perspective(720px) rotate(${rot * (1 - m)}deg) translateY(${lift - m * 60}px) rotateX(${-5 * m}deg) scale(${1 + m * 0.5})`;
