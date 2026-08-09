@@ -160,40 +160,50 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                   {hoverMinion === m.id && def && (
                     <div style={minionTip}>
                       <span style={minionTipEdge} aria-hidden />
-                      <div style={minionTipHead}>
-                        <span style={minionTipName}>{def.name}</span>
-                        <span style={minionTipStat}>{m.attack}/{m.health}</span>
+                      {/* Big card face — the summoned minion enlarged in its full ornate frame. */}
+                      <div style={hoverCardFace}>
+                        <div style={hoverCardArt}><CardArt id={m.defId} size="100%" /></div>
+                        <span style={hoverCardName}>{def.name}</span>
+                        <span style={{ ...hoverCardStat, ...hoverCardAtk }}>{m.attack}</span>
+                        <span style={{ ...hoverCardStat, ...hoverCardHp, color: m.health < m.maxHealth ? '#ff9a6a' : '#8fe0a0' }}>{m.health}</span>
                       </div>
-                      <div style={minionTipDesc}>{def.desc}</div>
-                      {(() => {
-                        const abils = KEYWORD_ORDER.filter((k) => m[k]);
-                        const hasRattle = m.hasDeathrattle;
-                        if (!abils.length && !hasRattle) return null;
-                        return (
-                          <div style={minionTipAbilities}>
-                            {abils.map((k) => (
-                              <div key={k} style={minionTipAbilityRow}>
-                                <span style={{ ...minionTipAbilityIcon, color: KEYWORD_META[k].color, borderColor: `${KEYWORD_META[k].color}66` }}>
-                                  <Icon name={KEYWORD_META[k].icon} size="66%" />
-                                </span>
-                                <span style={minionTipAbilityText}>
-                                  <b style={{ color: KEYWORD_META[k].color }}>{KEYWORD_META[k].label}</b> — {KEYWORD_META[k].desc}
-                                </span>
-                              </div>
-                            ))}
-                            {hasRattle && (
-                              <div style={minionTipAbilityRow}>
-                                <span style={{ ...minionTipAbilityIcon, color: '#a89f88', borderColor: '#a89f8866' }}>
-                                  <Icon name="skull" size="66%" />
-                                </span>
-                                <span style={minionTipAbilityText}>
-                                  <b style={{ color: '#a89f88' }}>유언</b> — 죽을 때 특수 효과가 발동한다.
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                      {/* Description column, to the side. */}
+                      <div style={hoverInfo}>
+                        <div style={minionTipHead}>
+                          <span style={minionTipName}>{def.name}</span>
+                          <span style={minionTipStat}>{m.attack}/{m.health}</span>
+                        </div>
+                        <div style={minionTipDesc}>{def.desc}</div>
+                        {(() => {
+                          const abils = KEYWORD_ORDER.filter((k) => m[k]);
+                          const hasRattle = m.hasDeathrattle;
+                          if (!abils.length && !hasRattle) return null;
+                          return (
+                            <div style={minionTipAbilities}>
+                              {abils.map((k) => (
+                                <div key={k} style={minionTipAbilityRow}>
+                                  <span style={{ ...minionTipAbilityIcon, color: KEYWORD_META[k].color, borderColor: `${KEYWORD_META[k].color}66` }}>
+                                    <Icon name={KEYWORD_META[k].icon} size="66%" />
+                                  </span>
+                                  <span style={minionTipAbilityText}>
+                                    <b style={{ color: KEYWORD_META[k].color }}>{KEYWORD_META[k].label}</b> — {KEYWORD_META[k].desc}
+                                  </span>
+                                </div>
+                              ))}
+                              {hasRattle && (
+                                <div style={minionTipAbilityRow}>
+                                  <span style={{ ...minionTipAbilityIcon, color: '#a89f88', borderColor: '#a89f8866' }}>
+                                    <Icon name="skull" size="66%" />
+                                  </span>
+                                  <span style={minionTipAbilityText}>
+                                    <b style={{ color: '#a89f88' }}>유언</b> — 죽을 때 특수 효과가 발동한다.
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -454,14 +464,44 @@ const minionChip: React.CSSProperties = {
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
-// Hover panel for a minion on the board — name, current stats, and its ability text. Sits above
-// the chip, doesn't intercept the pointer, and is wide enough to read the keyword description.
+// Hover panel for a minion on the board — a LARGE card face beside a description column, so a
+// played minion reads as a big card with its rules text next to it. Sits above the chip, doesn't
+// intercept the pointer. flex-row = card | info.
 const minionTip: React.CSSProperties = {
   position: 'absolute', bottom: '116%', left: '50%', transform: 'translateX(-50%)',
-  width: 172, padding: '9px 11px 10px', borderRadius: 9, zIndex: 40, pointerEvents: 'none',
+  display: 'flex', alignItems: 'stretch', gap: 12,
+  padding: '11px 13px 12px', borderRadius: 11, zIndex: 40, pointerEvents: 'none',
   background: 'linear-gradient(180deg, rgba(28,34,51,0.99), rgba(14,19,31,0.99))',
-  border: `1px solid ${C.borderHi}`, textAlign: 'left', overflow: 'hidden',
+  border: `1px solid ${C.borderHi}`, textAlign: 'left',
   boxShadow: '0 14px 34px rgba(0,0,0,0.6)',
+};
+// The enlarged card face — the summoned minion in its full ornate stone frame, art in the floor
+// window, name engraved on the plaque, attack/health gems at the lower corners.
+const hoverCardFace: React.CSSProperties = {
+  position: 'relative', flexShrink: 0, width: 154, aspectRatio: '2 / 3', borderRadius: 8,
+  backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+  filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.55))',
+};
+const hoverCardArt: React.CSSProperties = {
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
+  borderRadius: 4, overflow: 'hidden', display: 'grid', placeItems: 'center',
+};
+const hoverCardName: React.CSSProperties = {
+  position: 'absolute', left: '12%', top: '80.5%', width: '76%',
+  fontFamily: sans, fontSize: 13, fontWeight: 800, color: '#2c1d0d',
+  textShadow: '0 1px 0 rgba(244,228,192,0.5)', lineHeight: 1.05, textAlign: 'center',
+  letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+};
+const hoverCardStat: React.CSSProperties = {
+  position: 'absolute', bottom: -11, minWidth: 30, height: 30, padding: '0 5px', borderRadius: 8,
+  fontSize: 19, fontFamily: mono, fontWeight: 900, lineHeight: '30px', textAlign: 'center',
+  background: '#0a0d15', border: '1px solid rgba(0,0,0,0.6)',
+};
+const hoverCardAtk: React.CSSProperties = { left: -9, color: '#ffcf4d' };
+const hoverCardHp: React.CSSProperties = { right: -9 };
+// The rules-text column, to the RIGHT of the big card face.
+const hoverInfo: React.CSSProperties = {
+  width: 186, display: 'flex', flexDirection: 'column', justifyContent: 'center',
 };
 const minionTipEdge: React.CSSProperties = {
   position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
