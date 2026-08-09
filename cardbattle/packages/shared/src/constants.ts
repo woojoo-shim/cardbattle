@@ -1,5 +1,7 @@
 export const MIN_PLAYERS = 2;
-export const MAX_PLAYERS = 6;
+// 1대1 전용: 한 방에 정확히 2명(사람 또는 봇)만 앉는다. maxClients·봇 추가 상한·
+// 로비 좌석 수·자동 채우기 목표가 모두 이 값에서 파생된다.
+export const MAX_PLAYERS = 2;
 export const START_HP = 40;
 export const START_DEFENSE = 0;
 export const START_HAND = 4;
