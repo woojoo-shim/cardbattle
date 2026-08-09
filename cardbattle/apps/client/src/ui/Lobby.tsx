@@ -15,6 +15,8 @@ interface Props {
   onExit?: () => void;
   /** Wall-clock ms the public-lobby bot auto-fill lands; 0 hides the countdown. */
   autofillDeadline?: number;
+  /** Entered via "대전 찾기": show a matchmaking search (auto-ready, no invite code), not a friend room. */
+  matchmaking?: boolean;
 }
 
 /** Live seconds remaining until an auto-fill deadline (0 once elapsed / when disabled). */
@@ -33,10 +35,17 @@ function useCountdown(deadline?: number): number {
 // The display serif shared with the main menu — the engraved "back-room sign" look.
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
-export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofillDeadline }: Props) {
+export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofillDeadline, matchmaking }: Props) {
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const toggle = () => { const next = !ready; setReady(next); playSfx(next ? 'select' : 'back'); onReady(next); };
+  // Matchmaking flow: the moment we're seated we auto-ready so the server starts the opponent
+  // search (and the 15s bot-fill countdown) with no "준비하기" click — it just runs a match.
+  useEffect(() => {
+    if (!matchmaking) return;
+    setReady(true);
+    onReady(true);
+  }, [matchmaking, onReady]);
   // Copy a full invite URL (origin + ?join=CODE) so a friend just clicks it to land in this room.
   const copyInvite = async () => {
     try {
@@ -59,8 +68,8 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
       )}
 
       <div style={content} className="cb-gate-in">
-        <span style={kicker}>대기실 · WAITING ROOM</span>
-        <h1 style={title}>{ui.title || '심연의 투기장'}</h1>
+        <span style={kicker}>{matchmaking ? '매칭 · FINDING MATCH' : '대기실 · WAITING ROOM'}</span>
+        <h1 style={title}>{matchmaking ? '상대를 찾는 중' : (ui.title || '심연의 투기장')}</h1>
         <div style={flourish} aria-hidden>
           <span style={flourishRule} />
           <span style={flourishGem}>◆</span>
@@ -74,7 +83,7 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
             <span style={modeBadgeTag}>{gm.tagline}</span>
           </div>
 
-          {ui.code && (
+          {!matchmaking && ui.code && (
             <div style={inviteBox}>
               <div style={codeBadge}>
                 <span style={codeLabel}>방 코드</span>
@@ -88,7 +97,9 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
           )}
 
           <p style={subtitle}>
-            {n}/{MAX_PLAYERS} 플레이어 · 최소 {MIN_PLAYERS}명 필요
+            {matchmaking
+              ? '공개 매칭 · 상대를 자동으로 찾고 있어요'
+              : `${n}/${MAX_PLAYERS} 플레이어 · 최소 ${MIN_PLAYERS}명 필요`}
           </p>
 
           {/* The roster is the arena seating chart: every one of the MAX_PLAYERS chairs is shown, so an
@@ -96,6 +107,19 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
           <div style={seatGrid}>
             {Array.from({ length: MAX_PLAYERS }, (_, i) => ui.players.find((p) => p.seat === i) ?? null).map((p, i) => {
               if (!p) {
+                // Matchmaking: an open chair is the opponent we're searching for — a passive,
+                // pulsing "상대 찾는 중" placeholder, never a manual "봇 추가" button.
+                if (matchmaking) {
+                  return (
+                    <div key={`seat-${i}`} style={searchSeat} className="cb-fill-pulse">
+                      <span style={searchThumb} aria-hidden />
+                      <span style={emptyText}>
+                        <span style={searchLabel}>상대 찾는 중…</span>
+                        <span style={seatTag}>좌석 {i + 1}</span>
+                      </span>
+                    </div>
+                  );
+                }
                 return (
                   <button
                     key={`seat-${i}`}
@@ -138,12 +162,23 @@ export function Lobby({ ui, myId, onReady, onAddBot, onRemoveBot, onExit, autofi
             </div>
           )}
 
-          <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
-            {ready ? <>준비 완료&nbsp;<Icon name="check" size={16} /></> : '준비하기'}
-          </button>
+          {matchmaking ? (
+            <div style={searchingRow}>
+              <span style={searchSpinner} aria-hidden />
+              상대를 찾고 있어요…
+            </div>
+          ) : (
+            <button onClick={toggle} style={{ ...btn, ...(ready ? btnReady : null) }}>
+              {ready ? <>준비 완료&nbsp;<Icon name="check" size={16} /></> : '준비하기'}
+            </button>
+          )}
         </div>
 
-        <p style={hint}>빈 자리를 눌러 봇을 채우면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!</p>
+        <p style={hint}>
+          {matchmaking
+            ? '공개 매칭으로 상대를 찾고 있어요. 상대가 없으면 잠시 후 봇과 대전이 시작됩니다.'
+            : '빈 자리를 눌러 봇을 채우면 혼자서도 플레이할 수 있습니다. 모두 준비되면 시작!'}
+        </p>
       </div>
     </div>
   );
@@ -291,6 +326,28 @@ const emptyPlus: React.CSSProperties = {
 };
 const emptyText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 };
 const emptyLabel: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: C.rare, letterSpacing: 0.3 };
+// A matchmaking opponent slot — passive, pulsing, no click. The chair we're searching to fill.
+const searchSeat: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', minWidth: 0,
+  borderRadius: 4, textAlign: 'left',
+  border: '1px dashed rgba(168,107,255,0.4)', background: 'rgba(168,107,255,0.05)',
+};
+const searchThumb: React.CSSProperties = {
+  width: 40, height: 40, flexShrink: 0, borderRadius: 4,
+  border: '1px dashed rgba(168,107,255,0.4)', background: 'rgba(168,107,255,0.06)',
+};
+const searchLabel: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: '#c9b0ff', letterSpacing: 0.3 };
+// The auto-ready "searching" row that replaces the 준비하기 button in matchmaking.
+const searchingRow: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, width: '100%', marginTop: 2,
+  padding: '14px 24px', fontSize: 15, fontWeight: 700, letterSpacing: 0.4, color: '#e6ddff',
+  borderRadius: 4, border: '1px solid rgba(168,107,255,0.35)', background: 'rgba(168,107,255,0.08)',
+};
+const searchSpinner: React.CSSProperties = {
+  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+  border: '2px solid rgba(168,107,255,0.3)', borderTopColor: '#c9b0ff',
+  animation: 'cb-spin 0.8s linear infinite',
+};
 const btn: React.CSSProperties = {
   width: '100%', marginTop: 2, padding: '14px 34px', fontSize: 17, fontWeight: 700, color: '#2a1a06', cursor: 'pointer',
   border: '1px solid #b98a2c', borderRadius: 4, fontFamily: sans,

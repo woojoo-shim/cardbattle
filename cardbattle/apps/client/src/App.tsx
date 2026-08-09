@@ -27,6 +27,9 @@ export function App() {
   const [connect, setConnect] = useState<Connect | null>(null);
   // When true, the next battle runs with the guided coach overlay (learn-by-playing tutorial).
   const [coach, setCoach] = useState(false);
+  // When true, we entered via "대전 찾기" (quick match) — the waiting room presents as a
+  // matchmaking search (auto-ready, "상대를 찾는 중…"), NOT a friend-room lobby with an invite code.
+  const [matchmaking, setMatchmaking] = useState(false);
   // After login we land on the main menu; 멀티플레이어 opens the room browser.
   const [view, setView] = useState<'menu' | 'browser'>('menu');
   // The brand intro plays once per session, right before the menu first appears.
@@ -46,7 +49,7 @@ export function App() {
     if (resumeChecked || !account) return;
     setResumeChecked(true);
     const token = readResumeToken();
-    if (token) { setSplashDone(true); setCoach(false); setConnect(() => () => reconnect(token)); }
+    if (token) { setSplashDone(true); setCoach(false); setMatchmaking(false); setConnect(() => () => reconnect(token)); }
   }, [account, resumeChecked]);
 
   // Invite links carry a room code in the URL (`?join=ABCD`). Once signed in, resolve the code to
@@ -63,7 +66,7 @@ export function App() {
     window.history.replaceState({}, '', url.pathname + url.search + url.hash);
     setSplashDone(true);
     findRoomByCode(code)
-      .then((roomId) => { if (roomId) { setCoach(false); setConnect(() => () => joinRoomById(roomId, account.display, account.avatar)); } })
+      .then((roomId) => { if (roomId) { setCoach(false); setMatchmaking(false); setConnect(() => () => joinRoomById(roomId, account.display, account.avatar)); } })
       .catch(() => {});
   }, [account, joinChecked, connect]);
 
@@ -100,8 +103,8 @@ export function App() {
         <MainMenu
           account={account}
           onAccount={setAccount}
-          onStart={() => { setCoach(false); setConnect(() => () => quickPlay(account.display, account.avatar)); }}
-          onStartCoach={() => { setCoach(true); setConnect(() => () => startCoachGame(account.display, account.avatar)); }}
+          onStart={() => { setCoach(false); setMatchmaking(true); setConnect(() => () => quickPlay(account.display, account.avatar)); }}
+          onStartCoach={() => { setCoach(true); setMatchmaking(false); setConnect(() => () => startCoachGame(account.display, account.avatar)); }}
           onMultiplayer={() => setView('browser')}
           onLogout={() => { clearToken(); setAccount(null); }}
         />
@@ -111,17 +114,17 @@ export function App() {
       <RoomBrowser
         account={account}
         onAccount={setAccount}
-        onPick={(c) => { setCoach(false); setConnect(() => c); }}
+        onPick={(c) => { setCoach(false); setMatchmaking(false); setConnect(() => c); }}
         onBack={() => setView('menu')}
         onLogout={() => { clearToken(); setAccount(null); }}
       />
     );
   }
   // Dropping `connect` unmounts Game → useRoom's cleanup leaves the room → back to the browser.
-  return <Game connect={connect} onExit={() => setConnect(null)} borderCosmetic={account.equippedBorder} coach={coach} />;
+  return <Game connect={connect} onExit={() => setConnect(null)} borderCosmetic={account.equippedBorder} coach={coach} matchmaking={matchmaking} />;
 }
 
-function Game({ connect, onExit, borderCosmetic, coach }: { connect: Connect; onExit: () => void; borderCosmetic?: string; coach?: boolean }) {
+function Game({ connect, onExit, borderCosmetic, coach, matchmaking }: { connect: Connect; onExit: () => void; borderCosmetic?: string; coach?: boolean; matchmaking?: boolean }) {
   const { conn, ui, hand, events, error, send, setReady, addBot, removeBot, emotes, sendEmote, reward, autofillDeadline, status } = useRoom(connect);
   const myId = conn?.sessionId ?? '';
 
@@ -155,7 +158,7 @@ function Game({ connect, onExit, borderCosmetic, coach }: { connect: Connect; on
   return (
     <>
       {ui.phase === 'lobby'
-        ? <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} onExit={onExit} autofillDeadline={autofillDeadline} />
+        ? <Lobby ui={ui} myId={myId} onReady={setReady} onAddBot={addBot} onRemoveBot={removeBot} onExit={onExit} autofillDeadline={autofillDeadline} matchmaking={matchmaking} />
         : <Battle ui={ui} myId={myId} hand={hand} events={events} error={error} send={send} onExit={onExit} borderCosmetic={borderCosmetic} emotes={emotes} sendEmote={sendEmote} reward={reward} coach={coach} />}
       {status !== 'live' && <ConnOverlay status={status} onExit={onExit} />}
     </>
