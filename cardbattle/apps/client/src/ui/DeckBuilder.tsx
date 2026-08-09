@@ -45,6 +45,8 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [saved, setSaved] = useState(false);
+  // Card whose description is shown — hover on desktop, tap on touch (no hover there).
+  const [peek, setPeek] = useState<string | null>(null);
 
   const slotCount = account.decks.length;
   const canAddSlot = slotCount < MAX_DECKS;
@@ -194,8 +196,22 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                 const maxed = inDeck >= MAX_COPIES;
                 const full = total >= DECK_SIZE;
                 return (
-                  <div key={def.id} style={cardCell(def.rarity, owned)} title={def.desc}>
-                    <div style={artWrap(def.rarity)}><CardArt id={def.id} size="clamp(96px, 9vw, 150px)" /></div>
+                  <div key={def.id} style={cardCell(def.rarity, owned)}
+                    onMouseEnter={() => setPeek(def.id)} onMouseLeave={() => setPeek((p) => (p === def.id ? null : p))}>
+                    <div style={artWrap(def.rarity)}
+                      onClick={() => setPeek((p) => (p === def.id ? null : def.id))}>
+                      <CardArt id={def.id} size="clamp(96px, 9vw, 150px)" />
+                      {peek === def.id && (
+                        <div style={{ ...descPanel, borderColor: RARITY_BORDER[def.rarity] }}>
+                          <span style={{ ...descRibbon, background: `linear-gradient(90deg, transparent, ${RARITY_BORDER[def.rarity]}, transparent)` }} aria-hidden />
+                          <div style={descMeta}>
+                            <span style={descCost}>◈ {def.cost}</span>
+                            <span style={descRarity}>{RARITY_LABEL[def.rarity]}</span>
+                          </div>
+                          <div style={descText}>{def.desc}</div>
+                        </div>
+                      )}
+                    </div>
                     <span style={cardName}>{def.name}</span>
                     <span style={cardMeta}>{RARITY_LABEL[def.rarity]} · {def.cost}코스트</span>
                     {owned ? (
@@ -337,11 +353,30 @@ function cardCell(rarity: Rarity, owned: boolean): React.CSSProperties {
 }
 function artWrap(rarity: Rarity): React.CSSProperties {
   return {
+    position: 'relative', cursor: 'help',
     width: 'clamp(112px, 10.5vw, 170px)', height: 'clamp(112px, 10.5vw, 170px)',
     display: 'grid', placeItems: 'center', borderRadius: 6, overflow: 'hidden',
     background: 'linear-gradient(180deg, #211a12, #100a08)', border: `1px solid ${RARITY_BORDER[rarity]}`,
   };
 }
+// Hover/tap description — overlays the art window (stays inside the cell, so the grid never clips it).
+const descPanel: React.CSSProperties = {
+  position: 'absolute', inset: 0, zIndex: 5, padding: '12px 11px 10px',
+  display: 'flex', flexDirection: 'column', gap: 7, textAlign: 'left', overflow: 'hidden',
+  background: 'linear-gradient(180deg, rgba(18,12,6,0.97), rgba(8,5,3,0.98))',
+  border: '1px solid', borderRadius: 6,
+};
+const descRibbon: React.CSSProperties = { position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, opacity: 0.9 };
+const descMeta: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6 };
+const descCost: React.CSSProperties = {
+  fontFamily: mono, fontSize: 11, fontWeight: 800, letterSpacing: 0.3, color: '#e6cf96',
+  padding: '1px 7px', borderRadius: 5, border: '1px solid #6a552855', background: 'rgba(195,154,76,0.15)',
+};
+const descRarity: React.CSSProperties = { fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 1, color: C.dim };
+const descText: React.CSSProperties = {
+  fontSize: 'clamp(11px, 1.05vw, 13.5px)', lineHeight: 1.5, color: C.text, whiteSpace: 'normal',
+  overflowY: 'auto',
+};
 const cardName: React.CSSProperties = { fontSize: 'clamp(15px, 1.4vw, 19px)', fontWeight: 700, textAlign: 'center' };
 const cardMeta: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(11px, 1vw, 13px)', color: C.dim, textAlign: 'center' };
 function addBtn(active: boolean): React.CSSProperties {
