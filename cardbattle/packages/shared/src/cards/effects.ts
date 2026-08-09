@@ -109,7 +109,8 @@ function healHeroBy(hero: PlayerState, amount: number, emit: (e: GameEvent) => v
 function healMinionBy(m: MinionInstance, amount: number, emit: (e: GameEvent) => void): void {
   if (amount <= 0) return;
   const before = m.health;
-  m.health = Math.min(m.maxHealth, m.health + amount);
+  // Healing can push a minion ABOVE its max health (overheal) — no cap, matching hero healing.
+  m.health = m.health + amount;
   if (m.health !== before) emit({ type: 'minion_buffed', minionId: m.id, attack: m.attack, health: m.health });
 }
 

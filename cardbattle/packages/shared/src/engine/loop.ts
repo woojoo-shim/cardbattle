@@ -95,7 +95,7 @@ function tickStatuses(state: GameState, p: PlayerState, emit: (e: GameEvent) => 
     } else if (st.kind === 'regen') {
       if (p.alive) {
         const before = p.hp;
-        p.hp = Math.min(p.maxHp, p.hp + st.amount);
+        p.hp = p.hp + st.amount; // overheal: regen can push hp above maxHp, no cap
         emit({ type: 'healed', targetId: p.id, amount: p.hp - before, targetHpAfter: p.hp });
       }
     }

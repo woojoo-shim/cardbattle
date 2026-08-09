@@ -44,7 +44,7 @@ describe('poison', () => {
 });
 
 describe('regen', () => {
-  it('mends the holder at the start of their own turn, capped at maxHp', () => {
+  it('mends the holder at the start of their own turn (overheals past maxHp)', () => {
     const s = game();
     s.players[0].hp = 20;
     s.players[0].statuses = [{ kind: 'regen', amount: 5, turns: 3 }];
