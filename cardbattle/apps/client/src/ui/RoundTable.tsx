@@ -444,14 +444,13 @@ const fieldRow: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 const minionChip: React.CSSProperties = {
-  position: 'relative', width: 'clamp(84px, 9vw, 128px)', aspectRatio: '5 / 7', borderRadius: 12, flexShrink: 0,
-  background: [
-    'linear-gradient(180deg, rgba(150,180,230,0.06), transparent 22%)',
-    'radial-gradient(120% 100% at 50% 46%, transparent 55%, rgba(0,0,0,0.4) 100%)',
-    'radial-gradient(125% 85% at 50% -8%, #26314a, #18202f 68%, #0e131f)',
-  ].join(','),
+  // A summoned minion on the felt wears the SAME ornate stone card frame as the hand cards, so a
+  // played card keeps its shape/design on the board. Art drops into the frame's floor window, the
+  // name is engraved on the plaque; the 2px border stays as the owner/state colour ring.
+  position: 'relative', width: 'clamp(84px, 9vw, 128px)', aspectRatio: '2 / 3', borderRadius: 10, flexShrink: 0,
+  backgroundImage: 'url(/card-frame.png)',
+  backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent',
   border: '2px solid',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '5px 4px 8px',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
@@ -487,15 +486,15 @@ const minionTipAbilityIcon: React.CSSProperties = {
 };
 const minionTipAbilityText: React.CSSProperties = { fontFamily: sans, fontSize: 10.5, lineHeight: 1.4, color: C.dim, whiteSpace: 'normal' };
 const minionArtWindow: React.CSSProperties = {
-  width: '92%', aspectRatio: '1 / 1', borderRadius: 5, overflow: 'hidden',
-  display: 'grid', placeItems: 'center', flexShrink: 0,
-  background: 'radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0.15), rgba(0,0,0,0.5))',
-  border: '1px solid rgba(0,0,0,0.45)', boxShadow: 'inset 0 1px 0 rgba(150,180,230,0.08)',
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
+  borderRadius: 4, overflow: 'hidden', display: 'grid', placeItems: 'center',
 };
 const minionName: React.CSSProperties = {
-  maxWidth: '100%', fontFamily: sans, fontSize: 15, fontWeight: 800, color: '#dbe4f5',
-  lineHeight: 1.1, textAlign: 'center', letterSpacing: '-0.02em',
-  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  position: 'absolute', left: '12%', top: '80.5%', width: '76%',
+  fontFamily: sans, fontSize: 'clamp(9px, 0.95vw, 14px)', fontWeight: 800, color: '#2c1d0d',
+  textShadow: '0 1px 0 rgba(244,228,192,0.5)',
+  lineHeight: 1.05, textAlign: 'center', letterSpacing: '-0.02em',
+  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', pointerEvents: 'none',
 };
 const minionStat: React.CSSProperties = {
   position: 'absolute', bottom: -12, minWidth: 32, height: 32, padding: '0 5px', borderRadius: 8,
@@ -515,7 +514,8 @@ const KEYWORD_META: Record<typeof KEYWORD_ORDER[number], { label: string; color:
   lifesteal: { label: '착취', color: '#d0839a', desc: '가한 피해만큼 내 영웅을 회복한다.', icon: 'heart' },
 };
 const kwRow: React.CSSProperties = {
-  display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', maxWidth: '100%', lineHeight: 1,
+  position: 'absolute', top: '73%', left: '50%', transform: 'translateX(-50%)', width: '92%', zIndex: 2,
+  display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', lineHeight: 1, pointerEvents: 'none',
 };
 const kwChip: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', height: 14, padding: '0 3px', borderRadius: 4,
