@@ -21,9 +21,12 @@ interface Props {
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 
 type ItemKey = 'start' | 'multi' | 'how' | 'deck' | 'shop' | 'credits' | 'logout';
+// Matchmaking-first, Clash-Royale style: the hero action RUNS A MATCH (auto-finds a 1v1 opponent,
+// fills with a bot if none turns up). Friend rooms (create/join by code) are the secondary path,
+// not the headline — we lead with "find a match", not "invite to a room".
 const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
-  { key: 'start', label: '시작', sub: '봇과 빠른 연습' },
-  { key: 'multi', label: '멀티플레이어', sub: '방 목록 · 친구와 대전' },
+  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색' },
+  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가' },
   { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
   { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기' },
   { key: 'shop', label: '상점', sub: '외형 · 칭호' },
