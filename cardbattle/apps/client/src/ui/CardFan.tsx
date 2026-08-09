@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CardInstance } from '@cardbattle/shared';
-import { CARD_DEFS, COSMETIC_BY_ID, requiresTarget } from '@cardbattle/shared';
-import { C, RARITY_BORDER, mono, sans } from './theme.js';
+import { CARD_DEFS, COSMETIC_BY_ID, TRIBE_LABEL, requiresTarget } from '@cardbattle/shared';
+import { C, RARITY_BORDER, TRIBE_COLOR, mono, sans } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon, TauntFrame, type IconName } from './art/Icon.js';
 import { playSfx } from '../audio/sfx.js';
@@ -288,6 +288,9 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                     </div>
                     <div style={tipMeta}>
                       <span style={{ ...tipChip, ...tipCostChip }}>◈ {def.cost}</span>
+                      {def.tribe && (
+                        <span style={{ ...tipChip, color: TRIBE_COLOR[def.tribe], borderColor: `${TRIBE_COLOR[def.tribe]}55`, background: `${TRIBE_COLOR[def.tribe]}18` }}>{TRIBE_LABEL[def.tribe]}</span>
+                      )}
                       {def.element !== 'none' && (
                         <span style={{ ...tipChip, color: em.color, borderColor: `${em.color}55`, background: `${em.color}18` }}>{em.label}</span>
                       )}

@@ -5,6 +5,9 @@ export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'poison' | 'ho
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 export type CardKind = 'minion' | 'spell';
 
+/** Creature tribe (종족) a summoned minion belongs to. Spells have none. */
+export type Tribe = 'beast' | 'human' | 'undead' | 'elemental';
+
 /** Passive minion abilities (Hearthstone-flavoured, adapted to our FFA board). */
 export type Keyword =
   | 'taunt'         // 수호: enemies must attack this minion before the hero or other minions
@@ -37,6 +40,8 @@ export interface CardDef {
   cost: number;
   element: Element;
   kind: CardKind;
+  /** Creature tribe (종족) for a minion card — 야수/인간/망자/정령. Undefined for spells. */
+  tribe?: Tribe;
   /** Base stats for a minion card (undefined for spells). */
   minion?: { attack: number; health: number };
   /** Passive keywords a summoned minion carries. */

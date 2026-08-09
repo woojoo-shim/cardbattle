@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
-  ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, MAX_DECKS, cardPrice,
+  ALL_DEFS, CARD_DEFS, DECK_SIZE, MAX_COPIES, MAX_DECKS, TRIBE_LABEL, cardPrice,
   isValidDeck, type CardDef, type Rarity,
 } from '@cardbattle/shared';
 import { buyCard, saveDeck, setActiveDeck, deleteDeck, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
-import { C, mono, sans, RARITY_BORDER } from './theme.js';
+import { C, mono, sans, RARITY_BORDER, TRIBE_COLOR } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon } from './art/Icon.js';
 
@@ -206,6 +206,9 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                           <span style={{ ...descRibbon, background: `linear-gradient(90deg, transparent, ${RARITY_BORDER[def.rarity]}, transparent)` }} aria-hidden />
                           <div style={descMeta}>
                             <span style={descCost}>◈ {def.cost}</span>
+                            {def.tribe && (
+                              <span style={{ ...descTribe, color: TRIBE_COLOR[def.tribe], borderColor: `${TRIBE_COLOR[def.tribe]}55`, background: `${TRIBE_COLOR[def.tribe]}18` }}>{TRIBE_LABEL[def.tribe]}</span>
+                            )}
                             <span style={descRarity}>{RARITY_LABEL[def.rarity]}</span>
                           </div>
                           <div style={descText}>{def.desc}</div>
@@ -213,7 +216,10 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                       )}
                     </div>
                     <span style={cardName}>{def.name}</span>
-                    <span style={cardMeta}>{RARITY_LABEL[def.rarity]} · {def.cost}코스트</span>
+                    <span style={cardMeta}>
+                      {def.tribe && <b style={{ color: TRIBE_COLOR[def.tribe] }}>{TRIBE_LABEL[def.tribe]} · </b>}
+                      {RARITY_LABEL[def.rarity]} · {def.cost}코스트
+                    </span>
                     {owned ? (
                       <button style={addBtn(!maxed && !full)} disabled={maxed || full}
                         onClick={() => addCard(def.id)}>
@@ -371,6 +377,10 @@ const descMeta: React.CSSProperties = { display: 'flex', alignItems: 'center', g
 const descCost: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, fontWeight: 800, letterSpacing: 0.3, color: '#e6cf96',
   padding: '1px 7px', borderRadius: 5, border: '1px solid #6a552855', background: 'rgba(195,154,76,0.15)',
+};
+const descTribe: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 0.5,
+  padding: '1px 6px', borderRadius: 5, border: '1px solid transparent',
 };
 const descRarity: React.CSSProperties = { fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 1, color: C.dim };
 const descText: React.CSSProperties = {
