@@ -327,8 +327,19 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
           </button>
         )}
         {isMyTurn && (
-          <button style={endTurnBtn} onClick={() => { setPending(null); setPowerPending(false); send({ type: 'end_turn' }); setCoachEnded(true); }}>
-            턴 종료&nbsp;<Icon name="arrowRight" size={15} />
+          <button
+            className="cb-endturn"
+            style={endTurnBtn}
+            onClick={() => { setPending(null); setPowerPending(false); send({ type: 'end_turn' }); setCoachEnded(true); }}
+            title="턴 종료"
+          >
+            <span style={endTurnGold} aria-hidden />
+            <span style={endTurnCrystal}>
+              <span className="cb-endturn-sheen" style={endTurnSheen} aria-hidden />
+              <span style={endTurnLabel}>턴&nbsp;종료</span>
+            </span>
+            <span style={endTurnGemTop} aria-hidden />
+            <span style={endTurnGemBot} aria-hidden />
           </button>
         )}
       </div>
@@ -709,13 +720,44 @@ const deckTip: React.CSSProperties = {
   border: '1px solid #3a4560', borderRadius: 4, color: '#cfe0ff', fontFamily: sans,
   fontSize: 12, fontWeight: 700, boxShadow: '0 6px 14px rgba(0,0,0,0.5)', pointerEvents: 'none', zIndex: 20,
 };
+// Ornate 턴 종료 CTA — a gold pointed-hexagon frame around an electric-blue crystal plate, with
+// gold star-gems straddling the top & bottom edges (recreated in code from the reference art).
+const ETB_HEX = 'polygon(5% 50%, 15% 4%, 85% 4%, 95% 50%, 85% 96%, 15% 96%)';
 const endTurnBtn: React.CSSProperties = {
   // Fixed to the viewport (not the hand row) so it sits at the screen's right vertical centre.
-  position: 'fixed', top: '50%', right: 32, transform: 'translateY(-50%)', padding: '13px 24px', fontSize: 16, fontWeight: 700,
-  color: '#eafff7', cursor: 'pointer', border: '1px solid #2a9e74', borderRadius: 4, fontFamily: sans,
-  background: '#1c7a58',
-  transition: 'transform .15s', zIndex: 30,
+  position: 'fixed', top: '50%', right: 26, transform: 'translateY(-50%)',
+  width: 208, height: 96, padding: 0, border: 'none', background: 'transparent',
+  cursor: 'pointer', fontFamily: sans, zIndex: 30,
+  filter: 'drop-shadow(0 7px 16px rgba(0,0,0,0.55))',
 };
+const endTurnGold: React.CSSProperties = {
+  position: 'absolute', inset: 0, clipPath: ETB_HEX, WebkitClipPath: ETB_HEX,
+  background: 'linear-gradient(180deg,#fdf1c0 0%,#ecc668 26%,#c2913a 52%,#9a6b22 74%,#6f4a13 100%)',
+};
+const endTurnCrystal: React.CSSProperties = {
+  position: 'absolute', inset: 7, clipPath: ETB_HEX, WebkitClipPath: ETB_HEX,
+  background: 'radial-gradient(130% 120% at 50% 42%, #8fe8ff 0%, #37a0f2 42%, #1550c8 74%, #0e2f96 100%)',
+  boxShadow: 'inset 0 0 20px rgba(8,26,110,0.75), inset 0 2px 6px rgba(255,255,255,0.35)',
+  display: 'grid', placeItems: 'center', overflow: 'hidden',
+};
+const endTurnSheen: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background: 'linear-gradient(112deg, transparent 32%, rgba(220,245,255,0.55) 48%, rgba(255,255,255,0.85) 50%, rgba(220,245,255,0.55) 52%, transparent 68%)',
+  backgroundSize: '260% 100%', backgroundRepeat: 'no-repeat', mixBlendMode: 'screen', pointerEvents: 'none',
+};
+const endTurnLabel: React.CSSProperties = {
+  position: 'relative', zIndex: 2, fontSize: 26, fontWeight: 900, letterSpacing: 2, color: '#fff',
+  textShadow: '0 0 10px rgba(150,220,255,0.95), 0 0 3px rgba(255,255,255,0.9), 0 2px 3px rgba(4,20,70,0.85)',
+};
+const endTurnGemBase: React.CSSProperties = {
+  position: 'absolute', left: '50%', width: 20, height: 20, zIndex: 3,
+  transform: 'translateX(-50%) rotate(45deg)',
+  background: 'linear-gradient(135deg,#fdf3c8 0%,#e6bd5c 45%,#a9741f 100%)',
+  border: '1px solid #714912', borderRadius: 3,
+  boxShadow: '0 0 10px rgba(120,195,255,0.85)',
+};
+const endTurnGemTop: React.CSSProperties = { ...endTurnGemBase, top: -7 };
+const endTurnGemBot: React.CSSProperties = { ...endTurnGemBase, bottom: -7 };
 // The avatar's signature ability, docked bottom-left above the mana readout. An arcane violet
 // slab so it reads as its own class of action, distinct from the oxblood 턴 종료 CTA.
 const heroBtn: React.CSSProperties = {

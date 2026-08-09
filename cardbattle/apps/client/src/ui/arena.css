@@ -1,4 +1,14 @@
 @keyframes cb-pulse { 50% { opacity: 0.35; } }
+/* 턴 종료 crystal: a specular glint sweeps across the electric-blue plate, then rests off-screen. */
+@keyframes cb-endturn-sheen {
+  0%   { background-position: 210% 0; }
+  55%  { background-position: -70% 0; }
+  100% { background-position: -70% 0; }
+}
+.cb-endturn-sheen { animation: cb-endturn-sheen 4.5s ease-in-out infinite; }
+.cb-endturn { transition: transform .14s ease, filter .14s ease; }
+.cb-endturn:hover { transform: translateY(-50%) scale(1.06); filter: drop-shadow(0 9px 22px rgba(0,0,0,0.6)) brightness(1.08); }
+.cb-endturn:active { transform: translateY(-50%) scale(0.98); }
 @keyframes cb-spin { to { transform: rotate(360deg); } }
 /* Burning fuse — the flame licks and flickers on its shrinking rope tip, and the taunt shakes. */
 @keyframes cb-fuse-flame {
