@@ -15,7 +15,7 @@ const STARTING_GOLD = 100; // gold every new account begins with
 // comma-separated list of your own account name(s). The owner's dev account is included by default.
 const DEV_GOLD = 1000;
 const DEV_GOLD_USERS = new Set(
-  (process.env.DEV_GOLD_USERS ?? 'julia')
+  (process.env.DEV_GOLD_USERS ?? 'photon')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean),
