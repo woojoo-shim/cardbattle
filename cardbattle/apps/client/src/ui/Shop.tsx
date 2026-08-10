@@ -206,7 +206,7 @@ function PackCeremony({ pack, def, onClose }: { pack: PackDef; def: CardDef; onC
             <span style={packBigBadge(st)}>{st.label}</span>
             <span style={packBigSeal(st)}>✦</span>
           </button>
-          <span style={ceremonyHint}>{clicks === 0 ? '팩을 클릭해서 개봉하세요' : `${NEED - clicks}번 더!`}</span>
+          <span style={ceremonyHint}>팩을 클릭해서 개봉하세요</span>
         </div>
       ) : (
         <div style={ceremonyCol} onClick={(e) => e.stopPropagation()}>
@@ -351,6 +351,7 @@ const ceremonyOverlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center',
   background: 'radial-gradient(60% 55% at 50% 40%, rgba(120,70,200,0.2), transparent 70%), rgba(3,4,9,0.9)',
   backdropFilter: 'blur(7px)', cursor: 'pointer',
+  userSelect: 'none', WebkitUserSelect: 'none',
 };
 const ceremonyCol: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, cursor: 'default',
@@ -364,6 +365,7 @@ function packBig(st: PackVisual): React.CSSProperties {
     position: 'relative', width: 208, height: 290, borderRadius: 18, display: 'grid', placeItems: 'center',
     background: st.grad, border: `3px solid ${st.border}`, cursor: 'pointer', padding: 0,
     boxShadow: `0 0 60px ${st.glow}, inset 0 0 40px rgba(0,0,0,0.42)`,
+    outline: 'none', WebkitTapHighlightColor: 'transparent', userSelect: 'none', WebkitUserSelect: 'none',
   };
 }
 function packBigBadge(st: PackVisual): React.CSSProperties {
