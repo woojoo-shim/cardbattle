@@ -359,6 +359,22 @@
   50%      { transform: translateY(-7px) rotate(0.8deg); }
 }
 .cb-shop-float { animation: cb-shop-float 4s ease-in-out infinite; }
+/* A loot-box reveal: the pulled card bursts up and settles with a little overshoot. */
+@keyframes cb-box-reveal {
+  0%   { transform: translateY(28px) scale(0.5) rotate(-8deg); opacity: 0; }
+  55%  { transform: translateY(-6px) scale(1.08) rotate(3deg); opacity: 1; }
+  100% { transform: translateY(0)    scale(1)    rotate(0deg); opacity: 1; }
+}
+.cb-box-reveal { animation: cb-box-reveal 0.5s cubic-bezier(.2,.9,.3,1.2) both; }
+/* The mystery chest jostles while it's being opened. */
+@keyframes cb-box-shake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20%      { transform: translateY(-3px) rotate(-3deg); }
+  40%      { transform: translateY(-3px) rotate(3deg); }
+  60%      { transform: translateY(-2px) rotate(-2deg); }
+  80%      { transform: translateY(-2px) rotate(2deg); }
+}
+.cb-box-shake { animation: cb-box-shake 0.4s ease-in-out infinite; }
 /* The gold balance keeps a soft, precious shimmer. */
 @keyframes cb-gold-shine {
   0%, 100% { text-shadow: 0 0 6px rgba(255,215,94,0.3); }

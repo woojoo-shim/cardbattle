@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import {
-  COSMETICS, TITLES, PLAY_EFFECTS,
-  type Cosmetic, type Title, type PlayEffect,
+  COSMETICS, TITLES, PLAY_EFFECTS, ALL_DEFS, CARD_DEFS, BOX_PRICE, TRIBE_LABEL,
+  type Cosmetic, type Title, type PlayEffect, type CardDef, type Rarity,
 } from '@cardbattle/shared';
-import { buyCosmetic, equipCosmetic, type Account } from '../net/auth.js';
+import { buyCosmetic, equipCosmetic, openBox, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
-import { C, mono, sans } from './theme.js';
+import { C, mono, sans, RARITY_BORDER, TRIBE_COLOR } from './theme.js';
 import { CardArt } from './art/CardArt.js';
 import { Icon, EFFECT_ICON } from './art/Icon.js';
 
 // The engraved display serif shared with the menu/lobby — one back-room voice across screens.
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
+
+const RARITY_LABEL: Record<Rarity, string> = { common: '일반', rare: '희귀', epic: '영웅', legendary: '전설' };
 
 /** Price tag / gold amount with the coin glyph. */
 function Gold({ amount }: { amount: number }) {
@@ -23,8 +25,9 @@ interface Props {
   onClose: () => void;
 }
 
-type TabId = 'border' | 'title' | 'effect';
+type TabId = 'box' | 'border' | 'title' | 'effect';
 const TABS: { id: TabId; label: string }[] = [
+  { id: 'box', label: '상자 깡' },
   { id: 'border', label: '테두리' },
   { id: 'title', label: '칭호' },
   { id: 'effect', label: '이펙트' },
@@ -39,7 +42,7 @@ function isGrad(v: string): boolean {
  *  effects — each bought with match-earned gold and equipped account-wide. All cosmetics are
  *  visible to every player at the table. A live preview shows the selected item. */
 export function Shop({ account, onAccount, onClose }: Props) {
-  const [tab, setTab] = useState<TabId>('border');
+  const [tab, setTab] = useState<TabId>('box');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -73,6 +76,9 @@ export function Shop({ account, onAccount, onClose }: Props) {
         {err && <p style={errLine}>{err}</p>}
 
         <div style={body}>
+          {tab === 'box' && (
+            <BoxTab account={account} onAccount={onAccount} />
+          )}
           {tab === 'border' && (
             <BorderTab account={account} owns={owns} busy={busy} act={act} />
           )}
@@ -103,6 +109,77 @@ function ActionRow({ id, price, equipped, owned, busy, act }: {
   if (owned) return <button className="cb-shop-btn" style={equipBtn} disabled={busy} onClick={() => { playSfx('select'); act(() => equipCosmetic(id)); }}>착용하기</button>;
   return (
     <button className="cb-shop-btn" style={buyBtn} disabled={busy} onClick={() => { playSfx('coin'); act(() => buyCosmetic(id)); }}><Gold amount={price} /> 구매</button>
+  );
+}
+
+/** Loot-box gacha ("상자 깡"): spend gold to pull one random UNOWNED card, rarity-weighted. */
+function BoxTab({ account, onAccount }: { account: Account; onAccount: (a: Account) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [reveal, setReveal] = useState<{ def: CardDef; n: number } | null>(null);
+
+  const remaining = ALL_DEFS.filter((d) => d.rarity !== 'common' && !account.ownedCards.includes(d.id)).length;
+  const affordable = account.gold >= BOX_PRICE;
+  const disabled = busy || remaining === 0 || !affordable;
+
+  const open = () => {
+    if (disabled) return;
+    setBusy(true); setErr(''); playSfx('coin');
+    openBox()
+      .then((res) => {
+        const def = CARD_DEFS[res.rolled];
+        onAccount(res);
+        if (def) setReveal((r) => ({ def, n: (r?.n ?? 0) + 1 }));
+        playSfx('select');
+      })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
+      .finally(() => setBusy(false));
+  };
+
+  return (
+    <>
+      <div style={previewCol}>
+        <div style={chestBox} className={busy ? 'cb-box-shake' : 'cb-shop-float'}>
+          <span style={chestMark}>?</span>
+        </div>
+        <span style={previewName}>미스터리 상자</span>
+        <button className="cb-shop-btn" style={disabled ? boxBtnOff : buyBtn} disabled={disabled} onClick={open}>
+          {remaining === 0 ? '모두 보유' : <><Gold amount={BOX_PRICE} />&nbsp;열기</>}
+        </button>
+        <span style={boxHint}>
+          {remaining === 0
+            ? '모든 카드를 이미 보유했습니다.'
+            : !affordable
+              ? '골드가 부족합니다.'
+              : `미보유 카드 ${remaining}종 · 무작위 새 카드 획득`}
+        </span>
+        {err && <span style={boxErr}>{err}</span>}
+      </div>
+
+      <div style={revealCol}>
+        {reveal ? (
+          <div key={reveal.n} className="cb-box-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <div style={revealFace(reveal.def.rarity)}>
+              {reveal.def.tribe && (
+                <span style={{ ...faceTribe, color: TRIBE_COLOR[reveal.def.tribe], borderColor: `${TRIBE_COLOR[reveal.def.tribe]}66`, background: `${TRIBE_COLOR[reveal.def.tribe]}22` }}>
+                  {TRIBE_LABEL[reveal.def.tribe]}
+                </span>
+              )}
+              <div style={faceArt}><CardArt id={reveal.def.id} size="100%" /></div>
+              <div style={facePlate}><div style={facePlateName}>{reveal.def.name}</div></div>
+            </div>
+            <span style={{ ...rarityTag, color: RARITY_BORDER[reveal.def.rarity] }}>
+              {RARITY_LABEL[reveal.def.rarity]} 카드 획득!
+            </span>
+          </div>
+        ) : (
+          <div style={revealEmpty}>
+            <span style={{ fontSize: 30, opacity: 0.4 }}>✶</span>
+            <span>상자를 열어<br />새 카드를 획득하세요</span>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -189,6 +266,47 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
     </>
   );
 }
+
+// —— Loot-box ("상자 깡") tab ——
+const chestBox: React.CSSProperties = {
+  width: 120, height: 166, borderRadius: 14, display: 'grid', placeItems: 'center',
+  background: 'radial-gradient(circle at 50% 34%, rgba(168,107,255,0.22), #140d20 72%)',
+  border: '2px solid #7a4fd0', boxShadow: '0 0 30px rgba(140,90,230,0.4), inset 0 0 24px rgba(120,70,200,0.3)',
+};
+const chestMark: React.CSSProperties = {
+  fontFamily: serif, fontSize: 64, fontWeight: 700, color: '#d9c4ff',
+  textShadow: '0 0 22px rgba(170,110,255,0.8)',
+};
+const boxBtnOff: React.CSSProperties = {
+  padding: '10px 18px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'not-allowed',
+  border: `1px solid ${C.border}`, borderRadius: 4, background: 'rgba(255,255,255,0.04)', opacity: 0.7,
+};
+const boxHint: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 1.5 };
+const boxErr: React.CSSProperties = { color: C.enemy, fontSize: 12, textAlign: 'center' };
+const revealCol: React.CSSProperties = { flex: 1, display: 'grid', placeItems: 'center', minHeight: 220 };
+function revealFace(rarity: Rarity): React.CSSProperties {
+  return {
+    position: 'relative', width: 150, aspectRatio: '2 / 3', backgroundImage: 'url(/card-frame.png)',
+    backgroundSize: '100% 100%', filter: `drop-shadow(0 0 18px ${RARITY_BORDER[rarity]}) drop-shadow(0 10px 20px rgba(0,0,0,0.5))`,
+  };
+}
+const faceTribe: React.CSSProperties = {
+  position: 'absolute', top: '4%', right: '5%', zIndex: 3, fontSize: 10, fontWeight: 800, padding: '1px 6px',
+  borderRadius: 999, border: '1px solid', fontFamily: sans,
+};
+const faceArt: React.CSSProperties = { position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%' };
+const facePlate: React.CSSProperties = {
+  position: 'absolute', left: '13%', top: '81%', width: '74%', height: '11.5%', display: 'grid', placeItems: 'center',
+};
+const facePlateName: React.CSSProperties = {
+  fontSize: 13, fontWeight: 800, color: '#2c1d0d', fontFamily: serif, textAlign: 'center',
+  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+};
+const rarityTag: React.CSSProperties = { fontSize: 14, fontWeight: 900, letterSpacing: 0.5, textShadow: '0 1px 3px rgba(0,0,0,0.6)' };
+const revealEmpty: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, color: C.dim, fontSize: 13,
+  textAlign: 'center', lineHeight: 1.6,
+};
 
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',

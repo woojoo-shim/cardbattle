@@ -124,6 +124,14 @@ export function equipCosmetic(itemId: string): Promise<Account> {
 export function buyCard(cardId: string): Promise<Account> {
   return authPost('/api/cards/buy', { cardId });
 }
+/** openBox result — the updated account plus the cardId that was rolled (for the reveal). */
+export interface BoxOpenResult extends Account { rolled: string }
+/** Open a loot box ("상자 깡"): spend gold, receive a random unowned card. Returns the updated
+ *  account plus the rolled cardId. */
+export async function openBox(): Promise<BoxOpenResult> {
+  const acct = await authPost('/api/box/open', {});
+  return acct as BoxOpenResult;
+}
 /** Save a deck into slot `index` (index === decks.length appends a new slot). */
 export function saveDeck(index: number, deck: string[]): Promise<Account> {
   return authPost('/api/deck', { index, deck });
