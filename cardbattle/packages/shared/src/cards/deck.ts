@@ -19,22 +19,41 @@ export function cardPrice(id: string): number | null {
   return def ? CARD_PRICE[def.rarity] : null;
 }
 
-/** Loot-box ("상자 깡") gold price and per-rarity drop weights. Commons are default-owned so they
- *  never drop — the box always yields a NEW (unowned) rare/epic/legendary card, rarity-weighted. */
-export const BOX_PRICE = 130;
-const BOX_WEIGHTS: Record<Rarity, number> = { common: 0, rare: 60, epic: 30, legendary: 10 };
+/** Card packs ("카드팩"): three tiers with different gold prices and rarity odds. Commons are
+ *  default-owned so they never drop — a pack always yields a NEW (unowned) rare/epic/legendary
+ *  card, weighted by the tier's odds. Higher tiers cost more but skew toward rarer cards. */
+export type PackId = 'normal' | 'rare' | 'super';
+export interface PackDef {
+  id: PackId;
+  name: string;
+  price: number;
+  weights: Record<Rarity, number>;
+}
+export const CARD_PACKS: PackDef[] = [
+  { id: 'normal', name: '일반 팩',      price: 90,  weights: { common: 0, rare: 78, epic: 20, legendary: 2 } },
+  { id: 'rare',   name: '레어 팩',      price: 180, weights: { common: 0, rare: 40, epic: 46, legendary: 14 } },
+  { id: 'super',  name: '슈퍼 레어 팩', price: 340, weights: { common: 0, rare: 12, epic: 48, legendary: 40 } },
+];
 
-/** Roll one unowned card from the box, weighted by rarity. Returns a cardId the account does NOT
- *  own, or null when every non-common card is already owned. `rand` yields [0,1). */
-export function rollBoxCard(owned: string[], rand: () => number = Math.random): string | null {
+/** Look up a pack by id, or undefined for an unknown id. */
+export function packById(id: string): PackDef | undefined {
+  return CARD_PACKS.find((p) => p.id === id);
+}
+
+/** Roll one unowned card from a pack, weighted by the tier's rarity odds. Returns a cardId the
+ *  account does NOT own, or null for an unknown pack / when every non-common card is already
+ *  owned. `rand` yields [0,1). */
+export function rollPackCard(packId: string, owned: string[], rand: () => number = Math.random): string | null {
+  const pack = packById(packId);
+  if (!pack) return null;
   const ownedSet = new Set(owned);
   const pool = ALL_DEFS.filter((d) => d.rarity !== 'common' && !ownedSet.has(d.id));
   if (pool.length === 0) return null;
-  const total = pool.reduce((s, d) => s + BOX_WEIGHTS[d.rarity], 0);
+  const total = pool.reduce((s, d) => s + pack.weights[d.rarity], 0);
   if (total <= 0) return pool[Math.floor(rand() * pool.length)].id;
   let roll = rand() * total;
   for (const d of pool) {
-    roll -= BOX_WEIGHTS[d.rarity];
+    roll -= pack.weights[d.rarity];
     if (roll < 0) return d.id;
   }
   return pool[pool.length - 1].id;

@@ -124,13 +124,13 @@ export function equipCosmetic(itemId: string): Promise<Account> {
 export function buyCard(cardId: string): Promise<Account> {
   return authPost('/api/cards/buy', { cardId });
 }
-/** openBox result — the updated account plus the cardId that was rolled (for the reveal). */
-export interface BoxOpenResult extends Account { rolled: string }
-/** Open a loot box ("상자 깡"): spend gold, receive a random unowned card. Returns the updated
- *  account plus the rolled cardId. */
-export async function openBox(): Promise<BoxOpenResult> {
-  const acct = await authPost('/api/box/open', {});
-  return acct as BoxOpenResult;
+/** openPack result — the updated account plus the cardId that was rolled (for the reveal). */
+export interface PackOpenResult extends Account { rolled: string }
+/** Open a card pack ("카드팩"): spend the pack's gold, receive a random unowned card weighted by the
+ *  tier's odds. Returns the updated account plus the rolled cardId. */
+export async function openPack(packId: string): Promise<PackOpenResult> {
+  const acct = await authPost('/api/pack/open', { packId });
+  return acct as PackOpenResult;
 }
 /** Save a deck into slot `index` (index === decks.length appends a new slot). */
 export function saveDeck(index: number, deck: string[]): Promise<Account> {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
-  COSMETICS, TITLES, PLAY_EFFECTS, ALL_DEFS, CARD_DEFS, BOX_PRICE, TRIBE_LABEL,
-  type Cosmetic, type Title, type PlayEffect, type CardDef, type Rarity,
+  COSMETICS, TITLES, PLAY_EFFECTS, ALL_DEFS, CARD_DEFS, CARD_PACKS, TRIBE_LABEL,
+  type Cosmetic, type Title, type PlayEffect, type CardDef, type Rarity, type PackId, type PackDef,
 } from '@cardbattle/shared';
-import { buyCosmetic, equipCosmetic, openBox, type Account } from '../net/auth.js';
+import { buyCosmetic, equipCosmetic, openPack, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
 import { C, mono, sans, RARITY_BORDER, TRIBE_COLOR } from './theme.js';
 import { CardArt } from './art/CardArt.js';
@@ -25,9 +25,9 @@ interface Props {
   onClose: () => void;
 }
 
-type TabId = 'box' | 'border' | 'title' | 'effect';
+type TabId = 'pack' | 'border' | 'title' | 'effect';
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'box', label: '상자 깡' },
+  { id: 'pack', label: '카드팩' },
   { id: 'border', label: '테두리' },
   { id: 'title', label: '칭호' },
   { id: 'effect', label: '이펙트' },
@@ -42,7 +42,7 @@ function isGrad(v: string): boolean {
  *  effects — each bought with match-earned gold and equipped account-wide. All cosmetics are
  *  visible to every player at the table. A live preview shows the selected item. */
 export function Shop({ account, onAccount, onClose }: Props) {
-  const [tab, setTab] = useState<TabId>('box');
+  const [tab, setTab] = useState<TabId>('pack');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -76,8 +76,8 @@ export function Shop({ account, onAccount, onClose }: Props) {
         {err && <p style={errLine}>{err}</p>}
 
         <div style={body}>
-          {tab === 'box' && (
-            <BoxTab account={account} onAccount={onAccount} />
+          {tab === 'pack' && (
+            <PackTab account={account} onAccount={onAccount} />
           )}
           {tab === 'border' && (
             <BorderTab account={account} owns={owns} busy={busy} act={act} />
@@ -112,74 +112,122 @@ function ActionRow({ id, price, equipped, owned, busy, act }: {
   );
 }
 
-/** Loot-box gacha ("상자 깡"): spend gold to pull one random UNOWNED card, rarity-weighted. */
-function BoxTab({ account, onAccount }: { account: Account; onAccount: (a: Account) => void }) {
-  const [busy, setBusy] = useState(false);
+// Per-tier pack visuals: a sealed foil pack tinted by rarity odds (steel → sapphire → amethyst).
+const PACK_STYLE: Record<PackId, { grad: string; border: string; glow: string; seal: string; label: string }> = {
+  normal: { grad: 'radial-gradient(circle at 50% 30%, rgba(150,170,190,0.30), #10131a 74%)', border: '#8794a6', glow: 'rgba(140,160,190,0.5)', seal: '#dfe7f0', label: '일반' },
+  rare:   { grad: 'radial-gradient(circle at 50% 30%, rgba(90,150,255,0.32), #0d1424 74%)',  border: '#5a8ce0', glow: 'rgba(90,150,255,0.55)', seal: '#cfe1ff', label: '레어' },
+  super:  { grad: 'radial-gradient(circle at 50% 30%, rgba(200,140,255,0.34), #180d22 74%)', border: '#b06bff', glow: 'rgba(180,110,255,0.6)',  seal: '#ecd9ff', label: '슈퍼' },
+};
+
+/** Odds line: the pack's rarity weights already sum to 100, so they read as percentages. */
+function oddsLine(pack: PackDef): string {
+  const w = pack.weights;
+  return `희귀 ${w.rare}% · 영웅 ${w.epic}% · 전설 ${w.legendary}%`;
+}
+
+/** Card packs ("카드팩"): three tiers, each spends its gold price to pull one random UNOWNED card
+ *  weighted by the tier's odds. A purchase rolls the card server-side, then a full-screen ceremony
+ *  shows the sealed pack — click it to shake, and after a few taps it bursts open to reveal. */
+function PackTab({ account, onAccount }: { account: Account; onAccount: (a: Account) => void }) {
+  const [busy, setBusy] = useState<PackId | null>(null);
   const [err, setErr] = useState('');
-  const [reveal, setReveal] = useState<{ def: CardDef; n: number } | null>(null);
+  const [ceremony, setCeremony] = useState<{ pack: PackDef; def: CardDef } | null>(null);
 
   const remaining = ALL_DEFS.filter((d) => d.rarity !== 'common' && !account.ownedCards.includes(d.id)).length;
-  const affordable = account.gold >= BOX_PRICE;
-  const disabled = busy || remaining === 0 || !affordable;
 
-  const open = () => {
-    if (disabled) return;
-    setBusy(true); setErr(''); playSfx('coin');
-    openBox()
+  const buy = (pack: PackDef) => {
+    if (busy !== null || remaining === 0) return;
+    if (account.gold < pack.price) { setErr('골드가 부족합니다.'); return; }
+    setBusy(pack.id); setErr(''); playSfx('coin');
+    openPack(pack.id)
       .then((res) => {
         const def = CARD_DEFS[res.rolled];
         onAccount(res);
-        if (def) setReveal((r) => ({ def, n: (r?.n ?? 0) + 1 }));
-        playSfx('select');
+        if (def) setCeremony({ pack, def });
       })
       .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
-      .finally(() => setBusy(false));
+      .finally(() => setBusy(null));
   };
 
   return (
-    <>
-      <div style={previewCol}>
-        <div style={chestBox} className={busy ? 'cb-box-shake' : 'cb-shop-float'}>
-          <span style={chestMark}>?</span>
-        </div>
-        <span style={previewName}>미스터리 상자</span>
-        <button className="cb-shop-btn" style={disabled ? boxBtnOff : buyBtn} disabled={disabled} onClick={open}>
-          {remaining === 0 ? '모두 보유' : <><Gold amount={BOX_PRICE} />&nbsp;열기</>}
-        </button>
-        <span style={boxHint}>
-          {remaining === 0
-            ? '모든 카드를 이미 보유했습니다.'
-            : !affordable
-              ? '골드가 부족합니다.'
-              : `미보유 카드 ${remaining}종 · 무작위 새 카드 획득`}
-        </span>
-        {err && <span style={boxErr}>{err}</span>}
+    <div style={packWrap}>
+      {remaining === 0 && <p style={packAllOwned}>모든 카드를 이미 보유했습니다.</p>}
+      <div style={packRow}>
+        {CARD_PACKS.map((pack) => {
+          const st = PACK_STYLE[pack.id];
+          const canAfford = account.gold >= pack.price;
+          const disabled = busy !== null || remaining === 0 || !canAfford;
+          return (
+            <div key={pack.id} style={packCard}>
+              <div style={packArt(st)} className={busy === pack.id ? 'cb-box-shake' : 'cb-shop-float'}>
+                <span style={packBadge(st)}>{st.label}</span>
+                <span style={packSeal(st)}>✦</span>
+              </div>
+              <span style={previewName}>{pack.name}</span>
+              <button className="cb-shop-btn" style={disabled ? boxBtnOff : buyBtn} disabled={disabled} onClick={() => buy(pack)}>
+                {busy === pack.id ? '여는 중…' : <><Gold amount={pack.price} />&nbsp;열기</>}
+              </button>
+              <span style={packOdds}>{oddsLine(pack)}</span>
+            </div>
+          );
+        })}
       </div>
+      {err && <span style={boxErr}>{err}</span>}
+      {ceremony && (
+        <PackCeremony pack={ceremony.pack} def={ceremony.def} onClose={() => setCeremony(null)} />
+      )}
+    </div>
+  );
+}
 
-      <div style={revealCol}>
-        {reveal ? (
-          <div key={reveal.n} className="cb-box-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-            <div style={revealFace(reveal.def.rarity)}>
-              {reveal.def.tribe && (
-                <span style={{ ...faceTribe, color: TRIBE_COLOR[reveal.def.tribe], borderColor: `${TRIBE_COLOR[reveal.def.tribe]}66`, background: `${TRIBE_COLOR[reveal.def.tribe]}22` }}>
-                  {TRIBE_LABEL[reveal.def.tribe]}
+/** Full-screen pack-opening ceremony: the sealed pack floats center-screen; each click shakes it
+ *  (a one-shot animation replayed by remounting via `key`), and the third tap bursts it open to
+ *  reveal the already-rolled card. */
+function PackCeremony({ pack, def, onClose }: { pack: PackDef; def: CardDef; onClose: () => void }) {
+  const st = PACK_STYLE[pack.id];
+  const [clicks, setClicks] = useState(0);
+  const [opened, setOpened] = useState(false);
+  const NEED = 3;
+
+  const tap = () => {
+    if (opened) return;
+    const n = clicks + 1;
+    setClicks(n);
+    if (n >= NEED) { playSfx('select'); setOpened(true); }
+    else playSfx('toggle');
+  };
+
+  return (
+    <div style={ceremonyOverlay} onClick={opened ? onClose : undefined}>
+      {!opened ? (
+        <div style={ceremonyCol} onClick={(e) => e.stopPropagation()}>
+          <span style={ceremonyKicker}>{pack.name}</span>
+          <button key={clicks} className={clicks > 0 ? 'cb-pack-shake' : 'cb-shop-float'} style={packBig(st)} onClick={tap} aria-label="팩 개봉">
+            <span style={packBigBadge(st)}>{st.label}</span>
+            <span style={packBigSeal(st)}>✦</span>
+          </button>
+          <span style={ceremonyHint}>{clicks === 0 ? '팩을 클릭해서 개봉하세요' : `${NEED - clicks}번 더!`}</span>
+        </div>
+      ) : (
+        <div style={ceremonyCol} onClick={(e) => e.stopPropagation()}>
+          <div className="cb-box-reveal" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+            <div style={revealFace(def.rarity)}>
+              {def.tribe && (
+                <span style={{ ...faceTribe, color: TRIBE_COLOR[def.tribe], borderColor: `${TRIBE_COLOR[def.tribe]}66`, background: `${TRIBE_COLOR[def.tribe]}22` }}>
+                  {TRIBE_LABEL[def.tribe]}
                 </span>
               )}
-              <div style={faceArt}><CardArt id={reveal.def.id} size="100%" /></div>
-              <div style={facePlate}><div style={facePlateName}>{reveal.def.name}</div></div>
+              <div style={faceArt}><CardArt id={def.id} size="100%" /></div>
+              <div style={facePlate}><div style={facePlateName}>{def.name}</div></div>
             </div>
-            <span style={{ ...rarityTag, color: RARITY_BORDER[reveal.def.rarity] }}>
-              {RARITY_LABEL[reveal.def.rarity]} 카드 획득!
+            <span style={{ ...rarityTag, color: RARITY_BORDER[def.rarity] }}>
+              {RARITY_LABEL[def.rarity]} 카드 획득!
             </span>
+            <button className="cb-shop-btn" style={buyBtn} onClick={onClose}>확인</button>
           </div>
-        ) : (
-          <div style={revealEmpty}>
-            <span style={{ fontSize: 30, opacity: 0.4 }}>✶</span>
-            <span>상자를 열어<br />새 카드를 획득하세요</span>
-          </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -267,23 +315,66 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
   );
 }
 
-// —— Loot-box ("상자 깡") tab ——
-const chestBox: React.CSSProperties = {
-  width: 120, height: 166, borderRadius: 14, display: 'grid', placeItems: 'center',
-  background: 'radial-gradient(circle at 50% 34%, rgba(168,107,255,0.22), #140d20 72%)',
-  border: '2px solid #7a4fd0', boxShadow: '0 0 30px rgba(140,90,230,0.4), inset 0 0 24px rgba(120,70,200,0.3)',
+// —— Card-pack ("카드팩") tab ——
+type PackVisual = { grad: string; border: string; glow: string; seal: string; label: string };
+const packWrap: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 };
+const packAllOwned: React.CSSProperties = { margin: 0, fontFamily: mono, fontSize: 12, color: C.dim, textAlign: 'center' };
+const packRow: React.CSSProperties = {
+  display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, width: '100%',
 };
-const chestMark: React.CSSProperties = {
-  fontFamily: serif, fontSize: 64, fontWeight: 700, color: '#d9c4ff',
-  textShadow: '0 0 22px rgba(170,110,255,0.8)',
-};
+const packCard: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 };
+function packArt(st: PackVisual): React.CSSProperties {
+  return {
+    position: 'relative', width: 118, height: 164, borderRadius: 12, display: 'grid', placeItems: 'center',
+    background: st.grad, border: `2px solid ${st.border}`,
+    boxShadow: `0 0 28px ${st.glow}, inset 0 0 22px rgba(0,0,0,0.4)`,
+  };
+}
+function packBadge(st: PackVisual): React.CSSProperties {
+  return {
+    position: 'absolute', top: 10, left: 0, right: 0, textAlign: 'center', fontFamily: serif, fontSize: 15,
+    fontWeight: 800, letterSpacing: 1, color: st.seal, textShadow: `0 0 12px ${st.glow}`,
+  };
+}
+function packSeal(st: PackVisual): React.CSSProperties {
+  return { fontSize: 40, color: st.seal, textShadow: `0 0 20px ${st.glow}`, opacity: 0.9 };
+}
+const packOdds: React.CSSProperties = { fontFamily: mono, fontSize: 10.5, color: C.dim, textAlign: 'center' };
 const boxBtnOff: React.CSSProperties = {
   padding: '10px 18px', fontSize: 14, fontWeight: 700, color: C.dim, cursor: 'not-allowed',
   border: `1px solid ${C.border}`, borderRadius: 4, background: 'rgba(255,255,255,0.04)', opacity: 0.7,
 };
-const boxHint: React.CSSProperties = { fontFamily: mono, fontSize: 11, color: C.dim, textAlign: 'center', lineHeight: 1.5 };
 const boxErr: React.CSSProperties = { color: C.enemy, fontSize: 12, textAlign: 'center' };
-const revealCol: React.CSSProperties = { flex: 1, display: 'grid', placeItems: 'center', minHeight: 220 };
+
+// —— Pack-opening ceremony (full-screen) ——
+const ceremonyOverlay: React.CSSProperties = {
+  position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center',
+  background: 'radial-gradient(60% 55% at 50% 40%, rgba(120,70,200,0.2), transparent 70%), rgba(3,4,9,0.9)',
+  backdropFilter: 'blur(7px)', cursor: 'pointer',
+};
+const ceremonyCol: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, cursor: 'default',
+};
+const ceremonyKicker: React.CSSProperties = {
+  fontFamily: serif, fontSize: 24, fontWeight: 700, letterSpacing: 2, color: '#eef2fb', textShadow: '0 2px 0 #0d1019',
+};
+const ceremonyHint: React.CSSProperties = { fontFamily: mono, fontSize: 13, color: '#c9b8e6', letterSpacing: 1 };
+function packBig(st: PackVisual): React.CSSProperties {
+  return {
+    position: 'relative', width: 208, height: 290, borderRadius: 18, display: 'grid', placeItems: 'center',
+    background: st.grad, border: `3px solid ${st.border}`, cursor: 'pointer', padding: 0,
+    boxShadow: `0 0 60px ${st.glow}, inset 0 0 40px rgba(0,0,0,0.42)`,
+  };
+}
+function packBigBadge(st: PackVisual): React.CSSProperties {
+  return {
+    position: 'absolute', top: 22, left: 0, right: 0, textAlign: 'center', fontFamily: serif, fontSize: 24,
+    fontWeight: 800, letterSpacing: 2, color: st.seal, textShadow: `0 0 18px ${st.glow}`,
+  };
+}
+function packBigSeal(st: PackVisual): React.CSSProperties {
+  return { fontSize: 76, color: st.seal, textShadow: `0 0 34px ${st.glow}`, opacity: 0.92 };
+}
 function revealFace(rarity: Rarity): React.CSSProperties {
   return {
     position: 'relative', width: 150, aspectRatio: '2 / 3', backgroundImage: 'url(/card-frame.png)',
@@ -303,10 +394,6 @@ const facePlateName: React.CSSProperties = {
   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
 };
 const rarityTag: React.CSSProperties = { fontSize: 14, fontWeight: 900, letterSpacing: 0.5, textShadow: '0 1px 3px rgba(0,0,0,0.6)' };
-const revealEmpty: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, color: C.dim, fontSize: 13,
-  textAlign: 'center', lineHeight: 1.6,
-};
 
 const overlay: React.CSSProperties = {
   position: 'fixed', inset: 0, zIndex: 60, display: 'grid', placeItems: 'center',

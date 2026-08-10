@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import express from 'express';
 import { BattleRoom } from './rooms/BattleRoom.js';
-import { register, login, me, buyCosmetic, equipCosmetic, buyCard, openBox, saveDeck, setActiveDeck, deleteDeck, AuthError } from './auth/auth.js';
+import { register, login, me, buyCosmetic, equipCosmetic, buyCard, openPack, saveDeck, setActiveDeck, deleteDeck, AuthError } from './auth/auth.js';
 import { initStore } from './auth/store.js';
 
 const port = Number(process.env.PORT ?? 2567);
@@ -78,9 +78,9 @@ app.post('/api/cards/buy', (req, res) => {
     res.status(500).json({ error: '서버 오류' });
   }
 });
-app.post('/api/box/open', (req, res) => {
+app.post('/api/pack/open', (req, res) => {
   try {
-    res.json(openBox(bearer(req)));
+    res.json(openPack(bearer(req), (req.body ?? {}).packId));
   } catch (err) {
     if (err instanceof AuthError) return res.status(400).json({ error: err.message });
     res.status(500).json({ error: '서버 오류' });

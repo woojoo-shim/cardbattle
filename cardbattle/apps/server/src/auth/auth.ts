@@ -1,6 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'crypto';
 import { getUser, upsertUser, grantCosmetic, grantCard, grantDevGold, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
-import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck, MAX_DECKS, BOX_PRICE, rollBoxCard } from '@cardbattle/shared';
+import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck, MAX_DECKS, packById, rollPackCard } from '@cardbattle/shared';
 
 // Zero-dependency auth: scrypt password hashing + HMAC-signed stateless tokens.
 // The secret must be set in prod (env AUTH_SECRET); a fixed dev fallback keeps local
@@ -28,8 +28,8 @@ export interface AuthResult {
   ownedCards: string[]; decks: string[][]; activeDeck: number; deck: string[];
 }
 
-/** openBox() result: the updated account plus the cardId that was rolled (for the reveal). */
-export interface BoxResult extends AuthResult { rolled: string }
+/** openPack() result: the updated account plus the cardId that was rolled (for the reveal). */
+export interface PackResult extends AuthResult { rolled: string }
 
 const USERNAME_RE = /^[a-zA-Z0-9_가-힣]{2,16}$/;
 
@@ -158,17 +158,20 @@ export function buyCard(token: string | undefined, cardId: string): AuthResult {
   return toResult(rec, token!);
 }
 
-/** Open a loot box ("상자 깡"): spend BOX_PRICE gold, roll one UNOWNED card (rarity-weighted),
- *  and grant it. Returns the account plus the rolled cardId for the reveal. */
-export function openBox(token: string | undefined): BoxResult {
+/** Open a card pack ("카드팩"): spend the pack's gold price, roll one UNOWNED card weighted by the
+ *  tier's rarity odds, and grant it. Returns the account plus the rolled cardId for the reveal. */
+export function openPack(token: string | undefined, packId: unknown): PackResult {
   const username = verifyToken(token);
   if (!username) throw new AuthError('세션이 만료되었습니다.');
   const rec = getUser(username);
   if (!rec) throw new AuthError('세션이 만료되었습니다.');
-  if (rec.gold < BOX_PRICE) throw new AuthError('골드가 부족합니다.');
-  const rolled = rollBoxCard(rec.ownedCards);
+  if (typeof packId !== 'string') throw new AuthError('존재하지 않는 팩입니다.');
+  const pack = packById(packId);
+  if (!pack) throw new AuthError('존재하지 않는 팩입니다.');
+  if (rec.gold < pack.price) throw new AuthError('골드가 부족합니다.');
+  const rolled = rollPackCard(pack.id, rec.ownedCards);
   if (!rolled) throw new AuthError('모든 카드를 이미 보유하고 있습니다.');
-  grantCard(username, rolled, BOX_PRICE);
+  grantCard(username, rolled, pack.price);
   return { ...toResult(rec, token!), rolled };
 }
 
