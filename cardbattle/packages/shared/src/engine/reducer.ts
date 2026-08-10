@@ -1,6 +1,6 @@
 import type { Action, GameEvent, GameState, ReduceCtx, ReduceResult, PlayerState } from '../types.js';
 import { CARD_DEFS, requiresTarget } from '../cards/defs.js';
-import { effectHandlers, EffectCtx, summonMinion, resolveAttack, findEntity } from '../cards/effects.js';
+import { effectHandlers, EffectCtx, summonMinion, resolveAttack, findEntity, mintBuildingId } from '../cards/effects.js';
 import { heroPowerFor, heroPowerNeedsTarget } from '../heroes.js';
 import { weightedPick } from './rng.js';
 
@@ -53,6 +53,8 @@ export function reduce(input: GameState, action: Action, ctx: ReduceCtx): Reduce
     if (actor.mana < def.cost) return { state: input, events: [] }; // can't afford it
     // a minion needs an open field slot to be summoned
     if (def.kind === 'minion' && actor.field.length >= input.rules.fieldCap) return { state: input, events: [] };
+    // a building needs an open building slot to be placed (shares the field cap)
+    if (def.kind === 'building' && actor.buildings.length >= input.rules.fieldCap) return { state: input, events: [] };
     // target validation for effects that pick an entity
     if (requiresTarget(def)) {
       const ent = findEntity(input, action.targetId);
@@ -83,6 +85,13 @@ export function reduce(input: GameState, action: Action, ctx: ReduceCtx): Reduce
         emit({ type: 'battlecry_triggered', playerId: actorId, cond: def.id });
         for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx);
       }
+    } else if (def.kind === 'building') {
+      // 건물: placed under construction. NO effects fire now — they start once it's built (see
+      // tickBuildings, run at the owner's turn start).
+      const turnsLeft = def.building?.buildTurns ?? 2;
+      const b = { id: mintBuildingId(state), defId: def.id, ownerId: sActor.id, turnsLeft };
+      sActor.buildings.push(b);
+      emit({ type: 'building_placed', playerId: actorId, buildingId: b.id, defId: def.id, turnsLeft });
     } else {
       for (const eff of def.effects) effectHandlers[eff.kind](eff, effCtx); // spell fires on play
     }

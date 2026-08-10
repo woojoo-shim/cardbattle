@@ -366,6 +366,15 @@ export class BattleRoom extends Room<BattleState> {
       if (summon) return play(summon.inst.id);
     }
 
+    // 3b) BUILD — lay down a building (a turn-over-turn engine) when there's a free slot. Prefer it
+    //     early (few enemy bodies to punish it) and only if no better tempo play was found above.
+    if (bot.buildings.length < fieldCap) {
+      const build = affordable
+        .filter((h) => h.def.kind === 'building')
+        .sort((a, b) => b.def.cost - a.def.cost)[0];
+      if (build && enemyMinions.length <= 1) return play(build.inst.id);
+    }
+
     // 4) BUFF — pump my board once it's worth it.
     const buffAll = affordable.find((h) => h.def.kind === 'spell' && h.def.effects.some((e) => e.kind === 'buff' && (e as any).target === 'allFriendlyMinions'));
     if (buffAll && bot.field.length >= 2) return play(buffAll.inst.id);

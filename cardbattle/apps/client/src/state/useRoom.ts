@@ -53,6 +53,15 @@ export interface UiMinion {
   hasDeathrattle: boolean;
 }
 
+/** A building on a player's board, mirrored for the board UI. `turnsLeft > 0` = still under
+ *  construction, 0 = built/active. */
+export interface UiBuilding {
+  id: string;
+  defId: string;
+  ownerId: string;
+  turnsLeft: number;
+}
+
 export interface UiPlayer {
   id: string;
   name: string;
@@ -70,6 +79,7 @@ export interface UiPlayer {
   hasDeathrattle: boolean;
   statuses: UiStatus[];
   field: UiMinion[];
+  buildings: UiBuilding[];
   /** Equipped cosmetics, broadcast from the server so every player sees them. */
   border: string;
   title: string;
@@ -159,6 +169,9 @@ function snapshot(state: any): UiState {
         poisonous: m.poisonous, lifesteal: m.lifesteal,
         summonedThisTurn: m.summonedThisTurn, attacksLeft: m.attacksLeft,
         hasDeathrattle: m.hasDeathrattle,
+      })) : [],
+      buildings: p.buildings ? Array.from(p.buildings, (b: any) => ({
+        id: b.id, defId: b.defId, ownerId: b.ownerId, turnsLeft: b.turnsLeft,
       })) : [],
       border: p.border ?? 'none',
       title: p.titleCosmetic ?? 'title_none',

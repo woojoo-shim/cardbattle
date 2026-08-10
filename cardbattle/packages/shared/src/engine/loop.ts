@@ -2,7 +2,7 @@ import type { CardDef, GameEvent, GameState, PlayerState, ReduceCtx, ReduceResul
 import { DEFAULT_AVATAR } from '../constants.js';
 import { resolveMode, manaRegenFor, DEFAULT_MODE, type GameModeId, type RuleSet } from '../modes.js';
 import { ALL_DEFS, CARD_DEFS } from '../cards/defs.js';
-import { eliminate } from '../cards/effects.js';
+import { eliminate, tickBuildings } from '../cards/effects.js';
 import { weightedPick, shuffle } from './rng.js';
 import { checkWin } from './reducer.js';
 
@@ -12,7 +12,7 @@ export function spawnPlayer(rules: RuleSet, seat: number, id: string, name: stri
   return {
     id, name, avatar, connected: true, seat,
     hp: rules.startHp, maxHp: rules.startHp, defense: rules.startDefense,
-    hand: [], field: [], statuses: [], deathrattle: [], alive: true,
+    hand: [], field: [], buildings: [], statuses: [], deathrattle: [], alive: true,
     skipTurns: 0, mana: rules.startMana, heroPowerUsed: false, deck,
   };
 }
@@ -89,6 +89,11 @@ function beginTurn(state: GameState, ctx: ReduceCtx, emit: (e: GameEvent) => voi
   const regained = manaRegenFor(state.rules, state.roundCount);
   cur.mana = Math.min(state.rules.manaMax, cur.mana + regained);
   emit({ type: 'mana_gained', playerId: cur.id, amount: regained, manaAfter: cur.mana });
+  // Advance/fire this player's buildings. A completed 화염탑's damage could finish the last foe, so
+  // settle the win before drawing / announcing the turn.
+  tickBuildings(state, cur, emit, ctx.nextCardId);
+  checkWin(state, emit);
+  if (state.phase !== 'playing') return;
   for (let i = 0; i < state.rules.drawPerTurn; i++) drawCard(state, cur, ctx, emit);
   emit({ type: 'turn_started', playerId: cur.id, deadline: state.turnDeadline });
 }

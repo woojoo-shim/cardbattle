@@ -42,6 +42,14 @@ export const CARD_DEFS: Record<string, CardDef> = {
   warhorn:     { id: 'warhorn',     name: '나팔',rarity: 'rare',  cost: 3, element: 'physical',  kind: 'spell', effects: [{ kind: 'buff', attack: 1, health: 1, target: 'allFriendlyMinions' }], cooldown: 0, vfxKey: 'summon', sfxKey: 'summon', icon: '📯', desc: '내 하수인 전체의 공격력·체력 +1.', flavor: '그 소리를 들으면 심장이 먼저 앞으로 나선다.', drawWeight: 6 },
   insight:     { id: 'insight',     name: '지혜',   rarity: 'common', cost: 2, element: 'none',      kind: 'spell', effects: [{ kind: 'draw', amount: 2 }], cooldown: 0, vfxKey: 'peek', sfxKey: 'draw', icon: '📖', desc: '내 덱에서 카드 2장을 뽑는다.', flavor: '"답은 언제나 책 속에 있지. 두 페이지쯤 뒤에."', drawWeight: 8 },
   manasurge:   { id: 'manasurge',   name: '마나',     rarity: 'common', cost: 1, element: 'lightning', kind: 'spell', effects: [{ kind: 'gainMana', amount: 2 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '🔷', desc: '마나 +2 (이 카드 비용 1 → 실제로 마나 1 이득).', flavor: '한 모금 마시면, 오늘은 뭐든 할 수 있을 것 같다.', drawWeight: 8 },
+
+  // ---- BUILDINGS (5) ----
+  // 건물: 내면 건설이 시작되고(建), buildTurns 턴이 지나면 완공되어 매 턴 시작마다 능력을 발동한다.
+  goldmine:    { id: 'goldmine',    name: '금광',        rarity: 'common', cost: 2, element: 'none',      kind: 'building', building: { buildTurns: 2 }, effects: [{ kind: 'gainMana', amount: 1 }], cooldown: 0, vfxKey: 'charge', sfxKey: 'charge', icon: '⛏️', desc: '건설 2턴 | 완공 후 매 턴 시작마다 마나 +1.', flavor: '"곡괭이질 소리가 곧 돈 세는 소리다."', drawWeight: 9 },
+  rampart:     { id: 'rampart',     name: '성벽',        rarity: 'common', cost: 2, element: 'physical',  kind: 'building', building: { buildTurns: 2 }, effects: [{ kind: 'shield', amount: 3 }], cooldown: 0, vfxKey: 'shield', sfxKey: 'shield', icon: '🧱', desc: '건설 2턴 | 완공 후 매 턴 시작마다 내 영웅 방어도 +3.', flavor: '"돌 하나하나가 누군가의 목숨값이다."', drawWeight: 8 },
+  library:     { id: 'library',     name: '마도서관',    rarity: 'rare',   cost: 3, element: 'none',      kind: 'building', building: { buildTurns: 3 }, effects: [{ kind: 'draw', amount: 1 }], cooldown: 0, vfxKey: 'peek', sfxKey: 'draw', icon: '📚', desc: '건설 3턴 | 완공 후 매 턴 시작마다 카드 1장을 뽑음.', flavor: '"지식은 쌓일수록 무거워지고, 무거울수록 강해진다."', drawWeight: 6 },
+  flametower:  { id: 'flametower',  name: '화염탑',      rarity: 'rare',   cost: 3, element: 'fire',      kind: 'building', building: { buildTurns: 3 }, effects: [{ kind: 'damage', amount: 3, target: 'randomEnemy' }], cooldown: 0, vfxKey: 'explode', sfxKey: 'explode', icon: '🗼', desc: '건설 3턴 | 완공 후 매 턴 시작마다 무작위 적에게 3 피해.', flavor: '"탑 꼭대기의 불꽃은 결코 잠들지 않는다."', drawWeight: 6 },
+  fountain:    { id: 'fountain',    name: '치유의 샘',   rarity: 'epic',   cost: 3, element: 'holy',      kind: 'building', building: { buildTurns: 2 }, effects: [{ kind: 'heal', amount: 3, target: 'hero' }], cooldown: 0, vfxKey: 'heal', sfxKey: 'heal', icon: '⛲', desc: '건설 2턴 | 완공 후 매 턴 시작마다 내 영웅 체력 3 회복.', flavor: '"마르지 않는 샘물 한 모금이면, 상처도 잊힌다."', drawWeight: 5 },
 };
 
 export const ALL_DEFS: CardDef[] = Object.values(CARD_DEFS);

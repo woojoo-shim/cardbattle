@@ -32,6 +32,14 @@ export class MinionSchema extends Schema {
   @type('boolean') hasDeathrattle = false;
 }
 
+/** A building (건물) a player has placed. `turnsLeft > 0` = still under construction, 0 = active. */
+export class BuildingSchema extends Schema {
+  @type('string') id = '';
+  @type('string') defId = '';
+  @type('string') ownerId = '';
+  @type('number') turnsLeft = 0;
+}
+
 export class PlayerSchema extends Schema {
   @type('string') id = '';
   @type('string') name = '';
@@ -55,6 +63,7 @@ export class PlayerSchema extends Schema {
   @type([CardInstanceSchema]) hand = new ArraySchema<CardInstanceSchema>();
   @type([StatusSchema]) statuses = new ArraySchema<StatusSchema>();
   @type([MinionSchema]) field = new ArraySchema<MinionSchema>();
+  @type([BuildingSchema]) buildings = new ArraySchema<BuildingSchema>();
 }
 
 export class BattleState extends Schema {
@@ -125,6 +134,13 @@ export function syncToSchema(schema: BattleState, gs: GameState): void {
       ms.summonedThisTurn = m.summonedThisTurn; ms.attacksLeft = m.attacksLeft;
       ms.hasDeathrattle = m.deathrattle.length > 0;
       ps.field.push(ms);
+    }
+    // Rebuild the buildings list (placed/progressing/completing) so the board stays in sync.
+    while (ps.buildings.length > 0) ps.buildings.pop();
+    for (const b of p.buildings) {
+      const bs = new BuildingSchema();
+      bs.id = b.id; bs.defId = b.defId; bs.ownerId = b.ownerId; bs.turnsLeft = b.turnsLeft;
+      ps.buildings.push(bs);
     }
   }
 }

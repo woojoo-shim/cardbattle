@@ -213,6 +213,59 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
         );
       })}
 
+      {/* Each player's buildings sit BEHIND them (away from the table centre) as a small rank of
+          structures — under construction (hammer + turns left) or active (glowing). */}
+      {ring.map((p, i) => {
+        if (!p.alive || !p.buildings || p.buildings.length === 0) return null;
+        const k = ((i - myRing) % n + n) % n;
+        const theta = ((90 + k * (360 / n)) * Math.PI) / 180;
+        const sLeft = CX + RX * Math.cos(theta);
+        const sTop = CY + RY * Math.sin(theta);
+        const bLeft = sLeft * 1.12 - CX * 0.12; // pushed out behind the player, off the felt edge
+        const bTop = sTop * 1.12 - CY * 0.12;
+        const mine = p.id === myId;
+        return (
+          <div key={`bld-${p.id}`} style={{ ...buildingRow, left: `${bLeft}%`, top: `${bTop}%` }}>
+            {p.buildings.map((b) => {
+              const def = CARD_DEFS[b.defId];
+              const building = b.turnsLeft > 0;
+              return (
+                <div
+                  key={b.id}
+                  onMouseEnter={() => setHoverMinion(b.id)}
+                  onMouseLeave={() => setHoverMinion((h) => (h === b.id ? null : h))}
+                  style={{
+                    ...buildingChip,
+                    borderColor: building ? '#8a6a3a' : mine ? C.you : C.enemy,
+                    opacity: building ? 0.82 : 1,
+                    boxShadow: building ? '0 3px 8px rgba(0,0,0,0.5)' : `0 0 12px ${mine ? 'rgba(143,224,160,0.5)' : 'rgba(224,120,120,0.45)'}`,
+                    zIndex: hoverMinion === b.id ? 30 : undefined,
+                  }}
+                >
+                  <div style={buildingArtWindow}><CardArt id={b.defId} size="100%" /></div>
+                  <span style={buildingName}>{def?.name}</span>
+                  {building
+                    ? <span style={buildConstruct}>🔨 {b.turnsLeft}턴</span>
+                    : <span style={buildActive}>가동</span>}
+                  {hoverMinion === b.id && def && (
+                    <div style={minionTip}>
+                      <span style={minionTipEdge} aria-hidden />
+                      <div style={hoverInfo}>
+                        <div style={minionTipHead}>
+                          <span style={minionTipName}>{def.name}</span>
+                          <span style={minionTipStat}>{building ? `건설 ${b.turnsLeft}턴` : '가동 중'}</span>
+                        </div>
+                        <div style={minionTipDesc}>{def.desc}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+
       {ring.map((p, i) => {
         const isMe = p.id === myId;
         const k = ((i - myRing) % n + n) % n;            // 0 = me, then clockwise around the oval
@@ -463,6 +516,35 @@ const minionChip: React.CSSProperties = {
   border: '2px solid',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
+};
+// The buildings rank — a compact row of structures behind the player. A building under
+// construction shows a hammer + turns-left; a completed one shows a "가동" (active) tag and glows.
+const buildingRow: React.CSSProperties = {
+  position: 'absolute', transform: 'translate(-50%,-50%)', zIndex: 5, pointerEvents: 'auto',
+  display: 'flex', gap: 6, flexWrap: 'nowrap', justifyContent: 'center', alignItems: 'flex-end',
+  whiteSpace: 'nowrap',
+};
+const buildingChip: React.CSSProperties = {
+  position: 'relative', width: 'clamp(64px, 6.5vw, 92px)', aspectRatio: '3 / 4', borderRadius: 8, flexShrink: 0,
+  background: 'linear-gradient(180deg, rgba(40,30,17,0.94), rgba(20,13,9,0.94))',
+  border: '2px solid', boxSizing: 'border-box',
+  display: 'flex', flexDirection: 'column', alignItems: 'center',
+  transition: 'box-shadow .18s, border-color .18s, opacity .18s',
+};
+const buildingArtWindow: React.CSSProperties = {
+  width: '78%', height: '58%', marginTop: '8%', borderRadius: 4, overflow: 'hidden',
+  display: 'grid', placeItems: 'center',
+};
+const buildingName: React.CSSProperties = {
+  fontFamily: sans, fontSize: 10, fontWeight: 800, color: '#e6d6b4', lineHeight: 1.05,
+  marginTop: 2, maxWidth: '92%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+};
+const buildConstruct: React.CSSProperties = {
+  fontFamily: mono, fontSize: 10, fontWeight: 800, color: '#f0c674', marginTop: 1, letterSpacing: '-0.02em',
+};
+const buildActive: React.CSSProperties = {
+  fontFamily: sans, fontSize: 9, fontWeight: 900, color: '#8fe0a0', marginTop: 1,
+  letterSpacing: '0.06em', textTransform: 'uppercase',
 };
 // Hover panel for a minion on the board — a LARGE card face beside a description column, so a
 // played minion reads as a big card with its rules text next to it. Sits above the chip, doesn't

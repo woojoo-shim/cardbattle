@@ -41,6 +41,40 @@ function mintMinionId(state: GameState): string {
   return id;
 }
 
+/** Mint a fresh unique BuildingInstance id (shares the server-owned counter with minions). */
+export function mintBuildingId(state: GameState): string {
+  const id = `b${state.nextMinionId}`;
+  state.nextMinionId += 1;
+  return id;
+}
+
+/** Advance an owner's buildings at the start of their turn. A building still under construction ticks
+ *  down one turn (announcing progress, then completion when it hits 0); a completed building fires its
+ *  def's effects every turn (mana/shield/draw/damage/heal). Called from the turn loop; deaths from a
+ *  building's damage are settled by its own damage handler (resolveDeaths). */
+export function tickBuildings(state: GameState, owner: PlayerState, emit: (e: GameEvent) => void, nextCardId: () => string): void {
+  for (const b of owner.buildings) {
+    const def = CARD_DEFS[b.defId];
+    if (!def) continue;
+    if (b.turnsLeft > 0) {
+      b.turnsLeft -= 1;
+      if (b.turnsLeft > 0) {
+        emit({ type: 'building_progressed', playerId: owner.id, buildingId: b.id, defId: b.defId, turnsLeft: b.turnsLeft });
+        continue; // still building — no ability yet
+      }
+      emit({ type: 'building_completed', playerId: owner.id, buildingId: b.id, defId: b.defId });
+    } else {
+      emit({ type: 'building_triggered', playerId: owner.id, buildingId: b.id, defId: b.defId });
+    }
+    // Fires the turn it completes and every turn thereafter.
+    const ctx: EffectCtx = {
+      state, source: owner, chosenTargetId: undefined,
+      element: def.element, randomOrder: livingOthers(state, owner.id), emit, nextCardId,
+    };
+    for (const e of def.effects) effectHandlers[e.kind](e, ctx);
+  }
+}
+
 /** Summon one copy of a minion token onto an owner's field (respecting the field cap). Sets up its
  *  combat stats + keyword flags, arms its deathrattle, and announces it. Returns the new minion (or
  *  null if the field is full / the token isn't a minion). */

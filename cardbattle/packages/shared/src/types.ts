@@ -3,7 +3,7 @@ import type { GameModeId, RuleSet } from './modes.js';
 export type Phase = 'lobby' | 'playing' | 'ended';
 export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'poison' | 'holy' | 'none';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
-export type CardKind = 'minion' | 'spell';
+export type CardKind = 'minion' | 'spell' | 'building';
 
 /** Creature tribe (종족) a summoned minion belongs to. Spells have none. */
 export type Tribe = 'beast' | 'human' | 'undead' | 'elemental';
@@ -44,6 +44,9 @@ export interface CardDef {
   tribe?: Tribe;
   /** Base stats for a minion card (undefined for spells). */
   minion?: { attack: number; health: number };
+  /** Building card (건물): takes `buildTurns` of the owner's turns to construct, then fires its
+   *  `effects` at the start of every one of the owner's turns. Undefined for minions/spells. */
+  building?: { buildTurns: number };
   /** Passive keywords a summoned minion carries. */
   keywords?: Keyword[];
   /** Spell: fired on play. Minion: its battlecry (fired on summon). */
@@ -82,6 +85,16 @@ export interface MinionInstance {
   deathrattle: Effect[];
 }
 
+/** A building (건물) a player has placed. While `turnsLeft > 0` it is still under construction and
+ *  does nothing; once `turnsLeft` reaches 0 it is active and fires its def's effects at the start of
+ *  each of the owner's turns. */
+export interface BuildingInstance {
+  id: string;
+  defId: string;
+  ownerId: string;
+  turnsLeft: number;   // remaining construction turns; 0 = built/active
+}
+
 export interface PlayerState {
   id: string;
   name: string;
@@ -93,6 +106,7 @@ export interface PlayerState {
   defense: number;           // hero armor: soaks damage to the hero before HP
   hand: CardInstance[];
   field: MinionInstance[];   // minions this player controls, left→right summon order
+  buildings: BuildingInstance[]; // buildings this player has placed (construction + active)
   statuses: Status[];        // ongoing turn-start effects (unused by the current card set, kept for badges)
   deathrattle: Effect[];     // legacy hero deathrattle slot (unused by the current card set)
   alive: boolean;
@@ -149,6 +163,11 @@ export type GameEvent =
   | { type: 'minion_damaged'; minionId: string; amount: number; healthAfter: number }
   | { type: 'minion_buffed'; minionId: string; attack: number; health: number }   // new totals after the buff
   | { type: 'minion_died'; minionId: string; playerId: string }
+  // Building events
+  | { type: 'building_placed'; playerId: string; buildingId: string; defId: string; turnsLeft: number }
+  | { type: 'building_progressed'; playerId: string; buildingId: string; defId: string; turnsLeft: number }
+  | { type: 'building_completed'; playerId: string; buildingId: string; defId: string }
+  | { type: 'building_triggered'; playerId: string; buildingId: string; defId: string }
   | { type: 'deathrattle_triggered'; playerId: string }             // a minion's 유언 (deathrattle) fired
   | { type: 'battlecry_triggered'; playerId: string; cond: string } // a minion's 강림 (battlecry) fired
   | { type: 'player_eliminated'; playerId: string }
