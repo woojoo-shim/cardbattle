@@ -126,6 +126,8 @@
 @keyframes cb-hub-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 /* Emote picker popover: a quick scale-in. */
 @keyframes cb-emote-pop { from { opacity: 0; transform: scale(0.9) translateY(6px); } to { opacity: 1; transform: none; } }
+/* Deck-builder card description panel entrance: rises + fades in over the card face. */
+@keyframes cb-desc-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
 /* Emote speech bubble: pops up above the seat while keeping its (-50%,-118%) anchor offset. */
 @keyframes cb-bubble-pop {
   0% { opacity: 0; transform: translate(-50%, -88%) scale(0.7); }

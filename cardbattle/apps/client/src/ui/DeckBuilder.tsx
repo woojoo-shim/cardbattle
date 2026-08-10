@@ -280,15 +280,20 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                       </div>
                       <div style={facePlate}><div style={facePlateName}>{def.name}</div></div>
                       {peek === def.id && (
-                        <div style={{ ...descPanel, borderColor: RARITY_BORDER[def.rarity] }}>
+                        <div style={{ ...descPanel, borderColor: RARITY_BORDER[def.rarity], boxShadow: `0 10px 26px rgba(0,0,0,0.6), 0 0 22px ${RARITY_BORDER[def.rarity]}44, inset 0 0 40px ${RARITY_BORDER[def.rarity]}10` }}>
                           <span style={{ ...descRibbon, background: `linear-gradient(90deg, transparent, ${RARITY_BORDER[def.rarity]}, transparent)` }} aria-hidden />
+                          <div style={descHeadRow}>
+                            <span style={{ ...descGem, background: RARITY_BORDER[def.rarity], boxShadow: `0 0 8px ${RARITY_BORDER[def.rarity]}` }} aria-hidden />
+                            <span style={descName}>{def.name}</span>
+                          </div>
                           <div style={descMeta}>
                             <span style={descCost}>◈ {def.cost}</span>
                             {def.tribe && (
                               <span style={{ ...descTribe, color: TRIBE_COLOR[def.tribe], borderColor: `${TRIBE_COLOR[def.tribe]}55`, background: `${TRIBE_COLOR[def.tribe]}18` }}>{TRIBE_LABEL[def.tribe]}</span>
                             )}
-                            <span style={descRarity}>{RARITY_LABEL[def.rarity]}</span>
+                            <span style={{ ...descRarity, color: RARITY_BORDER[def.rarity] }}>{RARITY_LABEL[def.rarity]}</span>
                           </div>
+                          <span style={{ ...descDivider, background: `linear-gradient(90deg, ${RARITY_BORDER[def.rarity]}66, transparent)` }} aria-hidden />
                           <div style={descText}>{def.desc}</div>
                         </div>
                       )}
@@ -493,12 +498,20 @@ const facePlateName: React.CSSProperties = {
 };
 // Hover/tap description — overlays the art window (stays inside the cell, so the grid never clips it).
 const descPanel: React.CSSProperties = {
-  position: 'absolute', inset: 0, zIndex: 5, padding: '12px 11px 10px',
+  position: 'absolute', inset: 0, zIndex: 5, padding: '13px 12px 11px',
   display: 'flex', flexDirection: 'column', gap: 7, textAlign: 'left', overflow: 'hidden',
-  background: 'linear-gradient(180deg, rgba(18,12,6,0.97), rgba(8,5,3,0.98))',
-  border: '1px solid', borderRadius: 6,
+  background: 'linear-gradient(165deg, rgba(26,18,9,0.96), rgba(9,6,3,0.98) 62%)',
+  border: '1px solid', borderRadius: 8,
+  backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)',
+  animation: 'cb-desc-in 0.16s cubic-bezier(0.2,0.7,0.3,1) both',
 };
-const descRibbon: React.CSSProperties = { position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, opacity: 0.9 };
+const descRibbon: React.CSSProperties = { position: 'absolute', top: 0, left: 0, right: 0, height: 2, opacity: 0.95 };
+const descHeadRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7 };
+const descGem: React.CSSProperties = { width: 7, height: 7, borderRadius: 2, transform: 'rotate(45deg)', flexShrink: 0 };
+const descName: React.CSSProperties = {
+  fontFamily: serif, fontSize: 'clamp(14px, 1.4vw, 19px)', fontWeight: 700, lineHeight: 1.05,
+  color: '#f4e4c0', textShadow: '0 1px 3px rgba(0,0,0,0.6)', letterSpacing: 0.2,
+};
 const descMeta: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 6 };
 const descCost: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, fontWeight: 800, letterSpacing: 0.3, color: '#e6cf96',
@@ -508,9 +521,10 @@ const descTribe: React.CSSProperties = {
   fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 0.5,
   padding: '1px 6px', borderRadius: 5, border: '1px solid transparent',
 };
-const descRarity: React.CSSProperties = { fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 1, color: C.dim };
+const descRarity: React.CSSProperties = { fontFamily: mono, fontSize: 10, fontWeight: 800, letterSpacing: 1 };
+const descDivider: React.CSSProperties = { height: 1, width: '100%', opacity: 0.7, marginTop: 1 };
 const descText: React.CSSProperties = {
-  fontSize: 'clamp(11px, 1.05vw, 13.5px)', lineHeight: 1.5, color: C.text, whiteSpace: 'normal',
+  fontSize: 'clamp(11px, 1.05vw, 13.5px)', lineHeight: 1.55, color: C.text, whiteSpace: 'normal',
   overflowY: 'auto',
 };
 function addBtn(active: boolean): React.CSSProperties {
