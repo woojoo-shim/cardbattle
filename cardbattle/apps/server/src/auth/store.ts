@@ -23,6 +23,7 @@ export interface UserRecord {
   ownedCards: string[];     // card ids the account has unlocked (all commons are free/default)
   decks: string[][];        // up to MAX_DECKS saved decks (each DECK_SIZE defIds, duplicates allowed)
   activeDeck: number;       // index into decks — the deck used when joining a match
+  devGranted?: boolean;     // true once the one-time dev-gold top-up has been applied
 }
 
 // Older records (pre-gold / pre-title) may lack the economy/cosmetic fields; backfill sane
@@ -164,6 +165,17 @@ export function grantCosmetic(username: string, id: string, price: number): void
   rec.gold -= price;
   if (!rec.owned.includes(id)) rec.owned.push(id);
   scheduleSave();
+}
+
+/** One-time dev top-up: raise gold to at least `amount` and mark the grant as spent. Returns
+ *  true if it actually applied (first time only), false if already granted or account missing. */
+export function grantDevGold(username: string, amount: number): boolean {
+  const rec = getUser(username);
+  if (!rec || rec.devGranted) return false;
+  rec.devGranted = true;
+  if (rec.gold < amount) rec.gold = amount;
+  scheduleSave();
+  return true;
 }
 
 /** Buy a card: deduct gold and grant ownership. Caller validates price/ownership. */

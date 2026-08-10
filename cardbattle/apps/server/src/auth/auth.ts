@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'crypto';
-import { getUser, upsertUser, grantCosmetic, grantCard, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
+import { getUser, upsertUser, grantCosmetic, grantCard, grantDevGold, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
 import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck, MAX_DECKS, BOX_PRICE, rollBoxCard } from '@cardbattle/shared';
 
 // Zero-dependency auth: scrypt password hashing + HMAC-signed stateless tokens.
@@ -8,6 +8,18 @@ import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CAR
 // the username + issued-at, so a leaked token can't be tampered with without the secret.
 const SECRET = process.env.AUTH_SECRET ?? 'cardbattle-dev-secret-change-me';
 const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const STARTING_GOLD = 100; // gold every new account begins with
+
+// Dev grant: accounts whose username is listed here get topped up to DEV_GOLD once, on login
+// (tracked by the `devGranted` flag so it fires a single time). Set DEV_GOLD_USERS in prod to a
+// comma-separated list of your own account name(s). The owner's dev account is included by default.
+const DEV_GOLD = 1000;
+const DEV_GOLD_USERS = new Set(
+  (process.env.DEV_GOLD_USERS ?? 'julia')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
+);
 
 export interface AuthResult {
   token: string; username: string; display: string; avatar: string;
@@ -71,11 +83,12 @@ export function register(rawName: string, password: string, avatar: string): Aut
   const rec: UserRecord = {
     username, display: display.slice(0, 16), salt, passHash: hash(password, salt),
     avatar: sanitizeAvatar(avatar), createdAt: Date.now(), wins: 0, losses: 0,
-    gold: 0, owned: [...DEFAULT_OWNED], equippedBorder: 'none',
+    gold: STARTING_GOLD, owned: [...DEFAULT_OWNED], equippedBorder: 'none',
     equippedTitle: 'title_none', equippedEffect: 'fx_none',
     ownedCards: [...DEFAULT_CARDS], decks: [defaultDeck()], activeDeck: 0,
   };
   upsertUser(rec);
+  if (DEV_GOLD_USERS.has(username)) grantDevGold(username, DEV_GOLD); // one-time owner top-up
   return toResult(rec, sign(username));
 }
 
@@ -88,6 +101,7 @@ export function login(rawName: string, password: string): AuthResult {
   if (candidate.length !== stored.length || !timingSafeEqual(candidate, stored)) {
     throw new AuthError('아이디 또는 비밀번호가 올바르지 않습니다.');
   }
+  if (DEV_GOLD_USERS.has(username)) grantDevGold(username, DEV_GOLD); // one-time owner top-up
   return toResult(rec, sign(username));
 }
 
