@@ -472,7 +472,7 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
         <p style={coachText}>{c.text}</p>
         {(c.point || stepNo > 0) && (
           <div style={coachFoot}>
-            <span style={coachPoint} className={c.point ? 'cb-coach-point' : undefined}>{c.point ?? ''}</span>
+            <span style={coachPoint} className={c.point ? (c.dir ? `cb-coach-point-${c.dir}` : 'cb-coach-point') : undefined}>{c.point ?? ''}</span>
             {stepNo > 0 && <span style={coachCount}>{stepNo} / 3</span>}
           </div>
         )}
@@ -484,7 +484,7 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
 type CoachStep = 'wait' | 'play' | 'target' | 'endturn' | 'done';
 // Which of the three actionable steps we're on (0 = intro/outro, no progress dots).
 const STEP_ORDER: Record<CoachStep, number> = { wait: 0, play: 1, target: 2, endturn: 3, done: 0 };
-const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text: string; point?: string; anchor: React.CSSProperties }> = {
+const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text: string; point?: string; dir?: 'down' | 'up' | 'right'; anchor: React.CSSProperties }> = {
   wait: {
     icon: 'zzz', tag: '잠깐 대기',
     head: '지금은 상대 차례예요.',
@@ -496,6 +496,7 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
     head: '카드를 한 장 눌러 내보세요.',
     text: '내 차례입니다. 각 카드의 숫자만큼 마나를 쓰고, 공격 카드는 상대의 HP를 깎아요.',
     point: '↓  화면 아래 내 손패에서 카드를 클릭',
+    dir: 'down',
     anchor: { bottom: 'clamp(200px, 20vh, 260px)', left: '50%', transform: 'translateX(-50%)' },
   },
   target: {
@@ -503,6 +504,7 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
     head: '누구를 맞힐지 골라주세요.',
     text: '이 카드는 대상이 필요해요. 잘못 골랐다면 카드를 다시 눌러 취소할 수 있어요.',
     point: '↑  위쪽 상대의 얼굴(초상화)을 클릭',
+    dir: 'up',
     anchor: { top: 'clamp(76px, 12vh, 120px)', left: '50%', transform: 'translateX(-50%)' },
   },
   endturn: {
@@ -510,6 +512,7 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
     head: '다 냈으면 턴을 넘기세요.',
     text: '마나가 남으면 카드를 더 낼 수 있어요. 더 낼 게 없으면 턴을 마무리합니다.',
     point: '→  오른쪽 «턴 종료» 버튼을 클릭',
+    dir: 'right',
     anchor: { bottom: 'clamp(96px, 12vh, 140px)', right: 24 },
   },
   done: {

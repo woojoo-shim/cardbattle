@@ -103,11 +103,28 @@
   60%  { opacity: 1; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
-/* The directional "click here" hint gently pulses so a newcomer's eye is drawn to the target. */
-.cb-coach-point { animation: cb-coach-point 1.3s ease-in-out infinite; }
+/* The directional "click here" hint doesn't just pulse — it BOUNCES toward whatever the newcomer
+   should touch (down to the hand, up to the enemy, right to the end-turn button), so the motion
+   itself tells them where to go. */
+.cb-coach-point { animation: cb-coach-point 1.2s ease-in-out infinite; }
+.cb-coach-point-down  { animation: cb-coach-down  0.95s cubic-bezier(0.5, 0, 0.4, 1) infinite; }
+.cb-coach-point-up    { animation: cb-coach-up    0.95s cubic-bezier(0.5, 0, 0.4, 1) infinite; }
+.cb-coach-point-right { animation: cb-coach-right 0.95s cubic-bezier(0.5, 0, 0.4, 1) infinite; }
 @keyframes cb-coach-point {
   0%, 100% { opacity: 0.6; }
   50%      { opacity: 1; }
+}
+@keyframes cb-coach-down {
+  0%, 100% { transform: translateY(0);   opacity: 0.72; }
+  50%      { transform: translateY(7px); opacity: 1; }
+}
+@keyframes cb-coach-up {
+  0%, 100% { transform: translateY(0);    opacity: 0.72; }
+  50%      { transform: translateY(-7px); opacity: 1; }
+}
+@keyframes cb-coach-right {
+  0%, 100% { transform: translateX(0);   opacity: 0.72; }
+  50%      { transform: translateX(8px); opacity: 1; }
 }
 /* End-screen climax: the title punches in with an overshoot, the winner medallion swells up
    from nothing, and (on victory) a fan of light rays turns slowly behind the winner. */
