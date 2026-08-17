@@ -250,6 +250,10 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                 const price = cardPrice(def.id) ?? 0;
                 const maxed = inDeck >= MAX_COPIES;
                 const full = total >= DECK_SIZE;
+                // Battle stats shown at a glance on the card face: minions carry 공격력/체력, and
+                // attack spells surface their 데미지 (the biggest damage effect).
+                const isMinion = !!def.minion;
+                const dmg = def.effects.reduce((m, e) => (e.kind === 'damage' ? Math.max(m, e.amount) : m), 0);
                 return (
                   <div key={def.id} style={cardCell}>
                     <div style={cardFace(owned)}
@@ -278,6 +282,14 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                       <div style={faceArt}>
                         <CardArt id={def.id} size="100%" />
                       </div>
+                      {isMinion ? (
+                        <>
+                          <span style={faceAtk} title="공격력"><Icon name="swords" size={13} />{def.minion!.attack}</span>
+                          <span style={faceHp} title="체력"><Icon name="heart" size={13} />{def.minion!.health}</span>
+                        </>
+                      ) : dmg > 0 ? (
+                        <span style={faceDmg} title="데미지"><Icon name="burst" size={13} />{dmg}</span>
+                      ) : null}
                       <div style={facePlate}><div style={facePlateName}>{def.name}</div></div>
                       {peek === def.id && (
                         <div style={{ ...descPanel, borderColor: RARITY_BORDER[def.rarity], boxShadow: `0 10px 26px rgba(0,0,0,0.6), 0 0 22px ${RARITY_BORDER[def.rarity]}44, inset 0 0 40px ${RARITY_BORDER[def.rarity]}10` }}>
@@ -482,6 +494,27 @@ const faceInDeck: React.CSSProperties = {
   position: 'absolute', top: '14.5%', right: '5%', zIndex: 3,
   fontFamily: mono, fontSize: 'clamp(8px, 0.85vw, 10px)', fontWeight: 800, letterSpacing: 0.3, color: '#141608',
   padding: '1px 6px', borderRadius: 5, background: '#9fae6a', border: '1px solid #6f7d3a',
+};
+// Battle-stat medallions on the lower corners of the art, so 공격력/체력/데미지 read at a glance.
+const faceStat: React.CSSProperties = {
+  position: 'absolute', top: '65.5%', zIndex: 4,
+  minWidth: 'clamp(30px, 3vw, 42px)', height: 'clamp(24px, 2.4vw, 33px)',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 3,
+  fontFamily: mono, fontWeight: 800, fontSize: 'clamp(13px, 1.35vw, 18px)',
+  padding: '0 7px', borderRadius: 999, border: '1.5px solid',
+  boxShadow: '0 3px 7px rgba(0,0,0,0.55)', pointerEvents: 'none', textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+};
+const faceAtk: React.CSSProperties = {
+  ...faceStat, left: '3.5%', color: '#ffe9b0', borderColor: '#e0b25a',
+  background: 'linear-gradient(180deg, rgba(150,110,50,0.96), rgba(90,62,26,0.96))',
+};
+const faceHp: React.CSSProperties = {
+  ...faceStat, right: '3.5%', color: '#ffe0e0', borderColor: '#f08a86',
+  background: 'linear-gradient(180deg, rgba(160,56,52,0.96), rgba(96,30,28,0.96))',
+};
+const faceDmg: React.CSSProperties = {
+  ...faceStat, right: '3.5%', color: '#ffe6d0', borderColor: '#ff9a5a',
+  background: 'linear-gradient(180deg, rgba(176,64,34,0.96), rgba(110,36,18,0.96))',
 };
 // The illustration is dropped INTO the frame's central carved opening (same coords as the hand card).
 const faceArt: React.CSSProperties = {
