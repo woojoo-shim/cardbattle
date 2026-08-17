@@ -3,7 +3,7 @@ import {
   COSMETICS, TITLES, PLAY_EFFECTS, ALL_DEFS, CARD_DEFS, CARD_PACKS, TRIBE_LABEL,
   type Cosmetic, type Title, type PlayEffect, type CardDef, type Rarity, type PackId, type PackDef,
 } from '@cardbattle/shared';
-import { buyCosmetic, equipCosmetic, openPack, type Account } from '../net/auth.js';
+import { buyCosmetic, equipCosmetic, openPack, openOwnedPack, type Account } from '../net/auth.js';
 import { playSfx } from '../audio/sfx.js';
 import { C, mono, sans, RARITY_BORDER, TRIBE_COLOR } from './theme.js';
 import { CardArt } from './art/CardArt.js';
@@ -149,8 +149,50 @@ function PackTab({ account, onAccount }: { account: Account; onAccount: (a: Acco
       .finally(() => setBusy(null));
   };
 
+  // Open a pack the account already OWNS (won as a match reward) — free, no gold spent.
+  const openOwned = (pack: PackDef) => {
+    if (busy !== null || remaining === 0) return;
+    if ((account.packs[pack.id] ?? 0) <= 0) return;
+    setBusy(pack.id); setErr(''); playSfx('select');
+    openOwnedPack(pack.id)
+      .then((res) => {
+        const def = CARD_DEFS[res.rolled];
+        onAccount(res);
+        if (def) setCeremony({ pack, def });
+      })
+      .catch((e: unknown) => setErr(e instanceof Error ? e.message : '오류'))
+      .finally(() => setBusy(null));
+  };
+
+  const ownedPacks = CARD_PACKS.filter((p) => (account.packs[p.id] ?? 0) > 0);
+
   return (
     <div style={packWrap}>
+      {ownedPacks.length > 0 && (
+        <div style={ownedPackBox}>
+          <span style={ownedPackTitle}>보유한 팩 · 승리 보상</span>
+          <div style={ownedPackRow}>
+            {ownedPacks.map((pack) => {
+              const st = PACK_STYLE[pack.id];
+              const count = account.packs[pack.id] ?? 0;
+              const disabled = busy !== null || remaining === 0;
+              return (
+                <div key={pack.id} style={packCard}>
+                  <div style={packArt(st)} className={busy === pack.id ? 'cb-box-shake' : 'cb-shop-float'}>
+                    <span style={packBadge(st)}>{st.label}</span>
+                    <span style={packSeal(st)}>✦</span>
+                    <span style={ownedPackCount}>×{count}</span>
+                  </div>
+                  <span style={previewName}>{pack.name}</span>
+                  <button className="cb-shop-btn" style={disabled ? boxBtnOff : equipBtn} disabled={disabled} onClick={() => openOwned(pack)}>
+                    {busy === pack.id ? '여는 중…' : '무료 개봉'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {remaining === 0 && <p style={packAllOwned}>모든 카드를 이미 보유했습니다.</p>}
       <div style={packRow}>
         {CARD_PACKS.map((pack) => {
@@ -319,6 +361,18 @@ function EffectTab({ account, owns, busy, act }: TabProps) {
 type PackVisual = { grad: string; border: string; glow: string; seal: string; label: string };
 const packWrap: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 };
 const packAllOwned: React.CSSProperties = { margin: 0, fontFamily: mono, fontSize: 12, color: C.dim, textAlign: 'center' };
+const ownedPackBox: React.CSSProperties = {
+  width: '100%', display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px',
+  borderRadius: 6, background: 'rgba(255,140,60,0.06)', border: '1px solid rgba(255,140,60,0.3)',
+};
+const ownedPackTitle: React.CSSProperties = {
+  fontFamily: mono, fontSize: 12, fontWeight: 800, letterSpacing: 1, color: '#ffb27a', textTransform: 'uppercase',
+};
+const ownedPackRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' };
+const ownedPackCount: React.CSSProperties = {
+  position: 'absolute', top: 6, right: 8, fontFamily: mono, fontWeight: 900, fontSize: 14,
+  color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+};
 const packRow: React.CSSProperties = {
   display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, width: '100%',
 };

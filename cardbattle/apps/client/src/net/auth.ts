@@ -25,6 +25,7 @@ export interface Account {
   decks: string[][];    // up to MAX_DECKS saved decks
   activeDeck: number;   // index of the deck used for matches
   deck: string[];       // resolved active deck (decks[activeDeck]) — the match draw pool
+  packs: Record<string, number>; // unopened win-reward packs by PackId
 }
 
 export function getToken(): string | null {
@@ -130,6 +131,12 @@ export interface PackOpenResult extends Account { rolled: string }
  *  tier's odds. Returns the updated account plus the rolled cardId. */
 export async function openPack(packId: string): Promise<PackOpenResult> {
   const acct = await authPost('/api/pack/open', { packId });
+  return acct as PackOpenResult;
+}
+/** Open a pack the account already OWNS (won as a match reward) — free, no gold spent. Returns the
+ *  updated account plus the rolled cardId. */
+export async function openOwnedPack(packId: string): Promise<PackOpenResult> {
+  const acct = await authPost('/api/pack/open-owned', { packId });
   return acct as PackOpenResult;
 }
 /** Save a deck into slot `index` (index === decks.length appends a new slot). */

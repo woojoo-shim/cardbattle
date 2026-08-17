@@ -121,7 +121,10 @@ export function App() {
     );
   }
   // Dropping `connect` unmounts Game → useRoom's cleanup leaves the room → back to the browser.
-  return <Game connect={connect} onExit={() => setConnect(null)} borderCosmetic={account.equippedBorder} coach={coach} matchmaking={matchmaking} />;
+  // Re-fetch the account on exit so post-match rewards (gold, won packs) show up immediately;
+  // fetchMe returns null for guests (no token) so their local account is left untouched.
+  const leave = () => { setConnect(null); fetchMe().then((a) => { if (a) setAccount(a); }); };
+  return <Game connect={connect} onExit={leave} borderCosmetic={account.equippedBorder} coach={coach} matchmaking={matchmaking} />;
 }
 
 function Game({ connect, onExit, borderCosmetic, coach, matchmaking }: { connect: Connect; onExit: () => void; borderCosmetic?: string; coach?: boolean; matchmaking?: boolean }) {
@@ -313,7 +316,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       token: '', username: '', display: `손님${Math.floor(1000 + Math.random() * 9000)}`,
       avatar, wins: 0, losses: 0, gold: 0,
       owned: [], equippedBorder: '', equippedTitle: '', equippedEffect: '',
-      ownedCards: [], decks: [], activeDeck: 0, deck: [],
+      ownedCards: [], decks: [], activeDeck: 0, deck: [], packs: {},
     });
   };
 

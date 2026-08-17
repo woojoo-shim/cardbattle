@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CardInstance, GameEvent } from '@cardbattle/shared';
-import { CARD_DEFS, requiresTarget, resolveMode, heroPowerFor, heroPowerNeedsTarget } from '@cardbattle/shared';
+import { CARD_DEFS, requiresTarget, resolveMode, heroPowerFor, heroPowerNeedsTarget, packById } from '@cardbattle/shared';
 import type { UiState, RoomError, LiveEmote, Reward } from '../state/useRoom.js';
 import { TopBar } from './TopBar.js';
 import { RoundTable, ENEMY_INTENT, type TargetIntent } from './RoundTable.js';
@@ -217,6 +217,12 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
               {reward.balance != null && (
                 <span style={rewardBalance}>보유 {reward.balance}</span>
               )}
+            </div>
+          )}
+          {reward && !reward.guest && reward.pack && (
+            <div style={packWon}>
+              <Icon name="burst" size={16} />
+              <span>{packById(reward.pack)?.name ?? '카드팩'} 획득! 상점에서 개봉하세요</span>
             </div>
           )}
           {reward && reward.guest && (
@@ -822,6 +828,11 @@ const rewardEarned: React.CSSProperties = { fontSize: 22, fontWeight: 900 };
 const rewardLabel: React.CSSProperties = { fontSize: 14, opacity: 0.8 };
 const rewardBalance: React.CSSProperties = { marginLeft: 6, paddingLeft: 10, fontSize: 13, color: C.dim, borderLeft: '1px solid rgba(255,255,255,0.14)' };
 const rewardGuest: React.CSSProperties = { margin: 0, color: C.dim, fontSize: 13, opacity: 0.8 };
+const packWon: React.CSSProperties = {
+  marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 8,
+  padding: '9px 16px', borderRadius: 4, fontFamily: mono, fontSize: 13, fontWeight: 700,
+  color: '#ffcfa0', background: 'rgba(255,140,60,0.10)', border: '1px solid rgba(255,140,60,0.35)',
+};
 const returnBtn: React.CSSProperties = {
   marginTop: 26, padding: '14px 28px', fontSize: 16, fontWeight: 700, letterSpacing: 0.5,
   color: '#eafff7', cursor: 'pointer', border: '1px solid #2a9e74', borderRadius: 4, fontFamily: sans,

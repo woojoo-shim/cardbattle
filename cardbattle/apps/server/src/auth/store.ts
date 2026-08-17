@@ -23,6 +23,7 @@ export interface UserRecord {
   ownedCards: string[];     // card ids the account has unlocked (all commons are free/default)
   decks: string[][];        // up to MAX_DECKS saved decks (each DECK_SIZE defIds, duplicates allowed)
   activeDeck: number;       // index into decks — the deck used when joining a match
+  packs: Record<string, number>; // unopened card packs by PackId (granted on match wins)
   devGranted?: boolean;     // true once the one-time dev-gold top-up has been applied
 }
 
@@ -47,6 +48,8 @@ function normalize(u: UserRecord): UserRecord {
   if (u.decks.length === 0) u.decks = [defaultDeck(u.ownedCards)];
   u.decks = u.decks.slice(0, MAX_DECKS).map((d) => sanitizeDeck(d, u.ownedCards));
   if (typeof u.activeDeck !== 'number' || u.activeDeck < 0 || u.activeDeck >= u.decks.length) u.activeDeck = 0;
+  // Unopened win-reward packs: older records lack the inventory.
+  if (!u.packs || typeof u.packs !== 'object') u.packs = {};
   delete (u as unknown as { deck?: string[] }).deck; // drop the legacy single-deck field
   return u;
 }
@@ -174,6 +177,24 @@ export function grantDevGold(username: string, amount: number): boolean {
   if (!rec || rec.devGranted) return false;
   rec.devGranted = true;
   if (rec.gold < amount) rec.gold = amount;
+  scheduleSave();
+  return true;
+}
+
+/** Grant one unopened pack (win reward). Mutates in place, persists. */
+export function grantPack(username: string, packId: string): void {
+  const rec = getUser(username);
+  if (!rec) return;
+  rec.packs[packId] = (rec.packs[packId] ?? 0) + 1;
+  scheduleSave();
+}
+
+/** Consume one unopened pack if the account has any. Returns true if one was spent. */
+export function consumePack(username: string, packId: string): boolean {
+  const rec = getUser(username);
+  if (!rec || (rec.packs[packId] ?? 0) <= 0) return false;
+  rec.packs[packId] -= 1;
+  if (rec.packs[packId] <= 0) delete rec.packs[packId];
   scheduleSave();
   return true;
 }

@@ -120,6 +120,7 @@ export interface Reward {
   balance: number | null;
   won: boolean;
   guest: boolean;
+  pack?: string | null; // PackId won on this match (winners only), else null
 }
 
 export interface UseRoom {

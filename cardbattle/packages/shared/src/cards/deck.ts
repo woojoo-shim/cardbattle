@@ -40,6 +40,20 @@ export function packById(id: string): PackDef | undefined {
   return CARD_PACKS.find((p) => p.id === id);
 }
 
+/** Odds (percent, sums to 100) for which pack tier a match WIN grants for free. */
+export const WIN_PACK_ODDS: Record<PackId, number> = { normal: 80, rare: 15, super: 5 };
+
+/** Roll one pack tier for a win reward, weighted by WIN_PACK_ODDS. `rand` yields [0,1). */
+export function rollPackTier(rand: () => number = Math.random): PackId {
+  const order: PackId[] = ['normal', 'rare', 'super'];
+  let roll = rand() * 100;
+  for (const id of order) {
+    roll -= WIN_PACK_ODDS[id];
+    if (roll < 0) return id;
+  }
+  return 'normal';
+}
+
 /** Roll one unowned card from a pack, weighted by the tier's rarity odds. Returns a cardId the
  *  account does NOT own, or null for an unknown pack / when every non-common card is already
  *  owned. `rand` yields [0,1). */

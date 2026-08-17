@@ -5,11 +5,11 @@ import {
   heroPowerFor, heroPowerNeedsTarget,
   type GameState, type Action, type GameEvent, type PlayerState, type MinionInstance, type GameModeId, type CardDef,
   MIN_PLAYERS, MAX_PLAYERS, RECONNECT_SECONDS, AUTOFILL_SECONDS,
-  BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID,
+  BOT_AVATAR, sanitizeAvatar, GOLD_WIN, GOLD_LOSS, GOLD_1V1_WIN, EMOTE_BY_ID, rollPackTier,
 } from '@cardbattle/shared';
 import { BattleState, syncToSchema } from '../schema/BattleState.js';
 import { me, accountFromToken } from '../auth/auth.js';
-import { recordMatch } from '../auth/store.js';
+import { recordMatch, grantPack } from '../auth/store.js';
 
 interface JoinOptions { name?: string; avatar?: string; token?: string; }
 interface CreateOptions { name?: string; title?: string; avatar?: string; token?: string; mode?: GameModeId; private?: boolean; }
@@ -520,8 +520,15 @@ export class BattleRoom extends Room<BattleState> {
       // Guests earn nothing but still get a reward card (0 gold) so the end screen reads the same.
       const balance = username ? recordMatch(username, won, gold) : null;
       const earned = username ? gold : 0;
+      // Every WIN grants one random unopened pack (normal 80% / rare 15% / super 5%). Logged-in
+      // seats only — guests aren't persisted so there's nowhere to keep the pack.
+      let pack: string | null = null;
+      if (won && username) {
+        pack = rollPackTier();
+        grantPack(username, pack);
+      }
       const client = this.clients.find((c) => c.sessionId === p.id);
-      client?.send('reward', { earned, balance, won, guest: !username });
+      client?.send('reward', { earned, balance, won, guest: !username, pack });
     }
   }
 

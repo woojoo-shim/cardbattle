@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'crypto';
-import { getUser, upsertUser, grantCosmetic, grantCard, grantDevGold, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
+import { getUser, upsertUser, grantCosmetic, grantCard, grantDevGold, consumePack, setDeck, setActiveDeck as setActiveDeckStore, deleteDeck as deleteDeckStore, setEquippedBorder, setEquippedTitle, setEquippedEffect, type UserRecord } from './store.js';
 import { sanitizeAvatar, DEFAULT_OWNED, cosmeticKind, cosmeticPrice, DEFAULT_CARDS, defaultDeck, cardPrice, isValidDeck, MAX_DECKS, packById, rollPackCard } from '@cardbattle/shared';
 
 // Zero-dependency auth: scrypt password hashing + HMAC-signed stateless tokens.
@@ -26,6 +26,7 @@ export interface AuthResult {
   wins: number; losses: number; gold: number; owned: string[];
   equippedBorder: string; equippedTitle: string; equippedEffect: string;
   ownedCards: string[]; decks: string[][]; activeDeck: number; deck: string[];
+  packs: Record<string, number>; // unopened win-reward packs by PackId
 }
 
 /** openPack() result: the updated account plus the cardId that was rolled (for the reveal). */
@@ -70,6 +71,7 @@ function toResult(rec: UserRecord, token: string): AuthResult {
     equippedBorder: rec.equippedBorder, equippedTitle: rec.equippedTitle, equippedEffect: rec.equippedEffect,
     ownedCards: rec.ownedCards, decks: rec.decks, activeDeck: rec.activeDeck,
     deck: rec.decks[rec.activeDeck] ?? [], // the resolved active deck (BattleRoom/match draw pool)
+    packs: rec.packs,
   };
 }
 
@@ -85,7 +87,7 @@ export function register(rawName: string, password: string, avatar: string): Aut
     avatar: sanitizeAvatar(avatar), createdAt: Date.now(), wins: 0, losses: 0,
     gold: STARTING_GOLD, owned: [...DEFAULT_OWNED], equippedBorder: 'none',
     equippedTitle: 'title_none', equippedEffect: 'fx_none',
-    ownedCards: [...DEFAULT_CARDS], decks: [defaultDeck()], activeDeck: 0,
+    ownedCards: [...DEFAULT_CARDS], decks: [defaultDeck()], activeDeck: 0, packs: {},
   };
   upsertUser(rec);
   if (DEV_GOLD_USERS.has(username)) grantDevGold(username, DEV_GOLD); // one-time owner top-up
@@ -172,6 +174,24 @@ export function openPack(token: string | undefined, packId: unknown): PackResult
   const rolled = rollPackCard(pack.id, rec.ownedCards);
   if (!rolled) throw new AuthError('모든 카드를 이미 보유하고 있습니다.');
   grantCard(username, rolled, pack.price);
+  return { ...toResult(rec, token!), rolled };
+}
+
+/** Open a pack the account already OWNS (won as a match reward) — free, no gold spent. Consumes
+ *  one pack of the tier, rolls one UNOWNED card, grants it. Returns the account + rolled cardId. */
+export function openOwnedPack(token: string | undefined, packId: unknown): PackResult {
+  const username = verifyToken(token);
+  if (!username) throw new AuthError('세션이 만료되었습니다.');
+  const rec = getUser(username);
+  if (!rec) throw new AuthError('세션이 만료되었습니다.');
+  if (typeof packId !== 'string') throw new AuthError('존재하지 않는 팩입니다.');
+  const pack = packById(packId);
+  if (!pack) throw new AuthError('존재하지 않는 팩입니다.');
+  if ((rec.packs[pack.id] ?? 0) <= 0) throw new AuthError('보유한 팩이 없습니다.');
+  const rolled = rollPackCard(pack.id, rec.ownedCards);
+  if (!rolled) throw new AuthError('모든 카드를 이미 보유하고 있습니다.');
+  consumePack(username, pack.id);
+  grantCard(username, rolled, 0); // free — already earned
   return { ...toResult(rec, token!), rolled };
 }
 
