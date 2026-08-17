@@ -152,19 +152,23 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 
               <label style={cap}>공개 설정</label>
               <div style={visRow}>
-                <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visBtn, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
-                  <Icon name="globe" size={15} />&nbsp;공개
+                <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visCard, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
+                  <span style={visHead}><Icon name="globe" size={16} />&nbsp;공개</span>
+                  <span style={visDesc}>로비 목록에 노출</span>
                 </button>
-                <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visBtn, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
-                  <Icon name="lock" size={15} />&nbsp;비공개
+                <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visCard, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
+                  <span style={visHead}><Icon name="lock" size={16} />&nbsp;비공개</span>
+                  <span style={visDesc}>코드로만 접속</span>
                 </button>
               </div>
-              <p style={visHint}>
-                {isPrivate ? '목록에 표시되지 않고 코드로만 접속' : '로비 목록에 공개로 노출됩니다'}
-              </p>
 
+              <label style={cap}>게임 규칙</label>
               <button className="cb-vis" data-on={showModes ? '1' : undefined} style={{ ...modeToggle, ...(showModes ? visBtnOn : null) }} onClick={toggleModes}>
-                <Icon name="sparkle" size={15} />&nbsp;게임 규칙 {showModes ? <><Icon name="chevronUp" size={13} /></> : <><Icon name="chevronDown" size={13} /></>}
+                <Icon name="sparkle" size={15} color={C.rare} />
+                <span style={modeToggleName}>{GAME_MODES[mode]?.name}</span>
+                <span style={{ flex: 1 }} />
+                <span style={modeToggleHint}>{showModes ? '접기' : '변경'}</span>
+                <Icon name={showModes ? 'chevronUp' : 'chevronDown'} size={14} />
               </button>
               {showModes && (
                 <div style={modeGrid}>
@@ -187,7 +191,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                   })}
                 </div>
               )}
-              <button className="cb-exec" style={primary} onClick={create}>방 만들기</button>
+              <button className="cb-exec" style={primary} onClick={create}><Icon name="swords" size={17} />&nbsp;방 만들기</button>
 
               <div style={sep}><span>코드로 참가</span></div>
               <div style={codeRow}>
@@ -368,21 +372,25 @@ const pipOn: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', b
 const pipOff: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: 'rgba(150,170,220,0.14)', border: '1px solid rgba(150,170,220,0.16)', boxSizing: 'border-box' };
 const rCountLbl: React.CSSProperties = { fontSize: 11, color: C.faint, letterSpacing: 0.5 };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
-const visBtn: React.CSSProperties = {
-  flex: 1, padding: '13px 14px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
-  borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
+const visCard: React.CSSProperties = {
+  flex: 1, display: 'flex', flexDirection: 'column', gap: 3, padding: '12px 14px', cursor: 'pointer', textAlign: 'left',
+  color: C.dim, letterSpacing: 0.3, borderRadius: 4, border: `1px solid ${C.border}`,
+  background: 'rgba(0,0,0,0.3)', fontFamily: sans,
   transition: 'border-color .12s, background .12s, color .12s',
 };
+const visHead: React.CSSProperties = { display: 'flex', alignItems: 'center', fontSize: 15, fontWeight: 700, letterSpacing: 0.5 };
+const visDesc: React.CSSProperties = { fontSize: 11.5, color: C.faint, letterSpacing: 0.2, lineHeight: 1.3 };
 const visBtnOn: React.CSSProperties = {
   color: C.rare, border: `1px solid ${C.borderHi}`, background: 'rgba(216,162,60,0.1)',
 };
-const visHint: React.CSSProperties = { margin: '-2px 0 2px', color: C.faint, fontSize: 13, lineHeight: 1.35, fontFamily: sans };
 const modeToggle: React.CSSProperties = {
-  marginTop: 4, padding: '13px 16px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
+  padding: '13px 16px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 4, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)', fontFamily: sans,
-  display: 'flex', alignItems: 'center', gap: 4,
+  display: 'flex', alignItems: 'center', gap: 8,
   transition: 'border-color .12s, color .12s, background .12s',
 };
+const modeToggleName: React.CSSProperties = { color: '#eef2fb', fontWeight: 700, letterSpacing: 0.5 };
+const modeToggleHint: React.CSSProperties = { fontSize: 12, color: C.faint, fontWeight: 600, letterSpacing: 0.5 };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
@@ -406,8 +414,11 @@ const field: React.CSSProperties = {
 const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const codeField: React.CSSProperties = { flex: 1, fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase' };
 const primary: React.CSSProperties = {
-  marginTop: 6, padding: '16px 20px', fontSize: 17, fontWeight: 700, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
-  border: '1px solid #b98a2c', borderRadius: 4, background: '#cf9a2f', fontFamily: sans,
+  marginTop: 8, padding: '16px 20px', fontSize: 17, fontWeight: 800, color: '#2a1a06', cursor: 'pointer', letterSpacing: 1,
+  border: '1px solid #e0b95c', borderRadius: 4, fontFamily: sans,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: 'linear-gradient(180deg, #e6b552, #cf9a2f)',
+  boxShadow: '0 8px 20px rgba(207,154,47,0.28), inset 0 1px 0 rgba(255,240,200,0.5)',
 };
 const ghost: React.CSSProperties = {
   padding: '15px 20px', fontSize: 15, fontWeight: 700, color: C.text, cursor: 'pointer', letterSpacing: 0.5,
