@@ -472,7 +472,7 @@ function CoachLayer({ isMyTurn, hasPending, played, ended, onDismiss }: {
         <p style={coachText}>{c.text}</p>
         {(c.point || stepNo > 0) && (
           <div style={coachFoot}>
-            <span style={coachPoint}>{c.point ?? ''}</span>
+            <span style={coachPoint} className={c.point ? 'cb-coach-point' : undefined}>{c.point ?? ''}</span>
             {stepNo > 0 && <span style={coachCount}>{stepNo} / 3</span>}
           </div>
         )}
@@ -847,9 +847,9 @@ const coachWrap: React.CSSProperties = {
   position: 'fixed', zIndex: 46, pointerEvents: 'none', maxWidth: 'min(340px, 88vw)',
 };
 const coachBubble: React.CSSProperties = {
-  pointerEvents: 'auto', padding: '12px 15px 13px', borderRadius: 3,
-  background: '#12151f', border: '1px solid rgba(90,110,150,0.3)', borderLeft: '3px solid #ffcf4d',
-  boxShadow: '0 12px 26px rgba(0,0,0,0.5)',
+  pointerEvents: 'auto', padding: '13px 16px 14px', borderRadius: 3,
+  background: '#12151f', border: '1px solid rgba(110,130,175,0.42)', borderLeft: '4px solid #ffcf4d',
+  boxShadow: '0 16px 36px rgba(0,0,0,0.62), 0 0 0 1px rgba(255,207,77,0.08), -6px 0 18px rgba(255,207,77,0.12)',
 };
 const coachHead: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 5 };
 // A big, bare serif numeral instead of a glowing circular badge.
@@ -859,14 +859,14 @@ const coachNum: React.CSSProperties = {
 };
 const coachMark: React.CSSProperties = { color: '#9a8558', alignSelf: 'center', flexShrink: 0, display: 'grid', placeItems: 'center' };
 const coachStepTag: React.CSSProperties = {
-  flex: 1, fontFamily: mono, fontSize: 10.5, fontWeight: 700, letterSpacing: 2, color: '#8f7f5c', textTransform: 'uppercase',
+  flex: 1, fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b09a6c', textTransform: 'uppercase',
 };
 const coachSkip: React.CSSProperties = {
   padding: 0, fontSize: 11, color: C.faint, cursor: 'pointer', border: 'none', background: 'transparent',
   fontFamily: sans, textDecoration: 'underline', textUnderlineOffset: 2,
 };
-const coachHeadline: React.CSSProperties = { margin: '0 0 4px', fontSize: 15.5, fontWeight: 700, lineHeight: 1.32, color: '#e7dcc4' };
-const coachText: React.CSSProperties = { margin: 0, fontSize: 12.5, lineHeight: 1.55, color: '#a99a7d' };
+const coachHeadline: React.CSSProperties = { margin: '0 0 4px', fontSize: 16.5, fontWeight: 700, lineHeight: 1.32, color: '#f2e9d3' };
+const coachText: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.55, color: '#b8aa8c' };
 // Footer: the directional hint (left) and a plain step counter (right), divided from the body by a hairline.
 const coachFoot: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
