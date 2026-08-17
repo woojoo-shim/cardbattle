@@ -229,6 +229,9 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
             {p.buildings.map((b) => {
               const def = CARD_DEFS[b.defId];
               const building = b.turnsLeft > 0;
+              const totalTurns = def?.building?.buildTurns ?? b.turnsLeft;
+              const doneTurns = Math.max(0, totalTurns - b.turnsLeft);
+              const progress = totalTurns > 0 ? doneTurns / totalTurns : 1;
               return (
                 <div
                   key={b.id}
@@ -237,16 +240,31 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                   style={{
                     ...buildingChip,
                     borderColor: building ? '#8a6a3a' : mine ? C.you : C.enemy,
-                    opacity: building ? 0.82 : 1,
+                    borderStyle: building ? 'dashed' : 'solid',
                     boxShadow: building ? '0 3px 8px rgba(0,0,0,0.5)' : `0 0 12px ${mine ? 'rgba(143,224,160,0.5)' : 'rgba(224,120,120,0.45)'}`,
                     zIndex: hoverMinion === b.id ? 30 : undefined,
                   }}
                 >
-                  <div style={buildingArtWindow}><CardArt id={b.defId} size="100%" /></div>
+                  <div style={buildingArtWindow}>
+                    <div style={{ width: '100%', height: '100%', filter: building ? 'grayscale(0.7) brightness(0.62)' : undefined }}>
+                      <CardArt id={b.defId} size="100%" />
+                    </div>
+                    {building && (
+                      <>
+                        <div style={scaffoldOverlay} aria-hidden />
+                        <span style={buildHammer} className="cb-build-hammer" aria-hidden>🔨</span>
+                      </>
+                    )}
+                  </div>
                   <span style={buildingName}>{def?.name}</span>
-                  {building
-                    ? <span style={buildConstruct}>🔨 {b.turnsLeft}턴</span>
-                    : <span style={buildActive}>가동</span>}
+                  {building ? (
+                    <>
+                      <span style={buildConstruct}>공사 중 · {b.turnsLeft}턴</span>
+                      <div style={buildBarTrack}>
+                        <div style={{ ...buildBarFill, width: `${Math.round(progress * 100)}%` }} />
+                      </div>
+                    </>
+                  ) : <span style={buildActive}>가동</span>}
                   {hoverMinion === b.id && def && (
                     <div style={minionTip}>
                       <span style={minionTipEdge} aria-hidden />
@@ -532,8 +550,29 @@ const buildingChip: React.CSSProperties = {
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
 const buildingArtWindow: React.CSSProperties = {
-  width: '78%', height: '58%', marginTop: '8%', borderRadius: 4, overflow: 'hidden',
+  position: 'relative', width: '78%', height: '58%', marginTop: '8%', borderRadius: 4, overflow: 'hidden',
   display: 'grid', placeItems: 'center',
+};
+// Under-construction dressing: caution-striped scaffolding over the darkened art + a bobbing hammer
+// + a build-progress bar, so a building visibly reads as a work-in-progress site (공사 중).
+const scaffoldOverlay: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none',
+  backgroundImage:
+    'repeating-linear-gradient(45deg, rgba(240,198,116,0.28) 0 6px, rgba(0,0,0,0) 6px 12px),' +
+    'linear-gradient(0deg, rgba(20,13,9,0.55), rgba(20,13,9,0.15))',
+  boxShadow: 'inset 0 0 0 1px rgba(240,198,116,0.4)',
+};
+const buildHammer: React.CSSProperties = {
+  position: 'absolute', right: 2, bottom: 1, fontSize: 15, lineHeight: 1,
+  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))', transformOrigin: '80% 80%',
+};
+const buildBarTrack: React.CSSProperties = {
+  width: '80%', height: 4, marginTop: 3, borderRadius: 999,
+  background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(240,198,116,0.35)', overflow: 'hidden',
+};
+const buildBarFill: React.CSSProperties = {
+  height: '100%', borderRadius: 999,
+  background: 'linear-gradient(90deg, #b8862f, #f0c674)', transition: 'width .25s ease',
 };
 const buildingName: React.CSSProperties = {
   fontFamily: sans, fontSize: 10, fontWeight: 800, color: '#e6d6b4', lineHeight: 1.05,
