@@ -102,19 +102,34 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
             </div>
             <div style={listBox}>
               {open.length === 0 && <p style={empty}>열린 방이 없습니다.<br />오른쪽에서 새 방을 만들어 보세요.</p>}
-              {open.map((r) => (
-                <button key={r.roomId} className="cb-room" style={roomRow} onClick={() => join(r.roomId)}>
-                  <span style={rMedallion} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
-                    <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={18} color={C.rare} />
-                  </span>
-                  <span style={rTitleCol}>
-                    <span style={rTitle}>{r.metadata?.title || '제목 없음'}</span>
-                    <span style={rMeta}><span style={rCode}>#{r.metadata?.code}</span> · {GAME_MODES[r.metadata?.mode ?? 'standard']?.name}</span>
-                  </span>
-                  <span style={rCount}>{headcount(r)}/{r.maxClients}</span>
-                  <span className="cb-go" style={rGo}>참가&nbsp;<Icon name="arrowRight" size={13} /></span>
-                </button>
-              ))}
+              {open.map((r) => {
+                const filled = headcount(r);
+                const cap = r.maxClients;
+                const nearFull = filled >= cap - 1;
+                return (
+                  <button key={r.roomId} className="cb-room" style={roomRow} onClick={() => join(r.roomId)}>
+                    <span style={rMedallion} title={GAME_MODES[r.metadata?.mode ?? 'standard']?.name}>
+                      <Icon name={MODE_ICON[r.metadata?.mode ?? 'standard']} size={18} color={C.rare} />
+                    </span>
+                    <span style={rTitleCol}>
+                      <span style={rTitleRow}>
+                        <span style={rTitle}>{r.metadata?.title || '제목 없음'}</span>
+                        {nearFull && <span style={nearFullPill}>마감 임박</span>}
+                      </span>
+                      <span style={rMeta}><span style={rCode}>#{r.metadata?.code}</span> · {GAME_MODES[r.metadata?.mode ?? 'standard']?.name}</span>
+                    </span>
+                    <span style={rCountCol}>
+                      <span style={seatPips} aria-hidden>
+                        {Array.from({ length: cap }, (_, i) => (
+                          <span key={i} style={i < filled ? pipOn : pipOff} />
+                        ))}
+                      </span>
+                      <span style={rCount}>{filled}/{cap} <span style={rCountLbl}>좌석</span></span>
+                    </span>
+                    <span className="cb-go" style={rGo}>참가&nbsp;<Icon name="arrowRight" size={13} /></span>
+                  </button>
+                );
+              })}
             </div>
           </section>
 
@@ -339,8 +354,19 @@ const rMedallion: React.CSSProperties = {
   border: '1px solid rgba(120,90,190,0.55)', boxShadow: 'inset 0 1px 0 rgba(200,180,255,0.14)',
 };
 const rTitleCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' };
-const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rTitleRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' };
+const rTitle: React.CSSProperties = { fontWeight: 600, fontSize: 16, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const nearFullPill: React.CSSProperties = {
+  flexShrink: 0, fontSize: 10.5, fontWeight: 700, letterSpacing: 0.5, color: '#ffd27a',
+  background: 'rgba(224,120,40,0.16)', border: '1px solid rgba(224,140,50,0.42)', borderRadius: 3,
+  padding: '2px 7px', fontFamily: sans,
+};
 const rMeta: React.CSSProperties = { fontSize: 12, color: C.faint, fontFamily: mono, letterSpacing: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rCountCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 };
+const seatPips: React.CSSProperties = { display: 'flex', gap: 3 };
+const pipOn: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: C.rare, boxShadow: '0 0 5px rgba(224,165,60,0.55)' };
+const pipOff: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: 'rgba(150,170,220,0.14)', border: '1px solid rgba(150,170,220,0.16)', boxSizing: 'border-box' };
+const rCountLbl: React.CSSProperties = { fontSize: 11, color: C.faint, letterSpacing: 0.5 };
 const visRow: React.CSSProperties = { display: 'flex', gap: 10 };
 const visBtn: React.CSSProperties = {
   flex: 1, padding: '13px 14px', fontSize: 15, fontWeight: 700, color: C.dim, cursor: 'pointer', letterSpacing: 0.5,
