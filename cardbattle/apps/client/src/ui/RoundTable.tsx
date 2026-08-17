@@ -213,16 +213,16 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
         );
       })}
 
-      {/* Each player's buildings sit BEHIND them (away from the table centre) as a small rank of
-          structures — under construction (hammer + turns left) or active (glowing). */}
+      {/* Each player's buildings sit to the RIGHT of them as a small rank of structures —
+          under construction (hammer + turns left) or active (glowing). */}
       {ring.map((p, i) => {
         if (!p.alive || !p.buildings || p.buildings.length === 0) return null;
         const k = ((i - myRing) % n + n) % n;
         const theta = ((90 + k * (360 / n)) * Math.PI) / 180;
         const sLeft = CX + RX * Math.cos(theta);
         const sTop = CY + RY * Math.sin(theta);
-        const bLeft = sLeft * 1.12 - CX * 0.12; // pushed out behind the player, off the felt edge
-        const bTop = sTop * 1.12 - CY * 0.12;
+        const bLeft = sLeft + 11; // parked just to the right of the player's seat
+        const bTop = sTop;
         const mine = p.id === myId;
         return (
           <div key={`bld-${p.id}`} style={{ ...buildingRow, left: `${bLeft}%`, top: `${bTop}%` }}>
