@@ -35,7 +35,7 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
 ];
 
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
-const INTRO_SEEN_KEY = 'cb_intro_v3';
+const INTRO_SESSION_KEY = 'cb_intro_session';
 
 export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultiplayer, onLogout }: Props) {
   const [hover, setHover] = useState<ItemKey | null>(null);
@@ -44,12 +44,16 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
-  // First-timers are dropped straight into the guided practice match so they can learn by playing.
-  // A localStorage flag keeps this from firing on every visit; 플레이 방법 replays the same game after.
+  // A player with no games yet is dropped straight into the guided practice match so they learn by
+  // playing — no need to press 플레이 방법. Gated per browser session (not a one-time flag) so it keeps
+  // greeting fresh accounts/guests, but won't relaunch every time they return to the menu this session.
+  // 플레이 방법 replays it any time.
   useEffect(() => {
+    const fresh = account.wins === 0 && account.losses === 0;
+    if (!fresh) return;
     try {
-      if (!localStorage.getItem(INTRO_SEEN_KEY)) { localStorage.setItem(INTRO_SEEN_KEY, '1'); onStartCoach(); }
-    } catch { /* private mode / storage disabled: just skip the auto-launch */ }
+      if (!sessionStorage.getItem(INTRO_SESSION_KEY)) { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); onStartCoach(); }
+    } catch { onStartCoach(); }
   }, []);
 
   const act = (k: ItemKey) => {
