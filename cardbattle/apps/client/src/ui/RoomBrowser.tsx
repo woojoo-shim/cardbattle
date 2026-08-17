@@ -193,7 +193,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
               )}
               <button className="cb-exec" style={primary} onClick={create}><Icon name="swords" size={17} />&nbsp;방 만들기</button>
 
-              <div style={sep}><span>코드로 참가</span></div>
+              <div style={sep}><span style={sepRule} /><span style={sepLabel}>코드로 참가</span><span style={sepRule} /></div>
               <div style={codeRow}>
                 <input
                   className="cb-input"
@@ -207,7 +207,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                 <button className="cb-ghost" style={ghost} onClick={joinByCode}>참가</button>
               </div>
 
-              <div style={sep}><span>연습</span></div>
+              <div style={sep}><span style={sepRule} /><span style={sepLabel}>연습</span><span style={sepRule} /></div>
               <button className="cb-ghost" style={ghost} onClick={quick}><Icon name="bolt" size={15} />&nbsp;봇과 빠른 대전</button>
 
               {err && <p style={errLine}>{err}</p>}
@@ -343,7 +343,7 @@ const winBar: React.CSSProperties = {
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
 const cap: React.CSSProperties = {
-  fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, color: C.dim, marginTop: 4,
+  fontFamily: sans, fontSize: 14, fontWeight: 700, letterSpacing: 0.5, color: '#c7d0e2', marginTop: 8, marginBottom: 1,
 };
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 280, maxHeight: '56vh', overflowY: 'auto', padding: '14px 18px 18px' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 15, fontFamily: sans, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
@@ -365,7 +365,7 @@ const nearFullPill: React.CSSProperties = {
   background: 'rgba(224,120,40,0.16)', border: '1px solid rgba(224,140,50,0.42)', borderRadius: 3,
   padding: '2px 7px', fontFamily: sans,
 };
-const rMeta: React.CSSProperties = { fontSize: 12, color: C.faint, fontFamily: mono, letterSpacing: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rMeta: React.CSSProperties = { fontSize: 12.5, color: C.dim, fontFamily: mono, letterSpacing: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const rCountCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 };
 const seatPips: React.CSSProperties = { display: 'flex', gap: 3 };
 const pipOn: React.CSSProperties = { width: 6, height: 6, borderRadius: '50%', background: C.rare, boxShadow: '0 0 5px rgba(224,165,60,0.55)' };
@@ -379,7 +379,7 @@ const visCard: React.CSSProperties = {
   transition: 'border-color .12s, background .12s, color .12s',
 };
 const visHead: React.CSSProperties = { display: 'flex', alignItems: 'center', fontSize: 15, fontWeight: 700, letterSpacing: 0.5 };
-const visDesc: React.CSSProperties = { fontSize: 11.5, color: C.faint, letterSpacing: 0.2, lineHeight: 1.3 };
+const visDesc: React.CSSProperties = { fontSize: 12.5, color: C.dim, letterSpacing: 0.2, lineHeight: 1.35 };
 const visBtnOn: React.CSSProperties = {
   color: C.rare, border: `1px solid ${C.borderHi}`, background: 'rgba(216,162,60,0.1)',
 };
@@ -426,8 +426,13 @@ const ghost: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 };
 const sep: React.CSSProperties = {
-  textAlign: 'center', color: C.faint, fontSize: 12, margin: '10px 0 2px', fontFamily: sans,
-  letterSpacing: 2, textTransform: 'uppercase',
+  display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0 6px',
+};
+const sepRule: React.CSSProperties = {
+  flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(150,170,220,0.24), transparent)',
+};
+const sepLabel: React.CSSProperties = {
+  fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 1, color: '#aeb8cc', whiteSpace: 'nowrap',
 };
 const errLine: React.CSSProperties = { margin: '2px 0 0', color: C.enemy, fontSize: 14, textAlign: 'center', fontFamily: sans };
 const topBar: React.CSSProperties = {
