@@ -77,7 +77,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
     playSfx(k === 'logout' ? 'back' : 'select');
     if (k === 'start') onStart();
     else if (k === 'multi') onMultiplayer();
-    else if (k === 'how') onStartCoach();
+    else if (k === 'how') setGuideStep(0);
     else if (k === 'deck') setDeckOpen(true);
     else if (k === 'shop') setShopOpen(true);
     else if (k === 'credits') setCreditsOpen(true);
