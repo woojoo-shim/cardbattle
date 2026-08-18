@@ -41,11 +41,11 @@ const INTRO_SESSION_KEY = 'cb_intro_session';
 // through the menu itself — each step spotlights one option and explains it, ending with an invite to
 // try the guided practice match. The last step's button is what actually launches the coach game.
 const GUIDE_STEPS: { target: ItemKey | null; title: string; text: string; final?: boolean }[] = [
-  { target: null, title: '심연의 투기장에 오신 걸 환영해요', text: '먼저 주요 메뉴를 하나씩 짚어드릴게요. 화살표를 눌러 천천히 따라와 주세요.' },
-  { target: 'start', title: '① 대전 찾기', text: '버튼 한 번이면 상대를 자동으로 찾아 1대1 대전이 시작돼요. 상대가 없으면 봇이 자리를 채웁니다.' },
-  { target: 'multi', title: '② 친구와 대전', text: '방을 만들어 코드를 공유하면 친구와 직접 붙을 수 있어요.' },
-  { target: 'deck', title: '③ 덱 편성', text: '카드를 모아 나만의 덱을 짜면 대전이 훨씬 유리해져요.' },
-  { target: 'how', title: '④ 플레이 방법', text: '봇과의 연습 대전에서 카드 내는 법을 직접 익혀보세요. 준비됐다면 지금 바로 시작할까요?', final: true },
+  { target: null, title: '환영합니다!', text: '처음이시죠? 어떤 버튼이 무슨 역할인지 하나씩 알려드릴게요.\n아래 «다음» 버튼을 눌러 따라와 주세요.' },
+  { target: 'start', title: '① 대전 찾기', text: '누르면 곧바로 다른 사람과 1대1 대결이 시작돼요.\n상대가 없으면 컴퓨터(봇)가 대신 상대해 줍니다.' },
+  { target: 'multi', title: '② 친구와 대전', text: '방을 만들면 코드가 나와요.\n그 코드를 친구에게 보내면 같이 대결할 수 있어요.' },
+  { target: 'deck', title: '③ 덱 편성', text: '내가 쓸 카드 묶음을 「덱」이라고 해요.\n좋은 카드를 모아 덱을 짜면 대결이 훨씬 쉬워져요.' },
+  { target: 'how', title: '④ 플레이 방법', text: '컴퓨터랑 연습 대결을 하면서 직접 배워봐요.\n한 판만 해보면 금방 익숙해져요. 지금 해볼까요?', final: true },
 ];
 
 export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultiplayer, onLogout }: Props) {
@@ -459,39 +459,39 @@ const guideWrap: React.CSSProperties = {
   paddingRight: 'clamp(24px, 5vw, 90px)', pointerEvents: 'none',
 };
 const guideCard: React.CSSProperties = {
-  pointerEvents: 'auto', width: 'min(470px, 92vw)', padding: '16px 20px 18px', borderRadius: 8,
+  pointerEvents: 'auto', width: 'min(540px, 92vw)', padding: '20px 26px 22px', borderRadius: 8,
   background: '#12161f', border: `1px solid ${C.border}`, borderTop: '3px solid #e0a53c',
   boxShadow: '0 22px 50px rgba(0,0,0,0.62)',
 };
 const guideHead: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6,
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8,
 };
 const guideKicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#c79a4e', textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 12.5, fontWeight: 700, letterSpacing: 2, color: '#c79a4e', textTransform: 'uppercase',
 };
 const guideSkip: React.CSSProperties = {
-  padding: '4px 10px', fontSize: 12, fontWeight: 700, color: C.faint, cursor: 'pointer',
+  padding: '6px 13px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
   border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: sans, background: 'transparent',
 };
 const guidePoint: React.CSSProperties = {
-  display: 'inline-block', fontFamily: mono, fontSize: 12, letterSpacing: 0.3, color: '#e0a53c', marginBottom: 6,
+  display: 'inline-block', fontFamily: sans, fontSize: 14, fontWeight: 700, letterSpacing: 0.3, color: '#e0a53c', marginBottom: 8,
 };
 const guideTitle: React.CSSProperties = {
-  margin: '0 0 5px', fontSize: 18, fontWeight: 800, color: '#f2e9d3', letterSpacing: 0.3,
+  margin: '0 0 8px', fontSize: 24, fontWeight: 800, color: '#f6efdb', letterSpacing: 0.3,
 };
-const guideText: React.CSSProperties = { margin: 0, fontSize: 13.5, lineHeight: 1.55, color: '#c3ccdb' };
+const guideText: React.CSSProperties = { margin: 0, fontSize: 17, lineHeight: 1.65, color: '#d3dae6', whiteSpace: 'pre-line' };
 const guideFoot: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14,
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 20,
 };
 const guideDots: React.CSSProperties = { display: 'flex', gap: 6 };
 function guideDot(on: boolean): React.CSSProperties {
   return {
-    width: on ? 18 : 7, height: 7, borderRadius: 4,
+    width: on ? 20 : 8, height: 8, borderRadius: 4,
     background: on ? '#e0a53c' : 'rgba(224,165,60,0.28)', transition: 'width .2s ease, background .2s ease',
   };
 }
 const guidePrimary: React.CSSProperties = {
-  padding: '9px 20px', fontSize: 14, fontWeight: 800, color: '#2a1a06', cursor: 'pointer',
+  padding: '12px 26px', fontSize: 16, fontWeight: 800, color: '#2a1a06', cursor: 'pointer',
   border: '1px solid #e0b95c', borderRadius: 4, fontFamily: sans,
   background: 'linear-gradient(180deg, #e6b552, #cf9a2f)',
   boxShadow: '0 6px 16px rgba(207,154,47,0.28), inset 0 1px 0 rgba(255,240,200,0.5)',
