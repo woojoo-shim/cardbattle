@@ -14,6 +14,18 @@ createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictM
 
 // Register the service worker so the game can be installed as an app (PWA).
 if ('serviceWorker' in navigator) {
+  // When a freshly deployed service worker takes control (our sw.js calls
+  // skipWaiting + clients.claim on activate), reload once so the page runs the
+  // NEW bundle immediately instead of the stale cached one — otherwise a shipped
+  // UI change (e.g. the menu guide) only shows up after a manual hard-refresh.
+  // Guarded so first install (no prior controller) and repeat fires don't loop.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
