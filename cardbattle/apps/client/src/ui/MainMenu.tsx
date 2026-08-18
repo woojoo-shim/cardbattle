@@ -37,24 +37,41 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
 const INTRO_SESSION_KEY = 'cb_intro_session';
 
+// The first-run MENU GUIDE. Instead of yanking a newcomer straight into a practice room, we walk them
+// through the menu itself — each step spotlights one option and explains it, ending with an invite to
+// try the guided practice match. The last step's button is what actually launches the coach game.
+const GUIDE_STEPS: { target: ItemKey | null; title: string; text: string; final?: boolean }[] = [
+  { target: null, title: '심연의 투기장에 오신 걸 환영해요', text: '먼저 주요 메뉴를 하나씩 짚어드릴게요. 화살표를 눌러 천천히 따라와 주세요.' },
+  { target: 'start', title: '① 대전 찾기', text: '버튼 한 번이면 상대를 자동으로 찾아 1대1 대전이 시작돼요. 상대가 없으면 봇이 자리를 채웁니다.' },
+  { target: 'multi', title: '② 친구와 대전', text: '방을 만들어 코드를 공유하면 친구와 직접 붙을 수 있어요.' },
+  { target: 'deck', title: '③ 덱 편성', text: '카드를 모아 나만의 덱을 짜면 대전이 훨씬 유리해져요.' },
+  { target: 'how', title: '④ 플레이 방법', text: '봇과의 연습 대전에서 카드 내는 법을 직접 익혀보세요. 준비됐다면 지금 바로 시작할까요?', final: true },
+];
+
 export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultiplayer, onLogout }: Props) {
   const [hover, setHover] = useState<ItemKey | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
   const [deckOpen, setDeckOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [guideStep, setGuideStep] = useState<number | null>(null);
 
-  // A player with no games yet is dropped straight into the guided practice match so they learn by
-  // playing — no need to press 플레이 방법. Gated per browser session (not a one-time flag) so it keeps
-  // greeting fresh accounts/guests, but won't relaunch every time they return to the menu this session.
-  // 플레이 방법 replays it any time.
+  // A player with no games yet gets a guided tour OF THE MENU (not thrown into a match) so they learn
+  // where everything is first — and only start the practice when they choose to on the final step.
+  // Gated per browser session (not a one-time flag) so it keeps greeting fresh accounts/guests, but
+  // won't relaunch every time they return to the menu this session. 플레이 방법 replays the practice.
   useEffect(() => {
     const fresh = account.wins === 0 && account.losses === 0;
     if (!fresh) return;
     try {
-      if (!sessionStorage.getItem(INTRO_SESSION_KEY)) { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); onStartCoach(); }
-    } catch { onStartCoach(); }
+      if (!sessionStorage.getItem(INTRO_SESSION_KEY)) { sessionStorage.setItem(INTRO_SESSION_KEY, '1'); setGuideStep(0); }
+    } catch { setGuideStep(0); }
   }, []);
+
+  const guideTarget = guideStep !== null ? GUIDE_STEPS[guideStep].target : null;
+  const nextGuide = () => { playSfx('select'); setGuideStep((s) => (s === null ? null : Math.min(s + 1, GUIDE_STEPS.length - 1))); };
+  const endGuide = () => { playSfx('back'); setGuideStep(null); };
+  const startPractice = () => { setGuideStep(null); onStartCoach(); };
 
   const act = (k: ItemKey) => {
     playSfx(k === 'logout' ? 'back' : 'select');
@@ -94,12 +111,14 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
 
         <nav style={menu}>
           {ITEMS.map((it) => {
-            const on = hover === it.key;
+            const guided = guideTarget === it.key;
+            const on = hover === it.key || guided;
             const danger = it.key === 'logout';
             return (
               <button
                 key={it.key}
-                style={menuItem(on, danger)}
+                style={{ ...menuItem(on, danger), ...(guided ? menuHi : null) }}
+                className={guided ? 'cb-guide-hi' : undefined}
                 onClick={() => act(it.key)}
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
@@ -117,6 +136,10 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
 
       {/* a fanned hand of real cards filling the right half — the menu reads as a CARD game at a glance */}
       <HeroFan />
+
+      {guideStep !== null && (
+        <MenuGuide step={guideStep} onNext={nextGuide} onSkip={endGuide} onStart={startPractice} />
+      )}
 
       {shopOpen && <Shop account={account} onAccount={onAccount} onClose={() => setShopOpen(false)} />}
       {deckOpen && <DeckBuilder account={account} onAccount={onAccount} onClose={() => setDeckOpen(false)} />}
@@ -186,6 +209,37 @@ function CoachInvite({ onClose, onStart }: { onClose: () => void; onStart: () =>
         </p>
         <button style={creditsClose} onClick={() => { playSfx('select'); onStart(); }}>게임하며 배우기</button>
         <button style={inviteGhost} onClick={() => { playSfx('back'); onClose(); }}>둘러보기</button>
+      </div>
+    </div>
+  );
+}
+
+// The first-run menu tour. A callout pinned to the bottom-centre that steps through the menu, while
+// the option it's describing pulses on the left (cb-guide-hi). The final step launches the practice.
+function MenuGuide({ step, onNext, onSkip, onStart }: {
+  step: number; onNext: () => void; onSkip: () => void; onStart: () => void;
+}) {
+  const s = GUIDE_STEPS[step];
+  const last = step === GUIDE_STEPS.length - 1;
+  const targetLabel = s.target ? ITEMS.find((i) => i.key === s.target)?.label : null;
+  return (
+    <div style={guideWrap}>
+      <div style={guideCard} className="cb-guide-in" key={step}>
+        <div style={guideHead}>
+          <span style={guideKicker}>가이드 {step + 1} / {GUIDE_STEPS.length}</span>
+          <button style={guideSkip} onClick={onSkip}>건너뛰기</button>
+        </div>
+        {targetLabel && <span style={guidePoint} className="cb-guide-arrow">←&nbsp;왼쪽 메뉴 «{targetLabel}»</span>}
+        <h3 style={guideTitle}>{s.title}</h3>
+        <p style={guideText}>{s.text}</p>
+        <div style={guideFoot}>
+          <div style={guideDots}>
+            {GUIDE_STEPS.map((_, i) => <span key={i} style={guideDot(i === step)} />)}
+          </div>
+          {last
+            ? <button style={guidePrimary} onClick={onStart}>지금 해보기</button>
+            : <button style={guidePrimary} onClick={onNext}>다음&nbsp;→</button>}
+        </div>
       </div>
     </div>
   );
@@ -300,6 +354,21 @@ const heroCss = `
 @media (max-width: 1600px) { .cb-hero-fan { transform: scale(0.85); } }
 @media (max-width: 1360px) { .cb-hero-fan { transform: scale(0.7); } }
 @media (max-width: 1150px) { .cb-hero-fan { transform: scale(0.58); } }
+.cb-guide-hi { animation: cb-guide-hi 1.3s ease-in-out infinite; }
+@keyframes cb-guide-hi {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(224,165,60,0.35), 0 0 16px rgba(224,165,60,0.16); }
+  50%      { box-shadow: 0 0 0 1px rgba(224,165,60,0.7),  0 0 30px rgba(224,165,60,0.42); }
+}
+.cb-guide-in { animation: cb-guide-in 0.36s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
+@keyframes cb-guide-in {
+  0%   { transform: translateY(16px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.cb-guide-arrow { animation: cb-guide-arrow 1.2s ease-in-out infinite; }
+@keyframes cb-guide-arrow {
+  0%, 100% { transform: translateX(0); opacity: 0.75; }
+  50%      { transform: translateX(-5px); opacity: 1; }
+}
 `;
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
@@ -322,6 +391,10 @@ function menuItem(on: boolean, danger: boolean): React.CSSProperties {
     transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
 }
+// The pill applied to whichever menu item the guide is currently spotlighting.
+const menuHi: React.CSSProperties = {
+  background: 'rgba(224,165,60,0.10)', borderRadius: 8, paddingRight: 16,
+};
 // The label + its hover caret. Relative so the caret can hang off the label's left edge without
 // nudging the label off-centre.
 const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
@@ -374,4 +447,52 @@ const creditsClose: React.CSSProperties = {
 const inviteGhost: React.CSSProperties = {
   marginTop: 8, padding: '8px 20px', fontSize: 13, fontWeight: 700, color: C.dim, cursor: 'pointer',
   border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: sans, background: 'transparent',
+};
+
+// The menu-guide callout, pinned bottom-centre. Pointer-transparent wrapper so the highlighted menu
+// item behind it stays hoverable; only the card itself takes clicks.
+const guideWrap: React.CSSProperties = {
+  // Pinned to the RIGHT half (over the decorative fan) so the left menu column it points at is never
+  // covered — whichever item is highlighted stays fully visible while the callout explains it.
+  position: 'fixed', right: 0, bottom: 'clamp(24px, 5vh, 60px)', zIndex: 62,
+  maxWidth: '54vw', display: 'flex', justifyContent: 'flex-end',
+  paddingRight: 'clamp(24px, 5vw, 90px)', pointerEvents: 'none',
+};
+const guideCard: React.CSSProperties = {
+  pointerEvents: 'auto', width: 'min(470px, 92vw)', padding: '16px 20px 18px', borderRadius: 8,
+  background: '#12161f', border: `1px solid ${C.border}`, borderTop: '3px solid #e0a53c',
+  boxShadow: '0 22px 50px rgba(0,0,0,0.62)',
+};
+const guideHead: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 6,
+};
+const guideKicker: React.CSSProperties = {
+  fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#c79a4e', textTransform: 'uppercase',
+};
+const guideSkip: React.CSSProperties = {
+  padding: '4px 10px', fontSize: 12, fontWeight: 700, color: C.faint, cursor: 'pointer',
+  border: `1px solid ${C.border}`, borderRadius: 4, fontFamily: sans, background: 'transparent',
+};
+const guidePoint: React.CSSProperties = {
+  display: 'inline-block', fontFamily: mono, fontSize: 12, letterSpacing: 0.3, color: '#e0a53c', marginBottom: 6,
+};
+const guideTitle: React.CSSProperties = {
+  margin: '0 0 5px', fontSize: 18, fontWeight: 800, color: '#f2e9d3', letterSpacing: 0.3,
+};
+const guideText: React.CSSProperties = { margin: 0, fontSize: 13.5, lineHeight: 1.55, color: '#c3ccdb' };
+const guideFoot: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14,
+};
+const guideDots: React.CSSProperties = { display: 'flex', gap: 6 };
+function guideDot(on: boolean): React.CSSProperties {
+  return {
+    width: on ? 18 : 7, height: 7, borderRadius: 4,
+    background: on ? '#e0a53c' : 'rgba(224,165,60,0.28)', transition: 'width .2s ease, background .2s ease',
+  };
+}
+const guidePrimary: React.CSSProperties = {
+  padding: '9px 20px', fontSize: 14, fontWeight: 800, color: '#2a1a06', cursor: 'pointer',
+  border: '1px solid #e0b95c', borderRadius: 4, fontFamily: sans,
+  background: 'linear-gradient(180deg, #e6b552, #cf9a2f)',
+  boxShadow: '0 6px 16px rgba(207,154,47,0.28), inset 0 1px 0 rgba(255,240,200,0.5)',
 };
