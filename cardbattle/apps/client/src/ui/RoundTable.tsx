@@ -246,7 +246,7 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                   }}
                 >
                   <div style={buildingArtWindow}>
-                    <div style={{ width: '100%', height: '100%', filter: building ? 'grayscale(0.7) brightness(0.62)' : undefined }}>
+                    <div style={{ width: '100%', height: '100%', filter: building ? 'grayscale(0.2) brightness(0.9)' : undefined }}>
                       <CardArt id={b.defId} size="100%" />
                     </div>
                     {building && (
@@ -558,8 +558,8 @@ const buildingArtWindow: React.CSSProperties = {
 const scaffoldOverlay: React.CSSProperties = {
   position: 'absolute', inset: 0, pointerEvents: 'none',
   backgroundImage:
-    'repeating-linear-gradient(45deg, rgba(240,198,116,0.28) 0 6px, rgba(0,0,0,0) 6px 12px),' +
-    'linear-gradient(0deg, rgba(20,13,9,0.55), rgba(20,13,9,0.15))',
+    'repeating-linear-gradient(45deg, rgba(240,198,116,0.26) 0 6px, rgba(0,0,0,0) 6px 12px),' +
+    'linear-gradient(0deg, rgba(20,13,9,0.32), rgba(20,13,9,0.04))',
   boxShadow: 'inset 0 0 0 1px rgba(240,198,116,0.4)',
 };
 const buildHammer: React.CSSProperties = {
