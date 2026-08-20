@@ -189,8 +189,16 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
           z = 2 + Math.round(m * 2);
         }
 
+        // While a card is lifted (hover/proximity) or being dragged, PAUSE the idle 3D float so the
+        // big readable hover transform isn't disturbed by the bob; resting cards keep floating.
+        const floating = !(isHover || m > 0.06 || drag?.id === c.id);
+
         return (
           <div key={c.id} className="cb-hand-deal" style={{ ...dealSlot, animationDelay: `${i * 260}ms`, zIndex: z }}>
+            <div
+              className={floating ? 'cb-card-float' : undefined}
+              style={{ ...floatWrap, animationDelay: `${(i % 5) * 620}ms`, transform: floating ? undefined : 'none' }}
+            >
             <button
               className="cb-hand-card"
               disabled={!enabled}
@@ -359,6 +367,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
               <div style={{ ...pillVal, ...pill.style }}>{pill.label}</div>
               {hasTaunt && <TauntFrame color={RARITY_BORDER[def.rarity] ?? C.border} style={{ zIndex: 2 }} />}
             </button>
+            </div>
           </div>
         );
       })}
@@ -392,6 +401,10 @@ const fan: React.CSSProperties = {
 // The animated deal slot owns the fan overlap + stacking; the button inside owns the fan
 // rotation and hover lift, so the entrance animation never fights the hover transform.
 const dealSlot: React.CSSProperties = { position: 'relative', margin: '0 -14px', display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 90%' };
+// A thin wrapper that carries ONLY the idle 3D float, so the card gently bobs/turns as a physical
+// object while the button inside keeps full ownership of the hover/proximity lift transform. Its
+// own perspective() (baked into the keyframe) makes the tilt read in 3D regardless of ancestors.
+const floatWrap: React.CSSProperties = { display: 'flex', alignItems: 'flex-end', transformOrigin: '50% 85%' };
 const card: React.CSSProperties = {
   // Width scales with the viewport; the ornate stone card frame is a 2:3 PNG, so the card locks
   // to that ratio and the artwork/nameplate are positioned INTO the frame's carved openings.

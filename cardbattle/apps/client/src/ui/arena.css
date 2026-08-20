@@ -648,6 +648,16 @@
    rarest cards shimmer even at rest — a constant tell that they're special. */
 @keyframes cb-foil { 0% { background-position: 210% 0; } 100% { background-position: -70% 0; } }
 .cb-foil { background-size: 230% 100%; background-position: 210% 0; animation: cb-foil 5s linear infinite; }
+/* Resting hand cards sit as real 3D objects (a slight backward tilt under the fan's perspective)
+   and gently float — bobbing up while slowly turning left↔right so the card catches the light and
+   reads dimensional, not like a flat sticker. Subtle enough to keep name/stats readable. Applied to
+   a wrapper so it composes UNDER the button's own hover/proximity transform (never fights it). */
+@keyframes cb-card-float {
+  0%   { transform: perspective(820px) translateY(0)    rotateX(5deg) rotateY(-3.2deg); }
+  50%  { transform: perspective(820px) translateY(-7px) rotateX(8deg) rotateY(3.2deg); }
+  100% { transform: perspective(820px) translateY(0)    rotateX(5deg) rotateY(-3.2deg); }
+}
+.cb-card-float { animation: cb-card-float 4.6s ease-in-out infinite; will-change: transform; }
 /* Specular glint sweeping across the ABYSSAL ARENA wordmark: a quick pass, then a long hold off-screen
    so the metal catches the light periodically rather than shimmering constantly. */
 @keyframes cb-logo-sheen {
