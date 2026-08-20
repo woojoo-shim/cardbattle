@@ -658,6 +658,26 @@
   100% { transform: perspective(820px) translateY(0)    rotateX(5deg) rotateY(-3.2deg); }
 }
 .cb-card-float { animation: cb-card-float 4.6s ease-in-out infinite; will-change: transform; }
+/* A freshly summoned minion is HURLED onto the felt: it drops in from above while spinning a full
+   360° flip, then SLAMS down with a squash-and-rebound on impact — reads as a real card being set
+   down hard, not just fading in. Runs once (only on first appearance). */
+@keyframes cb-minion-land {
+  0%   { transform: perspective(700px) translateY(-46px) rotateY(0deg)   scale(1.18); opacity: 0; }
+  12%  { opacity: 1; }
+  62%  { transform: perspective(700px) translateY(-16px) rotateY(300deg) scale(1.06); opacity: 1; }
+  78%  { transform: perspective(700px) translateY(6px)   rotateY(360deg) scale(0.9, 1.02); }
+  88%  { transform: perspective(700px) translateY(0)     rotateY(360deg) scale(1.05, 0.95); }
+  100% { transform: perspective(700px) translateY(0)     rotateY(360deg) scale(1, 1); }
+}
+.cb-minion-land { animation: cb-minion-land .52s cubic-bezier(.34,.9,.32,1) both; will-change: transform; }
+/* The dust puff bloom, timed (delay) to fire the instant the flipping card touches down: a tan
+   ground cloud that expands outward and fades. */
+@keyframes cb-minion-dust {
+  0%   { transform: translateX(-50%) scaleX(0.3) scaleY(0.4); opacity: 0; }
+  30%  { transform: translateX(-50%) scaleX(0.9) scaleY(0.85); opacity: 0.95; }
+  100% { transform: translateX(-50%) scaleX(1.7) scaleY(1.15); opacity: 0; }
+}
+.cb-minion-dust { animation: cb-minion-dust .5s ease-out .34s both; will-change: transform, opacity; }
 /* Specular glint sweeping across the ABYSSAL ARENA wordmark: a quick pass, then a long hold off-screen
    so the metal catches the light periodically rather than shimmering constantly. */
 @keyframes cb-logo-sheen {

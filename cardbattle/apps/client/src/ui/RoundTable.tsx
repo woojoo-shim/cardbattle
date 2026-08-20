@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { UiState, UiMinion } from '../state/useRoom.js';
 import { COSMETIC_BY_ID, TITLE_BY_ID, CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
@@ -41,6 +41,13 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
   // Hovering any minion on the board reveals its name / stats / ability text — so you can read a
   // foe's board before you commit to an attack or target.
   const [hoverMinion, setHoverMinion] = useState<string | null>(null);
+  // Track which minions we've already seen so a freshly summoned one plays a one-time
+  // "slam onto the board" entrance (360° flip + dust) — existing minions never re-animate.
+  // We read (not mutate) the set during render, then record current ids in an effect after paint.
+  const seenMinions = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const p of ui.players) for (const m of p.field) seenMinions.current.add(m.id);
+  });
   const ring = [...ui.players].sort((a, b) => a.seat - b.seat);
   const n = ring.length;
   const myRing = Math.max(0, ring.findIndex((p) => p.id === myId));
@@ -116,10 +123,13 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
               const armed = attackerId === m.id;
               const clickable = canAttack || canHit;
               const def = CARD_DEFS[m.defId];
+              // First time this minion appears on the felt → play the slam-down entrance once.
+              const fresh = !seenMinions.current.has(m.id);
               return (
                 <div
                   key={m.id}
                   data-pid={m.id}
+                  className={fresh ? 'cb-minion-land' : undefined}
                   onMouseEnter={() => setHoverMinion(m.id)}
                   onMouseLeave={() => setHoverMinion((h) => (h === m.id ? null : h))}
                   onClick={(e) => {
@@ -136,9 +146,10 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                       : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
                     cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
                     opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
-                    zIndex: hoverMinion === m.id ? 30 : undefined,
+                    zIndex: hoverMinion === m.id ? 30 : fresh ? 20 : undefined,
                   }}
                 >
+                  {fresh && <span style={minionDust} className="cb-minion-dust" aria-hidden />}
                   {m.taunt && <TauntFrame color={armed ? '#e0b84a' : '#c8a24a'} style={{ zIndex: 3 }} />}
                   <div style={minionArtWindow}><CardArt id={m.defId} size="100%" /></div>
                   <span style={minionName}>{def?.name}</span>
@@ -534,6 +545,16 @@ const minionChip: React.CSSProperties = {
   border: '2px solid',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
+};
+// Dust burst kicked up when a freshly summoned minion slams onto the felt — a soft tan puff
+// that blooms out along the ground at the base of the card and fades. Timed (via CSS delay) to
+// hit the moment the flipping card lands.
+const minionDust: React.CSSProperties = {
+  position: 'absolute', left: '50%', bottom: -6, width: '150%', height: '46%',
+  transform: 'translateX(-50%)', transformOrigin: '50% 100%', pointerEvents: 'none', zIndex: 0,
+  borderRadius: '50%',
+  background: 'radial-gradient(ellipse at 50% 100%, rgba(226,196,142,0.72) 0%, rgba(198,162,104,0.4) 38%, rgba(160,128,80,0) 70%)',
+  opacity: 0,
 };
 // The buildings rank — a compact row of structures behind the player. A building under
 // construction shows a hammer + turns-left; a completed one shows a "가동" (active) tag and glows.

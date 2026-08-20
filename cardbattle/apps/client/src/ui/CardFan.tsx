@@ -80,6 +80,35 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
   // After a successful drag-drop the browser still fires a click; this flag swallows that
   // trailing click so a dragged spell doesn't also fire again via onClick (double-play).
   const skipClickRef = useRef(false);
+  // Hearthstone-style "held card" wobble: the drag ghost swings like it's dangling from the grab
+  // point. Pointer horizontal velocity drives a damped pendulum (spring), so a quick flick tilts
+  // the card hard and it springs back upright when the cursor settles — as if you really grabbed it.
+  const [wobble, setWobble] = useState(0);
+  const velRef = useRef(0);       // recent pointer horizontal impulse (px), decays each frame
+  const lastXRef = useRef(0);     // pointer X on the previous move, to measure impulse
+  const angRef = useRef(0);       // current tilt angle (deg)
+  const angVelRef = useRef(0);    // angular velocity of the pendulum
+  const draggingRef = useRef(false);
+  const wobbleRafRef = useRef<number | null>(null);
+  const stepWobble = () => {
+    const drive = Math.max(-55, Math.min(55, velRef.current));
+    const target = -drive * 0.5; // the card trails the motion (top leans back)
+    angVelRef.current += (target - angRef.current) * 0.16 - angVelRef.current * 0.32;
+    angRef.current += angVelRef.current;
+    velRef.current *= 0.82; // impulse fades so the pendulum settles once the cursor stops
+    setWobble(angRef.current);
+    const settled = !draggingRef.current
+      && Math.abs(angRef.current) < 0.05 && Math.abs(angVelRef.current) < 0.05 && Math.abs(velRef.current) < 0.05;
+    if (settled) {
+      angRef.current = 0; angVelRef.current = 0; velRef.current = 0;
+      setWobble(0);
+      wobbleRafRef.current = null;
+      return;
+    }
+    wobbleRafRef.current = requestAnimationFrame(stepWobble);
+  };
+  const ensureWobbleLoop = () => { if (wobbleRafRef.current == null) wobbleRafRef.current = requestAnimationFrame(stepWobble); };
+  useEffect(() => () => { if (wobbleRafRef.current != null) cancelAnimationFrame(wobbleRafRef.current); }, []);
   // A 시동'd (pending-target) card has left the hand and now sits in the board's left cast area,
   // so it must NOT also render in the fan — filter it out and fan the remaining cards cleanly.
   const visible = pendingId ? hand.filter((c) => c.id !== pendingId) : hand;
@@ -223,13 +252,21 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 // snap to the board and fire (targeted spells enter target-select via onPlay).
                 if (!playable) return;
                 try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* older browsers */ }
+                lastXRef.current = e.clientX;
                 setDrag({ id: c.id, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, moved: false });
               }}
               onPointerMove={(e) => {
                 if (!drag || drag.id !== c.id) return;
                 const moved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8;
                 if (moved && !drag.moved) onDragging?.(true); // first real movement → light the cast slot
-                if (moved) setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: true });
+                if (moved) {
+                  // Feed the pendulum: accumulate this move's horizontal impulse, keep the loop alive.
+                  velRef.current += e.clientX - lastXRef.current;
+                  draggingRef.current = true;
+                  ensureWobbleLoop();
+                  setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: true });
+                }
+                lastXRef.current = e.clientX;
               }}
               onPointerUp={(e) => {
                 if (!drag || drag.id !== c.id) return;
@@ -241,6 +278,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 const overId = el?.closest('[data-pid]')?.getAttribute('data-pid') ?? undefined;
                 const overCast = !!el?.closest('[data-castzone]');
                 const dropped = (drag.moved && lifted > 70) || overCast;
+                draggingRef.current = false; // release → the pendulum springs back upright
                 setDrag(null);
                 onDragging?.(false);
                 if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId, overCast); }
@@ -254,6 +292,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 const overId = el?.closest('[data-pid]')?.getAttribute('data-pid') ?? undefined;
                 const overCast = !!el?.closest('[data-castzone]');
                 const dropped = (drag.moved && lifted > 70) || overCast;
+                draggingRef.current = false; // release → the pendulum springs back upright
                 setDrag(null);
                 onDragging?.(false);
                 if (dropped && affordable) { skipClickRef.current = true; playSfx('select'); onPlay(c, overId, overCast); }
@@ -376,7 +415,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
         const ddef = dc && CARD_DEFS[dc.defId];
         if (!ddef) return null;
         return (
-          <div style={{ ...dragGhost, left: drag.x, top: drag.y }}>
+          <div style={{ ...dragGhost, left: drag.x, top: drag.y, transform: `translate(-50%, -62%) rotate(${wobble}deg)` }}>
             <div style={dragGhostCard}>
               <div style={dragGhostArt}><CardArt id={ddef.id} size={64} /></div>
               <div style={dragGhostName}>{ddef.name}</div>
@@ -428,7 +467,10 @@ const card: React.CSSProperties = {
 // The card that floats under the cursor while a minion is being dragged out of the hand. Rendered
 // through a portal to document.body so the fan's `perspective` doesn't warp its fixed positioning.
 const dragGhost: React.CSSProperties = {
-  position: 'fixed', transform: 'translate(-50%, -62%) rotate(-4deg)', pointerEvents: 'none',
+  position: 'fixed', transform: 'translate(-50%, -62%)', pointerEvents: 'none',
+  // Pivot near the top (the grab point) so the velocity-driven tilt reads as the card dangling
+  // from your grip and swinging, rather than spinning about its middle.
+  transformOrigin: '50% 8%',
   zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
 };
 const dragGhostCard: React.CSSProperties = {
