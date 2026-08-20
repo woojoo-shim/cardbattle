@@ -183,16 +183,14 @@ export function VfxLayer({ events, players, myId }: Props) {
         const color = ELEM[def.element] ?? ELEM.none;
         const isAttack = def.kind !== 'minion' && def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
         if (def.kind !== 'minion') {
-          // BIG LEFT-OF-THE-TABLE ACTIVATION REVEAL: whenever a card is played (dragged onto the
-          // desk to cast it), the card art blows up HUGE on the LEFT of the table, holds a readable
-          // beat with a glowing element-tinted aura, then fades — so it unmistakably reads as the
-          // card being CAST/activated. This is the star; the attack hurl / support deal below still
-          // deliver the effect afterward.
-          const c = tableCenter();
-          const midY = c ? c.y : window.innerHeight / 2;
-          const size = Math.round(Math.min(window.innerHeight * 0.52, 460));
-          const leftX = Math.max(size * 0.6, window.innerWidth * 0.17);
-          add.push({ id: nextId.current++, kind: 'activate', x: leftX, y: midY, size, defId: e.defId, name: def.name, color });
+          // ACTIVATION SEAL, TOP-RIGHT: whenever a card is played (dragged onto the desk to cast it),
+          // the card art STAMPS in as a round gilt medallion/seal in the TOP-RIGHT corner — not a
+          // rectangular card — holds a readable beat inside a glowing element-tinted ring, then fades.
+          // So it unmistakably reads as the card being CAST/activated without covering the table.
+          const size = Math.round(Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.22, 240));
+          const rightX = window.innerWidth - (size / 2 + 44);
+          const topY = size / 2 + 92;
+          add.push({ id: nextId.current++, kind: 'activate', x: rightX, y: topY, size, defId: e.defId, name: def.name, color });
         }
         if (def.kind === 'minion') {
           // A summoned minion gets a BIG, prominent reveal on the CASTER's side of the table (pulled
@@ -394,7 +392,9 @@ export function VfxLayer({ events, players, myId }: Props) {
             <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={460} /></span>
           ) : f.kind === 'activate' ? (
             <span key={f.id} style={activateStyle(f)}>
-              <CardArt id={f.defId} size={f.size} />
+              <span style={activateSealStyle(f)}>
+                <span style={activateSealArt(f)}><CardArt id={f.defId} size={f.size} /></span>
+              </span>
               <span style={activateNameStyle(f)}>{f.name}</span>
             </span>
           ) : f.kind === 'cast' ? (
@@ -520,15 +520,32 @@ function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
     animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
   };
 }
-/** The BIG activation reveal on the LEFT of the table: the played card art blows up huge, holds a
- *  readable beat inside a bright element-tinted aura, then fades — the "카드 발동" money shot. */
+/** The activation reveal in the TOP-RIGHT corner: the played card art STAMPS in as a round gilt
+ *  seal, holds a readable beat inside a bright element-tinted ring, then fades — the "카드 발동" shot. */
 function activateStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, zIndex: 64,
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-    filter: `drop-shadow(0 0 40px ${f.color}) drop-shadow(0 0 14px ${f.color}) drop-shadow(0 16px 34px rgba(0,0,0,0.82))`,
+    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+    filter: `drop-shadow(0 0 34px ${f.color}) drop-shadow(0 0 12px ${f.color}) drop-shadow(0 14px 28px rgba(0,0,0,0.82))`,
     willChange: 'transform, opacity', transformOrigin: 'center',
     animation: 'cb-activate 1.4s cubic-bezier(.16,.72,.26,1) forwards',
+  };
+}
+/** The round medallion body — a circular gilt seal (NOT a rectangle) framing the card art. */
+function activateSealStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
+  return {
+    width: f.size, height: f.size, borderRadius: '50%', overflow: 'hidden',
+    display: 'grid', placeItems: 'center', position: 'relative',
+    background: `radial-gradient(circle at 50% 38%, rgba(40,30,16,0.9), rgba(12,8,4,0.97))`,
+    border: `3px solid ${f.color}`,
+    boxShadow: `inset 0 0 26px rgba(0,0,0,0.72), inset 0 0 0 6px rgba(233,205,140,0.28), 0 0 0 5px rgba(20,14,8,0.7), 0 0 0 7px ${f.color}`,
+  };
+}
+/** The art clipped inside the circular seal — scaled up a touch so it fills the disc. */
+function activateSealArt(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
+  return {
+    width: f.size, height: f.size, display: 'grid', placeItems: 'center',
+    transform: 'scale(1.24)', transformOrigin: 'center',
   };
 }
 /** The card's name plate under the big left reveal — a struck gilt-white label. */
