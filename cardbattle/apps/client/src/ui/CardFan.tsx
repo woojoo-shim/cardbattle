@@ -80,28 +80,41 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
   // After a successful drag-drop the browser still fires a click; this flag swallows that
   // trailing click so a dragged spell doesn't also fire again via onClick (double-play).
   const skipClickRef = useRef(false);
-  // Hearthstone-style "held card" wobble: the drag ghost swings like it's dangling from the grab
-  // point. Pointer horizontal velocity drives a damped pendulum (spring), so a quick flick tilts
-  // the card hard and it springs back upright when the cursor settles — as if you really grabbed it.
-  const [wobble, setWobble] = useState(0);
-  const velRef = useRef(0);       // recent pointer horizontal impulse (px), decays each frame
-  const lastXRef = useRef(0);     // pointer X on the previous move, to measure impulse
-  const angRef = useRef(0);       // current tilt angle (deg)
-  const angVelRef = useRef(0);    // angular velocity of the pendulum
+  // Hearthstone-style "held card" wobble: the drag ghost TILTS/FLIPS in 3D toward the drag motion —
+  // horizontal motion flips it around the vertical axis (rotateY), vertical motion around the
+  // horizontal axis (rotateX). Each axis is a damped pendulum driven by pointer velocity, so a
+  // quick flick banks the card hard and it springs back flat when the cursor settles.
+  const [wobble, setWobble] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 });
+  const velXRef = useRef(0);      // recent horizontal impulse (px), decays each frame → rotateY
+  const velYRef = useRef(0);      // recent vertical impulse (px), decays each frame → rotateX
+  const lastXRef = useRef(0);
+  const lastYRef = useRef(0);
+  const ryRef = useRef(0);        // current Y-flip angle (deg)
+  const ryVelRef = useRef(0);
+  const rxRef = useRef(0);        // current X-flip angle (deg)
+  const rxVelRef = useRef(0);
   const draggingRef = useRef(false);
   const wobbleRafRef = useRef<number | null>(null);
   const stepWobble = () => {
-    const drive = Math.max(-55, Math.min(55, velRef.current));
-    const target = -drive * 0.5; // the card trails the motion (top leans back)
-    angVelRef.current += (target - angRef.current) * 0.16 - angVelRef.current * 0.32;
-    angRef.current += angVelRef.current;
-    velRef.current *= 0.82; // impulse fades so the pendulum settles once the cursor stops
-    setWobble(angRef.current);
+    const driveX = Math.max(-55, Math.min(55, velXRef.current));
+    const driveY = Math.max(-55, Math.min(55, velYRef.current));
+    const targetRy = driveX * 0.7;   // move right → right edge flips back (banks into the motion)
+    const targetRx = driveY * 0.7;   // move down → top edge flips back
+    ryVelRef.current += (targetRy - ryRef.current) * 0.16 - ryVelRef.current * 0.32;
+    rxVelRef.current += (targetRx - rxRef.current) * 0.16 - rxVelRef.current * 0.32;
+    ryRef.current += ryVelRef.current;
+    rxRef.current += rxVelRef.current;
+    velXRef.current *= 0.82; // impulses fade so the flips settle once the cursor stops
+    velYRef.current *= 0.82;
+    setWobble({ rx: rxRef.current, ry: ryRef.current });
+    const near = (v: number) => Math.abs(v) < 0.05;
     const settled = !draggingRef.current
-      && Math.abs(angRef.current) < 0.05 && Math.abs(angVelRef.current) < 0.05 && Math.abs(velRef.current) < 0.05;
+      && near(ryRef.current) && near(ryVelRef.current) && near(velXRef.current)
+      && near(rxRef.current) && near(rxVelRef.current) && near(velYRef.current);
     if (settled) {
-      angRef.current = 0; angVelRef.current = 0; velRef.current = 0;
-      setWobble(0);
+      ryRef.current = 0; ryVelRef.current = 0; velXRef.current = 0;
+      rxRef.current = 0; rxVelRef.current = 0; velYRef.current = 0;
+      setWobble({ rx: 0, ry: 0 });
       wobbleRafRef.current = null;
       return;
     }
@@ -253,6 +266,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 if (!playable) return;
                 try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* older browsers */ }
                 lastXRef.current = e.clientX;
+                lastYRef.current = e.clientY;
                 setDrag({ id: c.id, sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY, moved: false });
               }}
               onPointerMove={(e) => {
@@ -260,13 +274,15 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
                 const moved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8;
                 if (moved && !drag.moved) onDragging?.(true); // first real movement → light the cast slot
                 if (moved) {
-                  // Feed the pendulum: accumulate this move's horizontal impulse, keep the loop alive.
-                  velRef.current += e.clientX - lastXRef.current;
+                  // Feed both pendulums: accumulate this move's impulse on each axis, keep the loop alive.
+                  velXRef.current += e.clientX - lastXRef.current;
+                  velYRef.current += e.clientY - lastYRef.current;
                   draggingRef.current = true;
                   ensureWobbleLoop();
                   setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: true });
                 }
                 lastXRef.current = e.clientX;
+                lastYRef.current = e.clientY;
               }}
               onPointerUp={(e) => {
                 if (!drag || drag.id !== c.id) return;
@@ -415,7 +431,7 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
         const ddef = dc && CARD_DEFS[dc.defId];
         if (!ddef) return null;
         return (
-          <div style={{ ...dragGhost, left: drag.x, top: drag.y, transform: `translate(-50%, -62%) rotate(${wobble}deg)` }}>
+          <div style={{ ...dragGhost, left: drag.x, top: drag.y, transform: `translate(-50%, -62%) perspective(640px) rotateX(${wobble.rx}deg) rotateY(${wobble.ry}deg)` }}>
             {/* The floating card wears the SAME ornate stone frame as the hand/board cards, so the
                 thing you're dragging looks exactly like the real card, just lifted out. */}
             <div style={dragGhostCard}>
@@ -472,9 +488,9 @@ const card: React.CSSProperties = {
 // through a portal to document.body so the fan's `perspective` doesn't warp its fixed positioning.
 const dragGhost: React.CSSProperties = {
   position: 'fixed', transform: 'translate(-50%, -62%)', pointerEvents: 'none',
-  // Pivot near the top (the grab point) so the velocity-driven tilt reads as the card dangling
-  // from your grip and swinging, rather than spinning about its middle.
-  transformOrigin: '50% 8%',
+  // Pivot at the middle so the velocity-driven flips (rotateX/rotateY) bank the whole card like a
+  // held object turning in 3D toward the drag direction.
+  transformOrigin: '50% 50%',
   zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
 };
 const dragGhostCard: React.CSSProperties = {
