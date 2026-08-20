@@ -416,10 +416,14 @@ export function CardFan({ hand, enabled, pendingId, mana, onPlay, onDragging, bo
         if (!ddef) return null;
         return (
           <div style={{ ...dragGhost, left: drag.x, top: drag.y, transform: `translate(-50%, -62%) rotate(${wobble}deg)` }}>
+            {/* The floating card wears the SAME ornate stone frame as the hand/board cards, so the
+                thing you're dragging looks exactly like the real card, just lifted out. */}
             <div style={dragGhostCard}>
-              <div style={dragGhostArt}><CardArt id={ddef.id} size={64} /></div>
-              <div style={dragGhostName}>{ddef.name}</div>
-              <div style={dragGhostStat}>{ddef.minion ? `${ddef.minion.attack}/${ddef.minion.health}` : `◈${ddef.cost}`}</div>
+              <div style={artWindow}><CardArt id={ddef.id} size="100%" /></div>
+              <div style={nameplate}><div style={dragGhostName}>{ddef.name}</div></div>
+              <div style={{ ...pillVal, ...(ddef.minion ? dragGhostStatPill : manaValPill) }}>
+                {ddef.minion ? `${ddef.minion.attack}/${ddef.minion.health}` : `◈${ddef.cost}`}
+              </div>
             </div>
             <div style={dragHint}>{ddef.minion ? '↑ 놓아서 소환' : '↑ 놓아서 발동'}</div>
           </div>
@@ -474,19 +478,17 @@ const dragGhost: React.CSSProperties = {
   zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
 };
 const dragGhostCard: React.CSSProperties = {
-  width: 96, borderRadius: 12, padding: '10px 8px 8px',
-  background: `radial-gradient(125% 85% at 50% -8%, ${C.panelHi}, ${C.stage} 68%, ${C.void})`,
-  border: `1px solid ${C.you}`, boxShadow: '0 0 24px rgba(143,157,79,0.5), 0 20px 40px rgba(0,0,0,0.6)',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+  // The full ornate stone card frame (same PNG as the hand/board cards) at a lifted size, so the
+  // dragged card is unmistakably the real card. Art/name/stat drop into the frame's carved openings.
+  width: 152, aspectRatio: '2 / 3', position: 'relative',
+  backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+  filter: 'drop-shadow(0 22px 36px rgba(0,0,0,0.62)) drop-shadow(0 0 16px rgba(143,157,79,0.42))',
 };
-const dragGhostArt: React.CSSProperties = {
-  width: '84%', aspectRatio: '1', borderRadius: 10, overflow: 'hidden',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.12), rgba(0,0,0,0.5))',
-  border: `1px solid ${C.border}`,
+const dragGhostName: React.CSSProperties = {
+  fontSize: 17, fontWeight: 800, lineHeight: 1.02, color: '#2c1d0d',
+  textShadow: '0 1px 0 rgba(244,228,192,0.55)',
 };
-const dragGhostName: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: C.text, lineHeight: 1 };
-const dragGhostStat: React.CSSProperties = { fontFamily: mono, fontSize: 13, fontWeight: 800, color: '#f0e0b4' };
+const dragGhostStatPill: React.CSSProperties = { color: '#f4e4c0', background: 'rgba(74,24,20,0.6)', border: '1px solid #7a3a28' };
 const dragHint: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: C.you,
   padding: '3px 8px', borderRadius: 6, background: 'rgba(16,20,32,0.92)', border: `1px solid ${C.you}66`,
