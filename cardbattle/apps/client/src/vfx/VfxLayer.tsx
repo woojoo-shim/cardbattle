@@ -183,13 +183,14 @@ export function VfxLayer({ events, players, myId }: Props) {
         const color = ELEM[def.element] ?? ELEM.none;
         const isAttack = def.kind !== 'minion' && def.effects.some((ef) => ef.kind === 'damage' || ef.kind === 'destroy');
         if (def.kind !== 'minion') {
-          // ACTIVATION SEAL, TOP-RIGHT: whenever a card is played (dragged onto the desk to cast it),
-          // the card art STAMPS in as a round gilt medallion/seal in the TOP-RIGHT corner — not a
-          // rectangular card — holds a readable beat inside a glowing element-tinted ring, then fades.
-          // So it unmistakably reads as the card being CAST/activated without covering the table.
-          const size = Math.round(Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.22, 240));
-          const rightX = window.innerWidth - (size / 2 + 44);
-          const topY = size / 2 + 92;
+          // ACTIVATION CARD, TOP-RIGHT: whenever a card is played (dragged onto the desk to cast it),
+          // the actual CARD stamps in — the ornate stone card frame with its art + nameplate — up in
+          // the TOP-RIGHT corner, holds a readable beat inside a glowing element-tinted aura, then
+          // fades. So it unmistakably reads as the card being CAST/activated without covering the table.
+          const size = Math.round(Math.min(Math.min(window.innerWidth, window.innerHeight) * 0.17, 190));
+          const cardH = size * 1.5;
+          const rightX = window.innerWidth - (size / 2 + 48);
+          const topY = 84 + cardH / 2;
           add.push({ id: nextId.current++, kind: 'activate', x: rightX, y: topY, size, defId: e.defId, name: def.name, color });
         }
         if (def.kind === 'minion') {
@@ -392,10 +393,10 @@ export function VfxLayer({ events, players, myId }: Props) {
             <span key={f.id} style={summonStyle(f)}><CardArt id={f.defId} size={460} /></span>
           ) : f.kind === 'activate' ? (
             <span key={f.id} style={activateStyle(f)}>
-              <span style={activateSealStyle(f)}>
-                <span style={activateSealArt(f)}><CardArt id={f.defId} size={f.size} /></span>
+              <span style={activateCardStyle(f)}>
+                <span style={activateArtWindow}><CardArt id={f.defId} size="100%" /></span>
+                <span style={activateNameplate}><span style={activateNameStyle(f)}>{f.name}</span></span>
               </span>
-              <span style={activateNameStyle(f)}>{f.name}</span>
             </span>
           ) : f.kind === 'cast' ? (
             <span key={f.id} style={castStyle(f)}>
@@ -520,40 +521,41 @@ function summonStyle(f: Extract<Fx, { kind: 'summon' }>): React.CSSProperties {
     animation: 'cb-summon 1.25s cubic-bezier(.18,.72,.28,1) forwards',
   };
 }
-/** The activation reveal in the TOP-RIGHT corner: the played card art STAMPS in as a round gilt
- *  seal, holds a readable beat inside a bright element-tinted ring, then fades — the "카드 발동" shot. */
+/** The activation reveal in the TOP-RIGHT corner: the actual CARD (ornate stone frame + art +
+ *  nameplate) STAMPS in, holds a readable beat inside a bright element-tinted aura, then fades. */
 function activateStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
   return {
     position: 'fixed', left: f.x, top: f.y, zIndex: 64,
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
     filter: `drop-shadow(0 0 34px ${f.color}) drop-shadow(0 0 12px ${f.color}) drop-shadow(0 14px 28px rgba(0,0,0,0.82))`,
     willChange: 'transform, opacity', transformOrigin: 'center',
     animation: 'cb-activate 1.4s cubic-bezier(.16,.72,.26,1) forwards',
   };
 }
-/** The round medallion body — a circular gilt seal (NOT a rectangle) framing the card art. */
-function activateSealStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
+/** The card body — the ornate stone card frame PNG (a real card shape, not a seal/rectangle). */
+function activateCardStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
   return {
-    width: f.size, height: f.size, borderRadius: '50%', overflow: 'hidden',
-    display: 'grid', placeItems: 'center', position: 'relative',
-    background: `radial-gradient(circle at 50% 38%, rgba(40,30,16,0.9), rgba(12,8,4,0.97))`,
-    border: `3px solid ${f.color}`,
-    boxShadow: `inset 0 0 26px rgba(0,0,0,0.72), inset 0 0 0 6px rgba(233,205,140,0.28), 0 0 0 5px rgba(20,14,8,0.7), 0 0 0 7px ${f.color}`,
+    width: f.size, aspectRatio: '2 / 3', position: 'relative',
+    backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
   };
 }
-/** The art clipped inside the circular seal — scaled up a touch so it fills the disc. */
-function activateSealArt(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
-  return {
-    width: f.size, height: f.size, display: 'grid', placeItems: 'center',
-    transform: 'scale(1.24)', transformOrigin: 'center',
-  };
-}
-/** The card's name plate under the big left reveal — a struck gilt-white label. */
+/** The illustration dropped into the frame's carved central opening (matches CardFan proportions). */
+const activateArtWindow: React.CSSProperties = {
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: 6,
+};
+/** The name plaque region near the bottom of the frame. */
+const activateNameplate: React.CSSProperties = {
+  position: 'absolute', left: '13%', top: '81%', width: '74%', height: '11.5%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+  padding: '0 4px', pointerEvents: 'none',
+};
+/** The card name engraved on the plaque — dark ink on the light stone, like CardFan. */
 function activateNameStyle(f: Extract<Fx, { kind: 'activate' }>): React.CSSProperties {
   return {
-    fontFamily: '"Geist", system-ui, sans-serif', fontWeight: 800,
-    fontSize: Math.round(f.size * 0.11), letterSpacing: '-0.01em', color: '#f6efdd',
-    whiteSpace: 'nowrap', textShadow: `0 0 16px ${f.color}, 0 2px 6px rgba(0,0,0,0.85)`,
+    fontFamily: '"Geist", system-ui, sans-serif', fontWeight: 800, lineHeight: 1.02,
+    fontSize: Math.round(f.size * 0.13), letterSpacing: '-0.01em', color: '#2c1d0d',
+    textShadow: '0 1px 0 rgba(244,228,192,0.55)',
   };
 }
 function castStyle(f: Extract<Fx, { kind: 'cast' }>): React.CSSProperties {
