@@ -142,8 +142,8 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                     ...minionChip,
                     borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
                     boxShadow: armed
-                      ? '0 0 12px rgba(224,184,74,0.7)'
-                      : m.divineShield ? '0 0 10px rgba(240,224,150,0.6)' : '0 3px 8px rgba(0,0,0,0.5)',
+                      ? `${chipEdge}, 0 0 12px rgba(224,184,74,0.7)`
+                      : m.divineShield ? `${chipEdge}, 0 0 10px rgba(240,224,150,0.6)` : chipEdge,
                     cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
                     opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
                     zIndex: hoverMinion === m.id ? 30 : fresh ? 20 : undefined,
@@ -538,14 +538,22 @@ const fieldRow: React.CSSProperties = {
 const minionChip: React.CSSProperties = {
   // A summoned minion on the felt wears the SAME ornate stone card frame as the hand cards, so a
   // played card keeps its shape/design on the board. Art drops into the frame's floor window, the
-  // name is engraved on the plaque; the 2px border stays as the owner/state colour ring.
-  position: 'relative', width: 'clamp(84px, 9vw, 128px)', aspectRatio: '2 / 3', borderRadius: 10, flexShrink: 0,
+  // name is engraved on the plaque; the 3px border stays as the owner/state colour ring. A stacked
+  // edge-shadow (chipEdge) gives the card visible THICKNESS so it reads as a chunky stone slab.
+  position: 'relative', width: 'clamp(88px, 9.4vw, 134px)', aspectRatio: '2 / 3', borderRadius: 13, flexShrink: 0,
+  marginBottom: 8,
   backgroundImage: 'url(/card-frame.png)',
   backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent',
-  border: '2px solid',
+  border: '3px solid',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
+// A layered edge-shadow that extrudes the card downward — several stacked dark offsets read as the
+// card's physical side wall, plus a warm top bevel highlight, so a minion looks THICK (두툼한), like
+// a carved stone token rather than a flat sticker. Appended to each interactive state's box-shadow.
+const chipEdge =
+  'inset 0 1.5px 0 rgba(255,238,196,0.22), inset 0 -2px 4px rgba(0,0,0,0.4),' +
+  '0 2px 0 #241809, 0 4px 0 #1b1207, 0 6px 0 #130c05, 0 8px 0 #0c0703, 0 12px 16px rgba(0,0,0,0.62)';
 // Dust burst kicked up when a freshly summoned minion slams onto the felt — a soft tan puff
 // that blooms out along the ground at the base of the card and fades. Timed (via CSS delay) to
 // hit the moment the flipping card lands.
