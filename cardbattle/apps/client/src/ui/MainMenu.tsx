@@ -3,6 +3,7 @@ import { Shop } from './Shop.js';
 import { DeckBuilder } from './DeckBuilder.js';
 import { Icon } from './art/Icon.js';
 import { CardArt } from './art/CardArt.js';
+import { CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
 import { playSfx } from '../audio/sfx.js';
 import { MuteButton } from './MuteButton.js';
@@ -149,11 +150,14 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
   );
 }
 
-// A held hand of real cards fanned out on the right of the menu — the single strongest signal that
-// this is a CARD game. Five card faces arc around a pivot (middle card highest, outers splay & dip),
-// each in a dark cardstock frame with a warm rim. A soft candlelit glow pools behind the fan and the
-// whole spread drifts on a slow idle float (cb-hero-float). Purely decorative — aria-hidden.
-const FAN_CARDS = ['snipe', 'shield', 'bomb', 'sword', 'potion'] as const;
+// A held hand of REAL cards fanned out on the right of the menu — the single strongest signal that
+// this is a CARD game. Five faces arc around a pivot (middle card highest, outers splay & dip). Each
+// is the actual in-game card: the ornate carved stone frame (card-frame.png) with the illustration
+// dropped into the recessed art window and the card name on the plaque — identical to the hand cards
+// in battle, so the menu reads as the same game. A candlelit glow pools behind; the whole spread
+// drifts on a slow idle float (cb-hero-float). Purely decorative — aria-hidden.
+const FAN_CARDS = ['archer', 'cleric', 'firebolt', 'knight', 'strike'] as const;
+const FAN_CARD_W = 220; // px width of one framed card (2:3 → 330 tall)
 function HeroFan() {
   const mid = (FAN_CARDS.length - 1) / 2;
   return (
@@ -163,8 +167,9 @@ function HeroFan() {
         {FAN_CARDS.map((id, i) => {
           const off = i - mid;
           const rot = off * 13;
-          const x = off * 150;
-          const y = Math.abs(off) * 56 - 10; // arc: outer cards dip lower
+          const x = off * 132;
+          const y = Math.abs(off) * 50 - 10; // arc: outer cards dip lower
+          const name = CARD_DEFS[id]?.name ?? '';
           return (
             <div
               key={id}
@@ -174,7 +179,8 @@ function HeroFan() {
                 zIndex: 10 - Math.abs(off),
               }}
             >
-              <CardArt id={id} size={300} />
+              <span style={fanArtWindow}><CardArt id={id} size="100%" /></span>
+              <span style={fanNameplate}><span style={fanName}>{name}</span></span>
             </div>
           );
         })}
@@ -334,16 +340,31 @@ const fanGlow: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%', width: 'clamp(720px, 62vw, 1040px)', height: 'clamp(720px, 62vw, 1040px)',
   transform: 'translate(-50%, -50%)',
   borderRadius: '50%', filter: 'blur(26px)',
-  background: 'radial-gradient(circle, rgba(168,107,255,0.18), rgba(55,224,160,0.08) 46%, transparent 72%)',
+  background: 'radial-gradient(circle, rgba(224,165,60,0.2), rgba(158,58,40,0.1) 46%, transparent 72%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
 const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(340px, 28vw, 460px)', height: 'clamp(540px, 56vw, 780px)' };
+// The real carved stone card frame (same art as the battle hand cards). The illustration and the
+// name plaque are absolutely positioned into the frame's carved cavities so they line up with the png.
 const fanCard: React.CSSProperties = {
   position: 'absolute', left: '50%', top: '50%',
-  display: 'grid', placeItems: 'center', padding: '12px 11px', borderRadius: 12,
-  background: 'linear-gradient(180deg, #26314a, #141b2b)',
-  border: '1px solid rgba(92,111,150,0.55)',
-  boxShadow: '0 22px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(150,180,230,0.12)',
+  width: FAN_CARD_W, aspectRatio: '2 / 3',
+  backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+  filter: 'drop-shadow(0 22px 40px rgba(0,0,0,0.6))',
+};
+const fanArtWindow: React.CSSProperties = {
+  position: 'absolute', left: '12%', top: '14.5%', width: '76%', height: '60%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: 6,
+};
+const fanNameplate: React.CSSProperties = {
+  position: 'absolute', left: '13%', top: '81%', width: '74%', height: '11.5%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+  padding: '0 4px', pointerEvents: 'none',
+};
+const fanName: React.CSSProperties = {
+  fontFamily: sans, fontWeight: 800, lineHeight: 1.02,
+  fontSize: Math.round(FAN_CARD_W * 0.088), letterSpacing: '-0.01em', color: '#2c1d0d',
+  textShadow: '0 1px 0 rgba(244,228,192,0.55)',
 };
 // The cards are a fixed pixel size (CardArt size is an SVG width prop, not CSS-clampable), so the
 // big fan that looks right on a wide 2000px screen overflows / overlaps the title on narrower
