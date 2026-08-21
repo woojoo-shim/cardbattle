@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
 import { DeckBuilder } from './DeckBuilder.js';
 import { Icon } from './art/Icon.js';
-import type { IconName } from './art/Icon.js';
 import { CardArt } from './art/CardArt.js';
 import { CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
@@ -26,14 +25,14 @@ type ItemKey = 'start' | 'multi' | 'how' | 'deck' | 'shop' | 'credits' | 'logout
 // Matchmaking-first, Clash-Royale style: the hero action RUNS A MATCH (auto-finds a 1v1 opponent,
 // fills with a bot if none turns up). Friend rooms (create/join by code) are the secondary path,
 // not the headline — we lead with "find a match", not "invite to a room".
-const ITEMS: { key: ItemKey; label: string; sub: string; icon: IconName }[] = [
-  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색', icon: 'swords' },
-  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가', icon: 'chain' },
-  { key: 'how', label: '플레이 방법', sub: '게임하며 배우기', icon: 'target' },
-  { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기', icon: 'hand' },
-  { key: 'shop', label: '상점', sub: '외형 · 칭호', icon: 'coin' },
-  { key: 'credits', label: '제작진', sub: '', icon: 'star' },
-  { key: 'logout', label: '나가기', sub: '로그아웃', icon: 'arrowRight' },
+const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
+  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색' },
+  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가' },
+  { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
+  { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기' },
+  { key: 'shop', label: '상점', sub: '외형 · 칭호' },
+  { key: 'credits', label: '제작진', sub: '' },
+  { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
 
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
@@ -89,6 +88,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
   return (
     <div style={wrap}>
       <style>{heroCss}</style>
+      <Atmosphere />
       {/* account chip, top-right */}
       <div style={topBar}>
         <MuteButton />
@@ -125,14 +125,11 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={medallion(on, danger)}>
-                  <Icon name={it.icon} size={20} color={danger ? C.enemy : (on ? '#f4e4c0' : C.you)} />
-                </span>
-                <span style={itemText}>
+                <span style={labelWrap}>
+                  <span style={caret(on)}>◆</span>
                   <span style={menuLabel}>{it.label}</span>
-                  {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
                 </span>
-                <span style={itemArrow(on)}>›</span>
+                {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
               </button>
             );
           })}
@@ -271,15 +268,71 @@ function Credits({ onClose }: { onClose: () => void }) {
   );
 }
 
-// A clean, flat dark backdrop — no back-room diorama, no falling cards. The title + menu column sits
-// on the left, the hero card fan fills the right, and the two are pushed to opposite edges so the
-// whole width is in play instead of everything hugging the left margin.
+// A candlelit back-room backdrop that matches the warm gold wordmark instead of the old cold navy.
+// The title + menu column sits on the left, the hero card fan fills the right, both pushed to opposite
+// edges so the whole width is in play. The living atmosphere (warm key light, oxblood haze, drifting
+// embers, vignette) is painted by <Atmosphere/> behind everything.
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box',
   display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 'clamp(20px, 4vw, 100px)',
   fontFamily: sans, color: C.text,
   padding: '0 clamp(28px, 7vw, 130px)',
-  background: 'linear-gradient(180deg, #101422 0%, #0a0d16 60%, #06080f 100%)',
+  background: 'linear-gradient(180deg, #1a120b 0%, #120b07 55%, #080503 100%)',
+};
+
+// Deterministic ember motes so the drift is even but ungridded (x%, size px, duration s, delay s, opacity).
+const EMBERS = [
+  { x: 8, s: 3, d: 15, delay: 0, o: 0.5 }, { x: 18, s: 2, d: 19, delay: 4, o: 0.35 },
+  { x: 27, s: 4, d: 13, delay: 8, o: 0.6 }, { x: 39, s: 2, d: 21, delay: 2, o: 0.3 },
+  { x: 52, s: 3, d: 16, delay: 6, o: 0.5 }, { x: 63, s: 2, d: 23, delay: 1, o: 0.32 },
+  { x: 71, s: 4, d: 14, delay: 9, o: 0.55 }, { x: 82, s: 3, d: 18, delay: 3, o: 0.42 },
+  { x: 91, s: 2, d: 20, delay: 7, o: 0.3 }, { x: 46, s: 2, d: 22, delay: 11, o: 0.28 },
+];
+// Warm candlelit atmosphere painted behind the whole menu: a soft amber key light pooling up the
+// left (behind the wordmark), an oxblood wall wash, a warm floor glow, a framing vignette, and a
+// field of embers drifting up through it. Purely decorative — aria-hidden, pointer-events none.
+function Atmosphere() {
+  return (
+    <div style={atmosLayer} aria-hidden>
+      <div style={atmosGlow} />
+      <div style={atmosVignette} />
+      <div style={emberField}>
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            className="cb-mm-ember"
+            style={{
+              left: `${e.x}%`, width: e.s, height: e.s, opacity: e.o,
+              animationDuration: `${e.d}s`, animationDelay: `${e.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const atmosLayer: React.CSSProperties = {
+  position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden',
+};
+const atmosGlow: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background:
+    // warm amber key light pooling up the left behind the wordmark
+    'radial-gradient(120% 90% at 22% 8%, rgba(240,184,94,0.16), transparent 52%),' +
+    // oxblood wall wash across the top
+    'radial-gradient(150% 70% at 60% -6%, rgba(158,58,40,0.13), transparent 60%),' +
+    // dusty plum counter-tone, upper right
+    'radial-gradient(90% 80% at 92% 12%, rgba(74,48,86,0.12), transparent 62%),' +
+    // warm firelight bloom off the floor
+    'radial-gradient(120% 60% at 40% 114%, rgba(150,58,32,0.2), transparent 60%)',
+};
+const atmosVignette: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  background: 'radial-gradient(130% 110% at 50% 46%, transparent 52%, rgba(0,0,0,0.66) 100%)',
+};
+const emberField: React.CSSProperties = {
+  position: 'absolute', inset: 0, mixBlendMode: 'screen',
 };
 
 const content: React.CSSProperties = {
@@ -394,6 +447,17 @@ const heroCss = `
   0%, 100% { transform: translateX(0); opacity: 0.75; }
   50%      { transform: translateX(-5px); opacity: 1; }
 }
+.cb-mm-ember {
+  position: absolute; bottom: -6px; border-radius: 50%;
+  background: radial-gradient(circle, #ffd9a0 0%, #e0913c 55%, transparent 72%);
+  animation-name: cb-mm-ember; animation-timing-function: linear; animation-iteration-count: infinite;
+}
+@keyframes cb-mm-ember {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  12%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(-104vh) translateX(18px); opacity: 0; }
+}
 `;
 const byline: React.CSSProperties = {
   fontFamily: mono, fontSize: 'clamp(9px, 1.4vw, 12px)', letterSpacing: 4, color: C.dim,
@@ -401,59 +465,41 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 'clamp(22px, 4vh, 42px)',
-  width: 'min(420px, 100%)',
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, marginTop: 'clamp(24px, 4.5vh, 48px)',
+  paddingLeft: 28,
 };
-// Each option is now a real button PANEL — an icon medallion on the left, label over sub-caption, and
-// a chevron on the right. A warm walnut gradient with a hairline gold top-edge reads as pressed metal,
-// and hover slides + lights the whole tile so the menu feels like a game menu, not a bare text list.
 function menuItem(on: boolean, danger: boolean): React.CSSProperties {
-  const accent = danger ? C.enemy : '#c79433';
+  const base = danger ? C.enemy : C.you;
   return {
-    position: 'relative', display: 'flex', alignItems: 'center', gap: 14,
-    padding: '11px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: sans,
-    borderRadius: 10,
-    border: `1px solid ${on ? accent : 'rgba(120,96,56,0.28)'}`,
-    background: on
-      ? 'linear-gradient(180deg, rgba(58,43,26,0.92), rgba(30,20,11,0.92))'
-      : 'linear-gradient(180deg, rgba(30,26,20,0.6), rgba(16,13,9,0.6))',
-    boxShadow: on
-      ? `0 10px 26px rgba(0,0,0,0.5), 0 0 22px ${accent}33, inset 0 1px 0 rgba(240,206,150,0.18)`
-      : 'inset 0 1px 0 rgba(200,180,140,0.06)',
-    color: on ? '#fff' : 'rgba(226,220,214,0.72)',
-    transform: on ? 'translateX(8px)' : 'none',
-    transition: 'transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease',
+    // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
+    padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
+    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
+    transform: on ? 'translateX(10px)' : 'none',
+    textShadow: on ? `0 0 20px ${base}66` : 'none',
+    transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
 }
 // The pill applied to whichever menu item the guide is currently spotlighting.
 const menuHi: React.CSSProperties = {
-  background: 'linear-gradient(180deg, rgba(58,43,26,0.92), rgba(30,20,11,0.92))', borderColor: '#c79433',
+  background: 'rgba(224,165,60,0.10)', borderRadius: 8, paddingRight: 16,
 };
-// A round carved-stone icon badge at the head of each tile.
-function medallion(on: boolean, danger: boolean): React.CSSProperties {
-  const accent = danger ? 'rgba(120,44,36,0.9)' : 'rgba(90,64,30,0.9)';
+// The label + its hover caret. Relative so the caret can hang off the label's left edge without
+// nudging the label off-centre.
+const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
+function caret(on: boolean): React.CSSProperties {
   return {
-    flex: '0 0 auto', width: 40, height: 40, borderRadius: '50%',
-    display: 'grid', placeItems: 'center',
-    background: `radial-gradient(circle at 50% 35%, ${accent}, rgba(24,16,10,0.95))`,
-    border: `1px solid ${on ? 'rgba(224,165,60,0.7)' : 'rgba(120,96,56,0.45)'}`,
-    boxShadow: on ? 'inset 0 1px 0 rgba(240,206,150,0.25)' : 'inset 0 1px 0 rgba(200,180,140,0.08)',
-    transition: 'border-color .16s ease',
+    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
+    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
+    opacity: on ? 1 : 0,
+    transition: 'opacity .16s ease, transform .16s ease',
   };
 }
-const itemText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 };
-function itemArrow(on: boolean): React.CSSProperties {
-  return {
-    flex: '0 0 auto', fontSize: 22, lineHeight: 1, color: on ? '#e0a53c' : 'rgba(200,180,140,0.3)',
-    transform: on ? 'translateX(0)' : 'translateX(-4px)', opacity: on ? 1 : 0.5,
-    transition: 'transform .16s ease, opacity .16s ease, color .16s ease',
-  };
-}
-const menuLabel: React.CSSProperties = { fontSize: 'clamp(18px, 2.3vw, 22px)', fontWeight: 800, letterSpacing: 0.5 };
+const menuLabel: React.CSSProperties = { fontSize: 'clamp(22px, 3.4vw, 30px)', fontWeight: 800, letterSpacing: 1 };
 function menuSub(on: boolean): React.CSSProperties {
   return {
-    fontFamily: mono, fontSize: 10.5, letterSpacing: 0.5, color: on ? C.dim : C.faint,
-    transition: 'color .16s ease', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? C.dim : C.faint,
+    transition: 'color .16s ease',
   };
 }
 
