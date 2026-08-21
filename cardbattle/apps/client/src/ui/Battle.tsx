@@ -301,24 +301,26 @@ export function Battle({ ui, myId, hand, events, error, send, onExit, borderCosm
         </div>
         <CardFan hand={hand} enabled={isMyTurn} pendingId={pending?.id ?? null} mana={myMana} onPlay={playCard} borderCosmetic={borderCosmetic} />
         <EmoteBar onSend={sendEmote} />
-        {isMyTurn && (
+        {ui.phase === 'playing' && (
           <button
             style={{
               ...heroBtn,
-              opacity: canUsePower ? 1 : 0.42,
+              opacity: canUsePower ? 1 : powerUsed ? 0.5 : 0.7,
               cursor: canUsePower ? 'pointer' : 'default',
               borderColor: powerPending ? '#e0b84a' : canUsePower ? '#8b74c8' : '#4a3d6e',
               boxShadow: powerPending
                 ? '0 0 18px rgba(224,184,74,0.55)'
                 : canUsePower
-                  ? '0 6px 18px rgba(0,0,0,0.45), 0 0 14px rgba(139,116,200,0.4)'
+                  ? '0 6px 18px rgba(0,0,0,0.45), 0 0 16px rgba(139,116,200,0.5)'
                   : '0 6px 18px rgba(0,0,0,0.45)',
             }}
             onClick={usePower}
             disabled={!canUsePower}
             title={`${power.name} · ${power.desc}`}
           >
-            <span style={heroIcon}>{power.icon}</span>
+            <span style={heroPortrait}>
+              <AvatarArt avatar={me?.avatar ?? ''} size={52} />
+            </span>
             <span style={heroInfo}>
               <span style={heroTopRow}>
                 <span style={heroKicker}>직업 스킬</span>
@@ -752,9 +754,12 @@ const heroBtn: React.CSSProperties = {
   boxShadow: '0 6px 18px rgba(0,0,0,0.45)',
   transition: 'opacity .15s, box-shadow .15s, border-color .15s',
 };
-const heroIcon: React.CSSProperties = {
-  fontSize: 30, lineHeight: 1, flexShrink: 0,
-  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+const heroPortrait: React.CSSProperties = {
+  flexShrink: 0, width: 56, height: 56, borderRadius: '50%',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+  background: 'radial-gradient(circle at 50% 36%, #4a3a72, #241a3e)',
+  border: '2px solid #8b74c8',
+  boxShadow: 'inset 0 2px 7px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.45)',
 };
 const heroInfo: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 };
 const heroTopRow: React.CSSProperties = { display: 'flex', alignItems: 'baseline', gap: 7 };
