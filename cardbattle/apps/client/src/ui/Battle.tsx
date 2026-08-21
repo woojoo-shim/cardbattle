@@ -513,7 +513,10 @@ const COACH: Record<CoachStep, { icon: IconName; tag: string; head: string; text
     text: '마나가 남으면 카드를 더 낼 수 있어요. 더 낼 게 없으면 턴을 마무리합니다.',
     point: '→  오른쪽 «턴 종료» 버튼을 클릭',
     dir: 'right',
-    anchor: { bottom: 'clamp(96px, 12vh, 140px)', right: 24 },
+    // Sit right beside the 턴 종료 button, which is fixed at the right edge, vertically centred
+    // (top:50%, right:12, 232px wide → left edge ≈ right:244). Tuck the note just left of it so the
+    // callout literally points at the button it's talking about.
+    anchor: { top: '50%', right: 252, transform: 'translateY(-50%)' },
   },
   done: {
     icon: 'trophy', tag: '다 배웠어요!',
