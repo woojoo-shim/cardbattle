@@ -139,35 +139,35 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
               <span>새 방 만들기</span>
             </div>
             <div style={form}>
-              <label style={cap}>세션 이름</label>
+              <StepLabel n={1} label="방 이름 정하기" hint="비워도 돼요" />
               <input
                 className="cb-input"
                 style={field}
                 value={title}
                 maxLength={24}
-                placeholder="세션 이름 입력..."
+                placeholder="예: 초보 환영 · 편하게 오세요"
                 onChange={(e) => setTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && create()}
               />
 
-              <label style={cap}>공개 설정</label>
+              <StepLabel n={2} label="누가 들어올 수 있나요?" />
               <div style={visRow}>
                 <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visCard, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
-                  <span style={visHead}><Icon name="globe" size={16} />&nbsp;공개</span>
-                  <span style={visDesc}>로비 목록에 노출</span>
+                  <span style={visHead}><Icon name="globe" size={16} />&nbsp;누구나</span>
+                  <span style={visDesc}>목록에 떠서 아무나 참가</span>
                 </button>
                 <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visCard, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
-                  <span style={visHead}><Icon name="lock" size={16} />&nbsp;비공개</span>
-                  <span style={visDesc}>코드로만 접속</span>
+                  <span style={visHead}><Icon name="lock" size={16} />&nbsp;친구만</span>
+                  <span style={visDesc}>코드를 아는 사람만</span>
                 </button>
               </div>
 
-              <label style={cap}>게임 규칙</label>
+              <StepLabel n={3} label="게임 규칙 고르기" hint="그대로 둬도 좋아요" />
               <button className="cb-vis" data-on={showModes ? '1' : undefined} style={{ ...modeToggle, ...(showModes ? visBtnOn : null) }} onClick={toggleModes}>
                 <Icon name="sparkle" size={15} color={C.rare} />
                 <span style={modeToggleName}>{GAME_MODES[mode]?.name}</span>
                 <span style={{ flex: 1 }} />
-                <span style={modeToggleHint}>{showModes ? '접기' : '변경'}</span>
+                <span style={modeToggleHint}>{showModes ? '접기' : '바꾸기'}</span>
                 <Icon name={showModes ? 'chevronUp' : 'chevronDown'} size={14} />
               </button>
               {showModes && (
@@ -191,7 +191,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                   })}
                 </div>
               )}
-              <button className="cb-exec" style={primary} onClick={create}><Icon name="swords" size={17} />&nbsp;방 만들기</button>
+              <button className="cb-exec" style={primary} onClick={create}><Icon name="swords" size={17} />&nbsp;이대로 방 만들기</button>
 
               <div style={sep}><span style={sepRule} /><span style={sepLabel}>코드로 참가</span><span style={sepRule} /></div>
               <div style={codeRow}>
@@ -285,6 +285,25 @@ const EMBERS = [
   { x: 88, s: 3, d: 16, delay: 2 }, { x: 45, s: 2, d: 21, delay: 9 },
 ];
 
+// A numbered step label so "새 방 만들기" reads as a clear 1-2-3 checklist instead of terse captions.
+function StepLabel({ n, label, hint }: { n: number; label: string; hint?: string }) {
+  return (
+    <div style={stepRow}>
+      <span style={stepNum}>{n}</span>
+      <span style={stepLabel}>{label}</span>
+      {hint && <span style={stepHint}>— {hint}</span>}
+    </div>
+  );
+}
+const stepRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, marginBottom: 3 };
+const stepNum: React.CSSProperties = {
+  flexShrink: 0, width: 22, height: 22, borderRadius: '50%', display: 'grid', placeItems: 'center',
+  fontFamily: mono, fontSize: 13, fontWeight: 800, color: '#2a1a06',
+  background: 'linear-gradient(180deg, #e6b552, #cf9a2f)', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+};
+const stepLabel: React.CSSProperties = { fontFamily: sans, fontSize: 15, fontWeight: 700, letterSpacing: 0.3, color: '#eef2fb' };
+const stepHint: React.CSSProperties = { fontFamily: sans, fontSize: 12, color: C.faint, letterSpacing: 0.2 };
+
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
@@ -342,9 +361,6 @@ const winBar: React.CSSProperties = {
 };
 const winMeta: React.CSSProperties = { marginLeft: 'auto', fontFamily: mono, fontSize: 14, color: C.dim, letterSpacing: 1 };
 const form: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 10, padding: '18px 20px 22px' };
-const cap: React.CSSProperties = {
-  fontFamily: sans, fontSize: 14, fontWeight: 700, letterSpacing: 0.5, color: '#c7d0e2', marginTop: 8, marginBottom: 1,
-};
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, minHeight: 280, maxHeight: '56vh', overflowY: 'auto', padding: '14px 18px 18px' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 15, fontFamily: sans, textAlign: 'center', margin: 'auto', lineHeight: 1.9 };
 const roomRow: React.CSSProperties = {
