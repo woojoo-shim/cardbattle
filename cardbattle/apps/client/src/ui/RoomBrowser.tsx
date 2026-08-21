@@ -26,7 +26,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [title, setTitle] = useState('');
   const [mode, setMode] = useState<GameModeId>(DEFAULT_MODE);
-  const [showModes, setShowModes] = useState(false); // special modes stay collapsed (standard) by default
+  const [showAdv, setShowAdv] = useState(false); // optional 공개 범위·규칙 stay tucked away so the default create flow is just name + button
   const [isPrivate, setIsPrivate] = useState(false); // public rooms are listed; private ones join-by-code only
   const [code, setCode] = useState('');
   const [err, setErr] = useState('');
@@ -48,8 +48,6 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
     .filter((r) => !r.metadata?.started && !r.metadata?.unlisted && headcount(r) < r.maxClients)
     .sort((a, b) => (a.metadata?.title ?? '').localeCompare(b.metadata?.title ?? ''));
 
-  // Collapsing the special-mode picker snaps the room back to the standard ruleset.
-  const toggleModes = () => { playSfx('toggle'); setShowModes((v) => { if (v) setMode(DEFAULT_MODE); return !v; }); };
   const create = () => { playSfx('select'); onPick(() => createRoom(name, title.trim(), avatar, mode, isPrivate)); };
   const join = (roomId: string) => { playSfx('select'); onPick(() => joinRoomById(roomId, name, avatar)); };
   const quick = () => { playSfx('select'); onPick(() => quickPlay(name, avatar)); };
@@ -150,45 +148,47 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
                 onKeyDown={(e) => e.key === 'Enter' && create()}
               />
 
-              <StepLabel n={2} label="누가 들어올 수 있나요?" />
-              <div style={visRow}>
-                <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visCard, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
-                  <span style={visHead}><Icon name="globe" size={16} />&nbsp;누구나</span>
-                  <span style={visDesc}>목록에 떠서 아무나 참가</span>
-                </button>
-                <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visCard, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
-                  <span style={visHead}><Icon name="lock" size={16} />&nbsp;친구만</span>
-                  <span style={visDesc}>코드를 아는 사람만</span>
-                </button>
-              </div>
-
-              <StepLabel n={3} label="게임 규칙 고르기" hint="그대로 둬도 좋아요" />
-              <button className="cb-vis" data-on={showModes ? '1' : undefined} style={{ ...modeToggle, ...(showModes ? visBtnOn : null) }} onClick={toggleModes}>
+              <StepLabel n={2} label="세부 설정" hint="선택 · 안 건드려도 돼요" />
+              <button className="cb-vis" data-on={showAdv ? '1' : undefined} style={{ ...modeToggle, ...(showAdv ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setShowAdv((v) => !v); }}>
                 <Icon name="sparkle" size={15} color={C.rare} />
-                <span style={modeToggleName}>{GAME_MODES[mode]?.name}</span>
+                <span style={modeToggleName}>{isPrivate ? '친구만' : '누구나'} · {GAME_MODES[mode]?.name}</span>
                 <span style={{ flex: 1 }} />
-                <span style={modeToggleHint}>{showModes ? '접기' : '바꾸기'}</span>
-                <Icon name={showModes ? 'chevronUp' : 'chevronDown'} size={14} />
+                <span style={modeToggleHint}>{showAdv ? '접기' : '바꾸기'}</span>
+                <Icon name={showAdv ? 'chevronUp' : 'chevronDown'} size={14} />
               </button>
-              {showModes && (
-                <div style={modeGrid}>
-                  {MODE_LIST.map((m) => {
-                    const on = m.id === mode;
-                    return (
-                      <button
-                        key={m.id}
-                        className="cb-mode"
-                        data-on={on ? '1' : undefined}
-                        style={{ ...modeCard, ...(on ? modeCardOn : null) }}
-                        onClick={() => { playSfx('select'); setMode(m.id); }}
-                        title={m.desc}
-                      >
-                        <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
-                        <span style={modeName}>{m.name}</span>
-                        <span style={modeTag}>{m.tagline}</span>
-                      </button>
-                    );
-                  })}
+              {showAdv && (
+                <div style={advBox}>
+                  <span style={advCap}>공개 범위</span>
+                  <div style={visRow}>
+                    <button className="cb-vis" data-on={!isPrivate ? '1' : undefined} style={{ ...visCard, ...(!isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(false); }}>
+                      <span style={visHead}><Icon name="globe" size={16} />&nbsp;누구나</span>
+                      <span style={visDesc}>목록에 떠서 아무나 참가</span>
+                    </button>
+                    <button className="cb-vis" data-on={isPrivate ? '1' : undefined} style={{ ...visCard, ...(isPrivate ? visBtnOn : null) }} onClick={() => { playSfx('toggle'); setIsPrivate(true); }}>
+                      <span style={visHead}><Icon name="lock" size={16} />&nbsp;친구만</span>
+                      <span style={visDesc}>코드를 아는 사람만</span>
+                    </button>
+                  </div>
+                  <span style={advCap}>게임 규칙</span>
+                  <div style={modeGrid}>
+                    {MODE_LIST.map((m) => {
+                      const on = m.id === mode;
+                      return (
+                        <button
+                          key={m.id}
+                          className="cb-mode"
+                          data-on={on ? '1' : undefined}
+                          style={{ ...modeCard, ...(on ? modeCardOn : null) }}
+                          onClick={() => { playSfx('select'); setMode(m.id); }}
+                          title={m.desc}
+                        >
+                          <span style={modeIcon}><Icon name={MODE_ICON[m.id]} size={22} color={C.rare} /></span>
+                          <span style={modeName}>{m.name}</span>
+                          <span style={modeTag}>{m.tagline}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               <button className="cb-exec" style={primary} onClick={create}><Icon name="swords" size={17} />&nbsp;이대로 방 만들기</button>
@@ -407,6 +407,11 @@ const modeToggle: React.CSSProperties = {
 };
 const modeToggleName: React.CSSProperties = { color: '#eef2fb', fontWeight: 700, letterSpacing: 0.5 };
 const modeToggleHint: React.CSSProperties = { fontSize: 12, color: C.faint, fontWeight: 600, letterSpacing: 0.5 };
+const advBox: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', gap: 9, marginTop: 4, padding: '13px 14px',
+  borderRadius: 6, border: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.2)',
+};
+const advCap: React.CSSProperties = { fontFamily: sans, fontSize: 12.5, fontWeight: 700, color: C.faint, letterSpacing: 0.6 };
 const modeGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 };
 const modeCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 3, padding: '13px 15px', textAlign: 'left', cursor: 'pointer',
