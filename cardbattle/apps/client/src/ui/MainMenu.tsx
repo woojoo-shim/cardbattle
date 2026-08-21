@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
 import { DeckBuilder } from './DeckBuilder.js';
 import { Icon } from './art/Icon.js';
+import type { IconName } from './art/Icon.js';
 import { CardArt } from './art/CardArt.js';
 import { CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
@@ -25,14 +26,14 @@ type ItemKey = 'start' | 'multi' | 'how' | 'deck' | 'shop' | 'credits' | 'logout
 // Matchmaking-first, Clash-Royale style: the hero action RUNS A MATCH (auto-finds a 1v1 opponent,
 // fills with a bot if none turns up). Friend rooms (create/join by code) are the secondary path,
 // not the headline — we lead with "find a match", not "invite to a room".
-const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
-  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색' },
-  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가' },
-  { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
-  { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기' },
-  { key: 'shop', label: '상점', sub: '외형 · 칭호' },
-  { key: 'credits', label: '제작진', sub: '' },
-  { key: 'logout', label: '나가기', sub: '로그아웃' },
+const ITEMS: { key: ItemKey; label: string; sub: string; icon: IconName }[] = [
+  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색', icon: 'swords' },
+  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가', icon: 'chain' },
+  { key: 'how', label: '플레이 방법', sub: '게임하며 배우기', icon: 'target' },
+  { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기', icon: 'hand' },
+  { key: 'shop', label: '상점', sub: '외형 · 칭호', icon: 'coin' },
+  { key: 'credits', label: '제작진', sub: '', icon: 'star' },
+  { key: 'logout', label: '나가기', sub: '로그아웃', icon: 'arrowRight' },
 ];
 
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
@@ -124,11 +125,14 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={labelWrap}>
-                  <span style={caret(on)}>◆</span>
-                  <span style={menuLabel}>{it.label}</span>
+                <span style={medallion(on, danger)}>
+                  <Icon name={it.icon} size={20} color={danger ? C.enemy : (on ? '#f4e4c0' : C.you)} />
                 </span>
-                {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
+                <span style={itemText}>
+                  <span style={menuLabel}>{it.label}</span>
+                  {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
+                </span>
+                <span style={itemArrow(on)}>›</span>
               </button>
             );
           })}
@@ -397,41 +401,59 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, marginTop: 'clamp(24px, 4.5vh, 48px)',
-  paddingLeft: 28,
+  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 'clamp(22px, 4vh, 42px)',
+  width: 'min(420px, 100%)',
 };
+// Each option is now a real button PANEL — an icon medallion on the left, label over sub-caption, and
+// a chevron on the right. A warm walnut gradient with a hairline gold top-edge reads as pressed metal,
+// and hover slides + lights the whole tile so the menu feels like a game menu, not a bare text list.
 function menuItem(on: boolean, danger: boolean): React.CSSProperties {
-  const base = danger ? C.enemy : C.you;
+  const accent = danger ? C.enemy : '#c79433';
   return {
-    // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
-    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
-    padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
-    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
-    transform: on ? 'translateX(10px)' : 'none',
-    textShadow: on ? `0 0 20px ${base}66` : 'none',
-    transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
+    position: 'relative', display: 'flex', alignItems: 'center', gap: 14,
+    padding: '11px 16px', cursor: 'pointer', textAlign: 'left', fontFamily: sans,
+    borderRadius: 10,
+    border: `1px solid ${on ? accent : 'rgba(120,96,56,0.28)'}`,
+    background: on
+      ? 'linear-gradient(180deg, rgba(58,43,26,0.92), rgba(30,20,11,0.92))'
+      : 'linear-gradient(180deg, rgba(30,26,20,0.6), rgba(16,13,9,0.6))',
+    boxShadow: on
+      ? `0 10px 26px rgba(0,0,0,0.5), 0 0 22px ${accent}33, inset 0 1px 0 rgba(240,206,150,0.18)`
+      : 'inset 0 1px 0 rgba(200,180,140,0.06)',
+    color: on ? '#fff' : 'rgba(226,220,214,0.72)',
+    transform: on ? 'translateX(8px)' : 'none',
+    transition: 'transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease',
   };
 }
 // The pill applied to whichever menu item the guide is currently spotlighting.
 const menuHi: React.CSSProperties = {
-  background: 'rgba(224,165,60,0.10)', borderRadius: 8, paddingRight: 16,
+  background: 'linear-gradient(180deg, rgba(58,43,26,0.92), rgba(30,20,11,0.92))', borderColor: '#c79433',
 };
-// The label + its hover caret. Relative so the caret can hang off the label's left edge without
-// nudging the label off-centre.
-const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
-function caret(on: boolean): React.CSSProperties {
+// A round carved-stone icon badge at the head of each tile.
+function medallion(on: boolean, danger: boolean): React.CSSProperties {
+  const accent = danger ? 'rgba(120,44,36,0.9)' : 'rgba(90,64,30,0.9)';
   return {
-    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
-    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
-    opacity: on ? 1 : 0,
-    transition: 'opacity .16s ease, transform .16s ease',
+    flex: '0 0 auto', width: 40, height: 40, borderRadius: '50%',
+    display: 'grid', placeItems: 'center',
+    background: `radial-gradient(circle at 50% 35%, ${accent}, rgba(24,16,10,0.95))`,
+    border: `1px solid ${on ? 'rgba(224,165,60,0.7)' : 'rgba(120,96,56,0.45)'}`,
+    boxShadow: on ? 'inset 0 1px 0 rgba(240,206,150,0.25)' : 'inset 0 1px 0 rgba(200,180,140,0.08)',
+    transition: 'border-color .16s ease',
   };
 }
-const menuLabel: React.CSSProperties = { fontSize: 'clamp(22px, 3.4vw, 30px)', fontWeight: 800, letterSpacing: 1 };
+const itemText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 };
+function itemArrow(on: boolean): React.CSSProperties {
+  return {
+    flex: '0 0 auto', fontSize: 22, lineHeight: 1, color: on ? '#e0a53c' : 'rgba(200,180,140,0.3)',
+    transform: on ? 'translateX(0)' : 'translateX(-4px)', opacity: on ? 1 : 0.5,
+    transition: 'transform .16s ease, opacity .16s ease, color .16s ease',
+  };
+}
+const menuLabel: React.CSSProperties = { fontSize: 'clamp(18px, 2.3vw, 22px)', fontWeight: 800, letterSpacing: 0.5 };
 function menuSub(on: boolean): React.CSSProperties {
   return {
-    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? C.dim : C.faint,
-    transition: 'color .16s ease',
+    fontFamily: mono, fontSize: 10.5, letterSpacing: 0.5, color: on ? C.dim : C.faint,
+    transition: 'color .16s ease', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
   };
 }
 
