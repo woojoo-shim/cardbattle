@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Shop } from './Shop.js';
 import { DeckBuilder } from './DeckBuilder.js';
-import { Icon, type IconName } from './art/Icon.js';
+import { Icon } from './art/Icon.js';
 import { CardArt } from './art/CardArt.js';
 import { CARD_DEFS } from '@cardbattle/shared';
 import { C, mono, sans } from './theme.js';
@@ -116,38 +116,20 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
             const guided = guideTarget === it.key;
             const on = hover === it.key || guided;
             const danger = it.key === 'logout';
-            const enter = () => { setHover(it.key); playSfx('hover'); };
-            const leave = () => setHover((h) => (h === it.key ? null : h));
-            // The headline action (대전 찾기) is a big gold PLAY button; the rest are a tidy stack of
-            // framed icon-rows — Steam-launcher style: one loud primary CTA, a calm secondary list.
-            if (it.key === 'start') {
-              return (
-                <button
-                  key={it.key} style={{ ...playBtn, ...(on ? playBtnOn : null) }}
-                  className={guided ? 'cb-guide-hi' : undefined}
-                  onClick={() => act(it.key)} onMouseEnter={enter} onMouseLeave={leave}
-                >
-                  <span style={playIcon}><Icon name="swords" size={26} /></span>
-                  <span style={playText}>
-                    <span style={playLabel}>{it.label}</span>
-                    <span style={playSub}>{it.sub}</span>
-                  </span>
-                  <span style={playGo(on)}><Icon name="arrowRight" size={20} /></span>
-                </button>
-              );
-            }
             return (
               <button
-                key={it.key} style={rowBtn(on, danger)}
+                key={it.key}
+                style={{ ...menuItem(on, danger), ...(guided ? menuHi : null) }}
                 className={guided ? 'cb-guide-hi' : undefined}
-                onClick={() => act(it.key)} onMouseEnter={enter} onMouseLeave={leave}
+                onClick={() => act(it.key)}
+                onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
+                onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={rowIcon(on, danger)}><Icon name={ICON_FOR[it.key]} size={17} /></span>
-                <span style={rowText}>
-                  <span style={rowLabel(on)}>{it.label}</span>
-                  {it.sub && <span style={rowSub(on)}>{it.sub}</span>}
+                <span style={labelWrap}>
+                  <span style={caret(on)}>◆</span>
+                  <span style={menuLabel}>{it.label}</span>
                 </span>
-                <span style={rowChevron(on, danger)}><Icon name="arrowRight" size={15} /></span>
+                {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
               </button>
             );
           })}
@@ -482,79 +464,42 @@ const byline: React.CSSProperties = {
   marginTop: 12, textTransform: 'uppercase',
 };
 
-// Steam-launcher menu: a loud gold PLAY button on top, then a calm framed list of secondary rows.
-const ICON_FOR: Record<ItemKey, IconName> = {
-  start: 'swords', multi: 'globe', how: 'sparkle', deck: 'card', shop: 'coin', credits: 'star', logout: 'close',
-};
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8,
-  marginTop: 'clamp(22px, 4vh, 44px)', width: 'clamp(300px, 30vw, 400px)', maxWidth: '100%',
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, marginTop: 'clamp(24px, 4.5vh, 48px)',
+  paddingLeft: 28,
 };
-// The headline PLAY button — big gold gradient CTA, icon | title+sub | arrow.
-const playBtn: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left',
-  padding: '16px 18px', cursor: 'pointer', borderRadius: 9, fontFamily: sans, color: '#2a1a06',
-  border: '1px solid #eccb72',
-  background: 'linear-gradient(180deg, #eeba4c 0%, #d29e31 100%)',
-  boxShadow: '0 12px 28px rgba(207,154,47,0.34), inset 0 1px 0 rgba(255,246,212,0.65)',
-  transition: 'transform .14s ease, box-shadow .14s ease, filter .14s ease',
-};
-const playBtnOn: React.CSSProperties = {
-  transform: 'translateY(-2px)', filter: 'brightness(1.05)',
-  boxShadow: '0 16px 34px rgba(207,154,47,0.46), inset 0 1px 0 rgba(255,246,212,0.75)',
-};
-const playIcon: React.CSSProperties = {
-  flexShrink: 0, width: 46, height: 46, borderRadius: 8, display: 'grid', placeItems: 'center',
-  background: 'rgba(42,26,6,0.14)', border: '1px solid rgba(42,26,6,0.22)', color: '#2a1a06',
-};
-const playText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minWidth: 0 };
-const playLabel: React.CSSProperties = { fontSize: 23, fontWeight: 900, letterSpacing: 0.5, lineHeight: 1 };
-const playSub: React.CSSProperties = {
-  fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'rgba(42,26,6,0.72)',
-};
-function playGo(on: boolean): React.CSSProperties {
+function menuItem(on: boolean, danger: boolean): React.CSSProperties {
+  const base = danger ? C.enemy : C.you;
   return {
-    flexShrink: 0, display: 'grid', placeItems: 'center', color: '#2a1a06',
-    transform: on ? 'translateX(3px)' : 'none', transition: 'transform .14s ease',
+    // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
+    padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
+    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
+    transform: on ? 'translateX(10px)' : 'none',
+    textShadow: on ? `0 0 20px ${base}66` : 'none',
+    transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
   };
 }
-// A secondary menu row — dark framed panel, icon disc | label+sub | reveal-on-hover arrow.
-function rowBtn(on: boolean, danger: boolean): React.CSSProperties {
-  const accent = danger ? C.enemy : '#e0a53c';
+// The pill applied to whichever menu item the guide is currently spotlighting.
+const menuHi: React.CSSProperties = {
+  background: 'rgba(224,165,60,0.10)', borderRadius: 8, paddingRight: 16,
+};
+// The label + its hover caret. Relative so the caret can hang off the label's left edge without
+// nudging the label off-centre.
+const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
+function caret(on: boolean): React.CSSProperties {
   return {
-    display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
-    padding: '11px 14px', cursor: 'pointer', borderRadius: 8, fontFamily: sans,
-    border: `1px solid ${on ? (danger ? `${C.enemy}88` : 'rgba(224,165,60,0.5)') : 'rgba(120,96,56,0.28)'}`,
-    background: on
-      ? 'linear-gradient(180deg, rgba(52,40,22,0.94), rgba(30,22,12,0.94))'
-      : 'rgba(24,18,11,0.62)',
-    color: on ? '#fff' : 'rgba(226,220,214,0.72)',
-    transform: on ? 'translateX(6px)' : 'none',
-    boxShadow: on ? `0 8px 20px rgba(0,0,0,0.42), inset 0 0 0 1px ${accent}22` : 'none',
-    transition: 'transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease',
+    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
+    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
+    opacity: on ? 1 : 0,
+    transition: 'opacity .16s ease, transform .16s ease',
   };
 }
-function rowIcon(on: boolean, danger: boolean): React.CSSProperties {
-  const accent = danger ? C.enemy : '#e0a53c';
+const menuLabel: React.CSSProperties = { fontSize: 'clamp(22px, 3.4vw, 30px)', fontWeight: 800, letterSpacing: 1 };
+function menuSub(on: boolean): React.CSSProperties {
   return {
-    flexShrink: 0, width: 34, height: 34, borderRadius: 8, display: 'grid', placeItems: 'center',
-    background: on ? (danger ? 'rgba(200,74,58,0.16)' : 'rgba(224,165,60,0.14)') : 'rgba(0,0,0,0.28)',
-    border: `1px solid ${on ? `${accent}77` : 'rgba(120,96,56,0.3)'}`,
-    color: on ? accent : 'rgba(210,190,150,0.72)',
-    transition: 'background .15s ease, border-color .15s ease, color .15s ease',
-  };
-}
-const rowText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minWidth: 0 };
-function rowLabel(on: boolean): React.CSSProperties {
-  return { fontSize: 16, fontWeight: 800, letterSpacing: 0.4, color: on ? '#fff' : 'inherit' };
-}
-function rowSub(on: boolean): React.CSSProperties {
-  return { fontFamily: mono, fontSize: 10.5, letterSpacing: 0.5, color: on ? C.dim : C.faint, transition: 'color .15s ease' };
-}
-function rowChevron(on: boolean, danger: boolean): React.CSSProperties {
-  return {
-    flexShrink: 0, display: 'grid', placeItems: 'center', color: danger ? C.enemy : '#e0a53c',
-    opacity: on ? 1 : 0, transform: on ? 'translateX(0)' : 'translateX(-6px)', transition: 'opacity .15s ease, transform .15s ease',
+    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? C.dim : C.faint,
+    transition: 'color .16s ease',
   };
 }
 
