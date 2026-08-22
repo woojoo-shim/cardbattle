@@ -275,10 +275,10 @@ export function TauntFrame({ color = '#e0c060', style }: { color?: string; style
       viewBox="0 0 100 120" preserveAspectRatio="none" aria-hidden
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', ...style }}
     >
-      <path
-        d="M9 9 Q50 2 91 9 L91 40 Q91 86 50 116 Q9 86 9 40 Z"
-        fill="none" stroke={color} strokeWidth={3} strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 0 3px ${color})`, opacity: 0.92 }}
+      <polygon
+        points="4,2.4 96,2.4 96,57.6 93,72 88,85.2 80,97.2 68,106.8 50,112.8 32,106.8 20,97.2 12,85.2 7,72 4,57.6"
+        fill="none" stroke={color} strokeWidth={3.5} strokeLinejoin="round"
+        style={{ filter: `drop-shadow(0 0 3px ${color})`, opacity: 0.95 }}
       />
     </svg>
   );

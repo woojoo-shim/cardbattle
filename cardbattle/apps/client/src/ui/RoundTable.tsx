@@ -141,14 +141,28 @@ export function RoundTable({ ui, myId, selectable, onSelect, targetIntent = ENEM
                   style={{
                     ...minionChip,
                     borderColor: armed ? '#e0b84a' : m.taunt ? '#c8a24a' : mine ? C.you : C.enemy,
-                    boxShadow: armed
-                      ? `${chipEdge}, 0 0 12px rgba(224,184,74,0.7)`
-                      : m.divineShield ? `${chipEdge}, 0 0 10px rgba(240,224,150,0.6)` : chipEdge,
+                    // 수호 하수인은 방패 몸통(shieldBody)이 카드를 대신하므로 사각 프레임/테두리/스택 그림자를 끄고
+                    // 방패는 자체 두께를 지닌다. 그 외 하수인은 두툼한 stone-slab 그림자(chipEdge)를 그대로 쓴다.
+                    ...(m.taunt
+                      ? {
+                          backgroundImage: 'none',
+                          border: 'none',
+                          boxShadow: 'none',
+                          filter: armed
+                            ? 'drop-shadow(0 0 7px rgba(224,184,74,0.85))'
+                            : m.divineShield ? 'drop-shadow(0 0 6px rgba(240,224,150,0.72))' : 'none',
+                        }
+                      : {
+                          boxShadow: armed
+                            ? `${chipEdge}, 0 0 12px rgba(224,184,74,0.7)`
+                            : m.divineShield ? `${chipEdge}, 0 0 10px rgba(240,224,150,0.6)` : chipEdge,
+                        }),
                     cursor: clickable ? (canAttack ? 'grab' : 'crosshair') : 'default',
                     opacity: mine && m.attacksLeft <= 0 && attackMode ? 0.6 : 1,
                     zIndex: hoverMinion === m.id ? 30 : fresh ? 20 : undefined,
                   }}
                 >
+                  {m.taunt && <span style={shieldBody} aria-hidden />}
                   {fresh && <span style={minionDust} className="cb-minion-dust" aria-hidden />}
                   {m.taunt && <TauntFrame color={armed ? '#e0b84a' : '#c8a24a'} style={{ zIndex: 3 }} />}
                   <div style={minionArtWindow}><CardArt id={m.defId} size="100%" /></div>
@@ -541,19 +555,33 @@ const minionChip: React.CSSProperties = {
   // name is engraved on the plaque; the 3px border stays as the owner/state colour ring. A stacked
   // edge-shadow (chipEdge) gives the card visible THICKNESS so it reads as a chunky stone slab.
   position: 'relative', width: 'clamp(88px, 9.4vw, 134px)', aspectRatio: '2 / 3', borderRadius: 13, flexShrink: 0,
-  marginBottom: 8,
+  marginBottom: 16,
   backgroundImage: 'url(/card-frame.png)',
   backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat', backgroundColor: 'transparent',
   border: '3px solid',
   boxSizing: 'border-box',
   transition: 'box-shadow .18s, border-color .18s, opacity .18s',
 };
-// A layered edge-shadow that extrudes the card downward — several stacked dark offsets read as the
-// card's physical side wall, plus a warm top bevel highlight, so a minion looks THICK (두툼한), like
-// a carved stone token rather than a flat sticker. Appended to each interactive state's box-shadow.
+// A deep layered edge-shadow that extrudes the card downward — many stacked dark offsets read as the
+// card's physical side wall (~12px tall), plus a warm top bevel highlight + inner base shade, so a
+// minion looks CHUNKY/THICK (두툼한) like a carved stone token, not a flat sticker. Appended to each
+// interactive state's box-shadow.
 const chipEdge =
-  'inset 0 1.5px 0 rgba(255,238,196,0.22), inset 0 -2px 4px rgba(0,0,0,0.4),' +
-  '0 2px 0 #241809, 0 4px 0 #1b1207, 0 6px 0 #130c05, 0 8px 0 #0c0703, 0 12px 16px rgba(0,0,0,0.62)';
+  'inset 0 2px 0 rgba(255,238,196,0.26), inset 0 -3px 5px rgba(0,0,0,0.45),' +
+  '0 2px 0 #2a1c0c, 0 4px 0 #241809, 0 6px 0 #1b1207, 0 8px 0 #150e06, 0 10px 0 #100a04, 0 12px 0 #0b0603, 0 17px 20px rgba(0,0,0,0.66)';
+// 방패형(수호) 하수인은 사각 카드 대신 진짜 방패 실루엣으로 잘라낸다. shieldBody가 카드 프레임 이미지를 heater-shield
+// 폴리곤으로 clip 해 방패 몸통이 되고(위 clip 좌표는 Icon.tsx TauntFrame 폴리곤과 정확히 일치해 외곽선이 딱 맞음),
+// 자체 drop-shadow 스택으로 방패에도 두께감을 준다.
+const SHIELD_CLIP =
+  'polygon(4% 2%, 96% 2%, 96% 48%, 93% 60%, 88% 71%, 80% 81%, 68% 89%, 50% 94%, 32% 89%, 20% 81%, 12% 71%, 7% 60%, 4% 48%)';
+const shieldBody: React.CSSProperties = {
+  position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+  clipPath: SHIELD_CLIP, WebkitClipPath: SHIELD_CLIP,
+  backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+  backgroundColor: '#2a1c0c',
+  filter:
+    'drop-shadow(0 2px 0 #241809) drop-shadow(0 5px 0 #150e06) drop-shadow(0 8px 0 #0b0603) drop-shadow(0 13px 14px rgba(0,0,0,0.62))',
+};
 // Dust burst kicked up when a freshly summoned minion slams onto the felt — a soft tan puff
 // that blooms out along the ground at the base of the card and fades. Timed (via CSS delay) to
 // hit the moment the flipping card lands.
