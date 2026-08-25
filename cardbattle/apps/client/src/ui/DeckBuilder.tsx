@@ -460,12 +460,13 @@ function filterChip(on: boolean, color: string): React.CSSProperties {
 }
 const emptyFilter: React.CSSProperties = { gridColumn: '1 / -1', color: C.faint, fontSize: 14, padding: '18px 4px' };
 const grid: React.CSSProperties = {
-  // NOTE: keep the minmax() min a PLAIN length — some Safari builds drop the whole
-  // grid-template-columns declaration when a clamp() is nested inside minmax()/repeat(),
-  // collapsing the grid to a single full-width column (the "broken" MacBook layout).
-  // auto-fill + 1fr keeps it responsive: columns pack to fit and cards grow to fill the row.
-  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-  gap: 16, alignContent: 'start', paddingRight: 6,
+  // The min column width is VIEWPORT-PROPORTIONAL (vw) so cards scale with screen size:
+  // on a narrow laptop (MacBook) they shrink so the grid isn't oversized/overflowing, and
+  // on a wide desktop (Windows) they grow. clamp() floors/caps it so it never gets tiny or huge.
+  // (Chrome/Blink handles clamp() nested in minmax() fine — the earlier plain-160px was a
+  //  mistaken Safari workaround; the user is on Chrome.)
+  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(112px, 9.3vw, 200px), 1fr))',
+  gap: 'clamp(9px, 0.95vw, 16px)', alignContent: 'start', paddingRight: 6,
 };
 const cardCell: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8 };
 // Each collection entry is a real game card — the ornate 2:3 stone frame PNG with the artwork,
