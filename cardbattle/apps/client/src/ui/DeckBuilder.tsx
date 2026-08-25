@@ -189,7 +189,7 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
               {deckRows.length === 0 && <p style={emptyNote}>보유 카드를 추가해 20장 덱을 만드세요.</p>}
               {deckRows.map(({ def, n }) => (
                 <button key={def.id} style={deckRow(def.rarity)} onClick={() => removeCard(def.id)} title="클릭하면 1장 제거">
-                  <span style={rowThumb(def.rarity)}><CardArt id={def.id} size="100%" /></span>
+                  <span style={rowThumb(def.rarity)}><CardArt id={def.id} size="100%" flat /></span>
                   <span style={costChip(def.rarity)}>{def.cost}</span>
                   <span style={rowNameCol}>
                     <span style={deckName}>{def.name}</span>
@@ -280,7 +280,7 @@ export function DeckBuilder({ account, onAccount, onClose }: Props) {
                       )}
                       {inDeck > 0 && <span style={faceInDeck}>덱 ×{inDeck}</span>}
                       <div style={faceArt}>
-                        <CardArt id={def.id} size="100%" />
+                        <CardArt id={def.id} size="100%" flat />
                       </div>
                       {isMinion ? (
                         <>

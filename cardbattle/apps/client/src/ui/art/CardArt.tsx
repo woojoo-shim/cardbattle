@@ -9,6 +9,11 @@ import { useState } from 'react';
 interface Props {
   id: string;
   size?: number | string; // number → px; string → any CSS length (e.g. a clamp() for responsive cards)
+  // `flat` drops the per-card SVG filter (ca-pop: feMorphology + feDropShadow) and the two
+  // mixBlendMode:'screen' wash layers. In a dense grid (DeckBuilder shows ~30 cards at once)
+  // those GPU-composited layers pile up and, on some integrated GPUs (e.g. MacBooks), exhaust
+  // VRAM → art flickers and disappears. Flat cards render cheaply; battle art stays rich.
+  flat?: boolean;
 }
 
 const STEEL = '#cfd6e6';
@@ -1511,7 +1516,7 @@ const SCENE: Record<Elem, Scene> = {
   none:      { sky1: '#2a1a3e', sky2: '#4e327a', horizon: '#e8b45a', g1: '#241a24', g2: '#100a12', haze: '#e8b45a' },
 };
 
-export function CardArt({ id, size = 44 }: Props) {
+export function CardArt({ id, size = 44, flat = false }: Props) {
   const Art = ART[id];
   // Custom art override: if the artist drops `public/cards/<id>.png`, it renders in place of the
   // coded SVG. When that file is absent the <image> 404s → onError falls back to the coded art.
@@ -1574,7 +1579,7 @@ export function CardArt({ id, size = 44 }: Props) {
       <rect x="0" y="39" width="64" height="25" fill={`url(#ca-ground-${el})`} />
       <ellipse cx="32" cy="40" rx="36" ry="15" fill={`url(#ca-horizon-${el})`} />
       {/* thin luminous horizon line where sky meets ground */}
-      <rect x="0" y="38.4" width="64" height="1.6" fill={s.haze} opacity="0.6" style={{ mixBlendMode: 'screen' }} />
+      <rect x="0" y="38.4" width="64" height="1.6" fill={s.haze} opacity="0.6" style={flat ? undefined : { mixBlendMode: 'screen' }} />
       {/* framing vignette + grounding contact shadow so the subject sits in the scene */}
       <rect x="0" y="0" width="64" height="64" fill="url(#ca-vig)" />
       <ellipse cx="32" cy="56" rx="17" ry="4.2" fill="url(#ca-floor)" />
@@ -1588,14 +1593,14 @@ export function CardArt({ id, size = 44 }: Props) {
           width="52"
           height="52"
           preserveAspectRatio="xMidYMid meet"
-          filter="url(#ca-pop)"
+          filter={flat ? undefined : 'url(#ca-pop)'}
           onError={() => setFailedId(id)}
         />
       ) : Art ? (
-        <g filter="url(#ca-pop)"><Art /></g>
+        flat ? <Art /> : <g filter="url(#ca-pop)"><Art /></g>
       ) : null}
       {/* faint overhead light wash across the top half */}
-      <rect x="0" y="0" width="64" height="28" fill="url(#ca-toplight)" style={{ mixBlendMode: 'screen' }} />
+      <rect x="0" y="0" width="64" height="28" fill="url(#ca-toplight)" style={flat ? undefined : { mixBlendMode: 'screen' }} />
     </svg>
   );
 }
