@@ -337,7 +337,7 @@ const overlay: React.CSSProperties = {
   background:
     'radial-gradient(70% 60% at 50% 30%, rgba(120,70,200,0.22), transparent 70%),' +
     'rgba(4,6,12,0.8)',
-  backdropFilter: 'blur(5px)', fontFamily: sans,
+  backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(1440px, 98vw)', height: '96vh', maxHeight: '96vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
@@ -460,7 +460,11 @@ function filterChip(on: boolean, color: string): React.CSSProperties {
 }
 const emptyFilter: React.CSSProperties = { gridColumn: '1 / -1', color: C.faint, fontSize: 14, padding: '18px 4px' };
 const grid: React.CSSProperties = {
-  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(150px, 13vw, 200px), 1fr))',
+  // NOTE: keep the minmax() min a PLAIN length — some Safari builds drop the whole
+  // grid-template-columns declaration when a clamp() is nested inside minmax()/repeat(),
+  // collapsing the grid to a single full-width column (the "broken" MacBook layout).
+  // auto-fill + 1fr keeps it responsive: columns pack to fit and cards grow to fill the row.
+  overflow: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
   gap: 16, alignContent: 'start', paddingRight: 6,
 };
 const cardCell: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 8 };
