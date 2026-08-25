@@ -254,7 +254,7 @@ const GateBackdrop = memo(function GateBackdrop() {
                     : driftCardFace.boxShadow,
                 }}
               >
-                <CardArt id={c.id} size={c.size} />
+                <CardArt id={c.id} size={c.size} flat />
               </span>
             </span>
           </span>
@@ -329,9 +329,14 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
       {/* The login floats over the arena — a minimal frosted-glass pass. */}
       <div style={ticketShell} className="cb-gate-in">
         {/* HEADER — crest seal + title */}
-        <div style={crestMedallion}><BrandMark size={62} markOnly /></div>
+        <div style={crestMedallion} className="cb-gate-crest"><BrandMark size={62} markOnly /></div>
         <h1 style={ticketTitle}>심연의 투기장</h1>
         <span style={ticketSub}>ABYSSAL&nbsp;ARENA</span>
+        <span style={flourish} aria-hidden>
+          <i style={flLine} />
+          <i style={flGem} />
+          <i style={flLine} />
+        </span>
 
         <div style={tabRow}>
           <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
@@ -525,13 +530,28 @@ const crestMedallion: React.CSSProperties = {
   border: `1px solid rgba(120,90,190,0.55)`,
   boxShadow: '0 0 40px rgba(168,107,255,0.28), inset 0 1px 0 rgba(200,180,255,0.16)',
 };
+// The wordmark reads as engraved amethyst crystal: a pale-to-violet vertical bevel clipped to the
+// glyphs, with depth from drop-shadow (NOT text-shadow — that would ghost through the transparent fill).
 const ticketTitle: React.CSSProperties = {
-  margin: 0, fontFamily: sans, fontSize: 26, fontWeight: 800, letterSpacing: 1, color: TICKET.ink, textAlign: 'center',
-  textShadow: '0 2px 0 rgba(4,6,12,0.6), 0 0 26px rgba(168,107,255,0.28)',
+  margin: 0, fontFamily: sans, fontSize: 27, fontWeight: 800, letterSpacing: 1, textAlign: 'center',
+  background: 'linear-gradient(180deg, #f6f1ff 0%, #d7c4ff 44%, #a86bff 100%)',
+  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
+  filter: 'drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 22px rgba(168,107,255,0.38))',
 };
 const ticketSub: React.CSSProperties = {
-  marginTop: 5, marginBottom: 18, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.seal,
+  marginTop: 6, marginBottom: 12, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.seal,
   textTransform: 'uppercase', opacity: 0.9,
+};
+// A crafted hairline-and-gem divider under the wordmark — the same flourish motif as the main menu.
+const flourish: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 10, width: 'clamp(180px, 70%, 280px)', marginBottom: 18,
+};
+const flLine: React.CSSProperties = {
+  flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(168,107,255,0.6), transparent)',
+};
+const flGem: React.CSSProperties = {
+  width: 6, height: 6, flexShrink: 0, transform: 'rotate(45deg)',
+  background: '#c8a6ff', boxShadow: '0 0 8px rgba(168,107,255,0.8)',
 };
 const stubTagline: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 3, color: TICKET.dim, textAlign: 'center',

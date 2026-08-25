@@ -484,6 +484,12 @@
   50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.08); }
 }
 .cb-gate-glow { animation: cb-gate-glow 6.5s ease-in-out infinite; }
+/* The crest seal behind the wordmark breathes a soft amethyst aura, as if lit from within. */
+@keyframes cb-gate-crest {
+  0%, 100% { box-shadow: 0 0 30px rgba(168,107,255,0.22), inset 0 1px 0 rgba(200,180,255,0.16); }
+  50%      { box-shadow: 0 0 52px rgba(168,107,255,0.42), inset 0 1px 0 rgba(210,190,255,0.24); }
+}
+.cb-gate-crest { animation: cb-gate-crest 5s ease-in-out infinite; }
 /* The battle light shaft over the table breathes and sways as the firelight flickers. */
 @keyframes cb-batt-shaft {
   0%, 100% { opacity: 0.7;  transform: translateX(-50%) skewX(-2.4deg); }
