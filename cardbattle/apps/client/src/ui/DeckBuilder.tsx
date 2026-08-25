@@ -337,7 +337,7 @@ const overlay: React.CSSProperties = {
   background:
     'radial-gradient(70% 60% at 50% 30%, rgba(120,70,200,0.22), transparent 70%),' +
     'rgba(4,6,12,0.8)',
-  backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', fontFamily: sans,
+  fontFamily: sans,
 };
 const modal: React.CSSProperties = {
   width: 'min(1440px, 98vw)', height: '96vh', maxHeight: '96vh', overflow: 'hidden', display: 'flex', flexDirection: 'column',
@@ -474,7 +474,11 @@ function cardFace(owned: boolean): React.CSSProperties {
   return {
     position: 'relative', width: '100%', aspectRatio: '2 / 3', cursor: 'help',
     backgroundImage: 'url(/card-frame.png)', backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
-    filter: owned ? 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))' : 'grayscale(0.6) brightness(0.82) drop-shadow(0 6px 12px rgba(0,0,0,0.45))',
+    // Use boxShadow (not filter: drop-shadow) for the card shadow: a CSS `filter` on every one of
+    // ~30 cards — each already holding its own SVG filter — stacks with the overlay's backdrop-filter
+    // and makes Safari flicker/glitch on scroll. Grayscale (unowned only) is the sole remaining filter.
+    boxShadow: owned ? '0 8px 16px rgba(0,0,0,0.5)' : '0 6px 12px rgba(0,0,0,0.45)',
+    filter: owned ? undefined : 'grayscale(0.6) brightness(0.82)',
     opacity: owned ? 1 : 0.92,
   };
 }

@@ -1524,7 +1524,10 @@ export function CardArt({ id, size = 44 }: Props) {
   // Scene gradients are keyed by element (not per-card): url() resolves to the first match in the
   // document, and every card of an element shares an identical palette, so this stays correct.
   return (
-    <svg viewBox="0 0 64 64" aria-hidden style={{ display: 'block', width: dim, height: dim }}>
+    // width/height are set as SVG PRESENTATION ATTRIBUTES (not just CSS) because Safari/WebKit
+    // collapses an inline <svg> with percentage CSS sizing to 0 inside a flex/grid container —
+    // the attributes give it the intrinsic size it needs, so the art shows on macOS too.
+    <svg viewBox="0 0 64 64" width={dim} height={dim} aria-hidden style={{ display: 'block', width: dim, height: dim }}>
       <defs>
         {/* Yu-Gi-Oh illustrated window: a dusk sky, a glowing horizon that backlights the subject,
             and a ground plane — a painted diorama rather than a flat spotlight-on-void. */}
