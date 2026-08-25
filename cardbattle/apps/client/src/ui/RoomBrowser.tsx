@@ -210,7 +210,7 @@ const EMBERS = [
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
-  fontFamily: sans, color: C.text, overflow: 'hidden',
+  fontFamily: sans, color: C.text, overflowX: 'hidden', overflowY: 'auto',
   background: 'linear-gradient(180deg, #1a120b 0%, #120b07 55%, #080503 100%)',
 };
 const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
@@ -229,17 +229,17 @@ const atmosVignette: React.CSSProperties = {
 const emberField: React.CSSProperties = { position: 'absolute', inset: 0, mixBlendMode: 'screen' };
 const inner: React.CSSProperties = {
   position: 'relative', zIndex: 1,
-  width: '100%', maxWidth: 560, margin: '0 auto', boxSizing: 'border-box',
-  padding: '72px clamp(20px, 5vw, 44px) 56px',
-  display: 'flex', flexDirection: 'column', gap: 20,
+  width: '100%', maxWidth: 'min(560px, 94vw)', margin: '0 auto', boxSizing: 'border-box',
+  padding: 'clamp(40px, 8vh, 72px) clamp(20px, 5vw, 44px) clamp(28px, 5vh, 56px)',
+  display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 2.4vh, 20px)',
 };
-const head: React.CSSProperties = { textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 };
+const head: React.CSSProperties = { textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(4px, 0.8vh, 6px)' };
 const kicker: React.CSSProperties = {
-  fontFamily: mono, fontSize: 12, letterSpacing: 4, textTransform: 'uppercase',
+  fontFamily: mono, fontSize: 'clamp(10px, 1.4vw, 12px)', letterSpacing: 4, textTransform: 'uppercase',
   color: 'rgba(224,165,60,0.72)',
 };
 const heading: React.CSSProperties = {
-  margin: 0, fontFamily: serif, fontSize: 'clamp(30px, 5.4vw, 46px)', fontWeight: 700,
+  margin: 0, fontFamily: serif, fontSize: 'clamp(28px, 5.4vw, 46px)', fontWeight: 700,
   letterSpacing: 2, color: '#f4e9cb',
   textShadow: '0 2px 0 #14100c, 0 6px 22px rgba(0,0,0,0.6)',
 };
@@ -249,12 +249,12 @@ const flourishRule: React.CSSProperties = {
   background: 'linear-gradient(90deg, transparent, rgba(224,165,60,0.5) 30%, rgba(224,165,60,0.5) 70%, transparent)',
 };
 const flourishGem: React.CSSProperties = { fontSize: 11, color: '#e0a53c', textShadow: '0 0 10px rgba(224,165,60,0.6)' };
-const sub: React.CSSProperties = { margin: '4px 0 0', fontSize: 14.5, color: C.dim, fontFamily: mono, letterSpacing: 0.5 };
+const sub: React.CSSProperties = { margin: '4px 0 0', fontSize: 'clamp(12px, 1.7vw, 14.5px)', color: C.dim, fontFamily: mono, letterSpacing: 0.5 };
 
-const tiles: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 };
+const tiles: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(10px, 1.6vw, 14px)' };
 const tile: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
-  padding: '26px 16px', borderRadius: 10, cursor: 'pointer', fontFamily: sans, textAlign: 'center',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(6px, 1vh, 8px)',
+  padding: 'clamp(18px, 3.4vh, 26px) clamp(10px, 2vw, 16px)', borderRadius: 10, cursor: 'pointer', fontFamily: sans, textAlign: 'center',
   background: 'linear-gradient(180deg, rgba(44,33,20,0.9), rgba(24,16,10,0.9))',
   border: '1px solid rgba(120,96,56,0.4)',
   boxShadow: '0 12px 28px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,238,196,0.08)',
@@ -265,71 +265,71 @@ const tileGold: React.CSSProperties = {
   boxShadow: '0 14px 30px rgba(207,154,47,0.34), inset 0 1px 0 rgba(255,246,212,0.6)',
 };
 const tileIcon: React.CSSProperties = {
-  width: 58, height: 58, borderRadius: '50%', display: 'grid', placeItems: 'center',
+  width: 'clamp(44px, 7vw, 58px)', height: 'clamp(44px, 7vw, 58px)', borderRadius: '50%', display: 'grid', placeItems: 'center',
   background: 'rgba(42,26,6,0.16)', border: '1px solid rgba(42,26,6,0.22)',
 };
 const tileIconDark: React.CSSProperties = {
   background: 'radial-gradient(circle at 50% 35%, rgba(90,64,30,0.9), rgba(20,13,7,0.9))',
   border: '1px solid rgba(224,165,60,0.4)',
 };
-const tileTitle: React.CSSProperties = { fontSize: 20, fontWeight: 900, letterSpacing: 0.5, color: '#2a1a06', lineHeight: 1 };
-const tileSubGold: React.CSSProperties = { fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.4, color: 'rgba(42,26,6,0.72)' };
-const tileSub: React.CSSProperties = { fontFamily: mono, fontSize: 11, fontWeight: 700, letterSpacing: 0.4, color: C.faint };
+const tileTitle: React.CSSProperties = { fontSize: 'clamp(16px, 2.6vw, 20px)', fontWeight: 900, letterSpacing: 0.5, color: '#2a1a06', lineHeight: 1 };
+const tileSubGold: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(9px, 1.3vw, 11px)', fontWeight: 700, letterSpacing: 0.4, color: 'rgba(42,26,6,0.72)' };
+const tileSub: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(9px, 1.3vw, 11px)', fontWeight: 700, letterSpacing: 0.4, color: C.faint };
 
 const panel: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: 10, padding: '16px 18px', borderRadius: 10,
+  display: 'flex', flexDirection: 'column', gap: 'clamp(7px, 1.2vh, 10px)', padding: 'clamp(12px, 2vh, 16px) clamp(14px, 2.4vw, 18px)', borderRadius: 10,
   background: 'rgba(24,16,10,0.62)', border: '1px solid rgba(120,96,56,0.3)',
   boxShadow: 'inset 0 1px 0 rgba(255,238,196,0.05)',
 };
 const panelHead: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', fontSize: 13.5, fontWeight: 800, letterSpacing: 0.5,
+  display: 'flex', alignItems: 'center', fontSize: 'clamp(11px, 1.6vw, 13.5px)', fontWeight: 800, letterSpacing: 0.5,
   color: '#e6cf96', fontFamily: sans,
 };
 const countPill: React.CSSProperties = {
-  marginLeft: 8, minWidth: 20, padding: '1px 7px', borderRadius: 999, fontFamily: mono, fontSize: 11.5,
+  marginLeft: 8, minWidth: 20, padding: '1px 7px', borderRadius: 999, fontFamily: mono, fontSize: 'clamp(10px, 1.3vw, 11.5px)',
   fontWeight: 800, color: '#2a1a06', background: '#e0a53c', textAlign: 'center',
 };
-const codeRow: React.CSSProperties = { display: 'flex', gap: 10 };
+const codeRow: React.CSSProperties = { display: 'flex', gap: 'clamp(7px, 1.4vw, 10px)' };
 const codeField: React.CSSProperties = {
-  flex: 1, padding: '13px 16px', fontSize: 18, color: C.text, outline: 'none',
+  flex: 1, minWidth: 0, padding: 'clamp(10px, 1.8vh, 13px) clamp(12px, 2vw, 16px)', fontSize: 'clamp(15px, 2.4vw, 18px)', color: C.text, outline: 'none',
   fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase',
   background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(120,96,56,0.4)', borderRadius: 8,
-  transition: 'border-color .12s, background .12s',
+  boxSizing: 'border-box', transition: 'border-color .12s, background .12s',
 };
 const ghost: React.CSSProperties = {
-  padding: '13px 22px', fontSize: 15, fontWeight: 800, color: '#e6cf96', cursor: 'pointer', letterSpacing: 0.5,
+  padding: 'clamp(10px, 1.8vh, 13px) clamp(16px, 3vw, 22px)', fontSize: 'clamp(13px, 1.9vw, 15px)', fontWeight: 800, color: '#e6cf96', cursor: 'pointer', letterSpacing: 0.5,
   border: '1px solid rgba(120,96,56,0.5)', borderRadius: 8, background: 'rgba(224,170,70,0.05)', fontFamily: sans,
   whiteSpace: 'nowrap',
 };
-const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, maxHeight: '34vh', overflowY: 'auto' };
-const empty: React.CSSProperties = { color: C.faint, fontSize: 13.5, fontFamily: sans, textAlign: 'center', margin: '6px 0', lineHeight: 1.8 };
+const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 1vh, 8px)', maxHeight: '34vh', overflowY: 'auto' };
+const empty: React.CSSProperties = { color: C.faint, fontSize: 'clamp(11px, 1.6vw, 13.5px)', fontFamily: sans, textAlign: 'center', margin: '6px 0', lineHeight: 1.8 };
 const roomRow: React.CSSProperties = {
-  display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 14,
-  padding: '11px 13px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+  display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 'clamp(10px, 1.8vw, 14px)',
+  padding: 'clamp(9px, 1.6vh, 11px) clamp(10px, 1.8vw, 13px)', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
   background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(120,96,56,0.3)', color: C.text, fontFamily: sans,
 };
 const rMedallion: React.CSSProperties = {
-  width: 36, height: 36, flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: '50%',
+  width: 'clamp(30px, 5vw, 36px)', height: 'clamp(30px, 5vw, 36px)', flexShrink: 0, display: 'grid', placeItems: 'center', borderRadius: '50%',
   background: 'radial-gradient(circle at 50% 35%, rgba(90,64,30,0.9), rgba(20,13,7,0.9))',
   border: '1px solid rgba(224,165,60,0.45)', boxShadow: 'inset 0 1px 0 rgba(255,238,196,0.14)',
 };
 const rTitleCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' };
-const rTitle: React.CSSProperties = { fontWeight: 700, fontSize: 15, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
-const rMeta: React.CSSProperties = { fontSize: 12.5, color: C.dim, fontFamily: mono, letterSpacing: 0.4 };
-const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 12, color: C.rare, letterSpacing: 1 };
-const rGo: React.CSSProperties = { fontSize: 14, color: C.rare, fontWeight: 800, letterSpacing: 0.5, display: 'flex', alignItems: 'center' };
-const errLine: React.CSSProperties = { margin: '2px 0 0', color: C.enemy, fontSize: 13.5, textAlign: 'center', fontFamily: sans };
+const rTitle: React.CSSProperties = { fontWeight: 700, fontSize: 'clamp(13px, 1.9vw, 15px)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+const rMeta: React.CSSProperties = { fontSize: 'clamp(11px, 1.6vw, 12.5px)', color: C.dim, fontFamily: mono, letterSpacing: 0.4 };
+const rCode: React.CSSProperties = { fontFamily: mono, fontSize: 'clamp(10px, 1.5vw, 12px)', color: C.rare, letterSpacing: 1 };
+const rGo: React.CSSProperties = { fontSize: 'clamp(12px, 1.8vw, 14px)', color: C.rare, fontWeight: 800, letterSpacing: 0.5, display: 'flex', alignItems: 'center' };
+const errLine: React.CSSProperties = { margin: '2px 0 0', color: C.enemy, fontSize: 'clamp(11px, 1.6vw, 13.5px)', textAlign: 'center', fontFamily: sans };
 
 const topBar: React.CSSProperties = {
-  position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
+  position: 'fixed', top: 'clamp(10px, 1.6vw, 16px)', right: 'clamp(10px, 1.6vw, 16px)', zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
 };
 const goldChip: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', padding: '8px 16px', fontSize: 13, fontWeight: 700,
+  display: 'flex', alignItems: 'center', padding: 'clamp(6px, 1vw, 8px) clamp(12px, 2vw, 16px)', fontSize: 'clamp(11px, 1.6vw, 13px)', fontWeight: 700,
   color: '#e6cf96', cursor: 'pointer', letterSpacing: 0.5,
   borderRadius: 8, border: '1px solid #5a4820', fontFamily: sans, background: 'rgba(42,33,14,0.85)',
 };
 const chip: React.CSSProperties = {
-  padding: '8px 14px', fontSize: 12.5, fontWeight: 700, letterSpacing: 0.5,
+  padding: 'clamp(6px, 1vw, 8px) clamp(10px, 1.8vw, 14px)', fontSize: 'clamp(11px, 1.5vw, 12.5px)', fontWeight: 700, letterSpacing: 0.5,
   color: C.dim, cursor: 'pointer', borderRadius: 8, border: '1px solid rgba(120,96,56,0.4)',
   background: 'rgba(20,13,9,0.85)', fontFamily: sans,
 };
