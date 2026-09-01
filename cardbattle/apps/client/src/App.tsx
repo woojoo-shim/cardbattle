@@ -338,11 +338,6 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
           <i style={flLine} />
         </span>
 
-        <div style={tabRow}>
-          <button type="button" style={tab(mode === 'login')} onClick={() => { setMode('login'); setError(null); playSfx('toggle'); }}>로그인</button>
-          <button type="button" style={tab(mode === 'register')} onClick={() => { setMode('register'); setError(null); playSfx('toggle'); }}>회원가입</button>
-        </div>
-
         {mode === 'register' && (
           <>
             <span style={pickLabel}>캐릭터 선택</span>
@@ -405,13 +400,16 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
             </button>
           </div>
           <button className="cb-enter cb-ticket" onClick={go} style={enter} aria-label={mode === 'login' ? '로그인' : '회원가입'} disabled={busy}>
-            {busy ? (waking ? '서버 깨우는 중…' : '…') : mode === 'login' ? '입장하기' : '가입하기'}&nbsp;{!busy && <Icon name="arrowRight" size={16} />}
+            {busy ? (waking ? '서버 깨우는 중…' : '…') : mode === 'login' ? '입장하기' : '가입하기'}&nbsp;{!busy && <Icon name="arrowRight" size={20} />}
           </button>
         </div>
         {waking
           ? <p style={hint}>서버가 절전 모드였어요. 처음 접속은 최대 1분까지 걸릴 수 있어요.</p>
           : error ? <p style={errText}>{error}</p> : <p style={hint}>계정을 만들고 심연의 투기장에 뛰어드세요</p>}
 
+        <button type="button" style={switchLink} onClick={() => { setMode((m) => (m === 'login' ? 'register' : 'login')); setError(null); playSfx('toggle'); }}>
+          {mode === 'login' ? '처음이신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
+        </button>
         <button type="button" style={guestLink} onClick={goGuest} disabled={busy}>계정 없이 게스트로 둘러보기</button>
 
         <span style={stubTagline}>여섯이 앉고, 하나가 살아남는다</span>
@@ -599,28 +597,14 @@ function pickName(on: boolean): React.CSSProperties {
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   };
 }
-// Segmented 로그인 / 회원가입 toggle.
-const tabRow: React.CSSProperties = {
-  display: 'flex', gap: 4, padding: 4, marginBottom: 16, borderRadius: 4,
-  background: 'rgba(10,13,21,0.6)', border: `1px solid ${TICKET.edge}`,
-};
-function tab(on: boolean): React.CSSProperties {
-  return {
-    padding: '9px 22px', fontSize: 14, fontWeight: 700, letterSpacing: 0.5, cursor: 'pointer',
-    border: 'none', borderRadius: 4, fontFamily: sans,
-    color: on ? TICKET.paperHi : TICKET.dim,
-    background: on ? '#a86bff' : 'transparent',
-    transition: 'color .2s, background .2s',
-  };
-}
 // A flat dark well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: 10,
-  borderRadius: 4, background: 'rgba(10,13,21,0.5)', border: `1px solid ${TICKET.edge}`,
+  display: 'flex', flexDirection: 'column', gap: 10, width: '100%', padding: 12,
+  borderRadius: 6, background: 'rgba(10,13,21,0.5)', border: `1px solid ${TICKET.edge}`,
 };
 const authInput: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', padding: '12px 14px', fontSize: 16, color: TICKET.ink, fontFamily: sans,
-  background: 'rgba(6,9,16,0.6)', border: `1px solid ${TICKET.edge}`, borderRadius: 4, outline: 'none',
+  width: '100%', boxSizing: 'border-box', padding: '14px 15px', fontSize: 16, color: TICKET.ink, fontFamily: sans,
+  background: 'rgba(6,9,16,0.6)', border: `1px solid ${TICKET.edge}`, borderRadius: 5, outline: 'none',
 };
 // Password field wraps the input so the reveal toggle can sit inside its right edge.
 const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
@@ -630,15 +614,23 @@ const pwToggle: React.CSSProperties = {
   border: 'none', background: 'transparent', borderRadius: 4, padding: 0,
 };
 const enter: React.CSSProperties = {
-  width: '100%', padding: '12px 20px', fontSize: 15, fontWeight: 700, letterSpacing: 0.5,
-  color: TICKET.paperHi, cursor: 'pointer', border: '1px solid #7a52c8', borderRadius: 4, fontFamily: sans,
-  background: '#a86bff',
+  width: '100%', marginTop: 2, padding: '17px 20px', fontSize: 19, fontWeight: 800, letterSpacing: 1,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  color: TICKET.paperHi, cursor: 'pointer', border: '1px solid #7a52c8', borderRadius: 8, fontFamily: sans,
+  background: 'linear-gradient(180deg, #b485ff, #9459e6)',
+  boxShadow: '0 10px 26px rgba(120,60,220,0.4), inset 0 1px 0 rgba(255,255,255,0.22)',
 };
 const hint: React.CSSProperties = {
   margin: '16px 0 6px', fontSize: 12.5, color: TICKET.faint, fontFamily: sans, letterSpacing: 0.2,
 };
 const errText: React.CSSProperties = {
   margin: '16px 0 0', fontSize: 12.5, color: C.enemy, fontFamily: sans, letterSpacing: 0.2,
+};
+// Small text link that swaps 로그인 ↔ 회원가입 — replaces the old segmented tab, so the panel
+// shows a single big action button instead of two competing choices.
+const switchLink: React.CSSProperties = {
+  margin: '14px 0 0', padding: '6px 4px', fontSize: 13.5, fontWeight: 700, fontFamily: sans,
+  letterSpacing: 0.3, color: TICKET.seal, background: 'none', border: 'none', cursor: 'pointer',
 };
 const guestLink: React.CSSProperties = {
   margin: '10px 0 0', padding: '6px 4px', fontSize: 12.5, fontFamily: sans, color: TICKET.dim,
