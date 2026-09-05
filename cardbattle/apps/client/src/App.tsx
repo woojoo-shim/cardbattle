@@ -92,7 +92,7 @@ export function App() {
     };
   }, []);
 
-  if (account === undefined) return <Centered>불러오는 중…</Centered>;
+  if (account === undefined) return <LoadingScreen label="불러오는 중" />;
   if (account === null) return <AuthGate onAuthed={setAccount} />;
   // Intro splash → menu: play the fade-in/hold/fade-out once, then reveal the menu.
   if (!splashDone) return <Splash onDone={() => setSplashDone(true)} />;
@@ -156,7 +156,7 @@ function Game({ connect, onExit, borderCosmetic, coach, matchmaking }: { connect
         </div>
       );
     }
-    return <Centered>연결 중…</Centered>;
+    return <LoadingScreen label="투기장에 입장하는 중" />;
   }
   return (
     <>
@@ -418,13 +418,105 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
   );
 }
 
-function Centered({ children }: { children: React.ReactNode }) {
-  return <div style={center}>{children}</div>;
+// The between-screens loading gate — shown while a stored token is checked, and while joining a
+// room. Not a bare spinner: the game crest sits inside two counter-rotating rune rings (echoing the
+// app icon's ornate frame + chains), over the same candlelit arena field as the login gate, with a
+// sweeping progress rail. On the Render free tier the first request cold-starts the server (30–50s),
+// so after a few seconds the copy switches to "서버를 깨우는 중" so the wait never reads as a freeze.
+function LoadingScreen({ label = '불러오는 중' }: { label?: string }) {
+  const [waking, setWaking] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setWaking(true), 4500);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div style={loadWrap}>
+      <div style={emberField} aria-hidden>
+        {EMBERS.map((e, i) => (
+          <span
+            key={i}
+            className="cb-ember"
+            style={{ left: `${e.left}%`, width: e.size, height: e.size, animationDelay: `${e.delay}s`, animationDuration: `${e.dur}s` }}
+          />
+        ))}
+      </div>
+      <div style={loadVignette} aria-hidden />
+      <div style={loadStage}>
+        <div style={loadCrestWrap}>
+          <div style={loadRingOuter} aria-hidden />
+          <div style={loadRingInner} aria-hidden />
+          <div style={loadCrestSeal} className="cb-gate-crest"><BrandMark size={82} markOnly /></div>
+        </div>
+        <h1 style={loadTitle}>심연의 투기장</h1>
+        <span style={loadSub}>ABYSSAL&nbsp;ARENA</span>
+        <div style={loadBarTrack} aria-hidden><span style={loadBarFill} className="cb-load-bar" /></div>
+        <span style={loadLabel}>{waking ? '서버를 깨우는 중…' : `${label}…`}</span>
+        {waking && <span style={loadHint}>절전 모드였어요. 처음 접속은 최대 1분까지 걸릴 수 있어요.</span>}
+      </div>
+    </div>
+  );
 }
 
-const center: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-  minHeight: '100vh', gap: 16, color: C.dim, fontFamily: sans, background: C.void,
+const loadWrap: React.CSSProperties = {
+  position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
+  background:
+    'radial-gradient(60% 46% at 50% 12%, rgba(168,107,255,0.18), transparent 62%),' +
+    'radial-gradient(70% 50% at 50% 108%, rgba(255,207,77,0.08), transparent 60%),' +
+    'linear-gradient(180deg, #141826 0%, #0d1019 52%, #070912 100%),' +
+    '#070912',
+};
+const loadVignette: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+  background: 'radial-gradient(120% 110% at 50% 44%, transparent 46%, rgba(3,2,1,0.95) 100%)',
+};
+const loadStage: React.CSSProperties = {
+  position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
+};
+// The crest is ringed by two dashed rune circles turning against each other — the icon's frame.
+const loadCrestWrap: React.CSSProperties = {
+  position: 'relative', width: 196, height: 196, display: 'grid', placeItems: 'center', marginBottom: 4,
+};
+const loadRingOuter: React.CSSProperties = {
+  position: 'absolute', inset: 0, borderRadius: '50%',
+  border: '1px dashed rgba(255,207,77,0.32)',
+  animation: 'cb-spin-rev 17s linear infinite',
+};
+const loadRingInner: React.CSSProperties = {
+  position: 'absolute', inset: 24, borderRadius: '50%',
+  border: '2px dashed rgba(168,107,255,0.5)',
+  boxShadow: 'inset 0 0 30px rgba(168,107,255,0.18)',
+  animation: 'cb-spin 9s linear infinite',
+};
+const loadCrestSeal: React.CSSProperties = {
+  width: 116, height: 116, borderRadius: '50%', display: 'grid', placeItems: 'center',
+  background: 'radial-gradient(circle at 50% 38%, rgba(168,107,255,0.22), rgba(30,24,60,0.34) 62%)',
+};
+const loadTitle: React.CSSProperties = {
+  margin: '10px 0 0', fontFamily: sans, fontSize: 26, fontWeight: 800, letterSpacing: 1, textAlign: 'center',
+  background: 'linear-gradient(180deg, #f6f1ff 0%, #d7c4ff 44%, #a86bff 100%)',
+  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
+  filter: 'drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 22px rgba(168,107,255,0.34))',
+};
+const loadSub: React.CSSProperties = {
+  marginTop: 6, fontFamily: mono, fontSize: 10, letterSpacing: 6, color: C.magic,
+  textTransform: 'uppercase', opacity: 0.85,
+};
+// A thin rail with a lone highlight sliding across — an indeterminate "working" progress cue.
+const loadBarTrack: React.CSSProperties = {
+  position: 'relative', marginTop: 22, width: 200, height: 3, borderRadius: 3, overflow: 'hidden',
+  background: 'rgba(120,90,190,0.16)',
+};
+const loadBarFill: React.CSSProperties = {
+  position: 'absolute', top: 0, left: 0, width: '42%', height: '100%', borderRadius: 3,
+  background: 'linear-gradient(90deg, transparent, #a86bff, #ecdcff, transparent)',
+};
+const loadLabel: React.CSSProperties = {
+  marginTop: 14, fontSize: 13, letterSpacing: 1, color: C.dim, fontFamily: sans,
+};
+const loadHint: React.CSSProperties = {
+  marginTop: 6, fontSize: 11.5, color: C.faint, fontFamily: sans, letterSpacing: 0.2, textAlign: 'center',
+  maxWidth: 280, lineHeight: 1.5,
 };
 
 const connOverlay: React.CSSProperties = {

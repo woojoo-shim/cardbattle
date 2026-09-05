@@ -490,6 +490,12 @@
   50%      { box-shadow: 0 0 52px rgba(168,107,255,0.42), inset 0 1px 0 rgba(210,190,255,0.24); }
 }
 .cb-gate-crest { animation: cb-gate-crest 5s ease-in-out infinite; }
+/* Loading screen: a lone light sweeps across the progress rail while the rune rings turn. */
+@keyframes cb-load-bar {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(310%); }
+}
+.cb-load-bar { animation: cb-load-bar 1.5s cubic-bezier(.5,0,.5,1) infinite; }
 /* The battle light shaft over the table breathes and sways as the firelight flickers. */
 @keyframes cb-batt-shaft {
   0%, 100% { opacity: 0.7;  transform: translateX(-50%) skewX(-2.4deg); }
