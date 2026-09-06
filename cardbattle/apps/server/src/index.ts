@@ -27,6 +27,13 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 
+// Health check — a tiny always-on endpoint an external uptime pinger (UptimeRobot,
+// cron-job.org) can hit every few minutes to keep the Render free-tier instance awake,
+// so first visitors don't wait through the cold-start spin-up.
+app.get('/api/health', (_req, res) => {
+  res.json({ ok: true, uptime: process.uptime() });
+});
+
 // Auth API — registered BEFORE the static/SPA handlers so /api/* isn't swallowed by
 // the index.html fallback. Bearer token in the Authorization header for /api/me.
 app.post('/api/register', (req, res) => {
