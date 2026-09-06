@@ -508,6 +508,25 @@
   84%           { filter: drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 34px rgba(200,168,255,0.6)); }
 }
 .cb-load-title { animation: cb-load-title 5.5s ease-in-out infinite; }
+/* The hanging lamp over the menu's poker table flickers like a failing bulb — a
+   restless idle drift punctuated by two hard cut-outs each cycle. */
+@keyframes cb-menu-lamp {
+  0%, 100% { opacity: 0.9; }
+  8%       { opacity: 1; }
+  10%      { opacity: 0.5; }
+  12%      { opacity: 0.96; }
+  30%      { opacity: 0.86; }
+  46%      { opacity: 1; }
+  48%      { opacity: 0.18; }
+  50%      { opacity: 0.9; }
+  68%      { opacity: 0.84; }
+  70%      { opacity: 0.34; }
+  72%      { opacity: 0.95; }
+  86%      { opacity: 1; }
+  88%      { opacity: 0.14; }
+  90%      { opacity: 0.9; }
+}
+.cb-menu-lamp { animation: cb-menu-lamp 6.5s linear infinite; }
 /* The battle light shaft over the table breathes and sways as the firelight flickers. */
 @keyframes cb-batt-shaft {
   0%, 100% { opacity: 0.7;  transform: translateX(-50%) skewX(-2.4deg); }

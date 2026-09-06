@@ -89,6 +89,7 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
     <div style={wrap}>
       <style>{heroCss}</style>
       <Atmosphere />
+      <div style={lampGlow} className="cb-menu-lamp" aria-hidden />
       {/* account chip, top-right */}
       <div style={topBar}>
         <MuteButton />
@@ -277,7 +278,21 @@ const wrap: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 'clamp(20px, 4vw, 100px)',
   fontFamily: sans, color: C.text,
   padding: '0 clamp(28px, 7vw, 130px)',
-  background: 'linear-gradient(180deg, #1a120b 0%, #120b07 55%, #080503 100%)',
+  // The Playtime back-room photo sits under everything; a left-side scrim keeps the
+  // wordmark + menu legible over it, and a base color fills any letterbox gap.
+  background:
+    'linear-gradient(90deg, rgba(6,4,3,0.86) 0%, rgba(6,4,3,0.55) 32%, rgba(6,4,3,0.18) 58%, rgba(6,4,3,0) 100%),' +
+    'url(/menu-bg.png) center / cover no-repeat, #080503',
+};
+
+// A warm pool of light under the hanging lamp that flickers like a failing bulb
+// (cb-menu-lamp: irregular dips + two hard blinks). Purely decorative.
+const lampGlow: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '-6%', transform: 'translateX(-50%)',
+  width: 'min(52vw, 760px)', height: 'min(78vh, 760px)', zIndex: 1, pointerEvents: 'none',
+  mixBlendMode: 'screen',
+  background:
+    'radial-gradient(46% 40% at 50% 22%, rgba(255,196,92,0.42), rgba(255,150,58,0.16) 42%, transparent 70%)',
 };
 
 // Deterministic ember motes so the drift is even but ungridded (x%, size px, duration s, delay s, opacity).
