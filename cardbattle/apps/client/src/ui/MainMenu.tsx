@@ -168,16 +168,18 @@ function HeroFan() {
       <div style={fanFloat} className="cb-hero-float">
         {FAN_CARDS.map((id, i) => {
           const off = i - mid;
-          const rot = off * 13;
-          const x = off * 132;
-          const y = Math.abs(off) * 50 - 10; // arc: outer cards dip lower
+          const rot = off * 11;
+          const x = off * 128;
+          const y = Math.abs(off) * 40 - 10; // arc: outer cards dip lower
           const name = CARD_DEFS[id]?.name ?? '';
           return (
             <div
               key={id}
               style={{
                 ...fanCard,
-                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${rot}deg)`,
+                // rotateX lays the fan back toward the felt so it reads as cards spread ON the
+                // poker table behind, not floating flat against the screen.
+                transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateX(30deg) rotate(${rot}deg)`,
                 zIndex: 10 - Math.abs(off),
               }}
             >
@@ -407,15 +409,19 @@ const fanPos: React.CSSProperties = {
   // the right edge (space-between) or leaving a big gap on the far right (flex-start).
   position: 'relative', flex: '1 1 0', minWidth: 0, zIndex: 1, pointerEvents: 'none',
   display: 'grid', placeItems: 'center',
+  // Drop the fan lower so it settles over the poker table in the background rather than floating high.
+  paddingTop: 'clamp(90px, 15vh, 240px)',
 };
 const fanGlow: React.CSSProperties = {
-  position: 'absolute', left: '50%', top: '50%', width: 'clamp(720px, 62vw, 1040px)', height: 'clamp(720px, 62vw, 1040px)',
+  // A warm red felt pool low under the cards — the table's own light catching the spread hand.
+  position: 'absolute', left: '50%', top: '64%', width: 'clamp(720px, 62vw, 1040px)', height: 'clamp(520px, 44vw, 760px)',
   transform: 'translate(-50%, -50%)',
-  borderRadius: '50%', filter: 'blur(26px)',
-  background: 'radial-gradient(circle, rgba(224,165,60,0.2), rgba(158,58,40,0.1) 46%, transparent 72%)',
+  borderRadius: '50%', filter: 'blur(30px)',
+  background: 'radial-gradient(circle, rgba(214,58,38,0.24), rgba(224,150,60,0.12) 44%, transparent 70%)',
 };
 // A sized, relatively-positioned stage the cards are absolutely pinned to (each centred then arced).
-const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(340px, 28vw, 460px)', height: 'clamp(540px, 56vw, 780px)' };
+// perspective makes the per-card rotateX read as real depth so the fan lays toward the table.
+const fanFloat: React.CSSProperties = { position: 'relative', width: 'clamp(340px, 28vw, 460px)', height: 'clamp(540px, 56vw, 780px)', perspective: '1200px' };
 // The real carved stone card frame (same art as the battle hand cards). The illustration and the
 // name plaque are absolutely positioned into the frame's carved cavities so they line up with the png.
 const fanCard: React.CSSProperties = {
