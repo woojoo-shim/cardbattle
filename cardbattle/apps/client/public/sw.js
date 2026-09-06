@@ -1,7 +1,7 @@
 // Minimal service worker — makes the game installable and gives the app shell
 // an offline fallback. It never touches the Colyseus server (different origin),
 // so live multiplayer traffic is untouched.
-const CACHE = 'cardbattle-v319';
+const CACHE = 'cardbattle-v320';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
