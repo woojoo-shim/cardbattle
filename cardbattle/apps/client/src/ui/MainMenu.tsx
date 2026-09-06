@@ -34,6 +34,10 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'credits', label: '제작진', sub: '' },
   { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
+// The menu is split into two tiers to cut clutter: the two core game actions become big shaped
+// buttons, and everything else collapses into a compact row of small pill chips underneath.
+const PRIMARY: ItemKey[] = ['start', 'multi'];
+const SECONDARY: ItemKey[] = ['how', 'deck', 'shop', 'credits', 'logout'];
 
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
 const INTRO_SESSION_KEY = 'cb_intro_session';
@@ -113,27 +117,45 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
         <span style={byline}>A CARD BATTLE IN THE BACK ROOM</span>
 
         <nav style={menu}>
-          {ITEMS.map((it) => {
+          {/* The two core game actions get big shaped buttons — the CTA the eye lands on first. */}
+          {ITEMS.filter((it) => PRIMARY.includes(it.key)).map((it) => {
             const guided = guideTarget === it.key;
             const on = hover === it.key || guided;
-            const danger = it.key === 'logout';
+            const hero = it.key === 'start';
             return (
               <button
                 key={it.key}
-                style={{ ...menuItem(on, danger), ...(guided ? menuHi : null) }}
+                style={{ ...primaryBtn(on, hero), ...(guided ? menuHi : null) }}
                 className={guided ? 'cb-guide-hi' : undefined}
                 onClick={() => act(it.key)}
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={labelWrap}>
-                  <span style={caret(on)}>◆</span>
-                  <span style={menuLabel}>{it.label}</span>
-                </span>
-                {it.sub && <span style={menuSub(on)}>{it.sub}</span>}
+                <span style={primaryLabel}>{it.label}</span>
+                {it.sub && <span style={primarySub(hero)}>{it.sub}</span>}
               </button>
             );
           })}
+          {/* Everything else collapses into a single compact row of pill chips — far less clutter. */}
+          <div style={chipRow}>
+            {ITEMS.filter((it) => SECONDARY.includes(it.key)).map((it) => {
+              const guided = guideTarget === it.key;
+              const on = hover === it.key || guided;
+              const danger = it.key === 'logout';
+              return (
+                <button
+                  key={it.key}
+                  style={{ ...chip(on, danger), ...(guided ? menuHi : null) }}
+                  className={guided ? 'cb-guide-hi' : undefined}
+                  onClick={() => act(it.key)}
+                  onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
+                  onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
+                >
+                  {it.label}
+                </button>
+              );
+            })}
+          </div>
         </nav>
       </div>
 
@@ -486,43 +508,53 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, marginTop: 'clamp(24px, 4.5vh, 48px)',
-  paddingLeft: 28,
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12, marginTop: 'clamp(24px, 4.5vh, 48px)',
 };
-function menuItem(on: boolean, danger: boolean): React.CSSProperties {
+// A big shaped action button. The hero (대전 찾기) is a filled amethyst→gold slab; the secondary
+// core action (친구와 대전) is a hollow outlined slab — a clear rank between the two.
+function primaryBtn(on: boolean, hero: boolean): React.CSSProperties {
+  return {
+    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2,
+    width: 'clamp(240px, 26vw, 340px)', padding: '15px 22px', cursor: 'pointer', fontFamily: sans,
+    textAlign: 'left', color: '#fff',
+    borderRadius: 14,
+    border: hero ? '1px solid rgba(224,165,60,0.55)' : `1px solid ${on ? 'rgba(178,142,224,0.75)' : 'rgba(150,120,190,0.4)'}`,
+    background: hero
+      ? 'linear-gradient(135deg, rgba(126,74,168,0.96), rgba(74,44,120,0.96))'
+      : (on ? 'rgba(70,52,104,0.42)' : 'rgba(28,22,40,0.5)'),
+    boxShadow: hero
+      ? (on ? '0 10px 30px rgba(126,74,168,0.5), inset 0 1px 0 rgba(255,220,150,0.25)' : '0 6px 20px rgba(80,44,120,0.4), inset 0 1px 0 rgba(255,220,150,0.18)')
+      : (on ? '0 8px 22px rgba(0,0,0,0.4)' : 'none'),
+    transform: on ? 'translateX(6px)' : 'none',
+    transition: 'transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease',
+  };
+}
+const primaryLabel: React.CSSProperties = { fontSize: 'clamp(20px, 3vw, 27px)', fontWeight: 800, letterSpacing: 1 };
+function primarySub(hero: boolean): React.CSSProperties {
+  return {
+    fontFamily: mono, fontSize: 11, letterSpacing: 1,
+    color: hero ? 'rgba(244,236,255,0.72)' : 'rgba(226,220,214,0.55)',
+  };
+}
+// The compact utility row under the two big actions.
+const chipRow: React.CSSProperties = {
+  display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6, maxWidth: 'clamp(240px, 26vw, 340px)',
+};
+function chip(on: boolean, danger: boolean): React.CSSProperties {
   const base = danger ? C.enemy : C.you;
   return {
-    // Left-aligned column, label over sub-caption, so the whole menu reads down the left edge.
-    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1,
-    padding: '6px 8px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
-    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
-    transform: on ? 'translateX(10px)' : 'none',
-    textShadow: on ? `0 0 20px ${base}66` : 'none',
-    transition: 'color .16s ease, transform .16s ease, text-shadow .16s ease',
+    padding: '7px 14px', cursor: 'pointer', fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
+    color: on ? '#fff' : 'rgba(226,220,214,0.6)',
+    borderRadius: 999,
+    border: `1px solid ${on ? base + '88' : 'rgba(150,140,160,0.28)'}`,
+    background: on ? base + '22' : 'rgba(20,16,26,0.5)',
+    transition: 'color .16s ease, background .16s ease, border-color .16s ease',
   };
 }
-// The pill applied to whichever menu item the guide is currently spotlighting.
+// The highlight applied to whichever button the guide is currently spotlighting.
 const menuHi: React.CSSProperties = {
-  background: 'rgba(224,165,60,0.10)', borderRadius: 8, paddingRight: 16,
+  boxShadow: '0 0 0 2px rgba(224,165,60,0.55), 0 0 22px rgba(224,165,60,0.35)',
 };
-// The label + its hover caret. Relative so the caret can hang off the label's left edge without
-// nudging the label off-centre.
-const labelWrap: React.CSSProperties = { position: 'relative', display: 'inline-flex', alignItems: 'center' };
-function caret(on: boolean): React.CSSProperties {
-  return {
-    position: 'absolute', left: -24, top: '50%', fontSize: 13, color: C.you, lineHeight: 1,
-    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-8px)',
-    opacity: on ? 1 : 0,
-    transition: 'opacity .16s ease, transform .16s ease',
-  };
-}
-const menuLabel: React.CSSProperties = { fontSize: 'clamp(22px, 3.4vw, 30px)', fontWeight: 800, letterSpacing: 1 };
-function menuSub(on: boolean): React.CSSProperties {
-  return {
-    fontFamily: mono, fontSize: 11, letterSpacing: 1, color: on ? C.dim : C.faint,
-    transition: 'color .16s ease',
-  };
-}
 
 const topBar: React.CSSProperties = {
   position: 'fixed', top: 16, right: 16, zIndex: 40, display: 'flex', gap: 8, alignItems: 'center',
