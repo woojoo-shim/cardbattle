@@ -34,10 +34,6 @@ const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
   { key: 'credits', label: '제작진', sub: '' },
   { key: 'logout', label: '나가기', sub: '로그아웃' },
 ];
-// The menu is split into two tiers to cut clutter: the two core game actions become big shaped
-// buttons, and everything else collapses into a compact row of small pill chips underneath.
-const PRIMARY: ItemKey[] = ['start', 'multi'];
-const SECONDARY: ItemKey[] = ['how', 'deck', 'shop', 'credits', 'logout'];
 
 // Bumped whenever the onboarding meaningfully changes, so returning players see the invite once more.
 const INTRO_SESSION_KEY = 'cb_intro_session';
@@ -116,53 +112,27 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
         </div>
         <span style={byline}>A CARD BATTLE IN THE BACK ROOM</span>
 
+        {/* A clean vertical text menu with a ▶ cursor that homes in on the hovered item — a spare,
+            horror-menu feel (à la the back-room monitors), no boxes or chrome. */}
         <nav style={menu}>
-          {/* The two core game actions get big shaped buttons — the CTA the eye lands on first. */}
-          {ITEMS.filter((it) => PRIMARY.includes(it.key)).map((it) => {
+          {ITEMS.map((it) => {
             const guided = guideTarget === it.key;
             const on = hover === it.key || guided;
-            const hero = it.key === 'start';
+            const danger = it.key === 'logout';
             return (
               <button
                 key={it.key}
-                style={{ ...primaryBtn(on, hero), ...(guided ? menuHi : null) }}
-                className={`cb-pbtn${guided ? ' cb-guide-hi' : ''}`}
+                style={{ ...menuItem(on, danger), ...(guided ? menuHi : null) }}
+                className={guided ? 'cb-guide-hi' : undefined}
                 onClick={() => act(it.key)}
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={primarySheen} className="cb-pbtn-sheen" aria-hidden />
-                <span style={primaryIcon(hero)}>
-                  <Icon name={hero ? 'swords' : 'card'} size={hero ? 24 : 21} />
-                </span>
-                <span style={primaryText}>
-                  <span style={primaryLabel}>{it.label}</span>
-                  {it.sub && <span style={primarySub(hero)}>{it.sub}</span>}
-                </span>
-                <span style={primaryChevron(on)} className="cb-pbtn-chevron" aria-hidden>›</span>
+                <span style={menuCursor(on, danger)} aria-hidden>▶</span>
+                <span style={menuLabel}>{it.label}</span>
               </button>
             );
           })}
-          {/* Everything else collapses into a single compact row of pill chips — far less clutter. */}
-          <div style={chipRow}>
-            {ITEMS.filter((it) => SECONDARY.includes(it.key)).map((it) => {
-              const guided = guideTarget === it.key;
-              const on = hover === it.key || guided;
-              const danger = it.key === 'logout';
-              return (
-                <button
-                  key={it.key}
-                  style={{ ...chip(on, danger), ...(guided ? menuHi : null) }}
-                  className={guided ? 'cb-guide-hi' : undefined}
-                  onClick={() => act(it.key)}
-                  onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
-                  onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
-                >
-                  {it.label}
-                </button>
-              );
-            })}
-          </div>
         </nav>
       </div>
 
@@ -515,84 +485,37 @@ const byline: React.CSSProperties = {
 };
 
 const menu: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12, marginTop: 'clamp(24px, 4.5vh, 48px)',
+  display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(9px, 1.5vh, 16px)',
+  marginTop: 'clamp(24px, 4.5vh, 48px)', paddingLeft: 36,
 };
-// A big shaped action button: an icon medallion, a label+sub column, and a chevron that slides on
-// hover, with a light band sweeping across on hover (cb-pbtn-sheen). The hero (대전 찾기) is a filled
-// amethyst slab with a gold-lit rim; the secondary action (친구와 대전) is a darker outlined slab.
-function primaryBtn(on: boolean, hero: boolean): React.CSSProperties {
-  return {
-    position: 'relative', overflow: 'hidden',
-    display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 14,
-    width: 'clamp(250px, 27vw, 360px)', padding: '14px 18px', cursor: 'pointer', fontFamily: sans,
-    textAlign: 'left', color: '#fff',
-    borderRadius: 16,
-    border: hero
-      ? `1px solid ${on ? 'rgba(240,196,110,0.9)' : 'rgba(224,165,60,0.55)'}`
-      : `1px solid ${on ? 'rgba(190,156,232,0.8)' : 'rgba(150,120,190,0.4)'}`,
-    background: hero
-      ? 'linear-gradient(135deg, rgba(140,86,186,0.97), rgba(78,46,128,0.97) 55%, rgba(52,30,92,0.97))'
-      : (on ? 'linear-gradient(135deg, rgba(70,52,104,0.62), rgba(38,28,58,0.6))' : 'rgba(26,20,38,0.55)'),
-    boxShadow: hero
-      ? (on ? '0 14px 36px rgba(126,74,168,0.6), 0 0 0 1px rgba(255,220,150,0.15), inset 0 1px 0 rgba(255,224,160,0.35)' : '0 8px 24px rgba(74,40,116,0.45), inset 0 1px 0 rgba(255,224,160,0.22)')
-      : (on ? '0 10px 26px rgba(0,0,0,0.45), inset 0 1px 0 rgba(200,180,230,0.14)' : 'inset 0 1px 0 rgba(200,180,230,0.08)'),
-    transform: on ? 'translateX(8px) scale(1.015)' : 'none',
-    transition: 'transform .18s cubic-bezier(.4,0,.2,1), box-shadow .18s ease, background .18s ease, border-color .18s ease',
-  };
-}
-// The light band that sweeps across a primary button on hover (animated via CSS on .cb-pbtn:hover).
-const primarySheen: React.CSSProperties = {
-  position: 'absolute', top: 0, bottom: 0, left: 0, width: '40%', pointerEvents: 'none',
-  background: 'linear-gradient(105deg, transparent, rgba(255,246,220,0.28) 50%, transparent)',
-  transform: 'translateX(-160%) skewX(-14deg)', opacity: 0,
-};
-// The circular icon badge on the left of a primary button.
-function primaryIcon(hero: boolean): React.CSSProperties {
-  return {
-    flex: '0 0 auto', display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: 12,
-    color: hero ? '#ffe6ad' : '#d8c6f0',
-    background: hero ? 'rgba(255,224,160,0.14)' : 'rgba(150,120,190,0.16)',
-    border: `1px solid ${hero ? 'rgba(255,224,160,0.35)' : 'rgba(170,140,210,0.3)'}`,
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)',
-  };
-}
-const primaryText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 auto', minWidth: 0 };
-const primaryLabel: React.CSSProperties = { fontSize: 'clamp(19px, 2.7vw, 25px)', fontWeight: 800, letterSpacing: 1 };
-function primarySub(hero: boolean): React.CSSProperties {
-  return {
-    fontFamily: mono, fontSize: 11, letterSpacing: 1, whiteSpace: 'nowrap',
-    color: hero ? 'rgba(244,236,255,0.75)' : 'rgba(226,220,214,0.55)',
-  };
-}
-function primaryChevron(on: boolean): React.CSSProperties {
-  return {
-    flex: '0 0 auto', fontSize: 30, fontWeight: 700, lineHeight: 1, color: 'rgba(255,255,255,0.8)',
-    transform: on ? 'translateX(4px)' : 'none', opacity: on ? 1 : 0.5,
-    transition: 'transform .18s ease, opacity .18s ease',
-  };
-}
-// The compact utility row under the two big actions.
-const chipRow: React.CSSProperties = {
-  display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, maxWidth: 'clamp(250px, 27vw, 360px)',
-};
-function chip(on: boolean, danger: boolean): React.CSSProperties {
+// One plain menu entry: transparent, no box — just the label. On hover it brightens, glows in its
+// accent, and slides right while the ▶ cursor snaps in from the left.
+function menuItem(on: boolean, danger: boolean): React.CSSProperties {
   const base = danger ? C.enemy : C.you;
   return {
-    padding: '8px 15px', cursor: 'pointer', fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
-    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
-    borderRadius: 999,
-    border: `1px solid ${on ? base + '99' : 'rgba(150,140,160,0.28)'}`,
-    background: on
-      ? `linear-gradient(135deg, ${base}33, ${base}18)`
-      : 'rgba(20,16,26,0.5)',
-    boxShadow: on ? `0 4px 14px ${base}33, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
-    transform: on ? 'translateY(-2px)' : 'none',
-    transition: 'color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease',
+    position: 'relative', display: 'inline-flex', alignItems: 'center',
+    padding: '2px 4px', cursor: 'pointer', border: 'none', background: 'transparent', fontFamily: sans,
+    color: on ? '#fff' : 'rgba(228,222,216,0.74)',
+    transform: on ? 'translateX(12px)' : 'none',
+    textShadow: on ? `0 0 22px ${base}99` : 'none',
+    transition: 'color .16s ease, transform .18s cubic-bezier(.4,0,.2,1), text-shadow .16s ease',
   };
 }
-// The highlight applied to whichever button the guide is currently spotlighting.
+// The ▶ selection cursor that hangs off the left edge, homing in on the hovered entry.
+function menuCursor(on: boolean, danger: boolean): React.CSSProperties {
+  const base = danger ? C.enemy : C.you;
+  return {
+    position: 'absolute', left: -30, top: '50%', fontSize: 14, lineHeight: 1, color: base,
+    transform: on ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-10px)',
+    opacity: on ? 1 : 0,
+    filter: `drop-shadow(0 0 6px ${base})`,
+    transition: 'opacity .16s ease, transform .18s cubic-bezier(.4,0,.2,1)',
+  };
+}
+const menuLabel: React.CSSProperties = { fontSize: 'clamp(23px, 3.3vw, 32px)', fontWeight: 700, letterSpacing: 1 };
+// The highlight applied to whichever entry the guide is currently spotlighting.
 const menuHi: React.CSSProperties = {
-  boxShadow: '0 0 0 2px rgba(224,165,60,0.55), 0 0 22px rgba(224,165,60,0.35)',
+  textShadow: '0 0 22px rgba(224,165,60,0.9)', color: '#fff',
 };
 
 const topBar: React.CSSProperties = {
