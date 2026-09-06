@@ -729,6 +729,14 @@
   100% { background-position: -60% 0; }
 }
 .cb-logo-sheen { background-position: 260% 0; animation: cb-logo-sheen 6.5s cubic-bezier(.5,0,.2,1) infinite; }
+
+/* A light band sweeps across a menu primary button when hovered. */
+@keyframes cb-pbtn-sheen {
+  0%   { transform: translateX(-160%) skewX(-14deg); opacity: 0; }
+  22%  { opacity: 1; }
+  100% { transform: translateX(320%) skewX(-14deg); opacity: 0; }
+}
+.cb-pbtn:hover .cb-pbtn-sheen { animation: cb-pbtn-sheen .7s ease-out; }
 .cb-field { transition: border-color .2s ease; }
 .cb-field:focus-within {
   border-color: rgba(176,70,47,0.55);

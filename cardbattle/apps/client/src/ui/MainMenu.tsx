@@ -26,8 +26,8 @@ type ItemKey = 'start' | 'multi' | 'how' | 'deck' | 'shop' | 'credits' | 'logout
 // fills with a bot if none turns up). Friend rooms (create/join by code) are the secondary path,
 // not the headline — we lead with "find a match", not "invite to a room".
 const ITEMS: { key: ItemKey; label: string; sub: string }[] = [
-  { key: 'start', label: '대전 찾기', sub: '1대1 매칭 · 상대 자동 탐색' },
-  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기 · 참가' },
+  { key: 'start', label: '대전 찾기', sub: '1대1 자동 매칭' },
+  { key: 'multi', label: '친구와 대전', sub: '코드로 방 만들기' },
   { key: 'how', label: '플레이 방법', sub: '게임하며 배우기' },
   { key: 'deck', label: '덱 편성', sub: '카드 수집 · 덱 만들기' },
   { key: 'shop', label: '상점', sub: '외형 · 칭호' },
@@ -126,13 +126,20 @@ export function MainMenu({ account, onAccount, onStart, onStartCoach, onMultipla
               <button
                 key={it.key}
                 style={{ ...primaryBtn(on, hero), ...(guided ? menuHi : null) }}
-                className={guided ? 'cb-guide-hi' : undefined}
+                className={`cb-pbtn${guided ? ' cb-guide-hi' : ''}`}
                 onClick={() => act(it.key)}
                 onMouseEnter={() => { setHover(it.key); playSfx('hover'); }}
                 onMouseLeave={() => setHover((h) => (h === it.key ? null : h))}
               >
-                <span style={primaryLabel}>{it.label}</span>
-                {it.sub && <span style={primarySub(hero)}>{it.sub}</span>}
+                <span style={primarySheen} className="cb-pbtn-sheen" aria-hidden />
+                <span style={primaryIcon(hero)}>
+                  <Icon name={hero ? 'swords' : 'card'} size={hero ? 24 : 21} />
+                </span>
+                <span style={primaryText}>
+                  <span style={primaryLabel}>{it.label}</span>
+                  {it.sub && <span style={primarySub(hero)}>{it.sub}</span>}
+                </span>
+                <span style={primaryChevron(on)} className="cb-pbtn-chevron" aria-hidden>›</span>
               </button>
             );
           })}
@@ -510,45 +517,77 @@ const byline: React.CSSProperties = {
 const menu: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12, marginTop: 'clamp(24px, 4.5vh, 48px)',
 };
-// A big shaped action button. The hero (대전 찾기) is a filled amethyst→gold slab; the secondary
-// core action (친구와 대전) is a hollow outlined slab — a clear rank between the two.
+// A big shaped action button: an icon medallion, a label+sub column, and a chevron that slides on
+// hover, with a light band sweeping across on hover (cb-pbtn-sheen). The hero (대전 찾기) is a filled
+// amethyst slab with a gold-lit rim; the secondary action (친구와 대전) is a darker outlined slab.
 function primaryBtn(on: boolean, hero: boolean): React.CSSProperties {
   return {
-    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2,
-    width: 'clamp(240px, 26vw, 340px)', padding: '15px 22px', cursor: 'pointer', fontFamily: sans,
+    position: 'relative', overflow: 'hidden',
+    display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 14,
+    width: 'clamp(250px, 27vw, 360px)', padding: '14px 18px', cursor: 'pointer', fontFamily: sans,
     textAlign: 'left', color: '#fff',
-    borderRadius: 14,
-    border: hero ? '1px solid rgba(224,165,60,0.55)' : `1px solid ${on ? 'rgba(178,142,224,0.75)' : 'rgba(150,120,190,0.4)'}`,
+    borderRadius: 16,
+    border: hero
+      ? `1px solid ${on ? 'rgba(240,196,110,0.9)' : 'rgba(224,165,60,0.55)'}`
+      : `1px solid ${on ? 'rgba(190,156,232,0.8)' : 'rgba(150,120,190,0.4)'}`,
     background: hero
-      ? 'linear-gradient(135deg, rgba(126,74,168,0.96), rgba(74,44,120,0.96))'
-      : (on ? 'rgba(70,52,104,0.42)' : 'rgba(28,22,40,0.5)'),
+      ? 'linear-gradient(135deg, rgba(140,86,186,0.97), rgba(78,46,128,0.97) 55%, rgba(52,30,92,0.97))'
+      : (on ? 'linear-gradient(135deg, rgba(70,52,104,0.62), rgba(38,28,58,0.6))' : 'rgba(26,20,38,0.55)'),
     boxShadow: hero
-      ? (on ? '0 10px 30px rgba(126,74,168,0.5), inset 0 1px 0 rgba(255,220,150,0.25)' : '0 6px 20px rgba(80,44,120,0.4), inset 0 1px 0 rgba(255,220,150,0.18)')
-      : (on ? '0 8px 22px rgba(0,0,0,0.4)' : 'none'),
-    transform: on ? 'translateX(6px)' : 'none',
-    transition: 'transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease',
+      ? (on ? '0 14px 36px rgba(126,74,168,0.6), 0 0 0 1px rgba(255,220,150,0.15), inset 0 1px 0 rgba(255,224,160,0.35)' : '0 8px 24px rgba(74,40,116,0.45), inset 0 1px 0 rgba(255,224,160,0.22)')
+      : (on ? '0 10px 26px rgba(0,0,0,0.45), inset 0 1px 0 rgba(200,180,230,0.14)' : 'inset 0 1px 0 rgba(200,180,230,0.08)'),
+    transform: on ? 'translateX(8px) scale(1.015)' : 'none',
+    transition: 'transform .18s cubic-bezier(.4,0,.2,1), box-shadow .18s ease, background .18s ease, border-color .18s ease',
   };
 }
-const primaryLabel: React.CSSProperties = { fontSize: 'clamp(20px, 3vw, 27px)', fontWeight: 800, letterSpacing: 1 };
+// The light band that sweeps across a primary button on hover (animated via CSS on .cb-pbtn:hover).
+const primarySheen: React.CSSProperties = {
+  position: 'absolute', top: 0, bottom: 0, left: 0, width: '40%', pointerEvents: 'none',
+  background: 'linear-gradient(105deg, transparent, rgba(255,246,220,0.28) 50%, transparent)',
+  transform: 'translateX(-160%) skewX(-14deg)', opacity: 0,
+};
+// The circular icon badge on the left of a primary button.
+function primaryIcon(hero: boolean): React.CSSProperties {
+  return {
+    flex: '0 0 auto', display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: 12,
+    color: hero ? '#ffe6ad' : '#d8c6f0',
+    background: hero ? 'rgba(255,224,160,0.14)' : 'rgba(150,120,190,0.16)',
+    border: `1px solid ${hero ? 'rgba(255,224,160,0.35)' : 'rgba(170,140,210,0.3)'}`,
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12)',
+  };
+}
+const primaryText: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 auto', minWidth: 0 };
+const primaryLabel: React.CSSProperties = { fontSize: 'clamp(19px, 2.7vw, 25px)', fontWeight: 800, letterSpacing: 1 };
 function primarySub(hero: boolean): React.CSSProperties {
   return {
-    fontFamily: mono, fontSize: 11, letterSpacing: 1,
-    color: hero ? 'rgba(244,236,255,0.72)' : 'rgba(226,220,214,0.55)',
+    fontFamily: mono, fontSize: 11, letterSpacing: 1, whiteSpace: 'nowrap',
+    color: hero ? 'rgba(244,236,255,0.75)' : 'rgba(226,220,214,0.55)',
+  };
+}
+function primaryChevron(on: boolean): React.CSSProperties {
+  return {
+    flex: '0 0 auto', fontSize: 30, fontWeight: 700, lineHeight: 1, color: 'rgba(255,255,255,0.8)',
+    transform: on ? 'translateX(4px)' : 'none', opacity: on ? 1 : 0.5,
+    transition: 'transform .18s ease, opacity .18s ease',
   };
 }
 // The compact utility row under the two big actions.
 const chipRow: React.CSSProperties = {
-  display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6, maxWidth: 'clamp(240px, 26vw, 340px)',
+  display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, maxWidth: 'clamp(250px, 27vw, 360px)',
 };
 function chip(on: boolean, danger: boolean): React.CSSProperties {
   const base = danger ? C.enemy : C.you;
   return {
-    padding: '7px 14px', cursor: 'pointer', fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
-    color: on ? '#fff' : 'rgba(226,220,214,0.6)',
+    padding: '8px 15px', cursor: 'pointer', fontFamily: sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5,
+    color: on ? '#fff' : 'rgba(226,220,214,0.62)',
     borderRadius: 999,
-    border: `1px solid ${on ? base + '88' : 'rgba(150,140,160,0.28)'}`,
-    background: on ? base + '22' : 'rgba(20,16,26,0.5)',
-    transition: 'color .16s ease, background .16s ease, border-color .16s ease',
+    border: `1px solid ${on ? base + '99' : 'rgba(150,140,160,0.28)'}`,
+    background: on
+      ? `linear-gradient(135deg, ${base}33, ${base}18)`
+      : 'rgba(20,16,26,0.5)',
+    boxShadow: on ? `0 4px 14px ${base}33, inset 0 1px 0 rgba(255,255,255,0.1)` : 'none',
+    transform: on ? 'translateY(-2px)' : 'none',
+    transition: 'color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease',
   };
 }
 // The highlight applied to whichever button the guide is currently spotlighting.
