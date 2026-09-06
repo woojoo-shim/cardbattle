@@ -496,6 +496,18 @@
   100% { transform: translateX(310%); }
 }
 .cb-load-bar { animation: cb-load-bar 1.5s cubic-bezier(.5,0,.5,1) infinite; }
+/* The amethyst halo behind the loading crest breathes — swells and fades in and out. */
+@keyframes cb-load-halo {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+.cb-load-halo { animation: cb-load-halo 4.2s ease-in-out infinite; }
+/* A soft light periodically catches the loading wordmark and sweeps across it. */
+@keyframes cb-load-title {
+  0%, 72%, 100% { filter: drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 22px rgba(168,107,255,0.34)); }
+  84%           { filter: drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 34px rgba(200,168,255,0.6)); }
+}
+.cb-load-title { animation: cb-load-title 5.5s ease-in-out infinite; }
 /* The battle light shaft over the table breathes and sways as the firelight flickers. */
 @keyframes cb-batt-shaft {
   0%, 100% { opacity: 0.7;  transform: translateX(-50%) skewX(-2.4deg); }

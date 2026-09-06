@@ -443,11 +443,13 @@ function LoadingScreen({ label = '불러오는 중' }: { label?: string }) {
       <div style={loadVignette} aria-hidden />
       <div style={loadStage}>
         <div style={loadCrestWrap}>
+          <div style={loadHalo} className="cb-load-halo" aria-hidden />
+          <div style={loadRingMid} aria-hidden />
           <div style={loadRingOuter} aria-hidden />
           <div style={loadRingInner} aria-hidden />
           <div style={loadCrestSeal} className="cb-gate-crest"><BrandMark size={82} markOnly /></div>
         </div>
-        <h1 style={loadTitle}>심연의 투기장</h1>
+        <h1 style={loadTitle} className="cb-load-title">심연의 투기장</h1>
         <span style={loadSub}>ABYSSAL&nbsp;ARENA</span>
         <div style={loadBarTrack} aria-hidden><span style={loadBarFill} className="cb-load-bar" /></div>
         <span style={loadLabel}>{waking ? '서버를 깨우는 중…' : `${label}…`}</span>
@@ -473,13 +475,26 @@ const loadVignette: React.CSSProperties = {
 const loadStage: React.CSSProperties = {
   position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center',
 };
-// The crest is ringed by two dashed rune circles turning against each other — the icon's frame.
+// The crest is ringed by dashed rune circles turning against each other — the icon's frame.
 const loadCrestWrap: React.CSSProperties = {
   position: 'relative', width: 196, height: 196, display: 'grid', placeItems: 'center', marginBottom: 4,
 };
+// A soft amethyst glow breathing behind the crest — the arena's living light.
+const loadHalo: React.CSSProperties = {
+  position: 'absolute', width: 220, height: 220, borderRadius: '50%', pointerEvents: 'none',
+  background: 'radial-gradient(circle, rgba(168,107,255,0.42) 0%, rgba(168,107,255,0.12) 42%, transparent 70%)',
+  filter: 'blur(6px)',
+};
+// Faint outermost ring for depth — turns slowest.
+const loadRingMid: React.CSSProperties = {
+  position: 'absolute', inset: -14, borderRadius: '50%',
+  border: '1px dashed rgba(168,107,255,0.16)',
+  animation: 'cb-spin 26s linear infinite',
+};
 const loadRingOuter: React.CSSProperties = {
   position: 'absolute', inset: 0, borderRadius: '50%',
-  border: '1px dashed rgba(255,207,77,0.32)',
+  border: '1px dashed rgba(255,207,77,0.34)',
+  boxShadow: '0 0 22px rgba(255,207,77,0.10)',
   animation: 'cb-spin-rev 17s linear infinite',
 };
 const loadRingInner: React.CSSProperties = {
@@ -490,26 +505,30 @@ const loadRingInner: React.CSSProperties = {
 };
 const loadCrestSeal: React.CSSProperties = {
   width: 116, height: 116, borderRadius: '50%', display: 'grid', placeItems: 'center',
-  background: 'radial-gradient(circle at 50% 38%, rgba(168,107,255,0.22), rgba(30,24,60,0.34) 62%)',
+  background: 'radial-gradient(circle at 50% 38%, rgba(168,107,255,0.26), rgba(30,24,60,0.36) 62%)',
+  boxShadow: 'inset 0 0 0 1px rgba(236,220,255,0.14), inset 0 2px 12px rgba(168,107,255,0.22)',
 };
 const loadTitle: React.CSSProperties = {
-  margin: '10px 0 0', fontFamily: sans, fontSize: 26, fontWeight: 800, letterSpacing: 1, textAlign: 'center',
+  position: 'relative', margin: '12px 0 0', fontFamily: sans, fontSize: 27, fontWeight: 800,
+  letterSpacing: 1, textAlign: 'center',
   background: 'linear-gradient(180deg, #f6f1ff 0%, #d7c4ff 44%, #a86bff 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
   filter: 'drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 22px rgba(168,107,255,0.34))',
 };
 const loadSub: React.CSSProperties = {
-  marginTop: 6, fontFamily: mono, fontSize: 10, letterSpacing: 6, color: C.magic,
+  marginTop: 7, fontFamily: mono, fontSize: 10, letterSpacing: 6, color: C.magic,
   textTransform: 'uppercase', opacity: 0.85,
 };
 // A thin rail with a lone highlight sliding across — an indeterminate "working" progress cue.
 const loadBarTrack: React.CSSProperties = {
-  position: 'relative', marginTop: 22, width: 200, height: 3, borderRadius: 3, overflow: 'hidden',
+  position: 'relative', marginTop: 24, width: 210, height: 3, borderRadius: 3, overflow: 'hidden',
   background: 'rgba(120,90,190,0.16)',
+  boxShadow: '0 0 12px rgba(168,107,255,0.14)',
 };
 const loadBarFill: React.CSSProperties = {
   position: 'absolute', top: 0, left: 0, width: '42%', height: '100%', borderRadius: 3,
   background: 'linear-gradient(90deg, transparent, #a86bff, #ecdcff, transparent)',
+  boxShadow: '0 0 10px rgba(168,107,255,0.6)',
 };
 const loadLabel: React.CSSProperties = {
   marginTop: 14, fontSize: 13, letterSpacing: 1, color: C.dim, fontFamily: sans,
