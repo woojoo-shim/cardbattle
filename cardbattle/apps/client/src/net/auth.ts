@@ -95,6 +95,24 @@ export async function fetchMe(): Promise<Account | null> {
   }
 }
 
+/** Ping the backend health endpoint until it answers, then resolve. Used to wake the Render
+ *  free-tier server on first load (it sleeps after ~15min idle and cold-starts in 30–60s). While
+ *  this is pending the app shows the branded loading screen, so a Vercel-hosted frontend (which
+ *  loads instantly even when the backend is asleep) keeps the visitor on a proper "waking the
+ *  server" screen instead of a dead login gate. Retries a bounded number of times, then gives up
+ *  and lets downstream flows surface their own errors so the app can never hang forever. */
+export async function wakeServer(): Promise<void> {
+  for (let i = 0; i < 40; i++) {
+    try {
+      const res = await fetch(`${apiBase}/api/health`, { cache: 'no-store' });
+      if (res.ok) return;
+    } catch {
+      // network error or a cold-start 5xx — fall through and retry after a short delay.
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+}
+
 /** Authenticated POST (Bearer token) returning the updated account. */
 async function authPost(path: string, body: unknown): Promise<Account> {
   let res: Response;

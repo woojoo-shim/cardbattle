@@ -12,7 +12,7 @@ import { BrandMark } from './ui/BrandMark.js';
 import { Icon } from './ui/art/Icon.js';
 import { AvatarArt, AVATAR_CHOICES } from './ui/art/CreatureArt.js';
 import { CardArt } from './ui/art/CardArt.js';
-import { login, register, fetchMe, clearToken, getToken, type Account } from './net/auth.js';
+import { login, register, fetchMe, wakeServer, clearToken, getToken, type Account } from './net/auth.js';
 import { playSfx } from './audio/sfx.js';
 import { startBgm } from './audio/bgm.js';
 import { MuteButton } from './ui/MuteButton.js';
@@ -21,9 +21,20 @@ import type { BattleConnection } from './net/client.js';
 
 type Connect = () => Promise<BattleConnection>;
 
+// When the frontend is hosted apart from the backend (Vercel page → Render Colyseus/API, set via
+// VITE_SERVER_URL at build time), the page loads instantly even while the free-tier backend is
+// asleep. In that split we proactively wake the backend on load and hold the branded loading
+// screen until it answers, so EVERY visitor — not just returning token holders — sees a proper
+// "waking the server" screen instead of a dead login gate. In dev / single-host (server co-located
+// with the page) there's nothing to wake, so the gate is skipped.
+const SPLIT_HOST = !import.meta.env.DEV && !!(import.meta.env.VITE_SERVER_URL as string | undefined);
+
 export function App() {
   // undefined = still checking a stored token; null = logged out; Account = signed in.
   const [account, setAccount] = useState<Account | null | undefined>(() => (getToken() ? undefined : null));
+  // false until the backend answers a health ping (split-host only); gates the whole app so the
+  // loading screen stays up while the Render server cold-starts. Same-origin starts ready.
+  const [serverUp, setServerUp] = useState(!SPLIT_HOST);
   const [connect, setConnect] = useState<Connect | null>(null);
   // When true, the next battle runs with the guided coach overlay (learn-by-playing tutorial).
   const [coach, setCoach] = useState(false);
@@ -39,9 +50,16 @@ export function App() {
   // One-shot: honour an invite link (?join=CODE) once we're signed in.
   const [joinChecked, setJoinChecked] = useState(false);
 
+  // Wake the split-host backend on first load; flip serverUp once it answers so the app proceeds.
   useEffect(() => {
-    if (account === undefined) fetchMe().then((a) => setAccount(a));
-  }, [account]);
+    if (SPLIT_HOST) wakeServer().then(() => setServerUp(true));
+  }, []);
+
+  // Only check the stored token once the server is up — otherwise a cold-start fetchMe returns
+  // null and momentarily bounces a returning player to the login gate.
+  useEffect(() => {
+    if (serverUp && account === undefined) fetchMe().then((a) => setAccount(a));
+  }, [serverUp, account]);
 
   // On the first load with a signed-in account, transparently rejoin a dropped game if the
   // reconnection token is still fresh — a refresh mid-match drops you right back in your seat.
@@ -92,6 +110,7 @@ export function App() {
     };
   }, []);
 
+  if (!serverUp) return <LoadingScreen label="서버에 연결하는 중" />;
   if (account === undefined) return <LoadingScreen label="불러오는 중" />;
   if (account === null) return <AuthGate onAuthed={setAccount} />;
   // Intro splash → menu: play the fade-in/hold/fade-out once, then reveal the menu.
