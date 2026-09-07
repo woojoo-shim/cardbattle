@@ -9,7 +9,7 @@ export type IconName =
   | 'eye' | 'chain' | 'zzz' | 'fire' | 'target' | 'card' | 'burst'
   | 'heart' | 'reverse' | 'crystal' | 'trash' | 'hand' | 'download'
   | 'petal' | 'frost' | 'star' | 'sound' | 'mute'
-  | 'poison' | 'reflect' | 'regen'
+  | 'poison' | 'reflect' | 'regen' | 'user'
   | 'arrowRight' | 'arrowSwap' | 'arrowCW' | 'arrowCCW' | 'chevronUp' | 'chevronDown';
 
 interface Props {
@@ -37,6 +37,12 @@ const GLYPHS: Record<IconName, () => JSX.Element> = {
     <>
       <rect x="5" y="11" width="14" height="9" rx="2" {...S} />
       <path d="M8 11 V8 a4 4 0 0 1 8 0 v3" {...S} />
+    </>
+  ),
+  user: () => (
+    <>
+      <circle cx="12" cy="8" r="3.6" {...S} />
+      <path d="M5 20 v-1 a6.2 6.2 0 0 1 14 0 v1" {...S} />
     </>
   ),
   globe: () => (

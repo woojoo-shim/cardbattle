@@ -384,18 +384,22 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
         )}
 
         <div style={authFields} className="cb-field">
-          <input
-            className="cb-nick"
-            autoFocus
-            value={username}
-            maxLength={16}
-            placeholder="아이디"
-            autoComplete="username"
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && go()}
-            style={authInput}
-          />
           <div style={pwWrap}>
+            <span style={fieldIcon} aria-hidden><Icon name="user" size={19} color={TICKET.seal} /></span>
+            <input
+              className="cb-nick"
+              autoFocus
+              value={username}
+              maxLength={16}
+              placeholder="아이디"
+              autoComplete="username"
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && go()}
+              style={{ ...authInput, paddingLeft: 44 }}
+            />
+          </div>
+          <div style={pwWrap}>
+            <span style={fieldIcon} aria-hidden><Icon name="lock" size={18} color={TICKET.seal} /></span>
             <input
               className="cb-nick"
               value={password}
@@ -405,7 +409,7 @@ function AuthGate({ onAuthed }: { onAuthed: (account: Account) => void }) {
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && go()}
-              style={{ ...authInput, paddingRight: 44 }}
+              style={{ ...authInput, paddingLeft: 44, paddingRight: 44 }}
             />
             <button
               type="button"
@@ -582,29 +586,32 @@ const connBtn: React.CSSProperties = {
 
 // Admission-ticket palette — printed on DARK SLATE STOCK. Scoped to the login gate.
 // A jewel arena pass: cool moonlit ink on obsidian card-stock, one amethyst seal accent. Flat, no glow.
+// Candlelit Victorian poker-room login: warm oxblood stock, gilt-gold trim, ember cream ink.
 const TICKET = {
-  ink: '#eef2fb', // primary text ink (cool, on the dark stock)
-  dim: '#aab6cf', // secondary ink
-  faint: '#5a6484', // faint printed / caption ink
-  paper: '#1c2233', // dark slate card-stock base
-  paperHi: '#f4f0ff', // pale ink used on the amethyst button
-  seal: '#a86bff', // amethyst accent — hairlines, dots, the seal
-  edge: 'rgba(58,69,96,0.7)', // steel ink hairline
-  edgeHi: '#5c6f96',
+  ink: '#f4e6c8', // primary text ink — warm candle-cream
+  dim: '#d3b479', // secondary ink — soft gold
+  faint: '#9a7a44', // faint printed / caption ink — dim brass
+  paper: '#1c0f0b', // dark oxblood card-stock base
+  paperHi: '#fff6dc', // pale gilt ink used on the red button
+  seal: '#d0a13a', // gilt-gold accent — hairlines, dots, the seal
+  edge: 'rgba(178,132,58,0.5)', // brass hairline
+  edgeHi: '#cfa246',
   // legacy aliases so any stray reference keeps compiling
-  text: '#eef2fb',
-  brass: '#a86bff',
-  accent: '#a86bff',
+  text: '#f4e6c8',
+  brass: '#d0a13a',
+  accent: '#d0a13a',
 };
 
 const gateWrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', overflow: 'hidden',
   display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: sans,
+  // The AI candlelit poker room carries its own chandelier + oxblood mood; a warm scrim + centre
+  // vignette darkens it just enough to float the login glass without washing out the room.
   background:
-    'radial-gradient(60% 46% at 50% 8%, rgba(168,107,255,0.20), transparent 62%),' +
-    'radial-gradient(80% 50% at 50% 116%, rgba(55,224,160,0.12), transparent 60%),' +
-    'linear-gradient(180deg, #141826 0%, #0d1019 52%, #070912 100%),' +
-    '#070912',
+    'radial-gradient(58% 52% at 50% 46%, rgba(20,8,6,0.30), rgba(12,5,4,0.78) 100%),' +
+    'linear-gradient(180deg, rgba(24,10,8,0.42) 0%, rgba(14,6,5,0.30) 44%, rgba(10,4,3,0.72) 100%),' +
+    'url(/login-bg.png) center/cover no-repeat,' +
+    '#0c0503',
 };
 // Full-height field the embers drift up through; sits behind the gate content (z below it).
 const emberField: React.CSSProperties = {
@@ -622,24 +629,26 @@ const lightShaft: React.CSSProperties = {
   position: 'absolute', top: '-14%', left: '50%', width: 'min(560px, 92vw)', height: '128%',
   transform: 'translateX(-50%)', pointerEvents: 'none', zIndex: 1,
   clipPath: 'polygon(38% 0%, 62% 0%, 88% 100%, 12% 100%)',
-  background: 'linear-gradient(180deg, rgba(168,107,255,0.24) 0%, rgba(120,80,200,0.10) 40%, transparent 82%)',
+  background: 'linear-gradient(180deg, rgba(226,168,74,0.26) 0%, rgba(180,110,40,0.10) 40%, transparent 82%)',
   mixBlendMode: 'screen', filter: 'blur(6px)',
 };
 // A soft warm halo pooled behind the form so it lifts off the dark field.
 const gateGlow: React.CSSProperties = {
   position: 'absolute', top: '50%', left: '50%', width: 520, height: 520,
   transform: 'translate(-50%, -50%)', pointerEvents: 'none', zIndex: 1, borderRadius: '50%',
-  background: 'radial-gradient(circle, rgba(168,107,255,0.16), rgba(55,224,160,0.05) 46%, transparent 70%)',
+  background: 'radial-gradient(circle, rgba(226,168,74,0.18), rgba(150,40,30,0.06) 46%, transparent 70%)',
   mixBlendMode: 'screen', filter: 'blur(10px)',
 };
 
-// The login form floats over the drifting arena — a minimal frosted-glass panel with one oxblood accent rule.
+// The login floats over the candlelit room — an oxblood glass panel double-framed in gilt gold.
 const ticketShell: React.CSSProperties = {
-  position: 'relative', zIndex: 2, width: 'min(372px, 92vw)', padding: '24px 26px 22px',
-  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 10,
-  background: 'rgba(16,20,32,0.74)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-  border: `1px solid rgba(58,69,96,0.55)`, borderTop: `2px solid ${TICKET.seal}`,
-  boxShadow: '0 30px 70px rgba(0,0,0,0.62)',
+  position: 'relative', zIndex: 2, width: 'min(376px, 92vw)', padding: '26px 26px 22px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 6,
+  background: 'linear-gradient(180deg, rgba(38,18,13,0.86), rgba(22,10,8,0.9))',
+  backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+  border: `1px solid ${TICKET.seal}`,
+  outline: '3px solid rgba(20,10,7,0.85)', outlineOffset: 3,
+  boxShadow: '0 30px 74px rgba(0,0,0,0.68), inset 0 0 0 1px rgba(120,84,34,0.35), inset 0 1px 0 rgba(255,222,150,0.14)',
 };
 // Full-bleed layer of card faces drifting behind the glass.
 const cardDrift: React.CSSProperties = {
@@ -654,17 +663,17 @@ const driftCardFace: React.CSSProperties = {
 // The crest sits inside a flat seal medallion.
 const crestMedallion: React.CSSProperties = {
   display: 'grid', placeItems: 'center', width: 92, height: 92, borderRadius: '50%', margin: '2px 0 8px',
-  background: 'radial-gradient(circle at 50% 38%, rgba(168,107,255,0.24), rgba(30,24,60,0.36) 62%)',
-  border: `1px solid rgba(120,90,190,0.55)`,
-  boxShadow: '0 0 40px rgba(168,107,255,0.28), inset 0 1px 0 rgba(200,180,255,0.16)',
+  background: 'radial-gradient(circle at 50% 38%, rgba(226,168,74,0.26), rgba(60,26,18,0.4) 62%)',
+  border: `1px solid rgba(190,140,60,0.6)`,
+  boxShadow: '0 0 40px rgba(226,168,74,0.30), inset 0 1px 0 rgba(255,224,160,0.2)',
 };
-// The wordmark reads as engraved amethyst crystal: a pale-to-violet vertical bevel clipped to the
-// glyphs, with depth from drop-shadow (NOT text-shadow — that would ghost through the transparent fill).
+// The wordmark reads as engraved gilt gold: a pale-to-amber vertical bevel clipped to the glyphs,
+// with depth from drop-shadow (NOT text-shadow — that would ghost through the transparent fill).
 const ticketTitle: React.CSSProperties = {
   margin: 0, fontFamily: sans, fontSize: 27, fontWeight: 800, letterSpacing: 1, textAlign: 'center',
-  background: 'linear-gradient(180deg, #f6f1ff 0%, #d7c4ff 44%, #a86bff 100%)',
+  background: 'linear-gradient(180deg, #fff6da 0%, #ecc873 44%, #c9962f 100%)',
   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent',
-  filter: 'drop-shadow(0 2px 0 rgba(4,6,12,0.55)) drop-shadow(0 0 22px rgba(168,107,255,0.38))',
+  filter: 'drop-shadow(0 2px 0 rgba(20,8,4,0.6)) drop-shadow(0 0 22px rgba(226,168,74,0.4))',
 };
 const ticketSub: React.CSSProperties = {
   marginTop: 6, marginBottom: 12, fontFamily: mono, fontSize: 10.5, letterSpacing: 6, color: TICKET.seal,
@@ -675,11 +684,11 @@ const flourish: React.CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 10, width: 'clamp(180px, 70%, 280px)', marginBottom: 18,
 };
 const flLine: React.CSSProperties = {
-  flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(168,107,255,0.6), transparent)',
+  flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(208,161,58,0.7), transparent)',
 };
 const flGem: React.CSSProperties = {
   width: 6, height: 6, flexShrink: 0, transform: 'rotate(45deg)',
-  background: '#c8a6ff', boxShadow: '0 0 8px rgba(168,107,255,0.8)',
+  background: '#f0cd7a', boxShadow: '0 0 8px rgba(226,168,74,0.85)',
 };
 const stubTagline: React.CSSProperties = {
   fontFamily: mono, fontSize: 11, letterSpacing: 3, color: TICKET.dim, textAlign: 'center',
@@ -699,7 +708,7 @@ function pickCell(on: boolean): React.CSSProperties {
   return {
     position: 'relative', padding: '7px 5px 6px', cursor: 'pointer', borderRadius: 4,
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-    background: on ? 'rgba(168,107,255,0.16)' : 'rgba(28,34,51,0.7)',
+    background: on ? 'rgba(226,168,74,0.16)' : 'rgba(40,20,14,0.7)',
     border: `1px solid ${on ? TICKET.seal : TICKET.edge}`,
     transform: on ? 'translateY(-2px)' : 'none',
     transition: 'border-color .2s, background .2s, transform .2s',
@@ -709,14 +718,14 @@ function pickCell(on: boolean): React.CSSProperties {
 const pickPin: React.CSSProperties = {
   position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
   display: 'grid', placeItems: 'center', zIndex: 2,
-  background: '#a86bff', border: '1px solid #7a52c8',
+  background: '#c9962f', border: '1px solid #7a1c17',
 };
 // The recessed portrait well that mounts the avatar art.
 function pickArt(on: boolean): React.CSSProperties {
   return {
     width: '100%', aspectRatio: '1', borderRadius: 4, display: 'grid', placeItems: 'center',
     overflow: 'hidden',
-    background: on ? 'rgba(168,107,255,0.14)' : 'rgba(10,13,21,0.55)',
+    background: on ? 'rgba(226,168,74,0.14)' : 'rgba(14,6,5,0.55)',
     border: `1px solid ${on ? TICKET.edgeHi : TICKET.edge}`,
   };
 }
@@ -727,28 +736,38 @@ function pickName(on: boolean): React.CSSProperties {
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   };
 }
-// A flat dark well holding the id + password fields and the submit action.
+// A recessed oxblood well holding the id + password fields and the submit action.
 const authFields: React.CSSProperties = {
-  display: 'flex', flexDirection: 'column', gap: 10, width: '100%', padding: 12,
-  borderRadius: 6, background: 'rgba(10,13,21,0.5)', border: `1px solid ${TICKET.edge}`,
+  display: 'flex', flexDirection: 'column', gap: 12, width: '100%', padding: 12,
+  borderRadius: 4, background: 'rgba(14,6,5,0.5)', border: `1px solid ${TICKET.edge}`,
 };
+// Each field is double-framed in gilt gold: a 1px outer gold border, a dark gap, then a thin gold
+// inner rule (both inset shadows) — the ornate look from the mockup, built with no extra DOM.
 const authInput: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', padding: '14px 15px', fontSize: 16, color: TICKET.ink, fontFamily: sans,
-  background: 'rgba(6,9,16,0.6)', border: `1px solid ${TICKET.edge}`, borderRadius: 5, outline: 'none',
+  background: 'rgba(10,5,4,0.66)', border: `1px solid ${TICKET.edgeHi}`, borderRadius: 4, outline: 'none',
+  boxShadow: 'inset 0 0 0 2px rgba(26,12,8,0.9), inset 0 0 0 3px rgba(184,132,58,0.45), inset 0 2px 6px rgba(0,0,0,0.5)',
 };
-// Password field wraps the input so the reveal toggle can sit inside its right edge.
+// Leading person / lock glyph seated inside a field's left edge.
+const fieldIcon: React.CSSProperties = {
+  position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
+  display: 'grid', placeItems: 'center', pointerEvents: 'none', zIndex: 2,
+};
+// Field wrapper — anchors the leading icon (and, for the password, the reveal toggle).
 const pwWrap: React.CSSProperties = { position: 'relative', width: '100%' };
 const pwToggle: React.CSSProperties = {
   position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
   width: 32, height: 32, display: 'grid', placeItems: 'center', cursor: 'pointer',
-  border: 'none', background: 'transparent', borderRadius: 4, padding: 0,
+  border: 'none', background: 'transparent', borderRadius: 4, padding: 0, zIndex: 2,
 };
+// The big LOGIN action — deep oxblood red slab, gilt-gold double trim.
 const enter: React.CSSProperties = {
-  width: '100%', marginTop: 2, padding: '17px 20px', fontSize: 19, fontWeight: 800, letterSpacing: 1,
+  width: '100%', marginTop: 2, padding: '17px 20px', fontSize: 19, fontWeight: 800, letterSpacing: 2,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  color: TICKET.paperHi, cursor: 'pointer', border: '1px solid #7a52c8', borderRadius: 8, fontFamily: sans,
-  background: 'linear-gradient(180deg, #b485ff, #9459e6)',
-  boxShadow: '0 10px 26px rgba(120,60,220,0.4), inset 0 1px 0 rgba(255,255,255,0.22)',
+  color: TICKET.paperHi, cursor: 'pointer', border: `1px solid ${TICKET.seal}`, borderRadius: 5, fontFamily: sans,
+  background: 'linear-gradient(180deg, #9c2a22 0%, #7a1c17 60%, #5e130f 100%)',
+  boxShadow: '0 10px 26px rgba(90,20,15,0.5), inset 0 0 0 2px rgba(30,10,7,0.7), inset 0 0 0 3px rgba(208,161,58,0.5), inset 0 1px 0 rgba(255,214,150,0.28)',
+  textShadow: '0 1px 2px rgba(0,0,0,0.6)',
 };
 const hint: React.CSSProperties = {
   margin: '16px 0 6px', fontSize: 12.5, color: TICKET.faint, fontFamily: sans, letterSpacing: 0.2,
