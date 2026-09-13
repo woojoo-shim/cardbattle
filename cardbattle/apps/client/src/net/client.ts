@@ -7,12 +7,13 @@ import { getToken } from './auth.js';
 // the Render Colyseus backend), aim the websocket at that cross-origin server — https→wss,
 // http→ws. Otherwise the server serves the built client from its own origin (single-host
 // Render deploy), so the websocket lives on the page's own host.
-const SERVER_URL = (import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '');
+// Falls back to the Render backend when VITE_SERVER_URL is missing so a Vercel build still
+// finds the websocket (same rationale as auth.ts). On the single-host Render deploy this wss
+// URL equals the page's own origin.
+const SERVER_URL = (import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '') ?? 'https://cardbattle.onrender.com';
 const endpoint = import.meta.env.DEV
   ? `ws://${location.hostname}:2567`
-  : SERVER_URL
-    ? SERVER_URL.replace(/^http/, 'ws')
-    : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
+  : SERVER_URL.replace(/^http/, 'ws');
 
 export interface BattleConnection {
   room: Room;

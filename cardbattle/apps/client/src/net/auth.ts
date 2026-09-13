@@ -3,9 +3,14 @@
 // cross-origin to that server (the server sends CORS headers); otherwise same-origin (the
 // single-host Render deploy serves both page and API). The token lives in localStorage for
 // auto-login and rides Colyseus joins (net/client.ts) so the server seats the account.
+// Non-dev fallback points at the Render backend so a Vercel build whose VITE_SERVER_URL
+// env var is missing still reaches the real API (otherwise same-origin /api POSTs get caught
+// by Vercel's static rewrite → index.html → 405). The single-host Render deploy serves this
+// same absolute URL as its own origin, so the fallback is safe there too.
+const PROD_SERVER = 'https://cardbattle.onrender.com';
 const apiBase = import.meta.env.DEV
   ? ''
-  : ((import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '') ?? '');
+  : ((import.meta.env.VITE_SERVER_URL as string | undefined)?.replace(/\/$/, '') ?? PROD_SERVER);
 
 const TOKEN_KEY = 'cb_token';
 
