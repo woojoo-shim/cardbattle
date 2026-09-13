@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoom, joinRoomById, quickPlay, listLobby, findRoomByCode, type BattleConnection, type RoomInfo } from '../net/client.js';
 import { fetchMe, type Account } from '../net/auth.js';
 import { DEFAULT_MODE } from '@cardbattle/shared';
@@ -24,9 +24,13 @@ function headcount(r: RoomInfo): number {
 export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Props) {
   const { display: name, avatar } = account;
   const [rooms, setRooms] = useState<RoomInfo[]>([]);
-  const [code, setCode] = useState('');
+  const [cells, setCells] = useState(['', '', '', '']);
   const [err, setErr] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
+  const cellsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const code = cells.join('');
+  const ready = code.length === 4;
+  const focusCell = (i: number) => { const el = cellsRef.current[i]; el?.focus(); el?.select(); };
 
   useEffect(() => {
     let off: (() => void) | undefined;
@@ -46,8 +50,8 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
   const join = (roomId: string) => { playSfx('select'); onPick(() => joinRoomById(roomId, name, avatar)); };
   const quick = () => { playSfx('select'); onPick(() => quickPlay(name, avatar)); };
   const joinByCode = async () => {
-    const c = code.trim().toUpperCase();
-    if (!c) return;
+    const c = code.replace(/\s/g, '').toUpperCase();
+    if (c.length < 4) { playSfx('back'); setErr('4자리 코드를 모두 입력하세요.'); focusCell(code.length); return; }
     playSfx('select');
     setErr('');
     let roomId: string | null;
@@ -59,6 +63,32 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
     }
     if (!roomId) { playSfx('back'); setErr(`'${c}' 방을 찾을 수 없습니다.`); return; }
     join(roomId);
+  };
+
+  const onCellChange = (i: number, v: string) => {
+    if (err) setErr('');
+    const ch = v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-1);
+    setCells((prev) => { const n = [...prev]; n[i] = ch; return n; });
+    if (ch && i < 3) focusCell(i + 1);
+  };
+  const onCellKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') { joinByCode(); return; }
+    if (e.key === 'Backspace' && !cells[i] && i > 0) {
+      e.preventDefault();
+      setCells((prev) => { const n = [...prev]; n[i - 1] = ''; return n; });
+      focusCell(i - 1);
+    } else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); focusCell(i - 1); }
+    else if (e.key === 'ArrowRight' && i < 3) { e.preventDefault(); focusCell(i + 1); }
+  };
+  const onCellPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const txt = e.clipboardData.getData('text').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+    if (!txt) return;
+    e.preventDefault();
+    if (err) setErr('');
+    const n = ['', '', '', ''];
+    for (let k = 0; k < txt.length; k++) n[k] = txt[k];
+    setCells(n);
+    focusCell(Math.min(txt.length, 3));
   };
 
   return (
@@ -103,17 +133,29 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
         {/* 친구 코드로 참가 */}
         <div style={panel}>
           <div style={panelHead}><Icon name="hand" size={15} color="#e0a53c" />&nbsp;친구 코드로 참가</div>
+          <p style={codeHint}>친구가 방을 만들면 알려주는 4자리 코드를 넣어 주세요.</p>
           <div style={codeRow}>
-            <input
-              className="cb-input"
-              style={codeField}
-              value={code}
-              maxLength={4}
-              placeholder="ABCD"
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === 'Enter' && joinByCode()}
-            />
-            <button className="cb-ghost" style={ghost} onClick={joinByCode}>참가</button>
+            <div style={codeCells}>
+              {cells.map((ch, i) => (
+                <input
+                  key={i}
+                  ref={(el) => { cellsRef.current[i] = el; }}
+                  className={`cb-cell${ch ? ' cb-cell-on' : ''}`}
+                  style={codeCell}
+                  value={ch}
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  maxLength={1}
+                  aria-label={`코드 ${i + 1}번째 글자`}
+                  placeholder="•"
+                  onChange={(e) => onCellChange(i, e.target.value)}
+                  onKeyDown={(e) => onCellKey(i, e)}
+                  onPaste={onCellPaste}
+                  onFocus={(e) => e.target.select()}
+                />
+              ))}
+            </div>
+            <button className="cb-ghost" style={{ ...ghost, ...(ready ? ghostReady : ghostIdle) }} onClick={joinByCode}>참가</button>
           </div>
           {err && <p style={errLine}>{err}</p>}
         </div>
@@ -148,11 +190,19 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
 }
 
 const hoverCss = `
-.cb-input:focus {
+.cb-cell::placeholder { color: rgba(224,170,70,0.2); font-weight: 400; }
+.cb-cell:hover { border-color: rgba(224,165,60,0.6) !important; }
+.cb-cell:focus {
   border-color: #e0b95c !important;
-  background: rgba(224,170,70,0.06) !important;
+  background: linear-gradient(180deg, rgba(224,170,70,0.14), rgba(224,170,70,0.05)) !important;
+  box-shadow: 0 0 0 3px rgba(224,165,60,0.18), 0 6px 16px rgba(0,0,0,0.4) !important;
+  transform: translateY(-1px);
 }
-.cb-input::placeholder { color: rgba(224,170,70,0.3); }
+.cb-cell-on {
+  border-color: rgba(224,165,60,0.7) !important;
+  background: linear-gradient(180deg, rgba(224,170,70,0.15), rgba(224,170,70,0.05)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,238,196,0.1) !important;
+}
 .cb-tile { transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, filter .14s ease; }
 .cb-tile:hover { transform: translateY(-3px); border-color: rgba(224,165,60,0.6) !important; }
 .cb-tile:active { transform: translateY(-1px); }
@@ -165,11 +215,8 @@ const hoverCss = `
 }
 .cb-go { opacity: 0.5; transition: opacity .14s, transform .14s; }
 .cb-room:hover .cb-go { opacity: 1; transform: translateX(3px); }
-.cb-ghost { transition: border-color .14s, background .14s, color .14s; }
-.cb-ghost:hover {
-  border-color: #e0b95c !important; color: #fff !important;
-  background: rgba(224,170,70,0.1) !important;
-}
+.cb-ghost:hover { border-color: #e0b95c !important; filter: brightness(1.06); }
+.cb-ghost:active { transform: translateY(1px); }
 @keyframes cb-rb-ember {
   0%   { transform: translateY(0) scale(1); opacity: 0; }
   12%  { opacity: 0.9; }
@@ -289,17 +336,28 @@ const countPill: React.CSSProperties = {
   marginLeft: 8, minWidth: 20, padding: '1px 7px', borderRadius: 999, fontFamily: mono, fontSize: 'clamp(10px, 1.3vw, 11.5px)',
   fontWeight: 800, color: '#2a1a06', background: '#e0a53c', textAlign: 'center',
 };
-const codeRow: React.CSSProperties = { display: 'flex', gap: 'clamp(7px, 1.4vw, 10px)' };
-const codeField: React.CSSProperties = {
-  flex: 1, minWidth: 0, padding: 'clamp(10px, 1.8vh, 13px) clamp(12px, 2vw, 16px)', fontSize: 'clamp(15px, 2.4vw, 18px)', color: C.text, outline: 'none',
-  fontFamily: mono, letterSpacing: 8, textAlign: 'center', textTransform: 'uppercase',
-  background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(120,96,56,0.4)', borderRadius: 8,
-  boxSizing: 'border-box', transition: 'border-color .12s, background .12s',
+const codeHint: React.CSSProperties = { margin: 0, fontSize: 'clamp(10.5px, 1.5vw, 12.5px)', color: C.faint, fontFamily: sans, lineHeight: 1.5 };
+const codeRow: React.CSSProperties = { display: 'flex', gap: 'clamp(7px, 1.4vw, 10px)', alignItems: 'stretch' };
+const codeCells: React.CSSProperties = { flex: 1, minWidth: 0, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'clamp(6px, 1.2vw, 9px)' };
+const codeCell: React.CSSProperties = {
+  width: '100%', minWidth: 0, aspectRatio: '3 / 4', padding: 0,
+  fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 800, color: '#f4e9cb', outline: 'none',
+  fontFamily: serif, textAlign: 'center', textTransform: 'uppercase', caretColor: '#e0a53c',
+  background: 'linear-gradient(180deg, rgba(0,0,0,0.42), rgba(0,0,0,0.28))',
+  border: '1px solid rgba(120,96,56,0.45)', borderRadius: 9,
+  boxSizing: 'border-box', transition: 'border-color .14s, background .14s, box-shadow .14s, transform .1s',
 };
 const ghost: React.CSSProperties = {
-  padding: 'clamp(10px, 1.8vh, 13px) clamp(16px, 3vw, 22px)', fontSize: 'clamp(13px, 1.9vw, 15px)', fontWeight: 800, color: '#e6cf96', cursor: 'pointer', letterSpacing: 0.5,
-  border: '1px solid rgba(120,96,56,0.5)', borderRadius: 8, background: 'rgba(224,170,70,0.05)', fontFamily: sans,
-  whiteSpace: 'nowrap',
+  padding: 'clamp(10px, 1.8vh, 13px) clamp(16px, 3vw, 22px)', fontSize: 'clamp(13px, 1.9vw, 15px)', fontWeight: 800, cursor: 'pointer', letterSpacing: 0.5,
+  borderRadius: 9, fontFamily: sans, whiteSpace: 'nowrap',
+  transition: 'border-color .14s, background .14s, color .14s, box-shadow .14s',
+};
+const ghostIdle: React.CSSProperties = {
+  color: '#c9b489', border: '1px solid rgba(120,96,56,0.5)', background: 'rgba(224,170,70,0.05)',
+};
+const ghostReady: React.CSSProperties = {
+  color: '#2a1a06', border: '1px solid #eccb72',
+  background: 'linear-gradient(180deg, #eeba4c, #cf9a2f)', boxShadow: '0 6px 16px rgba(207,154,47,0.32)',
 };
 const listBox: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 1vh, 8px)', maxHeight: '34vh', overflowY: 'auto' };
 const empty: React.CSSProperties = { color: C.faint, fontSize: 'clamp(11px, 1.6vw, 13.5px)', fontFamily: sans, textAlign: 'center', margin: '6px 0', lineHeight: 1.8 };
