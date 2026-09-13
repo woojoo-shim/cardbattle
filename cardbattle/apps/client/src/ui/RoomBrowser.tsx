@@ -258,7 +258,10 @@ const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
   fontFamily: sans, color: C.text, overflowX: 'hidden', overflowY: 'auto',
-  background: 'linear-gradient(180deg, #1a120b 0%, #120b07 55%, #080503 100%)',
+  background:
+    'linear-gradient(180deg, rgba(20,14,9,0.80) 0%, rgba(14,9,6,0.86) 55%, rgba(6,4,2,0.94) 100%),' +
+    'url(/battle-bg.png) center top / cover no-repeat,' +
+    '#080503',
 };
 const atmos: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' };
 const atmosGlow: React.CSSProperties = {
