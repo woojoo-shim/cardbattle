@@ -95,6 +95,7 @@ export function RoomBrowser({ account, onAccount, onPick, onBack, onLogout }: Pr
     <div style={wrap}>
       <style>{hoverCss}</style>
       <Atmosphere />
+      <SideCards />
 
       <div style={topBar}>
         {onBack && <button style={chip} onClick={() => { playSfx('back'); onBack(); }}>← 나가기</button>}
@@ -223,6 +224,12 @@ const hoverCss = `
   85%  { opacity: 0.5; }
   100% { transform: translateY(-102vh) scale(0.5); opacity: 0; }
 }
+@keyframes cb-side-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+.cb-side-stage { animation: cb-side-float 7s ease-in-out infinite; }
+@media (max-width: 1120px) { .cb-sidecards { display: none; } }
 `;
 
 // A candlelit waiting-hall glow behind the browser. SHOW layer only.
@@ -254,6 +261,42 @@ const EMBERS = [
   { x: 88, s: 3, d: 16, delay: 2 }, { x: 45, s: 2, d: 21, delay: 9 },
 ];
 
+// Decorative card fans peeking from both edges — pure SHOW layer, hidden on narrow screens.
+const LEFT_CARDS = [
+  { id: 'dragon', rot: -17, x: -46, y: -118, z: 1, o: 0.72 },
+  { id: 'knight', rot: -7, x: -6, y: -6, z: 3, o: 0.95 },
+  { id: 'archangel', rot: 4, x: 18, y: 112, z: 2, o: 0.82 },
+];
+const RIGHT_CARDS = [
+  { id: 'necromancer', rot: 17, x: 46, y: -118, z: 1, o: 0.72 },
+  { id: 'vampirelord', rot: 7, x: 6, y: -6, z: 3, o: 0.95 },
+  { id: 'golem', rot: -4, x: -18, y: 112, z: 2, o: 0.82 },
+];
+function SideCards() {
+  return (
+    <div className="cb-sidecards" aria-hidden style={sideWrap}>
+      <div className="cb-side-stage" style={{ ...sideStage, ...sideLeft, animationDelay: '0s' }}>
+        <span style={sideGlow} />
+        {LEFT_CARDS.map((c, i) => (
+          <div key={i} style={sideCard(c)}>
+            <img src={`/cards/${c.id}.png`} alt="" style={sideImg} />
+            <span style={sideVignette} />
+          </div>
+        ))}
+      </div>
+      <div className="cb-side-stage" style={{ ...sideStage, ...sideRight, animationDelay: '1.8s' }}>
+        <span style={sideGlow} />
+        {RIGHT_CARDS.map((c, i) => (
+          <div key={i} style={sideCard(c)}>
+            <img src={`/cards/${c.id}.png`} alt="" style={sideImg} />
+            <span style={sideVignette} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const serif = "'Times New Roman', Georgia, 'Nanum Myeongjo', serif";
 const wrap: React.CSSProperties = {
   position: 'relative', minHeight: '100vh', width: '100%', boxSizing: 'border-box',
@@ -277,6 +320,30 @@ const atmosVignette: React.CSSProperties = {
   background: 'radial-gradient(115% 100% at 50% 42%, transparent 52%, rgba(0,0,0,0.66) 100%)',
 };
 const emberField: React.CSSProperties = { position: 'absolute', inset: 0, mixBlendMode: 'screen' };
+
+const sideWrap: React.CSSProperties = { position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' };
+const sideStage: React.CSSProperties = { position: 'absolute', top: '50%', width: 0, height: 0 };
+const sideLeft: React.CSSProperties = { left: 'clamp(72px, 10vw, 190px)' };
+const sideRight: React.CSSProperties = { right: 'clamp(72px, 10vw, 190px)' };
+const sideGlow: React.CSSProperties = {
+  position: 'absolute', left: '50%', top: '50%', width: 420, height: 520, transform: 'translate(-50%,-50%)',
+  background: 'radial-gradient(closest-side, rgba(224,165,60,0.14), rgba(158,58,40,0.06) 55%, transparent 72%)',
+  filter: 'blur(8px)', pointerEvents: 'none',
+};
+const sideCard = (c: { rot: number; x: number; y: number; z: number; o: number }): React.CSSProperties => ({
+  position: 'absolute', left: '50%', top: '50%',
+  width: 'clamp(150px, 13vw, 208px)', aspectRatio: '5 / 7', borderRadius: 14, overflow: 'hidden',
+  background: 'linear-gradient(180deg, #2a1f13, #1c140b)',
+  border: '1px solid rgba(120,96,56,0.5)',
+  boxShadow: '0 24px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,238,196,0.1)',
+  transform: `translate(-50%,-50%) translate(${c.x}px, ${c.y}px) rotate(${c.rot}deg)`,
+  zIndex: c.z, opacity: c.o,
+});
+const sideImg: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+const sideVignette: React.CSSProperties = {
+  position: 'absolute', inset: 0, pointerEvents: 'none',
+  background: 'radial-gradient(130% 100% at 50% 34%, transparent 48%, rgba(8,5,2,0.7) 100%), linear-gradient(180deg, rgba(255,238,196,0.06), transparent 30%)',
+};
 const inner: React.CSSProperties = {
   position: 'relative', zIndex: 1,
   width: '100%', maxWidth: 'min(560px, 94vw)', margin: '0 auto', boxSizing: 'border-box',
